@@ -1,0 +1,33 @@
+{
+  "package": "com.shaterguy.shiganshina.dev",
+  "version_name": "0.1.0-dev1",
+  "version_code": 1,
+  "abi": "arm64-v8a",
+  "development_only": true,
+  "final_export_allowed": false,
+  "input_sha256": "42e1573e36c1f0017280d6e2608550dfd3e4826b8e9ed1a1ce51bae63178a5e0",
+  "input_bytes": 29528818,
+  "output_sha256": "c90ad1b8d79f5fe8131d7f8ec85b5089c5bf4c1b634ca5b2de7bf2efc9c1b8e2",
+  "output_bytes": 29536100,
+  "certificate_sha256": "4256200e2c63dbfec3d0e9370ecca4b611ee11c65e1e2edad88003ea858c174c",
+  "signature_schemes": [
+    "v2",
+    "v3"
+  ],
+  "alignment": {
+    "elf_load_alignment_kib": 16,
+    "native_libraries_compressed": true,
+    "native_library_zip_alignment_kib": null,
+    "zip_alignment_bytes": 4,
+    "zipalign_mode": "legacy_compressed_native"
+  },
+  "asset_manifest_sha256": "2eef6472d8d8da5b2404e7dc8f99c966018d760747c806c62a065aefc110e550",
+  "verified_at_utc": "2026-10-10T08:29:27Z",
+  "source_commit": "20b6165718d828f4f6b7f194b481dd627c090127",
+  "source_tree": "5086b4aca94d0d8dbd11af5fd5df16f4e918d2e7",
+  "apk_payload_unchanged_by_signing": true,
+  "on_device_installation_verified": false,
+  "on_device_gamepad_verified": false,
+  "art_placeholders": 5,
+  "walking_art_review_pending": true
+}

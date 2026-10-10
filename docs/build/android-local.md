@@ -10,7 +10,7 @@ At the 2026-10-10 tooling checkpoint, these five art records remain blocked: `ti
 python3 tools/build/build_android.py --check-ready
 ```
 
-A nonzero `EXPORT_BLOCKED art_review_pending` result is intentional. Never toggle flags, delete rejected records or use older APK probes merely to make a build pass. The source art must be revised, reviewed, and approved through the normal project process. The Python wrapper checks before launching any tool, and the EditorPlugin independently checks again. There is no bypass flag. Tests may use a separate tiny fixture app; that is not a playable game build or art approval.
+A nonzero `EXPORT_BLOCKED art_review_pending` result is intentional. Never toggle flags, delete rejected records or use older APK probes merely to make a build pass. The source art must be revised, reviewed, and approved through the normal project process. The Python wrapper checks before launching any tool, and the EditorPlugin independently checks again. The default final-art gate has no bypass. A separate, explicitly incomplete [development-validation build](DEV-VALIDATION.md) uses five approved basic-art placeholders, preserves the final=false marker, and excludes the rejected images. It is not final art approval. Tests may also use a separate tiny fixture app.
 
 ## 1. Prepare local tools once
 
