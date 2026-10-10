@@ -186,7 +186,6 @@ func _draw() -> void:
 			draw_texture_rect(intro,Rect2((_viewport_size-target)*0.5,target),false)
 		return
 	_draw_props()
-	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 	for drop in _snapshot.get("drops",[]):
 		_sprite("xp_pickup",Vector2(drop.position[0],drop.position[1]),"idle",1.0)
 	# Large final threat is scenery-priority; the small playable soldier must
@@ -215,6 +214,9 @@ func _draw() -> void:
 		if projectile.item_id == "ally_cover":
 			_sprite("garrison_01",pos,"attack",0.8,float(projectile.velocity[0]) < 0)
 		else: _sprite("debris_fx",pos,"attack",0.35)
+	# Danger silhouettes remain readable over opaque giants; the playable
+	# soldier is still drawn on top so the exact player position stays visible.
+	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 	var position_data: Array = _snapshot.player.position
 	var animation := player_animation(_snapshot)
 	var player_seconds := _clock-_attack_started if animation == "attack" else _clock
