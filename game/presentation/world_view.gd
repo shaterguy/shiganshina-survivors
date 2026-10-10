@@ -16,6 +16,26 @@ var reduce_effects := false
 var screen_shake := 0.4
 var _camera := Vector2.ZERO
 var _viewport_size := Vector2(800,450)
+# Presentation-only observations; never serialized into RunState. The app emits
+# at most eight fixed simulation ticks between presents (bounded catch-up).
+const MAX_GAIT_TICK_GAP := 8
+var _gait_tracks: Dictionary = {}
+var _gait_run_key: Array = []
+var _gait_tick := -1
+func reset_presentation() -> void:
+	_snapshot = {}
+	_gait_tracks.clear()
+	_gait_run_key.clear()
+	_gait_tick = -1
+	_clock = 0.0
+	_attack_until = 0.0
+	_attack_started = 0.0
+	_hit_until = 0.0
+	_shake_until = 0.0
+	_enemy_hits.clear()
+	_effects.clear()
+	_corpses.clear()
+	_camera = Vector2.ZERO
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	load_manifest()
@@ -39,9 +59,83 @@ func frame_rect(asset_id: String, animation: String, seconds: float) -> Rect2:
 	var columns := int(record.get("columns",1))
 	return Rect2((frame%columns)*width,(frame/columns)*height,width,height)
 func present(snapshot: Dictionary) -> void:
+	_update_gait(snapshot)
 	_snapshot = snapshot
 	if not snapshot.is_empty(): _camera = Vector2(snapshot.player.position[0],snapshot.player.position[1])
 	queue_redraw()
+func _cycle_distance(asset_id: String) -> float:
+	var gait = _assets.get(asset_id,{}).get("gait",{})
+	if not gait is Dictionary: return 0.0
+	var distance = gait.get("cycle_distance_px",0.0)
+	if not (distance is int or distance is float): return 0.0
+	return float(distance) if is_finite(float(distance)) and float(distance) > 0.0 else 0.0
+func movement_seconds(asset_id: String, actor_id: String, scale_value: float, fallback_seconds: float) -> float:
+	var cycle := _cycle_distance(asset_id)*absf(scale_value)
+	if cycle <= 0.0 or not is_finite(cycle): return fallback_seconds
+	var animation: Dictionary = _assets[asset_id].get("animations",{}).get("move",{})
+	var frames: Array = animation.get("frames",[])
+	var fps := float(animation.get("fps",8.0))
+	if frames.is_empty() or fps <= 0.0 or not is_finite(fps): return fallback_seconds
+	var distance := float(_gait_tracks.get(actor_id,{}).get("distance",0.0))
+	# Convert distance phase to the existing manifest-driven atlas selector. The
+	# clock remains authoritative for every asset without optional gait metadata.
+	return fposmod(distance/cycle,1.0)*frames.size()/fps
+func _update_gait(snapshot: Dictionary) -> void:
+	if snapshot.is_empty():
+		reset_presentation()
+		return
+	var tick := int(snapshot.get("active_tick",0))
+	var key: Array = [snapshot.get("seed",0),snapshot.get("chapter_id",""),snapshot.get("content_revision","")]
+	if (not _gait_run_key.is_empty() and key != _gait_run_key) or tick < _gait_tick:
+		reset_presentation()
+	_gait_run_key = key
+	_gait_tick = tick
+	var seen: Dictionary = {}
+	var active: bool = snapshot.get("phase","") in ["survival","evacuation"]
+	var paused: bool = not snapshot.get("pause_reasons",[]).is_empty()
+	var player: Dictionary = snapshot.get("player",{})
+	if active and float(player.get("hp",1.0)) > 0.0:
+		var animation := player_animation(snapshot)
+		var action: String = player.get("action_state","move")
+		var locomotion: bool = animation in ["move","idle"] and action in ["move","idle"] and player.get("grounded",true)
+		var moving: bool = locomotion and animation == "move" and action == "move"
+		_track_gait("player","garrison_01",player,tick,moving,locomotion,paused,seen)
+	if active:
+		for entity in snapshot.get("entities",[]):
+			if float(entity.get("hp",1.0)) <= 0.0: continue
+			var id := str(entity.id)
+			var definition: Dictionary = snapshot.get("rules",{}).get("enemy_catalog",{}).get(entity.enemy_id,{})
+			var asset_id := approved_art_id(str(definition.get("art_id","titan_basic")))
+			var action: String = entity.get("action_state","move")
+			var locomotion: bool = action in ["move","idle"] and entity.get("grounded",true) and not _enemy_hits.has(id)
+			var moving: bool = locomotion and action == "move"
+			_track_gait("entity:"+id,asset_id,entity,tick,moving,locomotion,paused,seen)
+	for id in _gait_tracks.keys():
+		if not seen.has(id): _gait_tracks.erase(id)
+func _track_gait(id: String, asset_id: String, actor: Dictionary, tick: int, moving: bool, locomotion: bool, paused: bool, seen: Dictionary) -> void:
+	if _cycle_distance(asset_id) <= 0.0: return
+	seen[id] = true
+	var position_data: Array = actor.position
+	var position := Vector2(position_data[0],position_data[1])
+	var velocity_data: Array = actor.get("velocity",[0.0,0.0])
+	var speed := Vector2(velocity_data[0],velocity_data[1]).length()
+	var identity: Array = [asset_id,actor.get("spawned_tick",0),actor.get("enemy_id","")]
+	var started := int(actor.get("action_started_tick",0))
+	var previous: Dictionary = _gait_tracks.get(id,{})
+	var distance := 0.0
+	if not previous.is_empty() and previous.identity == identity:
+		distance = float(previous.distance)
+		var elapsed := tick-int(previous.tick)
+		var travel := position.distance_to(previous.position)
+		# Grounded idle is a valid starting point for the very first move tick;
+		# attack/hit/airborne/recovery are not. A changed action epoch between
+		# two move samples may hide an entire leap, so rebase that interval too.
+		var same_action: bool = started == int(previous.started) or not previous.moving
+		var continuous: bool = moving and previous.locomotion and same_action
+		var plausible := travel <= maxf(speed,float(previous.speed))*float(elapsed)/60.0+0.001
+		if not paused and continuous and elapsed > 0 and elapsed <= MAX_GAIT_TICK_GAP and plausible:
+			distance += travel
+	_gait_tracks[id] = {"identity":identity,"position":position,"speed":speed,"tick":tick,"moving":moving,"locomotion":locomotion,"started":started,"distance":distance}
 func consume_events(events: Array[Dictionary]) -> void:
 	for event in events:
 		if event.type == "damage" and str(event.payload.get("target_id","")) == "player":
@@ -99,7 +193,7 @@ func _draw() -> void:
 	# remain visible even where the giant's opaque torso overlaps its sprite.
 	if _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
-		_sprite("armored_titan",Vector2(zone[0]+zone[2]/2,zone[1]-220),"move",1.5)
+		_sprite("armored_titan",Vector2(zone[0]+zone[2]/2,zone[1]-220),"idle",1.5)
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
 	for corpse in _corpses:
 		_sprite(corpse.asset,Vector2(corpse.position[0],corpse.position[1]),"death",1.0,false,_clock-float(corpse.started))
@@ -113,6 +207,7 @@ func _draw() -> void:
 		var animation_name: String = {"move":"move","windup":"windup","attack":"attack","airborne":"attack","recover":"idle"}.get(action,"move")
 		if _enemy_hits.has(str(entity.id)): animation_name = "hit"
 		var seconds := maxf(0,float(int(_snapshot.active_tick)-int(entity.get("action_started_tick",0)))/60.0)
+		if animation_name == "move": seconds = movement_seconds(asset_id,"entity:"+str(entity.id),1.0,seconds)
 		var facing: Array = entity.get("facing",entity.velocity)
 		_sprite(asset_id,Vector2(entity.position[0],entity.position[1]),animation_name,1.0,float(facing[0]) < 0,seconds)
 	for projectile in _snapshot.get("projectiles",[]):
@@ -122,7 +217,9 @@ func _draw() -> void:
 		else: _sprite("debris_fx",pos,"attack",0.35)
 	var position_data: Array = _snapshot.player.position
 	var animation := player_animation(_snapshot)
-	_sprite("garrison_01",Vector2(position_data[0],position_data[1]),animation,1.0,float(_snapshot.player.facing[0]) < 0, _clock-_attack_started if animation == "attack" else _clock)
+	var player_seconds := _clock-_attack_started if animation == "attack" else _clock
+	if animation == "move": player_seconds = movement_seconds("garrison_01","player",1.0,player_seconds)
+	_sprite("garrison_01",Vector2(position_data[0],position_data[1]),animation,1.0,float(_snapshot.player.facing[0]) < 0,player_seconds)
 	for effect in _effects:
 		_sprite(effect.asset,Vector2(effect.position[0],effect.position[1])-Vector2(0,64),"attack",0.8,_snapshot.player.facing[0] < 0,_clock-float(effect.started))
 func player_animation(snapshot: Dictionary) -> String:

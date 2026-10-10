@@ -75,6 +75,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_resize)
 	_resize()
 func start_run(seed: int) -> void:
+	world.reset_presentation()
 	state = simulation.new_run(chapter,seed)
 	pending_checkpoint.clear()
 	ui.set_checkpoint_available(false)
@@ -139,6 +140,7 @@ func request_resume() -> void:
 		if not checkpoint_matches_chapter(pending_checkpoint,chapter): return
 		var restored: Dictionary = simulation.restore(pending_checkpoint)
 		if not restored.ok: return
+		world.reset_presentation()
 		state = restored.state
 		pending_checkpoint.clear()
 		ui.set_checkpoint_available(false)
