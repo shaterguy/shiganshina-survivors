@@ -1,0 +1,13 @@
+extends SceneTree
+var checks := 0
+var failures: Array[String] = []
+func check(value: bool, label: String) -> void:
+	checks += 1
+	if not value:
+		failures.append(label)
+		print("FAIL: " + label)
+func _initialize() -> void:
+	print("PINNED ENGINE: ", Engine.get_version_info().string)
+	load("res://tests/persistence/test_save_migrations.gd").new().run(self)
+	print("RESULT checks=%d failures=%d" % [checks,failures.size()])
+	quit(0 if checks > 0 and failures.is_empty() else 1)

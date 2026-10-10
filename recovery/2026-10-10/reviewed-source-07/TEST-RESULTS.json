@@ -1,0 +1,1170 @@
+{
+  "classification": "NEW_DERIVED_PRODUCT_VERIFICATION_SUMMARY",
+  "counts_are_separate_not_quality_scores": true,
+  "fresh_isolated_replays": {
+    "combined_application_tested": false,
+    "engine": "4.6.3.stable.official.7d41c59c4",
+    "inputs": [
+      {
+        "bytes": 75408,
+        "group": "chapter-provider",
+        "restore_target": "assets/manifest.json",
+        "sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24"
+      },
+      {
+        "bytes": 804,
+        "group": "chapter-provider",
+        "restore_target": "chapters/chapter_01/authored_dock.json",
+        "sha256": "9eed4feddf9ff5584174a5aaadd94f558437441ff8171788cf25d980a0285fa8"
+      },
+      {
+        "bytes": 9605,
+        "group": "chapter-provider",
+        "restore_target": "chapters/chapter_01/city_templates.json",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      {
+        "bytes": 2192,
+        "group": "chapter-provider",
+        "restore_target": "chapters/chapter_01/manifest.json",
+        "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+      },
+      {
+        "bytes": 2560,
+        "group": "chapter-provider",
+        "restore_target": "chapters/chapter_01/map.json",
+        "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+      },
+      {
+        "bytes": 1636,
+        "group": "chapter-provider",
+        "restore_target": "data/doctrines.json",
+        "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+      },
+      {
+        "bytes": 2058,
+        "group": "chapter-provider",
+        "restore_target": "data/enemies.json",
+        "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+      },
+      {
+        "bytes": 3818,
+        "group": "chapter-provider",
+        "restore_target": "data/enemy_roles_ch01_3.json",
+        "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+      },
+      {
+        "bytes": 2382,
+        "group": "chapter-provider",
+        "restore_target": "data/equipment.json",
+        "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+      },
+      {
+        "bytes": 1943,
+        "group": "chapter-provider",
+        "restore_target": "data/evolutions.json",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      {
+        "bytes": 1588,
+        "group": "chapter-provider",
+        "restore_target": "data/passives.json",
+        "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+      },
+      {
+        "bytes": 1644,
+        "group": "chapter-provider",
+        "restore_target": "data/supply_shop.json",
+        "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+      },
+      {
+        "bytes": 5737,
+        "group": "chapter-provider",
+        "restore_target": "data/world_props.json",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      {
+        "bytes": 2845,
+        "group": "chapter-provider",
+        "restore_target": "game/app/world_checkpoint_adapter.gd",
+        "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+      },
+      {
+        "bytes": 9073,
+        "group": "chapter-provider",
+        "restore_target": "game/combat/world_geometry.gd",
+        "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+      },
+      {
+        "bytes": 37027,
+        "group": "chapter-provider",
+        "restore_target": "game/core/streamed_run_world.gd",
+        "sha256": "6e7c5a1941426230019b78f6acc07ca0cb10748bf70790f0ad731943b3e17f93"
+      },
+      {
+        "bytes": 7372,
+        "group": "chapter-provider",
+        "restore_target": "game/director/chapter_catalog.gd",
+        "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+      },
+      {
+        "bytes": 4318,
+        "group": "chapter-provider",
+        "restore_target": "game/director/streamed_chapter_provider.gd",
+        "sha256": "1a4bdafb40ac6480815154335dcdfecff9724dee3b85f5743a6012dca3543c74"
+      },
+      {
+        "bytes": 5173,
+        "group": "chapter-provider",
+        "restore_target": "game/world/city_generator.gd",
+        "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+      },
+      {
+        "bytes": 8390,
+        "group": "chapter-provider",
+        "restore_target": "game/world/city_navigation.gd",
+        "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+      },
+      {
+        "bytes": 6309,
+        "group": "chapter-provider",
+        "restore_target": "game/world/evacuation_route.gd",
+        "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+      },
+      {
+        "bytes": 12731,
+        "group": "chapter-provider",
+        "restore_target": "game/world/streamed_world.gd",
+        "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+      },
+      {
+        "bytes": 3564,
+        "group": "chapter-provider",
+        "restore_target": "game/world/world_address.gd",
+        "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+      },
+      {
+        "bytes": 5961,
+        "group": "chapter-provider",
+        "restore_target": "game/world/world_delta_codec.gd",
+        "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+      },
+      {
+        "bytes": 3713,
+        "group": "chapter-provider",
+        "restore_target": "game/world/world_interactions.gd",
+        "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+      },
+      {
+        "bytes": 3773,
+        "group": "chapter-provider",
+        "restore_target": "game/world/world_prop_catalog.gd",
+        "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+      },
+      {
+        "bytes": 188,
+        "group": "chapter-provider",
+        "restore_target": "project.godot",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      {
+        "bytes": 569,
+        "group": "chapter-provider",
+        "restore_target": "run_named_tests.gd",
+        "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+      },
+      {
+        "bytes": 2742,
+        "group": "chapter-provider",
+        "restore_target": "tests/integration/test_streamed_chapter_provider.gd",
+        "sha256": "d9ba67790f196c8b75c8e294508a8ec8d7fb5c694e76fc92c710f8b89119ffc7"
+      },
+      {
+        "bytes": 1505,
+        "group": "chapter-provider",
+        "restore_target": "tests/run_all.gd",
+        "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+      },
+      {
+        "bytes": 9605,
+        "group": "finite-core-c3",
+        "restore_target": "chapters/chapter_01/city_templates.json",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      {
+        "bytes": 2192,
+        "group": "finite-core-c3",
+        "restore_target": "chapters/chapter_01/manifest.json",
+        "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+      },
+      {
+        "bytes": 2560,
+        "group": "finite-core-c3",
+        "restore_target": "chapters/chapter_01/map.json",
+        "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+      },
+      {
+        "bytes": 1636,
+        "group": "finite-core-c3",
+        "restore_target": "data/doctrines.json",
+        "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+      },
+      {
+        "bytes": 2058,
+        "group": "finite-core-c3",
+        "restore_target": "data/enemies.json",
+        "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+      },
+      {
+        "bytes": 3818,
+        "group": "finite-core-c3",
+        "restore_target": "data/enemy_roles_ch01_3.json",
+        "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+      },
+      {
+        "bytes": 2382,
+        "group": "finite-core-c3",
+        "restore_target": "data/equipment.json",
+        "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+      },
+      {
+        "bytes": 1943,
+        "group": "finite-core-c3",
+        "restore_target": "data/evolutions.json",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      {
+        "bytes": 1588,
+        "group": "finite-core-c3",
+        "restore_target": "data/passives.json",
+        "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+      },
+      {
+        "bytes": 1644,
+        "group": "finite-core-c3",
+        "restore_target": "data/supply_shop.json",
+        "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+      },
+      {
+        "bytes": 5737,
+        "group": "finite-core-c3",
+        "restore_target": "data/world_props.json",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      {
+        "bytes": 1357,
+        "group": "finite-core-c3",
+        "restore_target": "game/combat/attack_geometry.gd",
+        "sha256": "f4f3dac3540401fdb4ffb16990183fa347c0ee021c874a26c5fbe0801dc0fc24"
+      },
+      {
+        "bytes": 2628,
+        "group": "finite-core-c3",
+        "restore_target": "game/combat/enemy_behaviors.gd",
+        "sha256": "0e41c80ffa01bc65319058c557d51c66fde1bed8b19221f9914a7ebe989eac7b"
+      },
+      {
+        "bytes": 8655,
+        "group": "finite-core-c3",
+        "restore_target": "game/combat/evolved_attack_resolver.gd",
+        "sha256": "434285a47841660e87c84f7730ef81588640d7fe1b4908110bd657cb147bff1a"
+      },
+      {
+        "bytes": 1006,
+        "group": "finite-core-c3",
+        "restore_target": "game/combat/spatial_hash.gd",
+        "sha256": "a2b5989c4ec18bc79d0143894f5deaeb0abcb55ffb7f076adc015a443b7ee2f7"
+      },
+      {
+        "bytes": 9073,
+        "group": "finite-core-c3",
+        "restore_target": "game/combat/world_geometry.gd",
+        "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+      },
+      {
+        "bytes": 4095,
+        "group": "finite-core-c3",
+        "restore_target": "game/contracts/game_contracts.gd",
+        "sha256": "119c263ba748071b57958281a3ef7e9ee2807ff1e1ad44a7c78505212c1a11e2"
+      },
+      {
+        "bytes": 71373,
+        "group": "finite-core-c3",
+        "restore_target": "game/core/run_simulation.gd",
+        "sha256": "5fcfa793dfef4c1ce24674ca2a71717953ae2b6f9d4d8f972b7fbd117779a39a"
+      },
+      {
+        "bytes": 7372,
+        "group": "finite-core-c3",
+        "restore_target": "game/director/chapter_catalog.gd",
+        "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+      },
+      {
+        "bytes": 5790,
+        "group": "finite-core-c3",
+        "restore_target": "game/economy/supply_catalog.gd",
+        "sha256": "890044e78e6b3bda635529841a588f23500468a335f4ea8d57265401a8d3c868"
+      },
+      {
+        "bytes": 9177,
+        "group": "finite-core-c3",
+        "restore_target": "game/progression/evolution_catalog.gd",
+        "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+      },
+      {
+        "bytes": 4967,
+        "group": "finite-core-c3",
+        "restore_target": "game/progression/growth_offer_service.gd",
+        "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+      },
+      {
+        "bytes": 15321,
+        "group": "finite-core-c3",
+        "restore_target": "game/progression/upgrade_catalog.gd",
+        "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+      },
+      {
+        "bytes": 188,
+        "group": "finite-core-c3",
+        "restore_target": "project.godot",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      {
+        "bytes": 980,
+        "group": "finite-core-c3",
+        "restore_target": "run_focused.gd",
+        "sha256": "ccc496d9ae18df314548ea2e80918d8e1c656422b20ae1b14acfb58025ff6c80"
+      },
+      {
+        "bytes": 4181,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/core_fixture.gd",
+        "sha256": "d79c984f9b0749c0cf6f233507d3e40718cf6a1c78d2e8097fc44efd4d253e3b"
+      },
+      {
+        "bytes": 9447,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_attack_events.gd",
+        "sha256": "8bcf382180944037bb019253d01439ec91f1028f3ba0df0c7abbd2af60c055a5"
+      },
+      {
+        "bytes": 7787,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_attack_restore_boundaries.gd",
+        "sha256": "46cc0ec423ea594bad5a2e04716213fbf2ddd1741afb1e015de5017fb02737c8"
+      },
+      {
+        "bytes": 3604,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_core_boundaries.gd",
+        "sha256": "79edfef0db7f96fcfb070ee9251b1aee42bee91169520758fb0c7f4b6f327c0d"
+      },
+      {
+        "bytes": 22473,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_growth_lifecycle.gd",
+        "sha256": "0db7f96ff785a2bbf68df92b7c4d81f8cf0f872fbbd5eb4274335def720e7edb"
+      },
+      {
+        "bytes": 7890,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_run_state.gd",
+        "sha256": "40aa75eeb84726d3b4327613b10d92a43ba91f1eaffe536df9ce7012b7a6c698"
+      },
+      {
+        "bytes": 4522,
+        "group": "finite-core-c3",
+        "restore_target": "tests/core/test_rebuild_terminal_precedence.gd",
+        "sha256": "7eedfb6340b995498cf6c10feb4ba803f27dc7d8348377b029700a8b3e22f198"
+      },
+      {
+        "bytes": 1505,
+        "group": "finite-core-c3",
+        "restore_target": "tests/run_all.gd",
+        "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+      },
+      {
+        "bytes": 9605,
+        "group": "persistence-gate3",
+        "restore_target": "chapters/chapter_01/city_templates.json",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      {
+        "bytes": 2192,
+        "group": "persistence-gate3",
+        "restore_target": "chapters/chapter_01/manifest.json",
+        "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+      },
+      {
+        "bytes": 2560,
+        "group": "persistence-gate3",
+        "restore_target": "chapters/chapter_01/map.json",
+        "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+      },
+      {
+        "bytes": 1636,
+        "group": "persistence-gate3",
+        "restore_target": "data/doctrines.json",
+        "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+      },
+      {
+        "bytes": 2058,
+        "group": "persistence-gate3",
+        "restore_target": "data/enemies.json",
+        "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+      },
+      {
+        "bytes": 3818,
+        "group": "persistence-gate3",
+        "restore_target": "data/enemy_roles_ch01_3.json",
+        "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+      },
+      {
+        "bytes": 2382,
+        "group": "persistence-gate3",
+        "restore_target": "data/equipment.json",
+        "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+      },
+      {
+        "bytes": 1943,
+        "group": "persistence-gate3",
+        "restore_target": "data/evolutions.json",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      {
+        "bytes": 1588,
+        "group": "persistence-gate3",
+        "restore_target": "data/passives.json",
+        "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+      },
+      {
+        "bytes": 1644,
+        "group": "persistence-gate3",
+        "restore_target": "data/supply_shop.json",
+        "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+      },
+      {
+        "bytes": 5737,
+        "group": "persistence-gate3",
+        "restore_target": "data/world_props.json",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      {
+        "bytes": 2845,
+        "group": "persistence-gate3",
+        "restore_target": "game/app/world_checkpoint_adapter.gd",
+        "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+      },
+      {
+        "bytes": 1357,
+        "group": "persistence-gate3",
+        "restore_target": "game/combat/attack_geometry.gd",
+        "sha256": "f4f3dac3540401fdb4ffb16990183fa347c0ee021c874a26c5fbe0801dc0fc24"
+      },
+      {
+        "bytes": 2628,
+        "group": "persistence-gate3",
+        "restore_target": "game/combat/enemy_behaviors.gd",
+        "sha256": "0e41c80ffa01bc65319058c557d51c66fde1bed8b19221f9914a7ebe989eac7b"
+      },
+      {
+        "bytes": 8655,
+        "group": "persistence-gate3",
+        "restore_target": "game/combat/evolved_attack_resolver.gd",
+        "sha256": "434285a47841660e87c84f7730ef81588640d7fe1b4908110bd657cb147bff1a"
+      },
+      {
+        "bytes": 1006,
+        "group": "persistence-gate3",
+        "restore_target": "game/combat/spatial_hash.gd",
+        "sha256": "a2b5989c4ec18bc79d0143894f5deaeb0abcb55ffb7f076adc015a443b7ee2f7"
+      },
+      {
+        "bytes": 9073,
+        "group": "persistence-gate3",
+        "restore_target": "game/combat/world_geometry.gd",
+        "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+      },
+      {
+        "bytes": 4095,
+        "group": "persistence-gate3",
+        "restore_target": "game/contracts/game_contracts.gd",
+        "sha256": "119c263ba748071b57958281a3ef7e9ee2807ff1e1ad44a7c78505212c1a11e2"
+      },
+      {
+        "bytes": 15150,
+        "group": "persistence-gate3",
+        "restore_target": "game/contracts/game_save_contracts.gd",
+        "sha256": "c6906f9c023a729c431baa3b08d21dd6b569161a5db5eb43227fcac1f57546de"
+      },
+      {
+        "bytes": 69054,
+        "group": "persistence-gate3",
+        "restore_target": "game/core/run_simulation.gd",
+        "sha256": "d2deda44bcb0d065720884a722aeec2eea282d9c6798868fc8f4454b309be0f6"
+      },
+      {
+        "bytes": 7372,
+        "group": "persistence-gate3",
+        "restore_target": "game/director/chapter_catalog.gd",
+        "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+      },
+      {
+        "bytes": 5790,
+        "group": "persistence-gate3",
+        "restore_target": "game/economy/supply_catalog.gd",
+        "sha256": "890044e78e6b3bda635529841a588f23500468a335f4ea8d57265401a8d3c868"
+      },
+      {
+        "bytes": 28000,
+        "group": "persistence-gate3",
+        "restore_target": "game/economy/supply_service.gd",
+        "sha256": "3627251019f4af71c90fd0eebf40978f54e504464a6031e8e466cc5f744a7014"
+      },
+      {
+        "bytes": 32059,
+        "group": "persistence-gate3",
+        "restore_target": "game/persistence/game_save_store.gd",
+        "sha256": "426038b39feb6727fe18629ce926046411bce4676d66082ef0b82bf79abb6fc6"
+      },
+      {
+        "bytes": 4898,
+        "group": "persistence-gate3",
+        "restore_target": "game/persistence/save_migrations.gd",
+        "sha256": "9d9af3c54b4eddcc0e6704c693ef30ba16646203905393b01ed0ffc83032238c"
+      },
+      {
+        "bytes": 5004,
+        "group": "persistence-gate3",
+        "restore_target": "game/persistence/save_store.gd",
+        "sha256": "0934d79697d2e4b36b1350f5e5b1220d1ce6a551b7fd93838141bc6302bc3d20"
+      },
+      {
+        "bytes": 14905,
+        "group": "persistence-gate3",
+        "restore_target": "game/persistence/world_delta_store.gd",
+        "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+      },
+      {
+        "bytes": 9177,
+        "group": "persistence-gate3",
+        "restore_target": "game/progression/evolution_catalog.gd",
+        "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+      },
+      {
+        "bytes": 4967,
+        "group": "persistence-gate3",
+        "restore_target": "game/progression/growth_offer_service.gd",
+        "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+      },
+      {
+        "bytes": 15321,
+        "group": "persistence-gate3",
+        "restore_target": "game/progression/upgrade_catalog.gd",
+        "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+      },
+      {
+        "bytes": 3564,
+        "group": "persistence-gate3",
+        "restore_target": "game/world/world_address.gd",
+        "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+      },
+      {
+        "bytes": 5961,
+        "group": "persistence-gate3",
+        "restore_target": "game/world/world_delta_codec.gd",
+        "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+      },
+      {
+        "bytes": 7727,
+        "group": "persistence-gate3",
+        "restore_target": "game/world/world_delta_index.gd",
+        "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+      },
+      {
+        "bytes": 188,
+        "group": "persistence-gate3",
+        "restore_target": "project.godot",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      {
+        "bytes": 485,
+        "group": "persistence-gate3",
+        "restore_target": "run_contract_gate.gd",
+        "sha256": "fcde6eb8f14becd96b02269aec2550cd5b1e57b433d9ce591e3e5010b7fe64cc"
+      },
+      {
+        "bytes": 483,
+        "group": "persistence-gate3",
+        "restore_target": "run_economy_gate.gd",
+        "sha256": "f4247e0a761382d3360e5c90c29741253e7616e1c05c68251e82aa52da8d8fdb"
+      },
+      {
+        "bytes": 481,
+        "group": "persistence-gate3",
+        "restore_target": "run_location_gate.gd",
+        "sha256": "c85a533d76758b6cdcfc92022daaab8a73407fd7dd01e86a2e5c06915ed790df"
+      },
+      {
+        "bytes": 475,
+        "group": "persistence-gate3",
+        "restore_target": "run_migration_gate.gd",
+        "sha256": "56bdbd8fc494bb856cf1011e932a559c08e73045357afb86bd515817084d6e8a"
+      },
+      {
+        "bytes": 493,
+        "group": "persistence-gate3",
+        "restore_target": "run_recovery_gate.gd",
+        "sha256": "01125e2ada191cc432a41c16e4cb3e06bec216c7abab18727cd5873a3a32d835"
+      },
+      {
+        "bytes": 479,
+        "group": "persistence-gate3",
+        "restore_target": "run_store_gate.gd",
+        "sha256": "dcc5d2253841a8d25cae7574f7bd1b59f7575b8781b1e8c96a669cd7c8a595ac"
+      },
+      {
+        "bytes": 4049,
+        "group": "persistence-gate3",
+        "restore_target": "tests/contracts/test_game_save_snapshot.gd",
+        "sha256": "b80ae1911853cf8f6f08293e660ba54ad611611c44319d1465127a5c238ccb5d"
+      },
+      {
+        "bytes": 5681,
+        "group": "persistence-gate3",
+        "restore_target": "tests/economy/test_supply_catalog.gd",
+        "sha256": "b792503347e0965d6c5de7929ff35de31a4c243c2f32857e66ce737bbb91b01d"
+      },
+      {
+        "bytes": 9674,
+        "group": "persistence-gate3",
+        "restore_target": "tests/economy/test_supply_hostile_types.gd",
+        "sha256": "9b18b75028659a2e14ec19a743462051d7b79c887056c6b9868136782b1a5bb4"
+      },
+      {
+        "bytes": 21557,
+        "group": "persistence-gate3",
+        "restore_target": "tests/economy/test_supply_service.gd",
+        "sha256": "45fb622da18d30a250e0d65b66f8f10829a777528d104143419884b40a05f024"
+      },
+      {
+        "bytes": 13057,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/attack_events.json",
+        "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+      },
+      {
+        "bytes": 1358,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/content_identity_basis.json",
+        "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      {
+        "bytes": 7276,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/game_save_v2.json",
+        "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+      },
+      {
+        "bytes": 5248,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/progression_source_offers.json",
+        "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+      },
+      {
+        "bytes": 24852,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/progression_views.json",
+        "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+      },
+      {
+        "bytes": 5045,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/run_v2.json",
+        "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+      },
+      {
+        "bytes": 22192,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply/supply_views.json",
+        "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+      },
+      {
+        "bytes": 2375,
+        "group": "persistence-gate3",
+        "restore_target": "tests/fixtures/evolution_supply_fixture.gd",
+        "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+      },
+      {
+        "bytes": 6674,
+        "group": "persistence-gate3",
+        "restore_target": "tests/persistence/test_authority_hostile.gd",
+        "sha256": "634178f0f70db484b99baf0637f04972a5d374ba578d309019113c30dc90c057"
+      },
+      {
+        "bytes": 22667,
+        "group": "persistence-gate3",
+        "restore_target": "tests/persistence/test_game_save_store.gd",
+        "sha256": "1ce0ceb8ed2258fd8c2da42d69cfd87950c24c726292aae85d97a3c6e330d379"
+      },
+      {
+        "bytes": 21926,
+        "group": "persistence-gate3",
+        "restore_target": "tests/persistence/test_game_save_transition_guard.gd",
+        "sha256": "450ea1b5eb5ecdeb7cc7cf1bfc98710446557447fed68ead241f3d55807a1308"
+      },
+      {
+        "bytes": 11081,
+        "group": "persistence-gate3",
+        "restore_target": "tests/persistence/test_save_migrations.gd",
+        "sha256": "7c0e86596df6237bb4880ff3d7646af0a6fa81f402a7607b8aa1d40d6f02b895"
+      },
+      {
+        "bytes": 1505,
+        "group": "persistence-gate3",
+        "restore_target": "tests/run_all.gd",
+        "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+      },
+      {
+        "bytes": 5981,
+        "group": "persistence-gate3",
+        "restore_target": "tests/world/test_world_delta_store.gd",
+        "sha256": "4388ba960b6a4b29178677cd4d26c01182be1e50eaa0bb1bcf4f16a6371fe8af"
+      },
+      {
+        "bytes": 75408,
+        "group": "streamed-boundary",
+        "restore_target": "assets/manifest.json",
+        "sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24"
+      },
+      {
+        "bytes": 9605,
+        "group": "streamed-boundary",
+        "restore_target": "chapters/chapter_01/city_templates.json",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      {
+        "bytes": 5737,
+        "group": "streamed-boundary",
+        "restore_target": "data/world_props.json",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      {
+        "bytes": 2845,
+        "group": "streamed-boundary",
+        "restore_target": "game/app/world_checkpoint_adapter.gd",
+        "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+      },
+      {
+        "bytes": 9073,
+        "group": "streamed-boundary",
+        "restore_target": "game/combat/world_geometry.gd",
+        "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+      },
+      {
+        "bytes": 37027,
+        "group": "streamed-boundary",
+        "restore_target": "game/core/streamed_run_world.gd",
+        "sha256": "6e7c5a1941426230019b78f6acc07ca0cb10748bf70790f0ad731943b3e17f93"
+      },
+      {
+        "bytes": 14905,
+        "group": "streamed-boundary",
+        "restore_target": "game/persistence/world_delta_store.gd",
+        "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+      },
+      {
+        "bytes": 5173,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/city_generator.gd",
+        "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+      },
+      {
+        "bytes": 8390,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/city_navigation.gd",
+        "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+      },
+      {
+        "bytes": 6309,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/evacuation_route.gd",
+        "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+      },
+      {
+        "bytes": 12731,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/streamed_world.gd",
+        "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+      },
+      {
+        "bytes": 3564,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/world_address.gd",
+        "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+      },
+      {
+        "bytes": 5961,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/world_delta_codec.gd",
+        "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+      },
+      {
+        "bytes": 7727,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/world_delta_index.gd",
+        "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+      },
+      {
+        "bytes": 3713,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/world_interactions.gd",
+        "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+      },
+      {
+        "bytes": 3773,
+        "group": "streamed-boundary",
+        "restore_target": "game/world/world_prop_catalog.gd",
+        "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+      },
+      {
+        "bytes": 188,
+        "group": "streamed-boundary",
+        "restore_target": "project.godot",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      {
+        "bytes": 459,
+        "group": "streamed-boundary",
+        "restore_target": "run_boundary.gd",
+        "sha256": "5e45f28ec388b54bd5aaa8edccfee35342c9d6a9172657248f5b331880179ad6"
+      },
+      {
+        "bytes": 569,
+        "group": "streamed-boundary",
+        "restore_target": "run_named_tests.gd",
+        "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+      },
+      {
+        "bytes": 1623,
+        "group": "streamed-boundary",
+        "restore_target": "tests/core_world/new_streamed_helper_fixture.gd",
+        "sha256": "f2e030618f0149637b2729b515ff5b0e4bdabfa0e8d8c997d272de2fe12e54a5"
+      },
+      {
+        "bytes": 14312,
+        "group": "streamed-boundary",
+        "restore_target": "tests/core_world/test_new_streamed_helper.gd",
+        "sha256": "20e8f73d2e4301db5fff2288921429365b6841d40c4feebd9ba9e22a77df3324"
+      },
+      {
+        "bytes": 11272,
+        "group": "streamed-boundary",
+        "restore_target": "tests/core_world/test_new_streamed_helper_boundaries.gd",
+        "sha256": "8a7262723d30b6dd6499b9391905ed523eb05c6e4f57c2840a25f2898a2b5a81"
+      },
+      {
+        "bytes": 1505,
+        "group": "streamed-boundary",
+        "restore_target": "tests/run_all.gd",
+        "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+      },
+      {
+        "bytes": 11063,
+        "group": "streamed-boundary",
+        "restore_target": "tests/world/test_streamed_run_world_boundary.gd",
+        "sha256": "0ddb9d223ec777569f8b6731bcdb26f99ce6ba480f3f8608677c7e7ed2ce3cdb"
+      }
+    ],
+    "results": [
+      {
+        "arguments": [],
+        "checks": 574,
+        "diagnostic_markers": false,
+        "expected_checks": 574,
+        "failures": 0,
+        "group": "finite-core-c3",
+        "id": "core_c3_focused",
+        "log_bytes": 179,
+        "log_sha256": "7813f561e41eb6d90f94a28c5e355680db1a69a3eb63f9df8b89bb60c9c4a3ae",
+        "process_exit_code": 0,
+        "runner": "run_focused.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 212,
+        "diagnostic_markers": false,
+        "expected_checks": 212,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_recovery",
+        "log_bytes": 204,
+        "log_sha256": "539034b2683a95d2537c3b8e817c4c22465bb621b121c7696be919282d876b3e",
+        "process_exit_code": 0,
+        "runner": "run_recovery_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 57,
+        "diagnostic_markers": false,
+        "expected_checks": 57,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_contracts",
+        "log_bytes": 162,
+        "log_sha256": "cabb8602214aa36f6194dff878b51fa1d4a296bc4298b061bf84b00a257a7277",
+        "process_exit_code": 0,
+        "runner": "run_contract_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 422,
+        "diagnostic_markers": false,
+        "expected_checks": 422,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_migration",
+        "log_bytes": 214,
+        "log_sha256": "91dd98b852562bede616ccc9983ac8d9b2a51fd77a389a4493c51866b2c761e0",
+        "process_exit_code": 0,
+        "runner": "run_migration_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 178,
+        "diagnostic_markers": false,
+        "expected_checks": 178,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_store",
+        "log_bytes": 215,
+        "log_sha256": "603b3f244d7c02710a03a01be1f23b716aae4765863f181a87a2977774d44f1a",
+        "process_exit_code": 0,
+        "runner": "run_store_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 24,
+        "diagnostic_markers": false,
+        "expected_checks": 24,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_locations",
+        "log_bytes": 101,
+        "log_sha256": "3dfe53692e5547d8844df7e21ecfb444408bf896a0bcb0de29f482d4ecc02acf",
+        "process_exit_code": 0,
+        "runner": "run_location_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 1243,
+        "diagnostic_markers": false,
+        "expected_checks": 1243,
+        "failures": 0,
+        "group": "persistence-gate3",
+        "id": "persistence_economy",
+        "log_bytes": 256,
+        "log_sha256": "df324a4ad8e88f9a16498ad000aa26f9c427736712bc7d451974cbe7e79b3c86",
+        "process_exit_code": 0,
+        "runner": "run_economy_gate.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [],
+        "checks": 140,
+        "diagnostic_markers": false,
+        "expected_checks": 140,
+        "failures": 0,
+        "group": "streamed-boundary",
+        "id": "world_boundary",
+        "log_bytes": 102,
+        "log_sha256": "646983951fe792a991a60a1990b9666a6fd22ce6202dd5193dd49e7534d4b41d",
+        "process_exit_code": 0,
+        "runner": "run_boundary.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [
+          "res://tests/core_world/test_new_streamed_helper.gd",
+          "res://tests/core_world/test_new_streamed_helper_boundaries.gd"
+        ],
+        "checks": 197,
+        "diagnostic_markers": false,
+        "expected_checks": 197,
+        "failures": 0,
+        "group": "streamed-boundary",
+        "id": "world_focused",
+        "log_bytes": 102,
+        "log_sha256": "5e4c123de04b1e7366758771d7cd0cfef2b5b20d94834194efc9da4075b7b0ca",
+        "process_exit_code": 0,
+        "runner": "run_named_tests.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "arguments": [
+          "res://tests/integration/test_streamed_chapter_provider.gd"
+        ],
+        "checks": 22,
+        "diagnostic_markers": false,
+        "expected_checks": 22,
+        "failures": 0,
+        "group": "chapter-provider",
+        "id": "chapter_provider",
+        "log_bytes": 101,
+        "log_sha256": "6d75843f8aa8dbe07fc37519808c400ab65427661ba77b7aaeebcc2b57e83f8c",
+        "process_exit_code": 0,
+        "runner": "run_named_tests.gd",
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      }
+    ],
+    "scope": "Separate finite Core, persistence gate3, streamed helper and inactive chapter provider only. These are not a combined application or Android test. Prior independent results are separately labeled.",
+    "source_inputs_unchanged": true
+  },
+  "not_established": [
+    "Combined application or full-suite pass",
+    "Streamed Core adoption and full rollback",
+    "Android export, install/update, save migration or device controls",
+    "Natural run balance, performance, artwork, full chapter or release approval"
+  ],
+  "prior_full_suite_observation": {
+    "checks": 67421,
+    "evidence": {
+      "bytes": 71488,
+      "git_blob_sha": "2fe9683e2c0e2e1792f12c6aca5c61e1d7914dfe",
+      "id": "prior_frozen_helper_review_aggregate",
+      "mode": "100644",
+      "sha256": "acf243d35e2267d9abe8c5029d4033adb5d41be74ed7707ca3719e845786d9d5"
+    },
+    "failures": 26,
+    "fresh_checkpoint_aggregate_run": false,
+    "process_exit_code": 1,
+    "scope": "A prior frozen review project, predating later source changes. Remains a failing observation, not the assembled checkpoint or complete game approval.",
+    "script_error_lines": 88,
+    "warnings_and_parse_errors_present": true
+  },
+  "prior_scoped_evidence": {
+    "chapter_provider": {
+      "evidence": {
+        "bytes": 101,
+        "git_blob_sha": "35b0409b3a3bba171ac4c5f2370fd0e03e937626",
+        "id": "chapter_provider_authored_70",
+        "mode": "100644",
+        "sha256": "25525b1de2cbd19d682aa6535f50c7bd9c88769da9874328caf23d8d17881481"
+      },
+      "failures": 0,
+      "fresh_provider_only_checks": 22,
+      "prior_logged_checks": 70,
+      "prior_runner_scope": "integration directory via tools/test.sh integration, as separately identified; not provider-only",
+      "production_status": "production_not_activated",
+      "scope": "Inactive explicit provider, mechanical definition identity and authored dock only. No independent approval or production integration is claimed.",
+      "status": "author_tested_not_independently_reviewed"
+    },
+    "finite_core_c3": {
+      "authored_checks": 574,
+      "evidence": [
+        {
+          "id": "focused-runner-tranche13",
+          "result": "RESULT checks=574 failures=0",
+          "sha256": "7813f561e41eb6d90f94a28c5e355680db1a69a3eb63f9df8b89bb60c9c4a3ae"
+        },
+        {
+          "id": "independent-boundary-probes-tranche13",
+          "result": "BOUNDARY RESULT checks=5 failures=0",
+          "sha256": "90b02f1713380bf00e11c1e460c691a07f6946ff8e07092f8454984f3a2e708b"
+        },
+        {
+          "id": "independent-growth-probes-tranche13",
+          "result": "INDEPENDENT GROWTH RESULT checks=1205 failures=0 observations=2",
+          "sha256": "d7ecbcc1b85402edbdf48e5c3d0b7a5f5a98a1cec4cbcb73863acaa6f36a0e9f"
+        },
+        {
+          "id": "independent-ledger-probes-tranche13",
+          "result": "LEDGER RESULT checks=40 failures=0",
+          "sha256": "710f9344408d250701a5cf4c6b71a3761b99f48d2816ff9ac9f40fcc8c8c1511"
+        },
+        {
+          "id": "independent-evolution-counter-probes-tranche13",
+          "result": "EVOLUTION COUNTER RESULT checks=12 failures=0",
+          "sha256": "e68f57aa01128cfd502908da65e4b5118fb6a0baac96ff825514cc89cb99a0ea"
+        },
+        {
+          "id": "generate-r1-fixtures-review-copy-tranche13",
+          "result": "R1 actual fixtures states=11 failures=0",
+          "sha256": "5a4314143fa72bab18ed3763026720c746a0842e92b68ef8c26a9023fed300bc"
+        }
+      ],
+      "failures": 0,
+      "fixture_files_byte_identical": 19,
+      "fixture_states": 11,
+      "independent_checks": 1262,
+      "limits": [
+        "Finite Core only; no streamed integration or economy-controller binding",
+        "Arranged boss/time/HP inputs do not establish natural leveling, balance or full-run gameplay"
+      ],
+      "report": {
+        "bytes": 9914,
+        "git_blob_sha": "566c6082ed2da2d1a56e2d06c45ffa2bb1ec5c5d",
+        "id": "finite_core_c3_review",
+        "mode": "100644",
+        "sha256": "37561ab32eb774daab17d56df5190220e96633f9094c7412a1120641610efe66"
+      },
+      "status": "approved_scoped_finite_core_growth_terminal_restore_on_tranche13"
+    },
+    "persistence_gate3": {
+      "report": {
+        "bytes": 2939,
+        "git_blob_sha": "ac8813f98b7491907b6a53a78f24d43ac7c95720",
+        "id": "persistence_gate3_scope",
+        "mode": "100644",
+        "sha256": "c5f34f47b1976075ad28e9769af5a8bfd587c0855f6700d049b05961d58583f7"
+      },
+      "scope": "Future schema classification and final archive/source race fixes; reviewed store/economy contracts. Same-process serialization, not an interprocess atomic multi-file CAS guarantee.",
+      "separate_terminal_shop_result": {
+        "checks": 48,
+        "dependency_context": "Separate earlier finite-Core snapshot with arranged terminal fixtures; not the combined chapter.",
+        "evidence": {
+          "bytes": 249,
+          "git_blob_sha": "b4218f0c11e16f7aa2d641e353376e71da9702ef",
+          "id": "prior_terminal_shop_log",
+          "mode": "100644",
+          "sha256": "c9420dfcb1a7ff64cb9c37957734b84e8fad641c18980d8c4a5f54333ee467b8"
+        },
+        "failures": 0,
+        "rerun_in_this_checkpoint": false
+      },
+      "status": "review_fix_snapshot_with_bounded_evidence"
+    },
+    "streamed_boundary": {
+      "boundary_checks": 140,
+      "fresh_focused_checks": 197,
+      "fresh_harness_difference": "Two named test loads instead of the prior directory runner also counting the fixture helper load. Test bodies are unchanged.",
+      "limits": [
+        "No complete Core world adoption, late-failure rollback, dock AI, Android performance or whole-chapter acceptance"
+      ],
+      "prior_authored_dock_checks": 12,
+      "prior_focused_checks": 198,
+      "prior_focused_log": {
+        "bytes": 102,
+        "git_blob_sha": "95cc1599173c3edd9a327ede258797e919488081",
+        "id": "world_prior_focused_198",
+        "mode": "100644",
+        "sha256": "eccf98f38009c478780266156c8bad8fb66a4188033669ece8392296734515a2"
+      },
+      "prior_variant_calls": 264,
+      "report": {
+        "bytes": 7949,
+        "git_blob_sha": "78c01b053942e1d59fc605ef145a93a43229a1db",
+        "id": "streamed_helper_boundary_review",
+        "mode": "100644",
+        "sha256": "4978e3ba932eb093b65b99f7574c475f3095b519aeb873d1fbd1f9829e06c4ad"
+      },
+      "status": "approved_scoped_new_helper_boundary_only"
+    }
+  }
+}

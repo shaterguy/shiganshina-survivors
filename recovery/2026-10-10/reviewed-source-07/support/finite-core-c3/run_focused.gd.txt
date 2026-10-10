@@ -1,0 +1,17 @@
+extends SceneTree
+var checks := 0
+var failures: Array[String] = []
+func check(condition: bool, message: String) -> void:
+	checks += 1
+	if not condition:
+		failures.append(message)
+		push_error("FAIL: "+message)
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+	print("NEW C2/C3 focused: real state and combat; no streamed world activation claim")
+	for path in ["res://tests/core/test_rebuild_run_state.gd","res://tests/core/test_rebuild_attack_events.gd","res://tests/core/test_rebuild_growth_lifecycle.gd","res://tests/core/test_rebuild_attack_restore_boundaries.gd","res://tests/core/test_rebuild_terminal_precedence.gd","res://tests/core/test_rebuild_core_boundaries.gd"]:
+		var script = load(path)
+		check(script != null and script.can_instantiate(),"NEW core test loads: "+path)
+		if script != null and script.can_instantiate(): script.new().run(self)
+	print("RESULT checks=%d failures=%d"%[checks,failures.size()])
+	quit(0 if failures.is_empty() else 1)

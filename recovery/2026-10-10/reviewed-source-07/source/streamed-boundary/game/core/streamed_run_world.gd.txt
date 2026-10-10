@@ -1,0 +1,506 @@
+class_name StreamedRunWorld
+extends RefCounted
+# NEW 2026-10-10 adapter, not a reconstruction of the missing latest helper.
+# Owns only replaceable derived caches. Every persistent change is a proposal.
+const Address = preload("res://game/world/world_address.gd")
+const Generator = preload("res://game/world/city_generator.gd")
+const Props = preload("res://game/world/world_prop_catalog.gd")
+const Stream = preload("res://game/world/streamed_world.gd")
+const Navigation = preload("res://game/world/city_navigation.gd")
+const Interactions = preload("res://game/world/world_interactions.gd")
+const Evacuation = preload("res://game/world/evacuation_route.gd")
+const Codec = preload("res://game/world/world_delta_codec.gd")
+const FiniteGeometry = preload("res://game/combat/world_geometry.gd")
+const Checkpoint = preload("res://game/app/world_checkpoint_adapter.gd")
+const CONTENT_REVISION := "ch01.3-rebuild.1"
+const VIEW_MARGIN := 896.0
+const MAX_LOCAL := 49152.0
+const LIMITS := {"entities":512,"projectiles":256,"drops":256,"telegraphs":512,"player_attack_instances":64,"enemy_attack_instances":64}
+const POSITION_FIELDS := ["position","previous_position","origin","target","locked_origin","locked_target","landing_target"]
+const GEOMETRY_POSITIONS := ["position","origin","target","center"]
+const WORLD_FIELDS := ["schema_version","mode","stage","scene_id","generator_revision","template_revision","content_fingerprint","origin_chunk","origin_revision","world_revision","delta_root","dirty_chunks","next_structure_strike_tick","evacuation"]
+var _definitions: Dictionary
+var _generator
+var _world
+var _navigation
+var _hydration: Dictionary = {}
+var _stamp := ""
+var _valid := false
+var _last_status: Dictionary = {}
+var _query_failure: Dictionary = {}
+var _stage := ""
+
+func _init(definitions: Dictionary = {}) -> void:
+	_definitions = definitions.duplicate(true)
+	if not _definitions_shape(_definitions): return
+	if not Props.validate(_definitions.props,_definitions.asset_manifest).is_empty(): return
+	_generator = Generator.new(_definitions.templates,_definitions.props)
+	_valid = _generator.validate().is_empty()
+func valid() -> bool: return _valid
+func fresh(): return get_script().new(_definitions)
+static func enabled(state: Dictionary) -> bool:
+	# Dispatchers must reject a present malformed world, never fall back to finite.
+	return state.get("world") is Dictionary and state.world.get("mode") is String and state.world.mode == "streamed_city"
+static func initial_world(content_fingerprint: String) -> Dictionary:
+	if not Codec.valid_hash(content_fingerprint): return failure("content_mismatch")
+	return {"schema_version":1,"mode":"streamed_city","stage":"city","scene_id":"city","generator_revision":"city_v1","template_revision":"ch01_city_1","content_fingerprint":content_fingerprint,"origin_chunk":["0","0"],"origin_revision":0,"world_revision":0,"delta_root":Codec.empty_root(),"dirty_chunks":[],"next_structure_strike_tick":0,"evacuation":{}}
+static func validate_world(state: Dictionary) -> Dictionary:
+	if not state.get("world") is Dictionary: return failure("invalid_snapshot")
+	var world: Dictionary = state.world
+	if not Codec.integer(world.get("schema_version")): return failure("invalid_snapshot")
+	if world.schema_version > 1: return failure("unsupported_schema")
+	if world.schema_version != 1: return failure("invalid_snapshot")
+	if not Codec.integer(state.get("schema_version")): return failure("invalid_snapshot")
+	if state.schema_version > 2: return failure("unsupported_schema")
+	if state.schema_version != 2: return failure("invalid_snapshot")
+	# Variant equality is not type-safe in GDScript. Check saved identities before
+	# comparison so malformed data cannot abort with an empty Dictionary.
+	for field in ["mode","stage","scene_id","generator_revision","template_revision","content_fingerprint"]:
+		if not world.get(field) is String: return failure("invalid_snapshot")
+	if not state.get("content_revision") is String: return failure("invalid_snapshot")
+	if world.get("mode") != "streamed_city" or world.get("generator_revision") != "city_v1" or world.get("template_revision") != "ch01_city_1" or state.get("content_revision") != CONTENT_REVISION: return failure("content_mismatch")
+	if not state.get("rules") is Dictionary or not Codec.valid_hash(state.rules.get("content_fingerprint")): return failure("invalid_snapshot")
+	if world.get("content_fingerprint") != state.rules.content_fingerprint: return failure("content_mismatch")
+	if not world.get("stage") in ["city","dock"]: return failure("content_mismatch")
+	if not Codec.exact_keys(world,WORLD_FIELDS+(["escape_rect"] if world.stage == "dock" else [])): return failure("invalid_snapshot")
+	if world.scene_id != ("city" if world.stage == "city" else "authored_dock"): return failure("invalid_snapshot")
+	if not world.origin_chunk is Array: return failure("invalid_snapshot")
+	var address := Address.parse(world.origin_chunk)
+	if not address.ok: return address
+	if not world.delta_root is Dictionary: return failure("invalid_snapshot")
+	var root := Codec.valid_root(world.delta_root)
+	if not root.ok: return root
+	for key in ["origin_revision","world_revision","next_structure_strike_tick"]:
+		if not Codec.integer(world[key]) or world[key] > Codec.MAX_JSON_INTEGER: return failure("invalid_snapshot")
+	var dirty := Codec.normalize_records(world.dirty_chunks)
+	if not dirty.ok: return dirty
+	if not _same_json(dirty.records,world.dirty_chunks) or (not dirty.records.is_empty() and world.world_revision == 0): return failure("invalid_snapshot")
+	if not world.evacuation is Dictionary: return failure("invalid_snapshot")
+	var evacuation: Dictionary = world.evacuation
+	if not evacuation.is_empty():
+		if not state.get("phase") in ["evacuation","dead","won","abandoned"] or not _tick(state.get("final_started_tick")) or not _tick(evacuation.get("selected_tick")) or state.final_started_tick > evacuation.selected_tick: return failure("invalid_snapshot")
+		var fields := ["passage_id","chunk","selected_tick"]+(["transition_command_id","transition_tick"] if world.stage == "dock" else [])
+		if not Codec.exact_keys(evacuation,fields) or not evacuation.chunk is Array or not Address.parse(evacuation.chunk).ok: return failure("invalid_snapshot")
+		if not evacuation.passage_id is String or evacuation.passage_id != "passage:city_v1:%s:%s" % [evacuation.chunk[0],evacuation.chunk[1]]: return failure("invalid_snapshot")
+		if not _tick(evacuation.selected_tick) or not _tick(state.get("active_tick")) or evacuation.selected_tick > state.active_tick: return failure("invalid_snapshot")
+	if world.stage == "dock":
+		if evacuation.is_empty() or not evacuation.transition_command_id is String or evacuation.transition_command_id.is_empty() or not _tick(evacuation.transition_tick) or evacuation.transition_tick < evacuation.selected_tick or evacuation.transition_tick > state.active_tick: return failure("invalid_snapshot")
+		if not _dock_escape_rect(world.escape_rect) or world.origin_chunk != ["0","0"] or world.origin_revision < 1: return failure("invalid_snapshot")
+	return {"ok":true}
+static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	if not state.get("player") is Dictionary or not point_valid(state.player.get("position")) or not number(state.player.get("radius")) or state.player.radius > 32: return failure("invalid_snapshot")
+	if not state.get("run_id") is String or state.run_id.is_empty() or not _tick(state.get("seed")): return failure("invalid_snapshot")
+	var command_check := _validate_commands(state,commands)
+	if not command_check.ok: return command_check
+	# Dock queries belong exclusively to its authored finite geometry, never to a
+	# city distance window or hydrated city chunk. Core selects that backend.
+	if state.world.stage == "dock": return {"ok":true,"chunks":[],"stage":"dock","origin_chunk":state.world.origin_chunk.duplicate(),"offset":[0,0]}
+	var origin: Array = state.world.origin_chunk
+	var player := vec(state.player.position)
+	var normalized := Address.normalize(origin,player)
+	if not normalized.ok: return normalized
+	var rectangles: Array[Rect2] = [Rect2(player-Vector2.ONE*VIEW_MARGIN,Vector2.ONE*VIEW_MARGIN*2)]
+	for collection in LIMITS:
+		if not state.get(collection) is Array or state[collection].size() > LIMITS[collection]: return failure("invalid_snapshot")
+		for record in state[collection]:
+			if not record is Dictionary: return failure("invalid_snapshot")
+			var bounds := _record_bounds(record,rectangles)
+			if not bounds.ok: return bounds
+			if collection == "entities":
+				if not point_valid(record.get("position")) or not number(record.get("radius")) or record.radius > 32 or not number(record.get("speed")) or record.speed > 960: return failure("invalid_snapshot")
+				rectangles.append(segment_rect(vec(record.position),player,64))
+			elif collection == "projectiles":
+				if not point_valid(record.get("position")) or not point_valid(record.get("velocity")) or not number(record.get("radius")) or record.radius > 32: return failure("invalid_snapshot")
+				rectangles.append(segment_rect(vec(record.position),vec(record.position)+vec(record.velocity)/60.0,float(record.radius)))
+	for command in commands:
+		if not spatial_command(command): continue
+		var bounds := _record_bounds(command.payload,rectangles)
+		if not bounds.ok: return bounds
+		for field in POSITION_FIELDS:
+			if command.payload.has(field): rectangles.append(segment_rect(player,vec(command.payload[field]),64))
+	var unique := {}
+	for rectangle in rectangles:
+		var added := _add_rect(unique,rectangle,origin,normalized.chunk)
+		if not added.ok: return added
+	for change in state.world.dirty_chunks:
+		var relative := Address.relative(change.chunk,Vector2.ZERO,normalized.chunk)
+		if not relative.ok or relative.local.abs().x > 2304 or relative.local.abs().y > 2304: return failure("delta_stage_required")
+		unique[Address.key(change.chunk)] = change.chunk.duplicate()
+	if unique.size() > 49: return failure("working_set_capacity")
+	var chunks: Array = unique.values()
+	chunks.sort_custom(Address.less)
+	return {"ok":true,"chunks":chunks,"stage":"city","origin_chunk":normalized.chunk,"offset":[normalized.offset.x,normalized.offset.y]}
+func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> Dictionary:
+	if not _valid: return failure("invalid_generator")
+	var needed := requirements(state,commands)
+	if not needed.ok: return needed
+	if needed.stage == "dock":
+		_world = null; _navigation = null; _hydration.clear(); _stage = "dock"
+		_stamp = stamp(state); _query_failure.clear(); _last_status = {"ok":true,"stage":"dock"}
+		return _last_status.duplicate(true)
+	# Always build privately: failed hydration/dirty validation cannot partially
+	# replace an existing run's cache. Call prepare only when coverage is needed.
+	# The exact generator assumes a typed delta slot ID; validate each packet
+	# before crossing that recovered boundary without changing its bytes.
+	for chunk in needed.chunks:
+		var key := Address.key(chunk)
+		if not hydration.has(key): continue # Exact Stream preserves missing-key detail.
+		if not hydration[key] is Array: return failure("invalid_hydration")
+		var checked := Codec.normalize_records([{"chunk":chunk,"props":hydration[key]}])
+		if not checked.ok: return checked
+	var candidate = Stream.new(_generator,int(state.seed))
+	var prepared: Dictionary = candidate.prepare(needed.chunks,[],hydration,state.world.origin_chunk)
+	if not prepared.ok: return prepared
+	if state.world.world_revision > 0:
+		var applied: Dictionary = candidate.apply_props(state.world.dirty_chunks,int(state.world.world_revision))
+		if not applied.ok: return applied
+	if not candidate.walkable(vec(state.player.position),float(state.player.radius)): return failure("blocked")
+	var next_hydration := {}
+	for chunk in needed.chunks:
+		var key := Address.key(chunk)
+		next_hydration[key] = hydration[key].duplicate(true)
+	_world = candidate; _navigation = Navigation.new(_world); _hydration = next_hydration
+	_stamp = stamp(state); _stage = "city"; _query_failure.clear(); _last_status = prepared.duplicate(true)
+	return prepared
+func matches(state: Dictionary) -> bool: return not _stamp.is_empty() and _stamp == stamp(state)
+func readiness(state: Dictionary, commands: Array = []) -> Dictionary:
+	var needed := requirements(state,commands)
+	if not needed.ok: return needed
+	var missing := []
+	for chunk in needed.chunks:
+		if not matches(state) or _world == null or not Address.key(chunk) in _world.chunk_keys(): missing.append(Address.key(chunk))
+	if not matches(state): return {"ok":false,"error_code":"world_not_ready","missing_delta_keys":missing}
+	return {"ok":missing.is_empty(),"error_code":"" if missing.is_empty() else "world_not_ready","missing_delta_keys":missing}
+func begin_query_batch(state: Dictionary, commands: Array = []) -> Dictionary:
+	var ready := readiness(state,commands)
+	if not ready.ok: return ready
+	_query_failure.clear()
+	return {"ok":true}
+func query_status() -> Dictionary:
+	return {"ok":true} if _query_failure.is_empty() else _query_failure.duplicate(true)
+func render_view(state: Dictionary) -> Dictionary:
+	if not matches(state): return {"ok":false,"error_code":"world_not_ready","chunks":[]}
+	if _stage == "dock": return {"ok":true,"stage":"dock","scene_id":"authored_dock","origin_chunk":["0","0"],"origin_revision":state.world.origin_revision,"chunks":[]}
+	var result: Dictionary = _world.render_view()
+	result.ok = true; result.scene_id = "city"; result.origin_revision = state.world.origin_revision
+	return result
+func status() -> Dictionary:
+	var result := _last_status.duplicate(true)
+	if _world != null: result.merge(_world.diagnostics(),true)
+	result.stage = _stage; result.resident_chunks = 0 if _world == null else _world.chunk_keys().size()
+	result.resident_hydration = _hydration.size(); result.query_status = query_status()
+	return result
+func walkable(position: Vector2, radius: float) -> Dictionary:
+	var checked := _query_guard(position,Vector2.ZERO,radius)
+	if not checked.ok: return checked
+	return {"ok":true,"walkable":_world.walkable(position,radius)}
+func move(position: Vector2, delta: Vector2, radius: float) -> Dictionary:
+	var checked := _query_guard(position,delta,radius)
+	if not checked.ok: return checked
+	return {"ok":true,"position":_world.move(position,delta,radius)}
+func sweep(position: Vector2, delta: Vector2, radius: float) -> Dictionary:
+	var checked := _query_guard(position,delta,radius)
+	return checked if not checked.ok else _query_result(_world.sweep(position,delta,radius))
+func cover_query(origin: Vector2, target: Vector2, radius: float, mask: int) -> Dictionary:
+	if mask < 0 or mask > 31: return _query_result(failure("invalid_query"))
+	var checked := _query_guard(origin,target-origin,radius)
+	return checked if not checked.ok else _query_result(_world.cover_sweep(origin,target-origin,radius,mask))
+func direction(position: Vector2, target: Vector2, radius: float, tick: int) -> Dictionary:
+	if tick < 0: return _query_result(failure("invalid_query"))
+	# Full 7x7-admissible rectangle is preflighted; the exact navigation owns
+	# connected route/grid work, never a truncated legacy solids dictionary.
+	var checked := _query_guard(position,target-position,radius)
+	return checked if not checked.ok else _query_result(_navigation.direction(position,target,radius,tick))
+func props_query(rectangle: Rect2) -> Dictionary:
+	if not _rect_finite(rectangle): return _query_result(failure("invalid_query"))
+	if _world == null or not _world.covered(rectangle): return _query_result(failure("world_not_ready"))
+	return {"ok":true,"props":_world.query_props(rectangle)}
+func _query_guard(position: Vector2, delta: Vector2, radius: float) -> Dictionary:
+	if not is_finite(radius) or radius < 0 or radius > 32: return _query_result(failure("unsupported_radius"))
+	if not _vector_valid(position) or not _vector_valid(delta) or delta.length() > MAX_LOCAL: return _query_result(failure("invalid_query"))
+	if _world == null or not _world.covered(segment_rect(position,position+delta,radius)): return _query_result(failure("world_not_ready"))
+	return {"ok":true}
+func _query_result(result: Dictionary) -> Dictionary:
+	if not result.get("ok",false) and _query_failure.is_empty(): _query_failure = result.duplicate(true)
+	return result
+static func rebase_proposal(state: Dictionary, commands: Array = []) -> Dictionary:
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	checked = _validate_commands(state,commands)
+	if not checked.ok: return checked
+	if not state.get("player") is Dictionary or not point_valid(state.player.get("position")): return failure("invalid_snapshot")
+	var candidate := state.duplicate(true)
+	var next_commands := commands.duplicate(true)
+	if state.world.stage == "dock": return {"ok":true,"changed":false,"state":candidate,"commands":next_commands,"offset":[0,0]}
+	var normalized := Address.normalize(state.world.origin_chunk,vec(state.player.position))
+	if not normalized.ok: return normalized
+	var offset: Vector2 = normalized.offset
+	if offset == Vector2.ZERO: return {"ok":true,"changed":false,"state":candidate,"commands":next_commands,"offset":[0,0]}
+	if state.world.origin_revision >= Codec.MAX_JSON_INTEGER: return failure("counter_exhausted")
+	if not _shift_record(candidate.player,["position"],offset): return failure("invalid_snapshot")
+	for collection in LIMITS:
+		if not candidate.get(collection) is Array: return failure("invalid_snapshot")
+		for record in candidate[collection]:
+			if not record is Dictionary or not _shift_record(record,POSITION_FIELDS,offset): return failure("invalid_snapshot")
+			if record.has("geometry") and (not record.geometry is Dictionary or not _shift_record(record.geometry,GEOMETRY_POSITIONS,offset)): return failure("invalid_snapshot")
+	if candidate.has("escape_zone"):
+		if not rect_valid(candidate.escape_zone): return failure("invalid_snapshot")
+		candidate.escape_zone = _shift(candidate.escape_zone,offset)
+	# Evacuation stores an absolute passage chunk only; rectangles/routes are
+	# derived per query and therefore cannot be shifted a second time.
+	candidate.world.origin_chunk = normalized.chunk.duplicate()
+	candidate.world.origin_revision = int(candidate.world.origin_revision)+1
+	for command in next_commands:
+		if not spatial_command(command): continue
+		if not _shift_record(command.payload,POSITION_FIELDS,offset): return failure("invalid_snapshot")
+		if command.payload.has("geometry") and (not command.payload.geometry is Dictionary or not _shift_record(command.payload.geometry,GEOMETRY_POSITIONS,offset)): return failure("invalid_snapshot")
+		if command.payload.has("escape_zone"):
+			if not rect_valid(command.payload.escape_zone): return failure("invalid_snapshot")
+			command.payload.escape_zone = _shift(command.payload.escape_zone,offset)
+		command.origin_revision = candidate.world.origin_revision
+	return {"ok":true,"changed":true,"state":candidate,"commands":next_commands,"offset":[offset.x,offset.y]}
+func structure_candidate_proposal(state: Dictionary, actor: Dictionary, prop_id: String, rules: Dictionary, reservations: Dictionary) -> Dictionary:
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	if state.world.stage != "city" or not matches(state) or _world == null: return failure("world_not_ready")
+	if not _tick(state.get("active_tick")) or not point_valid(actor.get("position")): return failure("invalid_query")
+	for field in ["remaining_strong_slots","in_flight","next_admit_tick"]:
+		if not _tick(reservations.get(field)): return failure("invalid_query")
+	var prop := _find_prop(prop_id)
+	if prop.is_empty(): return failure("world_not_ready")
+	if not actor.get("source_team") is String or not actor.get("structure_capable",false) is bool or not actor.get("cancelled",false) is bool: return failure("source_policy")
+	# Bound integer conversions before exact admission adds clocks.
+	for field in ["structure_admission_interval_ticks","max_structure_attacks","warning_ticks","recovery_ticks","structure_damage","structure_reach"]:
+		if not Codec.integer(rules.get(field)) or rules[field] <= 0 or rules[field] > Codec.MAX_JSON_INTEGER: return failure("invalid_structure_rules")
+	for field in ["structure_admission_interval_ticks","warning_ticks","recovery_ticks"]:
+		if not _tick(rules[field]): return failure("counter_exhausted")
+	var budget := reservations.duplicate(true)
+	budget.next_admit_tick = maxi(int(budget.next_admit_tick),int(state.world.next_structure_strike_tick))
+	var admitted := Interactions.structure_candidate(actor,prop,rules,int(state.active_tick),budget)
+	if not admitted.ok: return admitted
+	if not _tick(admitted.next_admit_tick) or not _tick(admitted.recovery_until): return failure("counter_exhausted")
+	var world: Dictionary = state.world.duplicate(true)
+	world.next_structure_strike_tick = admitted.next_admit_tick
+	return {"ok":true,"world":world,"admission":admitted.duplicate(true)}
+func destruction_proposal(state: Dictionary, attack: Dictionary, contact: Dictionary) -> Dictionary:
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	if state.world.stage != "city" or not matches(state) or _world == null: return failure("world_not_ready")
+	if not attack.get("kind") is String or not attack.get("source_team") is String or not attack.get("cancelled",false) is bool: return failure("source_policy")
+	if not attack.get("target_prop_id") is String or not attack.get("attack_instance_id") is String or attack.attack_instance_id.is_empty() or not attack.get("hit_target_ids") is Array: return failure("invalid_attack")
+	for id in attack.hit_target_ids:
+		if not id is String or id.is_empty(): return failure("invalid_attack")
+	if not _tick(attack.get("active_from_tick")) or not _tick(attack.get("expires_tick")) or attack.expires_tick < attack.active_from_tick: return failure("invalid_attack")
+	if not contact.get("prop_id") is String or not contact.get("reached") is bool: return failure("invalid_contact")
+	if not _tick(contact.get("tick")) or not number(contact.get("fraction")) or contact.fraction > 1 or not Codec.integer(attack.get("structure_damage")) or attack.structure_damage <= 0 or attack.structure_damage > Codec.MAX_JSON_INTEGER: return failure("invalid_contact")
+	var prop := _find_prop(attack.target_prop_id)
+	if prop.is_empty(): return failure("world_not_ready")
+	var resolved := Interactions.resolve_structure_hit(attack,prop,contact)
+	if not resolved.ok: return resolved
+	if state.world.world_revision >= Codec.MAX_JSON_INTEGER: return failure("counter_exhausted")
+	var chunk: Dictionary = _world.localized_chunk(prop.chunk_id)
+	var deltas := []
+	# Persist every modification in this chunk, including previously hydrated
+	# damage, because immutable store records replace rather than patch a chunk.
+	for item in chunk.props:
+		if item.prop_id == prop.prop_id: deltas.append(resolved.delta.duplicate(true))
+		elif item.destructible and (item.destroyed or item.hp != item.max_hp): deltas.append({"slot_id":item.slot_id,"hp":item.hp,"destroyed":item.destroyed})
+	var changes: Array = state.world.dirty_chunks.duplicate(true)
+	var found := false
+	for record in changes:
+		if record.chunk == chunk.chunk: record.props = deltas; found = true; break
+	if not found: changes.append({"chunk":chunk.chunk.duplicate(),"props":deltas})
+	var normalized := Codec.normalize_records(changes)
+	if not normalized.ok: return normalized
+	var world: Dictionary = state.world.duplicate(true)
+	world.world_revision = int(world.world_revision)+1; world.dirty_chunks = normalized.records
+	return {"ok":true,"world":world,"hit_target_id":resolved.hit_target_id,"event":resolved.event.duplicate(true)}
+func passage_proposal(state: Dictionary) -> Dictionary:
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	if state.world.stage != "city" or not matches(state) or _world == null: return failure("world_not_ready")
+	checked = _evacuation_input(state)
+	if not checked.ok: return checked
+	if state.get("phase") != "evacuation" or not _tick(state.get("final_started_tick")) or state.final_started_tick > state.active_tick: return failure("invalid_transition_phase")
+	var route = Evacuation.new(state.world.evacuation)
+	var passage: Dictionary = route.select(_world,state.player,state.world.origin_chunk,int(state.active_tick))
+	if not passage.ok: return passage
+	var world: Dictionary = state.world.duplicate(true)
+	world.evacuation = {"passage_id":passage.passage_id,"chunk":passage.chunk.duplicate(),"selected_tick":passage.selected_tick}
+	return {"ok":true,"world":world,"passage":passage}
+func dock_transition_proposal(state: Dictionary, command: Dictionary, dock_definition: Dictionary) -> Dictionary:
+	if not _dock_valid(dock_definition): return failure("invalid_dock_definition")
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	checked = _evacuation_input(state)
+	if not checked.ok: return checked
+	if not command.get("command_id") is String or command.command_id.is_empty() or not command.get("kind") is String or command.kind != "dock_transition" or not command.get("payload") is Dictionary: return failure("invalid_query")
+	# Exact same completed command remains a no-op even after origin changes.
+	if state.world.stage == "dock": return Evacuation.dock_transition(state,{"command_id":command.command_id},dock_definition)
+	checked = _validate_commands(state,[command])
+	if not checked.ok: return checked
+	var evacuation: Dictionary = state.world.evacuation
+	if evacuation.is_empty() or not command.payload.get("passage_id") is String or command.payload.passage_id != evacuation.passage_id: return failure("wrong_passage")
+	var local := Address.relative(evacuation.chunk,Vector2(336,336),state.world.origin_chunk)
+	if not local.ok: return local
+	if state.world.origin_revision >= Codec.MAX_JSON_INTEGER: return failure("counter_exhausted")
+	for collection in ["entities","projectiles","telegraphs","drops","pending_attacks","pending_evolutions","player_attack_instances","enemy_attack_instances"]:
+		if not state.get(collection,[]) is Array or state.get(collection,[]).size() > LIMITS.get(collection,512): return failure("invalid_snapshot")
+		for item in state.get(collection,[]):
+			if not item is Dictionary: return failure("invalid_snapshot")
+	return Evacuation.dock_transition(state,{"passage_id":evacuation.passage_id,"command_id":command.command_id,"rect":Rect2(local.local,Vector2(96,96))},dock_definition)
+static func escape_status(state: Dictionary, dock_definition: Dictionary) -> Dictionary:
+	if not _dock_valid(dock_definition): return failure("invalid_dock_definition")
+	var checked := validate_world(state)
+	if not checked.ok: return checked
+	checked = _evacuation_input(state)
+	if not checked.ok: return checked
+	return Evacuation.escape_status(state,dock_definition)
+static func receipt_proposal(world: Dictionary, receipt: Dictionary) -> Dictionary:
+	# Exact adapter remains sole receipt authority; no live cache acknowledge.
+	return Checkpoint.accept_receipt(world,receipt)
+func _find_prop(id: String) -> Dictionary:
+	for chunk in _world.render_view().chunks:
+		for prop in chunk.props:
+			if prop.prop_id == id: return prop
+	return {}
+static func _record_bounds(record: Dictionary, rectangles: Array[Rect2]) -> Dictionary:
+	var radius := 32.0
+	for field in ["radius","length","range","width","splash_radius"]:
+		if record.has(field):
+			if not number(record[field]) or record[field] > MAX_LOCAL: return failure("invalid_snapshot")
+			radius = maxf(radius,float(record[field]))
+	for field in POSITION_FIELDS:
+		if record.has(field):
+			if not point_valid(record[field]): return failure("invalid_snapshot")
+			rectangles.append(segment_rect(vec(record[field]),vec(record[field]),radius))
+	if record.has("geometry"):
+		if not record.geometry is Dictionary: return failure("invalid_snapshot")
+		var geometry: Dictionary = record.geometry
+		var geometry_radius := radius
+		for field in ["radius","length","range","width"]:
+			if geometry.has(field):
+				if not number(geometry[field]) or geometry[field] > MAX_LOCAL: return failure("invalid_snapshot")
+				geometry_radius = maxf(geometry_radius,float(geometry[field]))
+		for field in GEOMETRY_POSITIONS:
+			if geometry.has(field):
+				if not point_valid(geometry[field]): return failure("invalid_snapshot")
+				rectangles.append(segment_rect(vec(geometry[field]),vec(geometry[field]),geometry_radius))
+	return {"ok":true}
+static func _add_rect(unique: Dictionary, rectangle: Rect2, origin: Array, target_origin: Array) -> Dictionary:
+	if not _rect_finite(rectangle): return failure("invalid_query")
+	var low := rectangle.position/768.0
+	var high := (rectangle.end-Vector2(0.0001 if rectangle.size.x > 0 else 0,0.0001 if rectangle.size.y > 0 else 0))/768.0
+	if high.x-low.x > 7 or high.y-low.y > 7: return failure("outside_working_set")
+	for y in range(int(floor(low.y)),int(floor(high.y))+1):
+		for x in range(int(floor(low.x)),int(floor(high.x))+1):
+			var absolute := Address.normalize(origin,Vector2(x*768,y*768))
+			if not absolute.ok: return absolute
+			var relative := Address.relative(absolute.chunk,Vector2.ZERO,target_origin)
+			if not relative.ok or relative.local.abs().x > 2304 or relative.local.abs().y > 2304: return failure("outside_working_set")
+			unique[Address.key(absolute.chunk)] = absolute.chunk
+			if unique.size() > 49: return failure("working_set_capacity")
+	return {"ok":true}
+static func _validate_commands(state: Dictionary, commands: Array) -> Dictionary:
+	if commands.size() > 512: return failure("working_set_capacity")
+	for command in commands:
+		if not command is Dictionary or not command.get("kind") is String: return failure("invalid_query")
+		if not spatial_command(command): continue
+		if not command.get("payload") is Dictionary: return failure("invalid_query")
+		if not Codec.integer(command.get("origin_revision")) or command.origin_revision != state.world.origin_revision: return failure("stale_origin_revision")
+	return {"ok":true}
+static func spatial_command(command: Dictionary) -> bool:
+	return command.get("kind") is String and command.kind in ["spawn_enemy","spawn_boss","telegraph_attack","begin_evacuation","dock_transition"]
+static func stamp(state: Dictionary) -> String:
+	return str(state.get("run_id",""))+":"+str(state.get("seed",-1))+":"+JSON.stringify(state.get("world",{}),"",true,true)
+static func _shift_record(record: Dictionary, fields: Array, offset: Vector2) -> bool:
+	for field in fields:
+		if record.has(field):
+			if not point_valid(record[field]): return false
+			var shifted := _shift(record[field],offset)
+			if not point_valid(shifted): return false
+			record[field] = shifted
+	return true
+static func _shift(value: Array, offset: Vector2) -> Array:
+	var result := value.duplicate()
+	result[0] = float(value[0])-offset.x; result[1] = float(value[1])-offset.y
+	return result
+static func _definitions_shape(definitions: Dictionary) -> bool:
+	for field in ["templates","props","asset_manifest"]:
+		if not definitions.get(field) is Dictionary: return false
+	if not definitions.templates.get("templates") is Array or not definitions.props.get("definitions") is Dictionary or not definitions.props.get("mask_bits") is Dictionary or not definitions.asset_manifest.get("assets") is Dictionary: return false
+	for field in ["generator_revision","template_revision"]:
+		if not definitions.templates.get(field) is String: return false
+	for field in ["chunk_size","navigation_cell"]:
+		if not number(definitions.templates.get(field)): return false
+	if not point_valid(definitions.templates.get("street_interval")) or not rect_valid(definitions.templates.get("passage_rect")): return false
+	for field in ["player","grounded_titan","physical_attack","straight_projectile","overhead"]:
+		if not number(definitions.props.mask_bits.get(field)): return false
+	for template in definitions.templates.templates:
+		if not template is Dictionary or not template.get("template_id") is String or not template.get("slots") is Array: return false
+		for slot in template.slots:
+			if not slot is Dictionary or not slot.get("slot_id") is String or not slot.get("definition_id") is String or not point_valid(slot.get("position")) or not number(slot.get("rotation_degrees",0)): return false
+	for id in definitions.props.definitions:
+		if not id is String: return false
+		var definition = definitions.props.definitions[id]
+		if not definition is Dictionary: return false
+		for field in ["asset_id","ruin_asset_id"]:
+			if not definition.get(field) is String: return false
+		for field in ["ground_footprint","render_bounds","ruin_footprint","ruin_render_bounds"]:
+			if not rect_valid(definition.get(field)): return false
+		if not point_valid(definition.get("anchor_px")) or not number(definition.get("depth_origin"),-MAX_LOCAL) or not definition.get("destructible") is bool: return false
+		if not Codec.integer(definition.get("structure_hp")) or definition.structure_hp > Codec.MAX_JSON_INTEGER: return false
+		if not number(definition.get("rotation_degrees",0)) or not number(definition.get("contact_damage",0)): return false
+		var art = definitions.asset_manifest.assets.get(definition.asset_id)
+		if art is Dictionary:
+			if not point_valid(art.get("anchor_px")) or not number(art.get("cell_w")) or not number(art.get("cell_h")): return false
+		for field in ["collision_mask","cover_mask"]:
+			if not Codec.integer(definition.get(field)) or definition[field] > 31: return false
+	for asset in definitions.asset_manifest.assets.values():
+		if not asset is Dictionary: return false
+		if asset.has("anchor_px") and not point_valid(asset.anchor_px): return false
+	return true
+static func _same_json(left: Variant, right: Variant) -> bool:
+	if left is Dictionary and right is Dictionary:
+		if left.size() != right.size(): return false
+		for key in left:
+			if not right.has(key) or not _same_json(left[key],right[key]): return false
+		return true
+	if left is Array and right is Array:
+		if left.size() != right.size(): return false
+		for index in left.size():
+			if not _same_json(left[index],right[index]): return false
+		return true
+	if (left is int or left is float) and (right is int or right is float): return left == right
+	return typeof(left) == typeof(right) and left == right
+static func _evacuation_input(state: Dictionary) -> Dictionary:
+	# World validation intentionally is not full RunState validation. These are
+	# only the values the exact pure evacuation module reads unsafely.
+	if not state.get("phase") is String or not _tick(state.get("active_tick")): return failure("invalid_snapshot")
+	var final_tick = state.get("final_started_tick")
+	if not _tick(final_tick) and not (number(final_tick,-1) and final_tick == -1): return failure("invalid_snapshot")
+	if not state.get("player") is Dictionary: return failure("invalid_snapshot")
+	var player: Dictionary = state.player
+	if not point_valid(player.get("position")) or not number(player.get("radius")) or player.radius > 32 or not number(player.get("hp"),-INF): return failure("invalid_snapshot")
+	return {"ok":true}
+static func _dock_escape_rect(value: Variant) -> bool:
+	return rect_valid(value) and float(value[0]) == -56.0 and float(value[1]) == 320.0 and float(value[2]) == 112.0 and float(value[3]) == 80.0
+static func _dock_valid(definition: Dictionary) -> bool:
+	return definition.get("scene_id") is String and definition.scene_id == "authored_dock" and point_valid(definition.get("entry_position")) and vec(definition.entry_position) == Vector2.ZERO and _dock_escape_rect(definition.get("escape_rect")) and definition.get("geometry") is Dictionary and not definition.geometry.is_empty() and FiniteGeometry.valid(definition.geometry)
+static func point_valid(value: Variant) -> bool:
+	return value is Array and value.size() == 2 and number(value[0],-MAX_LOCAL) and number(value[1],-MAX_LOCAL) and absf(float(value[0])) <= MAX_LOCAL and absf(float(value[1])) <= MAX_LOCAL
+static func rect_valid(value: Variant) -> bool:
+	return value is Array and value.size() == 4 and point_valid([value[0],value[1]]) and number(value[2]) and number(value[3]) and value[2] <= MAX_LOCAL and value[3] <= MAX_LOCAL
+static func number(value: Variant, minimum: float = 0.0) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value) >= minimum
+static func _tick(value: Variant) -> bool: return Codec.integer(value) and value <= 2147483647
+static func _vector_valid(value: Vector2) -> bool:
+	return is_finite(value.x) and is_finite(value.y) and value.abs().x <= MAX_LOCAL and value.abs().y <= MAX_LOCAL
+static func _rect_finite(value: Rect2) -> bool:
+	return _vector_valid(value.position) and _vector_valid(value.end) and value.size.x >= 0 and value.size.y >= 0
+static func vec(value: Array) -> Vector2: return Vector2(float(value[0]),float(value[1]))
+static func segment_rect(a: Vector2, b: Vector2, radius: float) -> Rect2:
+	return Rect2(a.min(b)-Vector2.ONE*radius,(b-a).abs()+Vector2.ONE*radius*2)
+static func failure(code: String) -> Dictionary: return {"ok":false,"error_code":code}

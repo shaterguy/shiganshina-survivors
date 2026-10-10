@@ -1,0 +1,13 @@
+extends SceneTree
+var checks := 0
+var failures := 0
+func check(ok: bool, label: String) -> void:
+	checks += 1
+	if not ok:
+		failures += 1
+		print("FAIL: "+label)
+func _initialize() -> void:
+	for path in ["res://tests/economy/test_supply_catalog.gd","res://tests/economy/test_supply_hostile_types.gd","res://tests/economy/test_supply_service.gd"]:
+		load(path).new().run(self)
+	print("RESULT checks=%d failures=%d" % [checks,failures])
+	quit(0 if failures == 0 and checks > 0 else 1)

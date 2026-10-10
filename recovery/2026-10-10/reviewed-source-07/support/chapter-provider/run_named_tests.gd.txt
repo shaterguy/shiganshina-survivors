@@ -1,0 +1,16 @@
+extends SceneTree
+var checks := 0
+var failures := 0
+func check(value: bool, label: String) -> void:
+	checks += 1
+	if not value:
+		failures += 1
+		push_error("FAIL: "+label)
+func _initialize() -> void: call_deferred("run")
+func run() -> void:
+	for path in OS.get_cmdline_user_args():
+		var script = load(path)
+		check(script != null and script.can_instantiate(), "test loads: "+path)
+		if script != null and script.can_instantiate(): await script.new().run(self)
+	print("RESULT checks=%d failures=%d" % [checks,failures])
+	quit(0 if checks > 0 and failures == 0 else 1)

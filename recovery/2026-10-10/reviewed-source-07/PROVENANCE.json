@@ -1,0 +1,2406 @@
+{
+  "application_activated": false,
+  "archive_policy": "Deterministic USTAR, sorted regular UTF-8 text files, mode 0644, zero uid/gid/mtime, empty owner names.",
+  "chapter": "시간시나구 탈출",
+  "classification": "NEW_DERIVED_PRODUCT_PRESERVATION_PROVENANCE",
+  "content_revision": "ch01.3-rebuild.1",
+  "dependency_mapping": [
+    {
+      "bytes": 75408,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+        "path": "assets/manifest.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "assets/manifest.json",
+      "sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24"
+    },
+    {
+      "bytes": 9605,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+    },
+    {
+      "bytes": 2192,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+        "path": "recovery/2026-10-10/integration-source-06/source/chapters/chapter_01/manifest.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/manifest.json",
+      "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+    },
+    {
+      "bytes": 2560,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+        "path": "chapters/chapter_01/map.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/map.json",
+      "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+    },
+    {
+      "bytes": 1636,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+        "path": "recovery/2026-10-10/integration-source-06/source/data/doctrines.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/doctrines.json",
+      "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+    },
+    {
+      "bytes": 2058,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+        "path": "data/enemies.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemies.json",
+      "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+    },
+    {
+      "bytes": 3818,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "source-02-20261010.tar",
+        "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+        "path": "recovery/2026-10-10/source-02/enemy-original-hash-exact/data/enemy_roles_ch01_3.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemy_roles_ch01_3.json",
+      "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+    },
+    {
+      "bytes": 2382,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+        "path": "data/equipment.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+    },
+    {
+      "bytes": 1943,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "path": "recovery/2026-10-10/growth-source-05/source/data/evolutions.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/evolutions.json",
+      "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+    },
+    {
+      "bytes": 1588,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+        "path": "data/passives.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+    },
+    {
+      "bytes": 1644,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+        "path": "recovery/2026-10-10/integration-source-06/source/data/supply_shop.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/supply_shop.json",
+      "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+    },
+    {
+      "bytes": 5737,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+        "path": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/world_props.json",
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+    },
+    {
+      "bytes": 2845,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/app/world_checkpoint_adapter.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/app/world_checkpoint_adapter.gd",
+      "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+    },
+    {
+      "bytes": 9073,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+        "path": "game/combat/world_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/world_geometry.gd",
+      "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+    },
+    {
+      "bytes": 37027,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "44ae88be26d07786a08ad0d84585319e852080f1",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/source/streamed-boundary/game/core/streamed_run_world.gd.txt",
+        "sha256": "6e7c5a1941426230019b78f6acc07ca0cb10748bf70790f0ad731943b3e17f93"
+      },
+      "restore_target": "game/core/streamed_run_world.gd",
+      "sha256": "6e7c5a1941426230019b78f6acc07ca0cb10748bf70790f0ad731943b3e17f93"
+    },
+    {
+      "bytes": 7372,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/director/chapter_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/director/chapter_catalog.gd",
+      "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+    },
+    {
+      "bytes": 5173,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_generator.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/city_generator.gd",
+      "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+    },
+    {
+      "bytes": 8390,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_navigation.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/city_navigation.gd",
+      "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+    },
+    {
+      "bytes": 6309,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/evacuation_route.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/evacuation_route.gd",
+      "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+    },
+    {
+      "bytes": 12731,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/streamed_world.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/streamed_world.gd",
+      "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+    },
+    {
+      "bytes": 3564,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_address.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_address.gd",
+      "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+    },
+    {
+      "bytes": 5961,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_codec.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_delta_codec.gd",
+      "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+    },
+    {
+      "bytes": 3713,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_interactions.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_interactions.gd",
+      "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+    },
+    {
+      "bytes": 3773,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_prop_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_prop_catalog.gd",
+      "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+    },
+    {
+      "bytes": 188,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "bc9e148c2adc8499c1536f3cb1a174b022c53e8f",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/project.godot.txt",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      "restore_target": "project.godot",
+      "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+    },
+    {
+      "bytes": 569,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "45137c487c536915f6716f4c93809f8ada926175",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/run_named_tests.gd.txt",
+        "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+      },
+      "restore_target": "run_named_tests.gd",
+      "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+    },
+    {
+      "bytes": 1505,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+        "path": "tests/run_all.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    },
+    {
+      "bytes": 9605,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+    },
+    {
+      "bytes": 2192,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+        "path": "recovery/2026-10-10/integration-source-06/source/chapters/chapter_01/manifest.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/manifest.json",
+      "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+    },
+    {
+      "bytes": 2560,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+        "path": "chapters/chapter_01/map.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/map.json",
+      "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+    },
+    {
+      "bytes": 1636,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+        "path": "recovery/2026-10-10/integration-source-06/source/data/doctrines.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/doctrines.json",
+      "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+    },
+    {
+      "bytes": 2058,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+        "path": "data/enemies.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemies.json",
+      "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+    },
+    {
+      "bytes": 3818,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "source-02-20261010.tar",
+        "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+        "path": "recovery/2026-10-10/source-02/enemy-original-hash-exact/data/enemy_roles_ch01_3.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemy_roles_ch01_3.json",
+      "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+    },
+    {
+      "bytes": 2382,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+        "path": "data/equipment.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+    },
+    {
+      "bytes": 1943,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "path": "recovery/2026-10-10/growth-source-05/source/data/evolutions.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/evolutions.json",
+      "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+    },
+    {
+      "bytes": 1588,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+        "path": "data/passives.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+    },
+    {
+      "bytes": 1644,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+        "path": "recovery/2026-10-10/integration-source-06/source/data/supply_shop.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/supply_shop.json",
+      "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+    },
+    {
+      "bytes": 5737,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+        "path": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/world_props.json",
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+    },
+    {
+      "bytes": 1357,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+        "path": "game/combat/attack_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/attack_geometry.gd",
+      "sha256": "f4f3dac3540401fdb4ffb16990183fa347c0ee021c874a26c5fbe0801dc0fc24"
+    },
+    {
+      "bytes": 2628,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+        "path": "game/combat/enemy_behaviors.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/enemy_behaviors.gd",
+      "sha256": "0e41c80ffa01bc65319058c557d51c66fde1bed8b19221f9914a7ebe989eac7b"
+    },
+    {
+      "bytes": 1006,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+        "path": "game/combat/spatial_hash.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/spatial_hash.gd",
+      "sha256": "a2b5989c4ec18bc79d0143894f5deaeb0abcb55ffb7f076adc015a443b7ee2f7"
+    },
+    {
+      "bytes": 9073,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+        "path": "game/combat/world_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/world_geometry.gd",
+      "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+    },
+    {
+      "bytes": 7372,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/director/chapter_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/director/chapter_catalog.gd",
+      "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+    },
+    {
+      "bytes": 5790,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "2fb491f8e44124391943ddec01d54882c94c6135",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "2fb491f8e44124391943ddec01d54882c94c6135",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/economy/supply_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/economy/supply_catalog.gd",
+      "sha256": "890044e78e6b3bda635529841a588f23500468a335f4ea8d57265401a8d3c868"
+    },
+    {
+      "bytes": 9177,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/evolution_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/evolution_catalog.gd",
+      "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+    },
+    {
+      "bytes": 4967,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/growth_offer_service.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/growth_offer_service.gd",
+      "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+    },
+    {
+      "bytes": 15321,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/upgrade_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/upgrade_catalog.gd",
+      "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+    },
+    {
+      "bytes": 188,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "bc9e148c2adc8499c1536f3cb1a174b022c53e8f",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/project.godot.txt",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      "restore_target": "project.godot",
+      "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+    },
+    {
+      "bytes": 980,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "ffe2798f9d4f66d726e425c6001cf7f0fdcb3716",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/finite-core-c3/run_focused.gd.txt",
+        "sha256": "ccc496d9ae18df314548ea2e80918d8e1c656422b20ae1b14acfb58025ff6c80"
+      },
+      "restore_target": "run_focused.gd",
+      "sha256": "ccc496d9ae18df314548ea2e80918d8e1c656422b20ae1b14acfb58025ff6c80"
+    },
+    {
+      "bytes": 1505,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+        "path": "tests/run_all.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    },
+    {
+      "bytes": 9605,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+    },
+    {
+      "bytes": 2192,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+        "path": "recovery/2026-10-10/integration-source-06/source/chapters/chapter_01/manifest.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/manifest.json",
+      "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+    },
+    {
+      "bytes": 2560,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+        "path": "chapters/chapter_01/map.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/map.json",
+      "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+    },
+    {
+      "bytes": 2058,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+        "path": "data/enemies.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemies.json",
+      "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+    },
+    {
+      "bytes": 3818,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "source-02-20261010.tar",
+        "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+        "path": "recovery/2026-10-10/source-02/enemy-original-hash-exact/data/enemy_roles_ch01_3.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/enemy_roles_ch01_3.json",
+      "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+    },
+    {
+      "bytes": 2382,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+        "path": "data/equipment.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+    },
+    {
+      "bytes": 1943,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "path": "recovery/2026-10-10/growth-source-05/source/data/evolutions.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/evolutions.json",
+      "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+    },
+    {
+      "bytes": 1588,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+        "path": "data/passives.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+    },
+    {
+      "bytes": 5737,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+        "path": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/world_props.json",
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+    },
+    {
+      "bytes": 2845,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/app/world_checkpoint_adapter.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/app/world_checkpoint_adapter.gd",
+      "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+    },
+    {
+      "bytes": 1357,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+        "path": "game/combat/attack_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/attack_geometry.gd",
+      "sha256": "f4f3dac3540401fdb4ffb16990183fa347c0ee021c874a26c5fbe0801dc0fc24"
+    },
+    {
+      "bytes": 2628,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+        "path": "game/combat/enemy_behaviors.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/enemy_behaviors.gd",
+      "sha256": "0e41c80ffa01bc65319058c557d51c66fde1bed8b19221f9914a7ebe989eac7b"
+    },
+    {
+      "bytes": 8655,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "20d37fd868ca163c305833ad7b7734fb85580f52",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "20d37fd868ca163c305833ad7b7734fb85580f52",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/combat/evolved_attack_resolver.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/evolved_attack_resolver.gd",
+      "sha256": "434285a47841660e87c84f7730ef81588640d7fe1b4908110bd657cb147bff1a"
+    },
+    {
+      "bytes": 1006,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+        "path": "game/combat/spatial_hash.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/spatial_hash.gd",
+      "sha256": "a2b5989c4ec18bc79d0143894f5deaeb0abcb55ffb7f076adc015a443b7ee2f7"
+    },
+    {
+      "bytes": 9073,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+        "path": "game/combat/world_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/world_geometry.gd",
+      "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+    },
+    {
+      "bytes": 4095,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "1735750860e3940132ab31ee7be255b9f0f5098f",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "1735750860e3940132ab31ee7be255b9f0f5098f",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/contracts/game_contracts.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/contracts/game_contracts.gd",
+      "sha256": "119c263ba748071b57958281a3ef7e9ee2807ff1e1ad44a7c78505212c1a11e2"
+    },
+    {
+      "bytes": 69054,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f4cb067a65a775baec3e265a15715b6c95511182",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f4cb067a65a775baec3e265a15715b6c95511182",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/core/run_simulation.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/core/run_simulation.gd",
+      "sha256": "d2deda44bcb0d065720884a722aeec2eea282d9c6798868fc8f4454b309be0f6"
+    },
+    {
+      "bytes": 7372,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+        "path": "recovery/2026-10-10/integration-source-06/source/game/director/chapter_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/director/chapter_catalog.gd",
+      "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+    },
+    {
+      "bytes": 5004,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "ab4f8fa07a4bcb7804e6d179f59c01c2843b35e2",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "ab4f8fa07a4bcb7804e6d179f59c01c2843b35e2",
+        "path": "game/persistence/save_store.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/persistence/save_store.gd",
+      "sha256": "0934d79697d2e4b36b1350f5e5b1220d1ce6a551b7fd93838141bc6302bc3d20"
+    },
+    {
+      "bytes": 14905,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/persistence/world_delta_store.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/persistence/world_delta_store.gd",
+      "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+    },
+    {
+      "bytes": 9177,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/evolution_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/evolution_catalog.gd",
+      "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+    },
+    {
+      "bytes": 4967,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/growth_offer_service.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/growth_offer_service.gd",
+      "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+    },
+    {
+      "bytes": 15321,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+        "path": "recovery/2026-10-10/growth-source-05/source/game/progression/upgrade_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/progression/upgrade_catalog.gd",
+      "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+    },
+    {
+      "bytes": 3564,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_address.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_address.gd",
+      "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+    },
+    {
+      "bytes": 5961,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_codec.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_delta_codec.gd",
+      "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+    },
+    {
+      "bytes": 7727,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_index.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_delta_index.gd",
+      "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+    },
+    {
+      "bytes": 188,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "bc9e148c2adc8499c1536f3cb1a174b022c53e8f",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/project.godot.txt",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      "restore_target": "project.godot",
+      "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+    },
+    {
+      "bytes": 485,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "85e477e8b3c645caea8c1f3f5e13e2ecf9e7ff13",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_contract_gate.gd.txt",
+        "sha256": "fcde6eb8f14becd96b02269aec2550cd5b1e57b433d9ce591e3e5010b7fe64cc"
+      },
+      "restore_target": "run_contract_gate.gd",
+      "sha256": "fcde6eb8f14becd96b02269aec2550cd5b1e57b433d9ce591e3e5010b7fe64cc"
+    },
+    {
+      "bytes": 483,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "9acaf543208c301312bb31d7a3be3c08d2e8d1d0",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_economy_gate.gd.txt",
+        "sha256": "f4247e0a761382d3360e5c90c29741253e7616e1c05c68251e82aa52da8d8fdb"
+      },
+      "restore_target": "run_economy_gate.gd",
+      "sha256": "f4247e0a761382d3360e5c90c29741253e7616e1c05c68251e82aa52da8d8fdb"
+    },
+    {
+      "bytes": 481,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "7ac82da8abd5a3709be78be46eb8e210cfe485e3",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_location_gate.gd.txt",
+        "sha256": "c85a533d76758b6cdcfc92022daaab8a73407fd7dd01e86a2e5c06915ed790df"
+      },
+      "restore_target": "run_location_gate.gd",
+      "sha256": "c85a533d76758b6cdcfc92022daaab8a73407fd7dd01e86a2e5c06915ed790df"
+    },
+    {
+      "bytes": 475,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "914b19b781326331f872b43cec5549c57db24b43",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_migration_gate.gd.txt",
+        "sha256": "56bdbd8fc494bb856cf1011e932a559c08e73045357afb86bd515817084d6e8a"
+      },
+      "restore_target": "run_migration_gate.gd",
+      "sha256": "56bdbd8fc494bb856cf1011e932a559c08e73045357afb86bd515817084d6e8a"
+    },
+    {
+      "bytes": 493,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "6fa3f0a44ef127f66c46eede58072bb4f96d2a78",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_recovery_gate.gd.txt",
+        "sha256": "01125e2ada191cc432a41c16e4cb3e06bec216c7abab18727cd5873a3a32d835"
+      },
+      "restore_target": "run_recovery_gate.gd",
+      "sha256": "01125e2ada191cc432a41c16e4cb3e06bec216c7abab18727cd5873a3a32d835"
+    },
+    {
+      "bytes": 479,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "cc53c3c70f81e3c4ede424a5d995bb906a1fbf19",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_store_gate.gd.txt",
+        "sha256": "dcc5d2253841a8d25cae7574f7bd1b59f7575b8781b1e8c96a669cd7c8a595ac"
+      },
+      "restore_target": "run_store_gate.gd",
+      "sha256": "dcc5d2253841a8d25cae7574f7bd1b59f7575b8781b1e8c96a669cd7c8a595ac"
+    },
+    {
+      "bytes": 5681,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "b27479750a5f96aa49a1aba8c27fa0194d4a894a",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/tests/economy/test_supply_catalog.gd.txt",
+        "sha256": "b792503347e0965d6c5de7929ff35de31a4c243c2f32857e66ce737bbb91b01d"
+      },
+      "restore_target": "tests/economy/test_supply_catalog.gd",
+      "sha256": "b792503347e0965d6c5de7929ff35de31a4c243c2f32857e66ce737bbb91b01d"
+    },
+    {
+      "bytes": 9674,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "981020c2f8c119ffba8685652814d402a85df850",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/tests/economy/test_supply_hostile_types.gd.txt",
+        "sha256": "9b18b75028659a2e14ec19a743462051d7b79c887056c6b9868136782b1a5bb4"
+      },
+      "restore_target": "tests/economy/test_supply_hostile_types.gd",
+      "sha256": "9b18b75028659a2e14ec19a743462051d7b79c887056c6b9868136782b1a5bb4"
+    },
+    {
+      "bytes": 13057,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/attack_events.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/attack_events.json",
+      "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+    },
+    {
+      "bytes": 1358,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/content_identity_basis.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/content_identity_basis.json",
+      "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+    },
+    {
+      "bytes": 7276,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/game_save_v2.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/game_save_v2.json",
+      "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+    },
+    {
+      "bytes": 5248,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_source_offers.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_source_offers.json",
+      "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+    },
+    {
+      "bytes": 24852,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_views.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_views.json",
+      "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+    },
+    {
+      "bytes": 5045,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/run_v2.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/run_v2.json",
+      "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+    },
+    {
+      "bytes": 22192,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/supply_views.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/supply_views.json",
+      "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+    },
+    {
+      "bytes": 2375,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+        "path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply_fixture.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/fixtures/evolution_supply_fixture.gd",
+      "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+    },
+    {
+      "bytes": 1505,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+        "path": "tests/run_all.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    },
+    {
+      "bytes": 5981,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "a95136801fb3579f3578237d5a91874deabca09f",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "source-02-20261010.tar",
+        "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "a95136801fb3579f3578237d5a91874deabca09f",
+        "path": "recovery/2026-10-10/source-02/world-storage-transcript/tests/world/test_world_delta_store.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/world/test_world_delta_store.gd",
+      "sha256": "4388ba960b6a4b29178677cd4d26c01182be1e50eaa0bb1bcf4f16a6371fe8af"
+    },
+    {
+      "bytes": 75408,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+        "path": "assets/manifest.json",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "assets/manifest.json",
+      "sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24"
+    },
+    {
+      "bytes": 9605,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+    },
+    {
+      "bytes": 5737,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+        "path": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "data/world_props.json",
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+    },
+    {
+      "bytes": 2845,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/app/world_checkpoint_adapter.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/app/world_checkpoint_adapter.gd",
+      "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+    },
+    {
+      "bytes": 9073,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+        "path": "game/combat/world_geometry.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/combat/world_geometry.gd",
+      "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+    },
+    {
+      "bytes": 14905,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/persistence/world_delta_store.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/persistence/world_delta_store.gd",
+      "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+    },
+    {
+      "bytes": 5173,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_generator.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/city_generator.gd",
+      "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+    },
+    {
+      "bytes": 8390,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_navigation.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/city_navigation.gd",
+      "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+    },
+    {
+      "bytes": 6309,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/evacuation_route.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/evacuation_route.gd",
+      "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+    },
+    {
+      "bytes": 12731,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/streamed_world.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/streamed_world.gd",
+      "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+    },
+    {
+      "bytes": 3564,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_address.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_address.gd",
+      "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+    },
+    {
+      "bytes": 5961,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_codec.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_delta_codec.gd",
+      "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+    },
+    {
+      "bytes": 7727,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+        "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_index.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_delta_index.gd",
+      "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+    },
+    {
+      "bytes": 3713,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_interactions.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_interactions.gd",
+      "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+    },
+    {
+      "bytes": 3773,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+        "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_prop_catalog.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "game/world/world_prop_catalog.gd",
+      "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+    },
+    {
+      "bytes": 188,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "bc9e148c2adc8499c1536f3cb1a174b022c53e8f",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/project.godot.txt",
+        "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+      },
+      "restore_target": "project.godot",
+      "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a"
+    },
+    {
+      "bytes": 459,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "92d60fd3023b743e55edbe08699da9b100e96aa5",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/streamed-boundary/run_boundary.gd.txt",
+        "sha256": "5e45f28ec388b54bd5aaa8edccfee35342c9d6a9172657248f5b331880179ad6"
+      },
+      "restore_target": "run_boundary.gd",
+      "sha256": "5e45f28ec388b54bd5aaa8edccfee35342c9d6a9172657248f5b331880179ad6"
+    },
+    {
+      "bytes": 569,
+      "classification": "EXACT_REFERENCE_TO_THIS_CHECKPOINT_MEMBER",
+      "git_blob_sha": "45137c487c536915f6716f4c93809f8ada926175",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/run_named_tests.gd.txt",
+        "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+      },
+      "restore_target": "run_named_tests.gd",
+      "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565"
+    },
+    {
+      "bytes": 1623,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "81c769f5744a1a91091c5cbe070decf566af8458",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "81c769f5744a1a91091c5cbe070decf566af8458",
+        "path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/new_streamed_helper_fixture.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/core_world/new_streamed_helper_fixture.gd",
+      "sha256": "f2e030618f0149637b2729b515ff5b0e4bdabfa0e8d8c997d272de2fe12e54a5"
+    },
+    {
+      "bytes": 14312,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "85973cb8d9d2b4fafb746e1442cadde1980448ab",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "85973cb8d9d2b4fafb746e1442cadde1980448ab",
+        "path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/test_new_streamed_helper.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/core_world/test_new_streamed_helper.gd",
+      "sha256": "20e8f73d2e4301db5fff2288921429365b6841d40c4feebd9ba9e22a77df3324"
+    },
+    {
+      "bytes": 11272,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "83051f1bf6bb5d2e1455b51d2995026249267310",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "archive_name": "integration-source-06-20261010.tar",
+        "archive_sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a",
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "83051f1bf6bb5d2e1455b51d2995026249267310",
+        "path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/test_new_streamed_helper_boundaries.gd.txt",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/core_world/test_new_streamed_helper_boundaries.gd",
+      "sha256": "8a7262723d30b6dd6499b9391905ed523eb05c6e4f57c2840a25f2898a2b5a81"
+    },
+    {
+      "bytes": 1505,
+      "classification": "EXACT_INHERITED_BYTE_REFERENCE_WITH_ORIGINAL_PROVENANCE_RETAINED",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "reference": {
+        "commit": "b8014d7c9bc9e8d16964a1974d30184ee428c3cf",
+        "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+        "path": "tests/run_all.gd",
+        "tree": "bc24f94b65ce21d58a72ff5c748c95f7f8413037"
+      },
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    }
+  ],
+  "derived_documents": [
+    "README.md",
+    "PROVENANCE.json",
+    "TEST-RESULTS.json"
+  ],
+  "evidence_derivation": "Reports are represented by newly written bounded findings, status, exact evidence hashes and limits. Original reports and raw execution logs are not copied into this product archive.",
+  "inherited_provenance": "Prior checkpoints remain byte-for-byte unchanged. Historical exact recovery, reassembled candidates, NEW implementations and derived documents retain their existing provenance. A dependency reference states byte identity to that artifact only; it never promotes reassembled or NEW work to recovered original source.",
+  "isolated_groups": {
+    "chapter-provider": "Three author-tested NEW inactive provider/dock/test snapshots; no independent approval.",
+    "finite-core-c3": "Exact reviewed tranche13, ten requested source/test snapshots.",
+    "persistence-gate3": "Exact gate3 manifest, thirteen requested source/test/data snapshots.",
+    "streamed-boundary": "Exact reviewed NEW helper and boundary test, two requested snapshots."
+  },
+  "primary_source_snapshots": 28,
+  "prior_archives": [
+    {
+      "bytes": 307200,
+      "name": "shiganshina-recovered-exact-source-01-20261010.tar",
+      "sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7"
+    },
+    {
+      "bytes": 184320,
+      "name": "source-02-20261010.tar",
+      "sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c"
+    },
+    {
+      "bytes": 235520,
+      "name": "ui-source-03-20261010.tar",
+      "sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115"
+    },
+    {
+      "bytes": 245760,
+      "name": "new-source-04-20261010.tar",
+      "sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f"
+    },
+    {
+      "bytes": 133120,
+      "name": "growth-source-05-20261010.tar",
+      "sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8"
+    },
+    {
+      "bytes": 532480,
+      "name": "integration-source-06-20261010.tar",
+      "sha256": "f10460951f14cfa0aab29f66abf9a403868ec8313c8dc681fe45452e0a37af2a"
+    }
+  ],
+  "product": "진격의 거인: 인류의 날개",
+  "publication_state": "LOCAL_PREPARATION_ONLY",
+  "purpose": "Inert recovery checkpoint of four separate bounded work units, not a merged runnable application.",
+  "restore_rule": "Use a separate empty workspace for each group. Restore every source_mapping and dependency_mapping entry for that group at restore_target; remove only the final inert .txt suffix. Resolve references to this checkpoint or the exact inherited Git blob/archived member and verify SHA-256. Never overlay all groups into one application.",
+  "source_bytes_modified": false,
+  "source_mapping": [
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/chapter-provider/chapters/chapter_01/authored_dock.json.txt",
+      "bytes": 804,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "15973c06f42dd1be289b1ecd907f506232a4b642",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "restore_target": "chapters/chapter_01/authored_dock.json",
+      "role": "primary",
+      "sha256": "9eed4feddf9ff5584174a5aaadd94f558437441ff8171788cf25d980a0285fa8",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/chapter-provider/game/director/streamed_chapter_provider.gd.txt",
+      "bytes": 4318,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "e1348ee8ac11b6cca6ac1993e29558b8d568e9d3",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "restore_target": "game/director/streamed_chapter_provider.gd",
+      "role": "primary",
+      "sha256": "1a4bdafb40ac6480815154335dcdfecff9724dee3b85f5743a6012dca3543c74",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/chapter-provider/tests/integration/test_streamed_chapter_provider.gd.txt",
+      "bytes": 2742,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "dd74208d5849f02d366d5501312c022c6a6af756",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "restore_target": "tests/integration/test_streamed_chapter_provider.gd",
+      "role": "primary",
+      "sha256": "d9ba67790f196c8b75c8e294508a8ec8d7fb5c694e76fc92c710f8b89119ffc7",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/game/combat/evolved_attack_resolver.gd.txt",
+      "bytes": 8655,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "20d37fd868ca163c305833ad7b7734fb85580f52",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "game/combat/evolved_attack_resolver.gd",
+      "role": "primary",
+      "sha256": "434285a47841660e87c84f7730ef81588640d7fe1b4908110bd657cb147bff1a",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/game/contracts/game_contracts.gd.txt",
+      "bytes": 4095,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "1735750860e3940132ab31ee7be255b9f0f5098f",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "game/contracts/game_contracts.gd",
+      "role": "primary",
+      "sha256": "119c263ba748071b57958281a3ef7e9ee2807ff1e1ad44a7c78505212c1a11e2",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/game/core/run_simulation.gd.txt",
+      "bytes": 71373,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "ecba4952d0c6190f65ed4c960a5d52adb1af2f7f",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "game/core/run_simulation.gd",
+      "role": "primary",
+      "sha256": "5fcfa793dfef4c1ce24674ca2a71717953ae2b6f9d4d8f972b7fbd117779a39a",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/core_fixture.gd.txt",
+      "bytes": 4181,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "3a5191d1816644a1efe1329253c2b0a817c4ab84",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/core_fixture.gd",
+      "role": "primary",
+      "sha256": "d79c984f9b0749c0cf6f233507d3e40718cf6a1c78d2e8097fc44efd4d253e3b",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_attack_events.gd.txt",
+      "bytes": 9447,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2438a7bcd3f4d68c8474359aa18d4835dbb828c8",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_attack_events.gd",
+      "role": "primary",
+      "sha256": "8bcf382180944037bb019253d01439ec91f1028f3ba0df0c7abbd2af60c055a5",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_attack_restore_boundaries.gd.txt",
+      "bytes": 7787,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "84539a4c3cf1b02aecfa3b73b70037b62dfbc25c",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_attack_restore_boundaries.gd",
+      "role": "primary",
+      "sha256": "46cc0ec423ea594bad5a2e04716213fbf2ddd1741afb1e015de5017fb02737c8",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_core_boundaries.gd.txt",
+      "bytes": 3604,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "5115349d76c0d5eb98a1188f8dd9c8f218bba2e4",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_core_boundaries.gd",
+      "role": "primary",
+      "sha256": "79edfef0db7f96fcfb070ee9251b1aee42bee91169520758fb0c7f4b6f327c0d",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_growth_lifecycle.gd.txt",
+      "bytes": 22473,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "038d0c464876202421114887e0e6d85cfba46e5c",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_growth_lifecycle.gd",
+      "role": "primary",
+      "sha256": "0db7f96ff785a2bbf68df92b7c4d81f8cf0f872fbbd5eb4274335def720e7edb",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_run_state.gd.txt",
+      "bytes": 7890,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "e6fa043164de6370ec3b251116c02a3037a6c2fc",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_run_state.gd",
+      "role": "primary",
+      "sha256": "40aa75eeb84726d3b4327613b10d92a43ba91f1eaffe536df9ce7012b7a6c698",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/finite-core-c3/tests/core/test_rebuild_terminal_precedence.gd.txt",
+      "bytes": 4522,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "85841ceb60679eb2c43982e654a7993de774e510",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_terminal_precedence.gd",
+      "role": "primary",
+      "sha256": "7eedfb6340b995498cf6c10feb4ba803f27dc7d8348377b029700a8b3e22f198",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/data/doctrines.json.txt",
+      "bytes": 1636,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "data/doctrines.json",
+      "role": "primary",
+      "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/data/supply_shop.json.txt",
+      "bytes": 1644,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "data/supply_shop.json",
+      "role": "primary",
+      "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/game/contracts/game_save_contracts.gd.txt",
+      "bytes": 15150,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2a93972fb25d4df986e17b1389b83420f094e326",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "game/contracts/game_save_contracts.gd",
+      "role": "primary",
+      "sha256": "c6906f9c023a729c431baa3b08d21dd6b569161a5db5eb43227fcac1f57546de",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/game/economy/supply_catalog.gd.txt",
+      "bytes": 5790,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2fb491f8e44124391943ddec01d54882c94c6135",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "game/economy/supply_catalog.gd",
+      "role": "primary",
+      "sha256": "890044e78e6b3bda635529841a588f23500468a335f4ea8d57265401a8d3c868",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/game/economy/supply_service.gd.txt",
+      "bytes": 28000,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "1dfc602691097f103436c599988db415a81cc5cb",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "game/economy/supply_service.gd",
+      "role": "primary",
+      "sha256": "3627251019f4af71c90fd0eebf40978f54e504464a6031e8e466cc5f744a7014",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/game/persistence/game_save_store.gd.txt",
+      "bytes": 32059,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "cddadd2de20c9fbc9e5e197eec89eb76e72c4ba2",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "game/persistence/game_save_store.gd",
+      "role": "primary",
+      "sha256": "426038b39feb6727fe18629ce926046411bce4676d66082ef0b82bf79abb6fc6",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/game/persistence/save_migrations.gd.txt",
+      "bytes": 4898,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2cfd1a8144e81f1634636674a6981c85ceb8cf36",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "game/persistence/save_migrations.gd",
+      "role": "primary",
+      "sha256": "9d9af3c54b4eddcc0e6704c693ef30ba16646203905393b01ed0ffc83032238c",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/contracts/test_game_save_snapshot.gd.txt",
+      "bytes": 4049,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "a0dc8d2d8656326bf228fec334aa6a7eb38b50b2",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/contracts/test_game_save_snapshot.gd",
+      "role": "primary",
+      "sha256": "b80ae1911853cf8f6f08293e660ba54ad611611c44319d1465127a5c238ccb5d",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/economy/test_supply_service.gd.txt",
+      "bytes": 21557,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "4854ca7faead0b35a4e459425819a80c4fc9a425",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/economy/test_supply_service.gd",
+      "role": "primary",
+      "sha256": "45fb622da18d30a250e0d65b66f8f10829a777528d104143419884b40a05f024",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/persistence/test_authority_hostile.gd.txt",
+      "bytes": 6674,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "1b3d16f8766ff2b10b370c7b452c0d9a46daa4a5",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_authority_hostile.gd",
+      "role": "primary",
+      "sha256": "634178f0f70db484b99baf0637f04972a5d374ba578d309019113c30dc90c057",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/persistence/test_game_save_store.gd.txt",
+      "bytes": 22667,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "768464d96aaf65176dcfac97c0c2ba29157637d0",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_game_save_store.gd",
+      "role": "primary",
+      "sha256": "1ce0ceb8ed2258fd8c2da42d69cfd87950c24c726292aae85d97a3c6e330d379",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/persistence/test_game_save_transition_guard.gd.txt",
+      "bytes": 21926,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "aaa9ec7e2c95794f6dd3ee24eed03c7e8e236371",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_game_save_transition_guard.gd",
+      "role": "primary",
+      "sha256": "450ea1b5eb5ecdeb7cc7cf1bfc98710446557447fed68ead241f3d55807a1308",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/persistence-gate3/tests/persistence/test_save_migrations.gd.txt",
+      "bytes": 11081,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "4b0faa8d0063f43f7817baae6c161f763daac01d",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_save_migrations.gd",
+      "role": "primary",
+      "sha256": "7c0e86596df6237bb4880ff3d7646af0a6fa81f402a7607b8aa1d40d6f02b895",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/streamed-boundary/game/core/streamed_run_world.gd.txt",
+      "bytes": 37027,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "44ae88be26d07786a08ad0d84585319e852080f1",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "restore_target": "game/core/streamed_run_world.gd",
+      "role": "primary",
+      "sha256": "6e7c5a1941426230019b78f6acc07ca0cb10748bf70790f0ad731943b3e17f93",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/source/streamed-boundary/tests/world/test_streamed_run_world_boundary.gd.txt",
+      "bytes": 11063,
+      "classification": "EXACT_SNAPSHOT_OF_NEW_IMPLEMENTATION_DEFINITION_OR_TEST_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "7ce358a49c8502a8230bc1dad634aae6d4be2356",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "restore_target": "tests/world/test_streamed_run_world_boundary.gd",
+      "role": "primary",
+      "sha256": "0ddb9d223ec777569f8b6731bcdb26f99ce6ba480f3f8608677c7e7ed2ce3cdb",
+      "transformation": "Inert final .txt suffix only; file bytes unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/project.godot.txt",
+      "bytes": 188,
+      "classification": "NEW_REPLAY_CONFIGURATION",
+      "git_blob_sha": "bc9e148c2adc8499c1536f3cb1a174b022c53e8f",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "restore_target": "project.godot",
+      "role": "new-replay-support",
+      "sha256": "68c44d2226e12e6b1d3ba9f3586f56ca9bdaafca348e0ab27c961d12ac8a084a",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/chapter-provider/run_named_tests.gd.txt",
+      "bytes": 569,
+      "classification": "NEW_REPLAY_CONFIGURATION",
+      "git_blob_sha": "45137c487c536915f6716f4c93809f8ada926175",
+      "group": "chapter-provider",
+      "mode": "100644",
+      "restore_target": "run_named_tests.gd",
+      "role": "new-replay-support",
+      "sha256": "75abdfb0918ccbf82a96e53b94ac3aa75528a7609731f545adaaa601ec827565",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/finite-core-c3/run_focused.gd.txt",
+      "bytes": 980,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "ffe2798f9d4f66d726e425c6001cf7f0fdcb3716",
+      "group": "finite-core-c3",
+      "mode": "100644",
+      "restore_target": "run_focused.gd",
+      "role": "replay-support",
+      "sha256": "ccc496d9ae18df314548ea2e80918d8e1c656422b20ae1b14acfb58025ff6c80",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_contract_gate.gd.txt",
+      "bytes": 485,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "85e477e8b3c645caea8c1f3f5e13e2ecf9e7ff13",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_contract_gate.gd",
+      "role": "replay-support",
+      "sha256": "fcde6eb8f14becd96b02269aec2550cd5b1e57b433d9ce591e3e5010b7fe64cc",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_economy_gate.gd.txt",
+      "bytes": 483,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "9acaf543208c301312bb31d7a3be3c08d2e8d1d0",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_economy_gate.gd",
+      "role": "replay-support",
+      "sha256": "f4247e0a761382d3360e5c90c29741253e7616e1c05c68251e82aa52da8d8fdb",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_location_gate.gd.txt",
+      "bytes": 481,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "7ac82da8abd5a3709be78be46eb8e210cfe485e3",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_location_gate.gd",
+      "role": "replay-support",
+      "sha256": "c85a533d76758b6cdcfc92022daaab8a73407fd7dd01e86a2e5c06915ed790df",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_migration_gate.gd.txt",
+      "bytes": 475,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "914b19b781326331f872b43cec5549c57db24b43",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_migration_gate.gd",
+      "role": "replay-support",
+      "sha256": "56bdbd8fc494bb856cf1011e932a559c08e73045357afb86bd515817084d6e8a",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_recovery_gate.gd.txt",
+      "bytes": 493,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "6fa3f0a44ef127f66c46eede58072bb4f96d2a78",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_recovery_gate.gd",
+      "role": "replay-support",
+      "sha256": "01125e2ada191cc432a41c16e4cb3e06bec216c7abab18727cd5873a3a32d835",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/run_store_gate.gd.txt",
+      "bytes": 479,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "cc53c3c70f81e3c4ede424a5d995bb906a1fbf19",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "run_store_gate.gd",
+      "role": "replay-support",
+      "sha256": "dcc5d2253841a8d25cae7574f7bd1b59f7575b8781b1e8c96a669cd7c8a595ac",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/tests/economy/test_supply_catalog.gd.txt",
+      "bytes": 5681,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "b27479750a5f96aa49a1aba8c27fa0194d4a894a",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/economy/test_supply_catalog.gd",
+      "role": "dependency",
+      "sha256": "b792503347e0965d6c5de7929ff35de31a4c243c2f32857e66ce737bbb91b01d",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/persistence-gate3/tests/economy/test_supply_hostile_types.gd.txt",
+      "bytes": 9674,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "981020c2f8c119ffba8685652814d402a85df850",
+      "group": "persistence-gate3",
+      "mode": "100644",
+      "restore_target": "tests/economy/test_supply_hostile_types.gd",
+      "role": "dependency",
+      "sha256": "9b18b75028659a2e14ec19a743462051d7b79c887056c6b9868136782b1a5bb4",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/reviewed-source-07/support/streamed-boundary/run_boundary.gd.txt",
+      "bytes": 459,
+      "classification": "EXACT_FROZEN_NEW_REPLAY_SUPPORT_NOT_ORIGINAL_SOURCE",
+      "git_blob_sha": "92d60fd3023b743e55edbe08699da9b100e96aa5",
+      "group": "streamed-boundary",
+      "mode": "100644",
+      "restore_target": "run_boundary.gd",
+      "role": "replay-support",
+      "sha256": "5e45f28ec388b54bd5aaa8edccfee35342c9d6a9172657248f5b331880179ad6",
+      "transformation": "Inert final .txt suffix only; bytes unchanged from the identified support snapshot."
+    }
+  ],
+  "unused_fixture_provenance": "An unused historical fixture provenance document is not required by any declared replay and is excluded. Fixture source-data bytes required by the replays retain their inherited references."
+}

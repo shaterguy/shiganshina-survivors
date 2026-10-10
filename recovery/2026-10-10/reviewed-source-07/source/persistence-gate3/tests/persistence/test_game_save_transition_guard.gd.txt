@@ -1,0 +1,271 @@
+extends RefCounted
+# NEW E2b isolated recovery transaction gate. SHAPE checkpoint validation unless labelled real.
+const Store = preload("res://game/persistence/game_save_store.gd")
+const Service = preload("res://game/economy/supply_service.gd")
+const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
+const Cases = preload("res://tests/persistence/test_game_save_store.gd")
+const EconomyCases = preload("res://tests/economy/test_supply_service.gd")
+var fixture = Fixture.new()
+var cases = Cases.new()
+var econ = EconomyCases.new()
+func _source() -> Dictionary:
+	var source: Dictionary = fixture.game_save()
+	source.store_revision = 7
+	source.next_run_serial = 2
+	source.checkpoint = fixture.run_state()
+	source.checkpoint.content_revision = "ch01.3"
+	source.checkpoint.world = {"delta_root":{"format_revision":99,"root_hash":"a".repeat(64)}}
+	source.profile.supply_credits = 45
+	source.profile.consumables.field_bandage = 2
+	source.profile.settings.custom_legacy = {"retained":"setting"}
+	source.profile.best_runs = {"chapter_01_shiganshina":{"survival_tick":100,"kills":2,"won":false,"retained":"history"}}
+	return source
+func _id(source: Dictionary, digest: String) -> String:
+	return "recover:%s:%s:%d" % [source.career_id,digest,int(source.next_run_serial)]
+func run(t) -> void:
+	var directory: String = cases._directory("recovery")
+	var store = Store.new(directory,fixture.validate_checkpoint)
+	var service = Service.new(fixture.make_run)
+	for method in ["inspect_checkpoint_recovery","preserve_checkpoint_authority","commit_preserved_run_start"]:
+		t.check(store.has_method(method),"E2b Store API "+method)
+	t.check(service.has_method("prepare_preserved_run_start"),"E2b pure explicit replacement API")
+	if not store.has_method("inspect_checkpoint_recovery") or not service.has_method("prepare_preserved_run_start"): return
+	var source := _source()
+	var bytes := JSON.stringify(source,"  ")
+	cases._write(directory.path_join("game_save.json"),bytes)
+	cases._write(directory.path_join("game_save.json.bak"),"original backup bytes")
+	var blocked: Dictionary = store.load_game()
+	t.check(blocked.get("ok") == false and blocked.get("scope") == "checkpoint","E2b unsupported checkpoint never auto reset")
+	var offer: Dictionary = store.inspect_checkpoint_recovery()
+	t.check(offer.get("ok") == true and offer.get("recovery_offer",{}).get("source_sha256") == bytes.sha256_text(),"E2b independent economic identity gives explicit recovery offer")
+	t.check(not DirAccess.dir_exists_absolute(directory.path_join("archives")) and cases._read(directory.path_join("game_save.json")) == bytes,"E2b inspection neither archives nor rewrites")
+	if not offer.get("ok",false): return
+	var digest: String = offer.recovery_offer.source_sha256
+	var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+	t.check(archived.get("ok") == true,"E2b exact source archived and read back")
+	if not archived.get("ok",false): return
+	t.check(cases._read(directory.path_join("archives/"+digest+".json")) == bytes,"E2b archive retains exact entire authority bytes")
+	var pin: Dictionary = JSON.parse_string(cases._read(directory.path_join("archives/"+digest+".pins.json")))
+	t.check(pin.get("source_sha256") == digest and pin.get("pins_all_world_storage") == true and store._same(pin.get("world_roots"),[source.checkpoint.world.delta_root]),"E2b archive pins opaque world roots, forbidding future GC loss")
+	var selection: Dictionary = source.profile.loadout.duplicate(true)
+	selection.supply_item_id = "field_bandage"
+	var input_before := JSON.stringify(archived.source)
+	var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7)
+	t.check(prepared.get("ok") == true and not prepared.get("already_applied",true),"E2b explicit preserved run candidate prepared")
+	if not prepared.get("ok",false): return
+	t.check(JSON.stringify(archived.source) == input_before and prepared.candidate.store_revision == 7,"E2b prepare preserves input and revision")
+	t.check(prepared.candidate.next_run_serial == 3 and prepared.candidate.checkpoint.run_serial == 2 and prepared.candidate.profile.consumables.field_bandage == 1,"E2b serial advances once and prepared supply debited once")
+	t.check(prepared.candidate.profile.supply_credits == 45 and prepared.candidate.settled_through_serial == 0 and prepared.candidate.settlement_receipts.is_empty(),"E2b no settlement/refund invented for preserved run")
+	t.check(store._same(prepared.candidate.profile.best_runs,source.profile.best_runs) and store._same(prepared.candidate.profile.settings,source.profile.settings),"E2b all history/settings preserved")
+	var receipt: Dictionary = prepared.candidate.checkpoint_recovery_receipt
+	t.check(receipt.size() == 6 and receipt.request_id == _id(source,digest) and receipt.source_store_revision == 7 and receipt.preserved_run_serial == 1 and receipt.replacement_run_serial == 2,"E2b reviewed durable receipt schema")
+	var contracts = Contracts.new(fixture.validate_checkpoint)
+	t.check(contracts.validate(prepared.candidate).is_empty(),"E2b replacement validates as normal new checkpoint")
+	var tampered: Dictionary = prepared.candidate.duplicate(true)
+	tampered.profile.supply_credits += 100
+	t.check(store.commit_preserved_run_start(tampered,digest,_id(source,digest),7).get("ok") == false,"E2b special commit cannot mint currency")
+	t.check(store.commit_game(prepared.candidate,7).get("ok") == false,"E2b ordinary commit cannot bypass incompatible authority")
+	var committed: Dictionary = store.commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+	t.check(committed.get("ok") == true and committed.game_save.store_revision == 8,"E2b reviewed transformation atomically commits/readbacks")
+	if not committed.get("ok",false): return
+	t.check(cases._read(directory.path_join("game_save.json.bak")) == "original backup bytes","E2b recovery preserves original backup bytes")
+	var committed_bytes := cases._read(directory.path_join("game_save.json"))
+	var repeat: Dictionary = Store.new(directory,fixture.validate_checkpoint).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+	t.check(repeat.get("ok") == true and repeat.get("already_applied") == true and not repeat.has("candidate") and cases._read(directory.path_join("game_save.json")) == committed_bytes,"E2b same-ID Store retry confirms without another commit")
+	var retry: Dictionary = service.prepare_preserved_run_start(committed.game_save,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7)
+	t.check(retry.get("ok") == true and retry.get("already_applied") == true and not retry.has("candidate"),"E2b pure same-ID retry returns receipt only")
+	var conflict: Dictionary = service.prepare_preserved_run_start(committed.game_save,econ._chapter(),43,selection,_id(source,digest),archived.archive_receipt,7)
+	t.check(conflict.get("error_code") == "request_conflict","E2b same-ID different payload is conflict")
+	_receipt_hostile(t,contracts,prepared.candidate)
+	_fault_and_hostile_cases(t)
+	_real_and_race_cases(t)
+	_archive_race_at_replace(t)
+	_authority_race_during_final_archive_read(t)
+func _receipt_hostile(t,contracts,valid: Dictionary) -> void:
+	for key in valid.checkpoint_recovery_receipt:
+		for wrong in [null,true,{},[],"bad",-1,0.5]:
+			var bad := valid.duplicate(true)
+			bad.checkpoint_recovery_receipt[key] = wrong
+			t.check(not contracts.validate_economy(bad).is_empty(),"E2b strict recovery receipt field "+key+" "+str(wrong))
+	var extra := valid.duplicate(true)
+	extra.checkpoint_recovery_receipt.grant_credits = 100
+	t.check(not contracts.validate_economy(extra).is_empty(),"E2b recovery receipt unknown field rejected")
+func _fault_and_hostile_cases(t) -> void:
+	var service = Service.new(fixture.make_run)
+	var source := _source()
+	var bytes := JSON.stringify(source,"  ")
+	var digest := bytes.sha256_text()
+	var selection: Dictionary = source.profile.loadout.duplicate(true)
+	selection.supply_item_id = "field_bandage"
+	for stage in ["archive_source_read","archive_write","archive_flush","archive_readback","archive_replace","archive_pins_write","archive_pins_flush","archive_pins_readback","archive_pins_replace"]:
+		var directory: String = cases._directory("recovery_"+stage)
+		cases._write(directory.path_join("game_save.json"),bytes)
+		var fault = func(at): return ERR_UNAVAILABLE if at == stage else OK
+		var denied: Dictionary = Store.new(directory,fixture.validate_checkpoint,fault).preserve_checkpoint_authority(digest,7)
+		t.check(denied.get("ok") == false and not denied.has("source") and cases._read(directory.path_join("game_save.json")) == bytes,"E2b archive failure never changes authority/adopts source "+stage)
+		var resumed: Dictionary = Store.new(directory,fixture.validate_checkpoint).preserve_checkpoint_authority(digest,7)
+		t.check(resumed.get("ok") == true,"E2b archive same-source retry recovers safely "+stage)
+	for stage in ["write","flush","verify","replace","after_replace_before_return","readback_after_replace"]:
+		var directory: String = cases._directory("recover_commit_"+stage)
+		cases._write(directory.path_join("game_save.json"),bytes)
+		cases._write(directory.path_join("game_save.json.bak"),"retained older backup")
+		var store = Store.new(directory,fixture.validate_checkpoint)
+		var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+		var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7)
+		var fault = func(at): return ERR_UNAVAILABLE if at == stage else OK
+		var result: Dictionary = Store.new(directory,fixture.validate_checkpoint,fault).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+		t.check(result.get("ok") == false,"E2b atomic recovery injected failure "+stage)
+		var unknown: bool = stage in ["after_replace_before_return","readback_after_replace"]
+		var observed: Dictionary = Store.new(directory,fixture.validate_checkpoint).load_game()
+		t.check((unknown and observed.get("ok") == true and observed.game_save.store_revision == 8 and observed.game_save.profile.consumables.field_bandage == 1) or (not unknown and observed.get("error_code") == "content_mismatch" and cases._read(directory.path_join("game_save.json")) == bytes),"E2b only coherent old/new whole authority "+stage)
+		t.check(cases._read(directory.path_join("archives/"+digest+".json")) == bytes and cases._read(directory.path_join("game_save.json.bak")) == "retained older backup","E2b archive and original backup survive commit fault "+stage)
+		var retry: Dictionary = Store.new(directory,fixture.validate_checkpoint).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+		t.check(retry.get("ok") == true and retry.get("already_applied",false) == unknown,"E2b same-ID restart retry either confirms or commits once "+stage)
+		var final_save: Dictionary = Store.new(directory,fixture.validate_checkpoint).load_game().game_save
+		t.check(final_save.store_revision == 8 and final_save.next_run_serial == 3 and final_save.profile.consumables.field_bandage == 1,"E2b same-ID retry never consumes twice "+stage)
+	var directory: String = cases._directory("recover_hostile")
+	cases._write(directory.path_join("game_save.json"),bytes)
+	var store = Store.new(directory,fixture.validate_checkpoint)
+	var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+	var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7)
+	var args := [archived.source,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7]
+	for index in args.size():
+		for wrong in [null,true,[],{},"bad",0.5,-1,INF,NAN]:
+			var input: Array = args.duplicate(true)
+			input[index] = wrong
+			var denied = service.callv("prepare_preserved_run_start",input)
+			t.check(denied is Dictionary and denied.get("ok") == false and not denied.has("candidate"),"E2b public prepare strict argument "+str(index)+"/"+str(typeof(wrong)))
+	for key in ["seed","chapter_id"]:
+		for wrong in [null,true,[],{},"bad",-1,0.5]:
+			var bad: Dictionary = prepared.candidate.duplicate(true)
+			bad.checkpoint[key] = wrong
+			var denied: Dictionary = store.commit_preserved_run_start(bad,digest,_id(source,digest),7)
+			t.check(denied.get("ok") == false,"E2b special commit direct scalar guard "+key+"/"+str(typeof(wrong)))
+	var bad_archive := directory.path_join("archives/"+digest+".json")
+	cases._write(bad_archive,"tampered archive")
+	t.check(store.commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7).get("ok") == false and cases._read(directory.path_join("game_save.json")) == bytes,"E2b corrupted archive prevents replacement")
+	for field in ["schema_version","profile","run_config","read_failed"]:
+		var bad := source.duplicate(true)
+		if field == "schema_version": bad.schema_version = 99
+		elif field == "profile": bad.profile.supply_credits = "unverified"
+		elif field == "run_config": bad.checkpoint.run_config.run_serial = "1"
+		cases._write(directory.path_join("game_save.json"),JSON.stringify(bad))
+		var fault = func(at): return ERR_UNAVAILABLE if field == "read_failed" and at == "read_primary" else OK
+		var denied: Dictionary = Store.new(directory,fixture.validate_checkpoint,fault).inspect_checkpoint_recovery()
+		t.check(denied.get("ok") == false and not denied.has("recovery_offer"),"E2b unverified/future authority or transient read cannot offer recovery "+field)
+func _real_and_race_cases(t) -> void:
+	var source := _source()
+	var bytes := JSON.stringify(source,"  ")
+	var digest := bytes.sha256_text()
+	var selection: Dictionary = source.profile.loadout.duplicate(true)
+	var service = Service.new(fixture.make_run)
+	for boundary in ["archive_write","replace"]:
+		var directory: String = cases._directory("recovery_race_"+boundary)
+		var path := directory.path_join("game_save.json")
+		cases._write(path,bytes)
+		var changed := source.duplicate(true)
+		changed.profile.settings.audio_master = 0.1
+		var changed_bytes := JSON.stringify(changed)
+		var fault = func(at):
+			if at == boundary: cases._write(path,changed_bytes)
+			return OK
+		var store = Store.new(directory,fixture.validate_checkpoint)
+		var result: Dictionary
+		if boundary == "archive_write": result = Store.new(directory,fixture.validate_checkpoint,fault).preserve_checkpoint_authority(digest,7)
+		else:
+			var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+			var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,selection,_id(source,digest),archived.archive_receipt,7)
+			result = Store.new(directory,fixture.validate_checkpoint,fault).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+		t.check(result.get("ok") == false and result.get("error_code") == "stale_revision" and cases._read(path) == changed_bytes,"E2b source hash race stops replacement at "+boundary)
+	var same_content := source.duplicate(true)
+	same_content.checkpoint.content_revision = "ch01.3-rebuild.1"
+	var directory: String = cases._directory("future_world_offer")
+	cases._write(directory.path_join("game_save.json"),JSON.stringify(same_content))
+	var world_incompatible = func(_state): return {"ok":false,"error_code":"unsupported_schema"}
+	t.check(Store.new(directory,world_incompatible).inspect_checkpoint_recovery().get("ok") == true,"E2b validated economic envelope with unsupported world can offer preservation")
+	var transient_world = func(_state): return {"ok":false,"error_code":"world_read_failed"}
+	var transient: Dictionary = Store.new(directory,transient_world).inspect_checkpoint_recovery()
+	t.check(transient.get("ok") == false and transient.get("error_code") == "world_read_failed" and not transient.has("recovery_offer"),"E2b transient world reads cannot authorize replacement")
+	var core_script = load("res://game/core/run_simulation.gd")
+	var validation = core_script.new()
+	var factory = core_script.new()
+	var chapter_load: Dictionary = load("res://game/director/chapter_catalog.gd").new().load_chapter("chapter_01_shiganshina")
+	t.check(chapter_load.get("ok") == true,"E2b real recovery fixture includes complete chapter definitions")
+	if chapter_load.get("ok") != true: return
+	var chapter: Dictionary = chapter_load.chapter
+	var real_dir: String = cases._directory("real_core_recovery")
+	var real_store = Store.new(real_dir,validation.restore)
+	var initial: Dictionary = real_store.load_game().game_save
+	var real_service = Service.new(factory.new_run)
+	var start: Dictionary = real_service.prepare_run_start(initial,chapter,42,econ._start_id(initial),initial.store_revision)
+	var started: Dictionary = real_store.commit_game(start.candidate,initial.store_revision)
+	t.check(started.get("ok") == true,"E2b REAL Core initial state prepared before simulated content upgrade")
+	if not started.get("ok",false): return
+	var old: Dictionary = started.game_save.duplicate(true)
+	old.checkpoint.content_revision = "ch01.3"
+	var old_bytes := JSON.stringify(old,"  ")
+	var old_hash := old_bytes.sha256_text()
+	cases._write(real_dir.path_join("game_save.json"),old_bytes)
+	var archived: Dictionary = real_store.preserve_checkpoint_authority(old_hash,old.store_revision)
+	var prepared: Dictionary = real_service.prepare_preserved_run_start(archived.source,chapter,77,old.profile.loadout,_id(old,old_hash),archived.archive_receipt,old.store_revision)
+	var committed: Dictionary = real_store.commit_preserved_run_start(prepared.candidate,old_hash,_id(old,old_hash),old.store_revision)
+	t.check(committed.get("ok") == true and committed.game_save.checkpoint.run_serial == 2,"E2b REAL Core new initial state validates in recovery commit")
+	if not committed.get("ok",false): return
+	var fresh_validator = core_script.new()
+	var restarted: Dictionary = Store.new(real_dir,fresh_validator.restore).load_game()
+	t.check(restarted.get("ok") == true and restarted.game_save.checkpoint.seed == 77 and restarted.game_save.checkpoint.run_id == old.career_id+":2","E2b REAL separate Core restart restores replacement state")
+	var updated: Dictionary = restarted.game_save.duplicate(true)
+	updated.profile.settings.audio_master = 0.6
+	var ordinary: Dictionary = real_store.commit_game(updated,updated.store_revision)
+	t.check(ordinary.get("ok") == true and ordinary.game_save.checkpoint_recovery_receipt == updated.checkpoint_recovery_receipt,"E2b recovery receipt persists through ordinary settings commit")
+	if not ordinary.get("ok",false): return
+	var forged: Dictionary = ordinary.game_save.duplicate(true)
+	forged.erase("checkpoint_recovery_receipt")
+	t.check(real_store.commit_game(forged,forged.store_revision).get("ok") == false,"E2b ordinary commit cannot erase durable recovery provenance")
+	var current_bytes := cases._read(real_dir.path_join("game_save.json"))
+	var late_retry: Dictionary = real_store.commit_preserved_run_start(prepared.candidate,old_hash,_id(old,old_hash),old.store_revision)
+	t.check(late_retry.get("already_applied") == true and cases._read(real_dir.path_join("game_save.json")) == current_bytes,"E2b late same-ID retry after ordinary revisions performs no write")
+	print("E2b REAL Core recovery covers initial nonstreamed states only; no combat/terminal/world closure claim")
+
+func _archive_race_at_replace(t) -> void:
+	var source := _source()
+	var bytes := JSON.stringify(source,"  ")
+	var digest := bytes.sha256_text()
+	for name in [".json",".pins.json"]:
+		var directory: String = cases._directory("archive_final_race")
+		var path := directory.path_join("game_save.json")
+		cases._write(path,bytes)
+		var store = Store.new(directory,fixture.validate_checkpoint)
+		var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+		var service = Service.new(fixture.make_run)
+		var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,source.profile.loadout,_id(source,digest),archived.archive_receipt,7)
+		var race = func(at):
+			if at == "replace": cases._write(directory.path_join("archives/"+digest+name),"changed preservation evidence")
+			return OK
+		var result: Dictionary = Store.new(directory,fixture.validate_checkpoint,race).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+		t.check(result.get("ok") == false and cases._read(path) == bytes,"E2b archive/pin evidence race immediately before replace blocks commit "+name)
+func _authority_race_during_final_archive_read(t) -> void:
+	var source := _source()
+	var bytes := JSON.stringify(source,"  ")
+	var digest := bytes.sha256_text()
+	for stage in ["archive_readback","archive_pins_readback"]:
+		var directory: String = cases._directory("source_final_archive_read_race")
+		var path := directory.path_join("game_save.json")
+		cases._write(path,bytes)
+		var store = Store.new(directory,fixture.validate_checkpoint)
+		var archived: Dictionary = store.preserve_checkpoint_authority(digest,7)
+		var service = Service.new(fixture.make_run)
+		var prepared: Dictionary = service.prepare_preserved_run_start(archived.source,econ._chapter(),42,source.profile.loadout,_id(source,digest),archived.archive_receipt,7)
+		var newer := source.duplicate(true)
+		newer.store_revision = 8
+		newer.profile.settings.audio_master = 0.1
+		var newer_bytes := JSON.stringify(newer)
+		var reads := [0]
+		var race = func(at):
+			if at == stage:
+				reads[0] += 1
+				if reads[0] == 2: cases._write(path,newer_bytes)
+			return OK
+		var result: Dictionary = Store.new(directory,fixture.validate_checkpoint,race).commit_preserved_run_start(prepared.candidate,digest,_id(source,digest),7)
+		t.check(result.get("ok") == false and result.get("error_code") == "stale_revision" and cases._read(path) == newer_bytes,"E2b final archive-read hook cannot hide changed primary "+stage)

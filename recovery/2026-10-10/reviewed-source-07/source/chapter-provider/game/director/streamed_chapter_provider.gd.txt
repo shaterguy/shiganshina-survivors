@@ -1,0 +1,62 @@
+extends RefCounted
+# NEW candidate provider. The app keeps its finite provider until C4 dispatch is verified.
+const Chapters = preload("res://game/director/chapter_catalog.gd")
+const World = preload("res://game/combat/world_geometry.gd")
+const Helper = preload("res://game/core/streamed_run_world.gd")
+const DOCK := "res://chapters/chapter_01/authored_dock.json"
+func load_chapter(id: String) -> Dictionary:
+	var base: Dictionary = Chapters.new().load_chapter(id)
+	if not base.get("ok",false): return base
+	var inputs := []
+	for path in ["res://chapters/chapter_01/city_templates.json","res://data/world_props.json","res://assets/manifest.json",DOCK]:
+		var file := FileAccess.open(path,FileAccess.READ)
+		if file == null or file.get_length() > Chapters.MAX_DEFINITION_BYTES: return _fail("definition_missing")
+		var parser := JSON.new()
+		if parser.parse(file.get_as_text()) != OK or not parser.data is Dictionary: return _fail("invalid_content_definition")
+		inputs.append(parser.data)
+	return from_definitions(base.chapter,inputs[0],inputs[1],inputs[2],inputs[3])
+func from_definitions(base: Dictionary, templates: Dictionary, props: Dictionary, assets: Dictionary, dock: Dictionary) -> Dictionary:
+	var catalog = Chapters.new()
+	if catalog.definition_digest([base,templates,props,assets,dock]).is_empty(): return _fail("invalid_content_definition")
+	# Authored JSON integers arrive as floats. Normalize numbers without changing
+	# source dictionaries before exact fixed-array validation and engine adapters.
+	dock = catalog._canonical_numbers(dock)
+	if not base.get("content_fingerprint") is String or base.content_fingerprint.length() != 64: return _fail("invalid_chapter")
+	if not props.get("definitions") is Dictionary or props.definitions.is_empty() or not assets.get("assets") is Dictionary: return _fail("invalid_content_definition")
+	var mechanical := {"assets":{}}
+	for prop in props.definitions.values():
+		if not prop is Dictionary: return _fail("invalid_content_definition")
+		for field in ["asset_id","ruin_asset_id"]:
+			if not prop.get(field) is String or not assets.assets.get(prop[field]) is Dictionary: return _fail("invalid_asset_metadata")
+			var art: Dictionary = assets.assets[prop[field]]
+			if not _point(art.get("anchor_px")): return _fail("invalid_asset_metadata")
+			for dimension in ["cell_w","cell_h"]:
+				if not _integer(art.get(dimension),1,4096): return _fail("invalid_asset_metadata")
+			mechanical.assets[prop[field]] = {"anchor_px":art.anchor_px.duplicate(),"cell_w":art.cell_w,"cell_h":art.cell_h}
+	if not _dock_valid(dock): return _fail("invalid_dock_definition")
+	var definitions := {"templates":templates.duplicate(true),"props":props.duplicate(true),"asset_manifest":mechanical}
+	if not Helper.new(definitions).valid(): return _fail("invalid_generator")
+	var basis := {"identity_version":1,"base_definition_fingerprint":base.content_fingerprint,"world_mode":"streamed_city","world_definitions":definitions,"authored_dock":dock}
+	var chapter := base.duplicate(true)
+	chapter.world_mode = "streamed_city"
+	chapter.world_geometry = {}
+	chapter.world_definitions = definitions
+	chapter.authored_dock = dock.duplicate(true)
+	chapter.content_identity_kind = "streamed_production_definitions"
+	chapter.content_fingerprint = catalog.definition_digest(basis)
+	return {"ok":true,"chapter":chapter}
+func _dock_valid(dock: Dictionary) -> bool:
+	if not dock.get("scene_id") is String or dock.scene_id != "authored_dock": return false
+	if not _point(dock.get("entry_position")) or dock.entry_position != [0,0]: return false
+	if not dock.get("escape_rect") is Array or dock.escape_rect != [-56,320,112,80]: return false
+	if not dock.get("geometry") is Dictionary or dock.geometry.is_empty() or not World.valid(dock.geometry): return false
+	return World.walkable(Vector2.ZERO,8,dock.geometry) and World.walkable(Vector2(0,360),8,dock.geometry)
+func _point(v: Variant) -> bool:
+	if not v is Array or v.size() != 2: return false
+	for n in v:
+		if not (n is int or n is float) or not is_finite(float(n)) or absf(float(n)) > 4096: return false
+	return true
+func _integer(v: Variant, low: int, high: int) -> bool:
+	return (v is int or v is float) and is_finite(float(v)) and v == floor(v) and v >= low and v <= high
+func _fail(code: String) -> Dictionary:
+	return {"ok":false,"error_code":code}
