@@ -1,0 +1,95 @@
+extends SceneTree
+const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
+const Views = preload("res://game/progression/progression_view.gd")
+const Offers = preload("res://game/progression/growth_offer_service.gd")
+const Fixture = preload("res://tests/progression/progression_test_fixture.gd")
+var checks := 0
+var failures := 0
+func check(value: bool, label: String):
+	checks += 1
+	if not value:
+		failures += 1
+		push_error("INDEPENDENT FAIL: "+label)
+func _initialize():
+	call_deferred("run")
+func run():
+	var catalog = Upgrades.new()
+	var offers = Offers.new(catalog)
+	var views = Views.new(catalog)
+	var setup := RandomNumberGenerator.new()
+	setup.seed = 612453
+	var equipment_ids := ["ally_cover","blade_slash","odm_dash","reentry_combo","spin_slash","wall_cannon"]
+	var passive_ids := ["armor","attack_range","damage","fire_interval","max_health","movement","pickup_radius","recovery"]
+	for seed_value in range(64):
+		var state := Fixture.state()
+		state.equipment = {}
+		state.passives = {}
+		for ids in [equipment_ids,passive_ids]:
+			var pool: Array = ids.duplicate()
+			var count := setup.randi_range(1,4)
+			for index in range(count):
+				var at := setup.randi_range(0,pool.size()-1)
+				var id: String = pool[at]
+				pool.remove_at(at)
+				if ids == equipment_ids: state.equipment[id] = setup.randi_range(1,5)
+				else: state.passives[id] = setup.randi_range(1,5)
+		state.player.level = setup.randi_range(2,10)
+		state.tactical_seals = setup.randi_range(0,5)
+		state.run_config.target_evolution_id = "evo_wing_cut" if seed_value%2 == 0 else "evo_crossfire"
+		var growth_rng := RandomNumberGenerator.new()
+		growth_rng.seed = (seed_value ^ 0x5EED1203) & 0x7fffffff
+		state.progression_rng_state = str(growth_rng.state)
+		var descriptor := Fixture.descriptor(state.player.level,"boss" if seed_value%3 == 0 else "level")
+		var before := state.duplicate(true)
+		var a: Dictionary = offers.materialize(state,descriptor)
+		check(a.get("ok",false),"legal sampled state materializes %d"%seed_value)
+		check(a == offers.materialize(state,descriptor),"repeat exact offer and RNG %d"%seed_value)
+		check(state == before,"materializer preserves source %d"%seed_value)
+		check(Upgrades.json_data_valid(a),"offer DTO finite JSON %d"%seed_value)
+		if not a.offer.is_empty():
+			var found := {}
+			check(a.offer.options.size() >= 1 and a.offer.options.size() <= 3,"legal card count")
+			for option in a.offer.options:
+				check(not found.has(option.option_id) and catalog.option_valid(state,option),"unique legal option")
+				found[option.option_id] = true
+			state.upgrade_offer = a.offer.duplicate(true)
+		before = state.duplicate(true)
+		var view: Dictionary = views.build(state)
+		check(not view.is_empty() and Upgrades.json_data_valid(view),"view finite JSON")
+		check(state == before and views.build(state) == view,"view unchanged input and exact repeated result")
+		view.target.requirements[0].name = "mutated"
+		if not view.active_offer.is_empty(): view.active_offer.options[0].name = "mutated"
+		check(state == before,"ordinary DTO mutation does not alias source")
+		var damage_scale := 1.0+0.15*int(state.passives.get("damage",0))
+		var range_scale := 1.0+0.12*int(state.passives.get("attack_range",0))
+		var cooldown_scale := 1.0-0.08*int(state.passives.get("fire_interval",0))
+		# Hand constants from frozen design/baseline, not the catalog under test.
+		var wing: Dictionary = catalog.evolutions.evaluate(state,"evo_wing_cut")
+		check(is_equal_approx(wing.effect_delta.stage_damage[0],27*damage_scale) and is_equal_approx(wing.effect_delta.stage_damage[1],36*damage_scale),"wing damage modifiers once")
+		check(is_equal_approx(wing.effect_delta.radius,88*range_scale) and wing.effect_delta.arc_degrees == 110 and wing.effect_delta.stage_delays == [0,12],"wing geometry modifier scope")
+		check(wing.effect_delta.cooldown_ticks == maxi(1,int(round(48*cooldown_scale))),"wing cooldown rounding once")
+		var cross: Dictionary = catalog.evolutions.evaluate(state,"evo_crossfire")
+		check(is_equal_approx(cross.effect_delta.stage_damage[0],44.8*damage_scale) and is_equal_approx(cross.effect_delta.stage_damage[1],44.8*damage_scale),"crossfire damage modifiers once")
+		check(is_equal_approx(cross.effect_delta.radius,56*range_scale) and is_equal_approx(cross.effect_delta.acquisition_range,456*range_scale) and is_equal_approx(cross.effect_delta.point_offset,24*range_scale) and cross.effect_delta.stage_delays == [36,66],"crossfire linear geometry only")
+		check(cross.effect_delta.cooldown_ticks == maxi(1,int(round(168*cooldown_scale))),"crossfire cooldown rounding once")
+		var reordered := state.duplicate(true)
+		var eq: Array = state.equipment.keys(); eq.reverse()
+		var pa: Array = state.passives.keys(); pa.reverse()
+		reordered.equipment = {}; reordered.passives = {}; reordered.upgrade_offer = {}
+		for id in eq: reordered.equipment[id] = state.equipment[id]
+		for id in pa: reordered.passives[id] = state.passives[id]
+		reordered.rules.allowed_equipment_ids.reverse()
+		check(offers.materialize(reordered,descriptor) == a,"source dictionary/allow-list order does not change offer")
+	for iteration in range(128):
+		var owner = Upgrades.new()
+		var owner_id: int = owner.get_instance_id()
+		var evolution_handle = owner.evolutions
+		var evolution_id: int = evolution_handle.get_instance_id()
+		owner = null
+		check(not is_instance_id_valid(owner_id) and evolution_handle.evaluate(Fixture.state(),"evo_wing_cut").is_empty(),"weak owner released and expired lookup closed")
+		evolution_handle = null
+		check(not is_instance_id_valid(evolution_id),"evolution handle itself released")
+	await process_frame
+	await process_frame
+	print("INDEPENDENT_VALID_RESULT checks=%d failures=%d sampled_states=64 weakref_cycles=128"%[checks,failures])
+	quit(0 if failures == 0 else 1)

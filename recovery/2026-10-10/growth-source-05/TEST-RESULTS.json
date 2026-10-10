@@ -1,0 +1,275 @@
+{
+  "actual_core_executed": false,
+  "actual_core_included": false,
+  "actual_core_verified": false,
+  "all_replay_input_bytes_unchanged": true,
+  "bounded_review_status": "Accepted after correction of public-boundary validation and metadata projection defects.",
+  "broader_contract_probe": {
+    "log": {
+      "bytes": 28051,
+      "git_blob_sha": "a12c7d83693465ed45d554aaea3b021239e76c49",
+      "mode": "100644",
+      "sha256": "b0063f4171c42cc31bbcd0d23ec7ba707139bdeb70152323301c6c2d912bad42"
+    },
+    "process_exit_code": 1,
+    "reason": "Missing save migration dependency, dependent controller compilation and imported UI resources produced runtime errors. Printed zero failures does not constitute a passing run.",
+    "rerun_during_preservation": false,
+    "status": "NOT_GREEN_AT_RECORDED_REVIEW"
+  },
+  "classification": "DERIVED_VERIFICATION_DOCUMENT_NOT_EXACT_SOURCE",
+  "counts_are_separate_not_a_full_game_total": true,
+  "fresh_preservation_results": [
+    {
+      "checks": 326,
+      "diagnostics": "No SCRIPT ERROR, ERROR, WARNING or leak marker.",
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "focused_progression",
+      "log": {
+        "bytes": 102,
+        "git_blob_sha": "a1de9dd63f093be4906a2a8642166924bdbc9b66",
+        "mode": "100644",
+        "sha256": "fcaafd37260d7d443aaaf412df36a372f7e4512c1da03e02c9fceaa0f0194edc"
+      },
+      "process_exit_code": 0,
+      "script": "tests/run_all.gd",
+      "user_arguments": [
+        "--",
+        "progression"
+      ],
+      "verification_type": "FRESH_ISOLATED_EXECUTION_ON_PRESERVED_AND_PINNED_DEPENDENCY_BYTES"
+    },
+    {
+      "checks": 54,
+      "diagnostics": "No SCRIPT ERROR, ERROR, WARNING or leak marker.",
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "hostile_boundaries",
+      "log": {
+        "bytes": 122,
+        "git_blob_sha": "edbc7717291985b40b2765d99bfcf1e28699cfbe",
+        "mode": "100644",
+        "sha256": "8d4e6a757f6c1a157104c70f53cb3d2c40e7d7958bda8952c0ae6052d7bb7003"
+      },
+      "process_exit_code": 0,
+      "script": "tests/progression/independent-boundaries.gd",
+      "user_arguments": [],
+      "verification_type": "FRESH_ISOLATED_EXECUTION_ON_PRESERVED_AND_PINNED_DEPENDENCY_BYTES"
+    },
+    {
+      "checks": 1408,
+      "diagnostics": "No SCRIPT ERROR, ERROR, WARNING or leak marker.",
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "valid_states_and_lifetime",
+      "log": {
+        "bytes": 158,
+        "git_blob_sha": "3ba76628afe2a009f3dc0e7f7ba06c45242a8645",
+        "mode": "100644",
+        "sha256": "dc216397a43f5437d1f3c066d6956fb08bd1ae8913c92e36c67e4dfbbe2c41ee"
+      },
+      "process_exit_code": 0,
+      "script": "tests/progression/independent-valid-states.gd",
+      "user_arguments": [],
+      "verification_type": "FRESH_ISOLATED_EXECUTION_ON_PRESERVED_AND_PINNED_DEPENDENCY_BYTES"
+    }
+  ],
+  "full_candidate_executed": false,
+  "not_established": [
+    "Actual Core authority or durable choice commits",
+    "Seal spending and complete boss seal-ledger equality",
+    "Queued-offer once-only activation and stale-selection rejection",
+    "Zero-choice healing",
+    "Actual attack execution and snapshot integration",
+    "Save migration or restore",
+    "Streamed-world adoption",
+    "Full contracts or full game test suite",
+    "Android device input, gameplay, performance, balance or art acceptance",
+    "APK build or signing"
+  ],
+  "observed_final_review_results": [
+    {
+      "checks": 326,
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "focused_progression",
+      "log": {
+        "bytes": 102,
+        "git_blob_sha": "a1de9dd63f093be4906a2a8642166924bdbc9b66",
+        "mode": "100644",
+        "sha256": "fcaafd37260d7d443aaaf412df36a372f7e4512c1da03e02c9fceaa0f0194edc"
+      },
+      "process_exit_code": 0,
+      "scope": "Bounded progression modules and DTOs only; not a game integration pass.",
+      "verification_type": "READ_AND_HASH_PREVIOUS_FINAL_REVIEW_LOG"
+    },
+    {
+      "checks": 54,
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "hostile_boundaries",
+      "log": {
+        "bytes": 122,
+        "git_blob_sha": "edbc7717291985b40b2765d99bfcf1e28699cfbe",
+        "mode": "100644",
+        "sha256": "8d4e6a757f6c1a157104c70f53cb3d2c40e7d7958bda8952c0ae6052d7bb7003"
+      },
+      "process_exit_code": 0,
+      "scope": "Bounded progression modules and DTOs only; not a game integration pass.",
+      "verification_type": "READ_AND_HASH_PREVIOUS_FINAL_REVIEW_LOG"
+    },
+    {
+      "checks": 1408,
+      "engine": "4.6.3.stable.official.7d41c59c4",
+      "failures": 0,
+      "id": "valid_states_and_lifetime",
+      "log": {
+        "bytes": 158,
+        "git_blob_sha": "3ba76628afe2a009f3dc0e7f7ba06c45242a8645",
+        "mode": "100644",
+        "sha256": "dc216397a43f5437d1f3c066d6956fb08bd1ae8913c92e36c67e4dfbbe2c41ee"
+      },
+      "process_exit_code": 0,
+      "scope": "Bounded progression modules and DTOs only; not a game integration pass.",
+      "verification_type": "READ_AND_HASH_PREVIOUS_FINAL_REVIEW_LOG"
+    }
+  ],
+  "replay_inputs": [
+    {
+      "bytes": 2382,
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "mode": "100644",
+      "path": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+    },
+    {
+      "bytes": 1943,
+      "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+      "mode": "100644",
+      "path": "data/evolutions.json",
+      "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+    },
+    {
+      "bytes": 1588,
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "mode": "100644",
+      "path": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+    },
+    {
+      "bytes": 9177,
+      "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+      "mode": "100644",
+      "path": "game/progression/evolution_catalog.gd",
+      "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+    },
+    {
+      "bytes": 4967,
+      "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+      "mode": "100644",
+      "path": "game/progression/growth_offer_service.gd",
+      "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+    },
+    {
+      "bytes": 2164,
+      "git_blob_sha": "3b77d334782fbc76aac0c42957c66a72d80a6543",
+      "mode": "100644",
+      "path": "game/progression/progression_view.gd",
+      "sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f"
+    },
+    {
+      "bytes": 15321,
+      "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+      "mode": "100644",
+      "path": "game/progression/upgrade_catalog.gd",
+      "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+    },
+    {
+      "bytes": 181,
+      "git_blob_sha": "620759ab1af406708c26ec561580307b27164d62",
+      "mode": "100644",
+      "path": "project.godot",
+      "sha256": "165b19ad3a6007c073f68f837b145003e08940ee8a8c0961763a0df367e92288"
+    },
+    {
+      "bytes": 5248,
+      "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+      "mode": "100644",
+      "path": "tests/fixtures/evolution_supply/progression_source_offers.json",
+      "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+    },
+    {
+      "bytes": 2375,
+      "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+      "mode": "100644",
+      "path": "tests/fixtures/evolution_supply_fixture.gd",
+      "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+    },
+    {
+      "bytes": 5186,
+      "git_blob_sha": "98e30fb99454f127fb3d6f4fb70682a395b2f44d",
+      "mode": "100644",
+      "path": "tests/progression/independent-boundaries.gd",
+      "sha256": "142bc3f4ae61ee9e5e50981a83dedacb15aa2dedc42e040dd9e353336756b572"
+    },
+    {
+      "bytes": 5797,
+      "git_blob_sha": "5dce5aa784d2aee89c7f0c004f3aa6a485371604",
+      "mode": "100644",
+      "path": "tests/progression/independent-valid-states.gd",
+      "sha256": "b711f7ddede987e711dabfabe3995c4b047528afb1126e24703e96c4396bb12f"
+    },
+    {
+      "bytes": 1431,
+      "git_blob_sha": "c66a02ed663bb535a9158ad8fbc5ed41b083b0d5",
+      "mode": "100644",
+      "path": "tests/progression/progression_test_fixture.gd",
+      "sha256": "8c4dce4e7920ec53ec1ac586909540e1201abff603663f3556ecd293b7dc2152"
+    },
+    {
+      "bytes": 6737,
+      "git_blob_sha": "6e67cc7d3c1ba2695b036ca42c2e7aaecc889d69",
+      "mode": "100644",
+      "path": "tests/progression/test_catalog_boundaries.gd",
+      "sha256": "ea4d8121359e4bd9643fc1cf110620274bd5ca7f9ec339db9ebecfcf0b659011"
+    },
+    {
+      "bytes": 6259,
+      "git_blob_sha": "50cef35ae480fe1e2de136fd8823619df4dfdcce",
+      "mode": "100644",
+      "path": "tests/progression/test_evolution_catalog.gd",
+      "sha256": "1a3d8bf1a4f4591968d8eba617b706a4ac230bda2578eef2a83f8c7afa4afd06"
+    },
+    {
+      "bytes": 7373,
+      "git_blob_sha": "920a5cbf3a191f60736985aba5e16f072978c7f0",
+      "mode": "100644",
+      "path": "tests/progression/test_growth_offers.gd",
+      "sha256": "b683183e890c7009b63dfcc000a1b9983ad917ef08a44b2b073698e43bca2814"
+    },
+    {
+      "bytes": 4325,
+      "git_blob_sha": "4904f473d734068c19ee688ae438194e00f80a23",
+      "mode": "100644",
+      "path": "tests/progression/test_progression_view.gd",
+      "sha256": "6b2875a7ffcc97a39adbc0fea4dc4f6b204153dd5aae247fa310bda48ecbbfa4"
+    },
+    {
+      "bytes": 4229,
+      "git_blob_sha": "8579fbb3fba1330bb35f85acd92f2760efde9aa7",
+      "mode": "100644",
+      "path": "tests/progression/test_review_boundaries.gd",
+      "sha256": "66cef95ee56a4a7376e0f3ee5a4e04f33d79b9bd53be33fafc5d98ff59370356"
+    },
+    {
+      "bytes": 1505,
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "mode": "100644",
+      "path": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    }
+  ],
+  "sampled_legal_states": 64,
+  "scope": "NEW progression rules, offer materialization and read-only views only. The small fixture states are not valid full Core saves.",
+  "weak_owner_release_cycles": 128
+}

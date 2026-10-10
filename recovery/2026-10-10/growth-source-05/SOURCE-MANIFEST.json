@@ -1,0 +1,434 @@
+{
+  "allowed_prefix": "recovery/2026-10-10/growth-source-05/",
+  "content_origin": "NEW_IMPLEMENTATION_NOT_RECOVERED_LOST_ORIGINALS",
+  "dependencies_not_included": [
+    {
+      "blob_url": "https://api.github.com/repos/shaterguy/shiganshina-survivors/git/blobs/e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "bytes": 2382,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_INCLUDED",
+      "commit": "31a097f032a49375467197705883287167a91aad",
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "mode": "100644",
+      "restore_target": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f",
+      "tree": "f56f1ce7290be12e4456e1e1de281fef0cdcb253",
+      "verification": "Local cached Git-tree entry and byte comparison; no new remote request."
+    },
+    {
+      "blob_url": "https://api.github.com/repos/shaterguy/shiganshina-survivors/git/blobs/1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "bytes": 1588,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_INCLUDED",
+      "commit": "31a097f032a49375467197705883287167a91aad",
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "mode": "100644",
+      "restore_target": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af",
+      "tree": "f56f1ce7290be12e4456e1e1de281fef0cdcb253",
+      "verification": "Local cached Git-tree entry and byte comparison; no new remote request."
+    },
+    {
+      "blob_url": "https://api.github.com/repos/shaterguy/shiganshina-survivors/git/blobs/fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "bytes": 1505,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_INCLUDED",
+      "commit": "31a097f032a49375467197705883287167a91aad",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "mode": "100644",
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6",
+      "tree": "f56f1ce7290be12e4456e1e1de281fef0cdcb253",
+      "verification": "Local cached Git-tree entry and byte comparison; no new remote request."
+    },
+    {
+      "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply_fixture.gd.txt",
+      "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+      "bytes": 2375,
+      "classification": "EXACT_PRIOR_ARCHIVE_REFERENCE_NOT_INCLUDED",
+      "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+      "mode": "100644",
+      "restore_target": "tests/fixtures/evolution_supply_fixture.gd",
+      "scope": "Test-only fixture and stored materialized offer; no real Core validator.",
+      "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+    },
+    {
+      "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_source_offers.json.txt",
+      "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+      "bytes": 5248,
+      "classification": "EXACT_PRIOR_ARCHIVE_REFERENCE_NOT_INCLUDED",
+      "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+      "mode": "100644",
+      "restore_target": "tests/fixtures/evolution_supply/progression_source_offers.json",
+      "scope": "Test-only fixture and stored materialized offer; no real Core validator.",
+      "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+    }
+  ],
+  "derived_product_documents": 4,
+  "exact_independent_probe_files": 2,
+  "exact_new_implementation_files": 11,
+  "mapping": [
+    {
+      "approval": {
+        "entry_sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/data/evolutions.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 1943,
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "mode": "100644",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      "restore_target": "data/evolutions.json",
+      "source": {
+        "bytes": 1943,
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "mode": "100644",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/game/progression/evolution_catalog.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 9177,
+        "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+        "mode": "100644",
+        "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+      },
+      "restore_target": "game/progression/evolution_catalog.gd",
+      "source": {
+        "bytes": 9177,
+        "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+        "mode": "100644",
+        "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/game/progression/growth_offer_service.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 4967,
+        "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+        "mode": "100644",
+        "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+      },
+      "restore_target": "game/progression/growth_offer_service.gd",
+      "source": {
+        "bytes": 4967,
+        "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+        "mode": "100644",
+        "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/game/progression/progression_view.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 2164,
+        "git_blob_sha": "3b77d334782fbc76aac0c42957c66a72d80a6543",
+        "mode": "100644",
+        "sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f"
+      },
+      "restore_target": "game/progression/progression_view.gd",
+      "source": {
+        "bytes": 2164,
+        "git_blob_sha": "3b77d334782fbc76aac0c42957c66a72d80a6543",
+        "mode": "100644",
+        "sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/game/progression/upgrade_catalog.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 15321,
+        "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+        "mode": "100644",
+        "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+      },
+      "restore_target": "game/progression/upgrade_catalog.gd",
+      "source": {
+        "bytes": 15321,
+        "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+        "mode": "100644",
+        "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "142bc3f4ae61ee9e5e50981a83dedacb15aa2dedc42e040dd9e353336756b572",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/independent-boundaries.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_TEST_BYTES",
+      "origin": "NEW_INDEPENDENT_REGRESSION_TEST",
+      "preserved": {
+        "bytes": 5186,
+        "git_blob_sha": "98e30fb99454f127fb3d6f4fb70682a395b2f44d",
+        "mode": "100644",
+        "sha256": "142bc3f4ae61ee9e5e50981a83dedacb15aa2dedc42e040dd9e353336756b572"
+      },
+      "restore_target": "tests/progression/independent-boundaries.gd",
+      "source": {
+        "bytes": 5186,
+        "git_blob_sha": "98e30fb99454f127fb3d6f4fb70682a395b2f44d",
+        "mode": "100644",
+        "sha256": "142bc3f4ae61ee9e5e50981a83dedacb15aa2dedc42e040dd9e353336756b572"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "b711f7ddede987e711dabfabe3995c4b047528afb1126e24703e96c4396bb12f",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/independent-valid-states.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_TEST_BYTES",
+      "origin": "NEW_INDEPENDENT_REGRESSION_TEST",
+      "preserved": {
+        "bytes": 5797,
+        "git_blob_sha": "5dce5aa784d2aee89c7f0c004f3aa6a485371604",
+        "mode": "100644",
+        "sha256": "b711f7ddede987e711dabfabe3995c4b047528afb1126e24703e96c4396bb12f"
+      },
+      "restore_target": "tests/progression/independent-valid-states.gd",
+      "source": {
+        "bytes": 5797,
+        "git_blob_sha": "5dce5aa784d2aee89c7f0c004f3aa6a485371604",
+        "mode": "100644",
+        "sha256": "b711f7ddede987e711dabfabe3995c4b047528afb1126e24703e96c4396bb12f"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "8c4dce4e7920ec53ec1ac586909540e1201abff603663f3556ecd293b7dc2152",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/progression_test_fixture.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 1431,
+        "git_blob_sha": "c66a02ed663bb535a9158ad8fbc5ed41b083b0d5",
+        "mode": "100644",
+        "sha256": "8c4dce4e7920ec53ec1ac586909540e1201abff603663f3556ecd293b7dc2152"
+      },
+      "restore_target": "tests/progression/progression_test_fixture.gd",
+      "source": {
+        "bytes": 1431,
+        "git_blob_sha": "c66a02ed663bb535a9158ad8fbc5ed41b083b0d5",
+        "mode": "100644",
+        "sha256": "8c4dce4e7920ec53ec1ac586909540e1201abff603663f3556ecd293b7dc2152"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "ea4d8121359e4bd9643fc1cf110620274bd5ca7f9ec339db9ebecfcf0b659011",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/test_catalog_boundaries.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 6737,
+        "git_blob_sha": "6e67cc7d3c1ba2695b036ca42c2e7aaecc889d69",
+        "mode": "100644",
+        "sha256": "ea4d8121359e4bd9643fc1cf110620274bd5ca7f9ec339db9ebecfcf0b659011"
+      },
+      "restore_target": "tests/progression/test_catalog_boundaries.gd",
+      "source": {
+        "bytes": 6737,
+        "git_blob_sha": "6e67cc7d3c1ba2695b036ca42c2e7aaecc889d69",
+        "mode": "100644",
+        "sha256": "ea4d8121359e4bd9643fc1cf110620274bd5ca7f9ec339db9ebecfcf0b659011"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "1a3d8bf1a4f4591968d8eba617b706a4ac230bda2578eef2a83f8c7afa4afd06",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/test_evolution_catalog.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 6259,
+        "git_blob_sha": "50cef35ae480fe1e2de136fd8823619df4dfdcce",
+        "mode": "100644",
+        "sha256": "1a3d8bf1a4f4591968d8eba617b706a4ac230bda2578eef2a83f8c7afa4afd06"
+      },
+      "restore_target": "tests/progression/test_evolution_catalog.gd",
+      "source": {
+        "bytes": 6259,
+        "git_blob_sha": "50cef35ae480fe1e2de136fd8823619df4dfdcce",
+        "mode": "100644",
+        "sha256": "1a3d8bf1a4f4591968d8eba617b706a4ac230bda2578eef2a83f8c7afa4afd06"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "b683183e890c7009b63dfcc000a1b9983ad917ef08a44b2b073698e43bca2814",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/test_growth_offers.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 7373,
+        "git_blob_sha": "920a5cbf3a191f60736985aba5e16f072978c7f0",
+        "mode": "100644",
+        "sha256": "b683183e890c7009b63dfcc000a1b9983ad917ef08a44b2b073698e43bca2814"
+      },
+      "restore_target": "tests/progression/test_growth_offers.gd",
+      "source": {
+        "bytes": 7373,
+        "git_blob_sha": "920a5cbf3a191f60736985aba5e16f072978c7f0",
+        "mode": "100644",
+        "sha256": "b683183e890c7009b63dfcc000a1b9983ad917ef08a44b2b073698e43bca2814"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "6b2875a7ffcc97a39adbc0fea4dc4f6b204153dd5aae247fa310bda48ecbbfa4",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/test_progression_view.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 4325,
+        "git_blob_sha": "4904f473d734068c19ee688ae438194e00f80a23",
+        "mode": "100644",
+        "sha256": "6b2875a7ffcc97a39adbc0fea4dc4f6b204153dd5aae247fa310bda48ecbbfa4"
+      },
+      "restore_target": "tests/progression/test_progression_view.gd",
+      "source": {
+        "bytes": 4325,
+        "git_blob_sha": "4904f473d734068c19ee688ae438194e00f80a23",
+        "mode": "100644",
+        "sha256": "6b2875a7ffcc97a39adbc0fea4dc4f6b204153dd5aae247fa310bda48ecbbfa4"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": {
+        "entry_sha256": "66cef95ee56a4a7376e0f3ee5a4e04f33d79b9bd53be33fafc5d98ff59370356",
+        "inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843"
+      },
+      "archive_path": "recovery/2026-10-10/growth-source-05/source/tests/progression/test_review_boundaries.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_REVIEWED_NEW_SOURCE_BYTES",
+      "origin": "NEW_IMPLEMENTATION_NOT_LOST_ORIGINAL",
+      "preserved": {
+        "bytes": 4229,
+        "git_blob_sha": "8579fbb3fba1330bb35f85acd92f2760efde9aa7",
+        "mode": "100644",
+        "sha256": "66cef95ee56a4a7376e0f3ee5a4e04f33d79b9bd53be33fafc5d98ff59370356"
+      },
+      "restore_target": "tests/progression/test_review_boundaries.gd",
+      "source": {
+        "bytes": 4229,
+        "git_blob_sha": "8579fbb3fba1330bb35f85acd92f2760efde9aa7",
+        "mode": "100644",
+        "sha256": "66cef95ee56a4a7376e0f3ee5a4e04f33d79b9bd53be33fafc5d98ff59370356"
+      },
+      "transformations": [
+        "Inert .txt suffix only; exact file bytes retained."
+      ]
+    },
+    {
+      "approval": null,
+      "archive_path": "recovery/2026-10-10/growth-source-05/test-support/project.godot.txt",
+      "byte_equal_to_source": true,
+      "classification": "NEW_PRESERVATION_TEST_SUPPORT",
+      "origin": "NEW_MINIMAL_HEADLESS_PROJECT_NOT_GAME_CONFIGURATION",
+      "preserved": {
+        "bytes": 181,
+        "git_blob_sha": "620759ab1af406708c26ec561580307b27164d62",
+        "mode": "100644",
+        "sha256": "165b19ad3a6007c073f68f837b145003e08940ee8a8c0961763a0df367e92288"
+      },
+      "restore_target": "project.godot",
+      "source": {
+        "bytes": 181,
+        "git_blob_sha": "620759ab1af406708c26ec561580307b27164d62",
+        "mode": "100644",
+        "sha256": "165b19ad3a6007c073f68f837b145003e08940ee8a8c0961763a0df367e92288"
+      },
+      "transformations": [
+        "New minimal headless replay configuration; no original-game configuration claim."
+      ]
+    }
+  ],
+  "new_test_support_files": 1,
+  "restore_rule": "For mapped inert snapshots remove only the final .txt and use restore_target in a separate empty test workspace. Resolve all declared dependencies at their exact hashes. Nothing is activated automatically.",
+  "schema_version": 1,
+  "source_identity": "The eleven changed source files and two independent probes match the final accepted inventory byte for byte. Baseline data are unchanged exact Git references. Derived documents make no original-source claim."
+}

@@ -1,0 +1,95 @@
+extends SceneTree
+const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
+const Views = preload("res://game/progression/progression_view.gd")
+const Offers = preload("res://game/progression/growth_offer_service.gd")
+const Fixture = preload("res://tests/progression/progression_test_fixture.gd")
+var checks := 0
+var failures := 0
+func check(value: bool, label: String):
+	checks += 1
+	if not value:
+		failures += 1
+		push_error("INDEPENDENT_BOUNDARY_FAIL: "+label)
+func _initialize(): call_deferred("run")
+func active_state(offers):
+	var state := Fixture.state()
+	state.upgrade_offer = offers.materialize(state,Fixture.descriptor()).offer
+	return state
+func run():
+	var catalog = Upgrades.new()
+	var offers = Offers.new(catalog)
+	var views = Views.new(catalog)
+	var eq := Fixture.read("res://data/equipment.json")
+	var pa := Fixture.read("res://data/passives.json")
+	var invalid_eq := eq.duplicate(true)
+	invalid_eq.items.blade_slash.damage = -1
+	var invalid_catalog = Upgrades.new(invalid_eq,pa)
+	check(not invalid_catalog.validate().is_empty(),"negative damage catalog rejected")
+	check(invalid_catalog.weapon_stats(Fixture.state(),"blade_slash",1).is_empty(),"rejected catalog cannot expose weapon stats")
+	var invalid_pa := pa.duplicate(true)
+	invalid_pa.items.damage.increment = -1
+	invalid_catalog = Upgrades.new(eq,invalid_pa)
+	var state := Fixture.state()
+	state.passives = {"damage":2}
+	check(not invalid_catalog.validate().is_empty(),"negative damage passive rejected")
+	check(invalid_catalog.stat(state,"damage_multiplier",1.0) == 1.0,"invalid catalog exposes only neutral finite base")
+	check(invalid_catalog.stat(state,"damage_multiplier",NAN) == 0.0,"invalid nonfinite base sanitized")
+	for malformed in [{"bad":true},[],1,true,null,""]:
+		state = active_state(offers)
+		state.run_config.target_evolution_id = malformed
+		check(views.build(state).is_empty(),"malformed target rejected without runtime error: "+str(malformed))
+		check(catalog.decorate_option(state,state.upgrade_offer.options[0]).is_empty(),"direct decorator rejects malformed target")
+	state = active_state(offers)
+	var foreign := RefCounted.new()
+	foreign.set_meta("amount",1)
+	state.upgrade_offer.foreign = foreign
+	check(views.build(state).is_empty(),"Object offer metadata rejected before duplicate")
+	check(foreign.get_meta("amount") == 1,"rejected view leaves source Object metadata unchanged")
+	state = active_state(offers)
+	state.upgrade_offer.options[0].extra = NAN
+	check(views.build(state).is_empty(),"NaN option metadata rejected")
+	check(catalog.decorate_option(state,state.upgrade_offer.options[0]).is_empty(),"direct decorator rejects NaN metadata")
+	state = active_state(offers)
+	var loop: Array = []
+	loop.append(loop)
+	state.upgrade_offer.foreign = loop
+	check(views.build(state).is_empty(),"cyclic source metadata rejected within bounded recursion")
+	loop.clear()
+	for metadata in [foreign,NAN,INF,Vector2.ONE]:
+		state = Fixture.state()
+		state.run_config.extra = metadata
+		check(not offers.materialize(state,Fixture.descriptor()).get("ok",false),"materializer rejects unsafe config fragment")
+	for field in ["base_hp","pickup_radius"]:
+		for value in [NAN,INF,-1,{"bad":1},"100"]:
+			state = Fixture.state()
+			state.rules[field] = value
+			check(not offers.materialize(state,Fixture.descriptor()).get("ok",false),"materializer rejects malformed calculation field "+field)
+			state.upgrade_offer = active_state(offers).upgrade_offer
+			check(views.build(state).is_empty(),"view rejects malformed calculation field "+field)
+	state = active_state(offers)
+	state.upgrade_offer.extra = {"safe":[1,2,3]}
+	state.upgrade_offer.options[0].extra = {"safe":true}
+	var view: Dictionary = views.build(state)
+	check(not view.is_empty() and not view.active_offer.has("extra") and not view.active_offer.options[0].has("extra"),"safe unknown metadata omitted from projected view")
+	check(Upgrades.json_data_valid(view),"projected view remains finite JSON")
+	state = active_state(offers)
+	state.upgrade_offer.options.append(state.upgrade_offer.options[0].duplicate(true))
+	check(views.build(state).is_empty(),"invalid excess/duplicate options rejected")
+	state = active_state(offers)
+	state.upgrade_offer.options = [state.upgrade_offer.options[0],state.upgrade_offer.options[0].duplicate(true)]
+	check(views.build(state).is_empty(),"two duplicate options rejected")
+	state = active_state(offers)
+	state.upgrade_offer.selected_option_id = "foreign:focus"
+	check(views.build(state).is_empty(),"focus not among options rejected")
+	state = active_state(offers)
+	state.entities = []
+	for index in range(1000): state.entities.append({"id":"enemy:%d"%index,"hp":10,"position":[0,0]})
+	var before := state.duplicate(true)
+	check(not views.build(state).is_empty(),"unrelated large entity array does not trip catalog-fragment limits")
+	check(state == before,"large state remains unchanged")
+	state.upgrade_offer = {}
+	check(offers.materialize(state,Fixture.descriptor()).get("ok",false),"materializer does not traverse unrelated large entities")
+	await process_frame
+	await process_frame
+	print("INDEPENDENT_BOUNDARY_RESULT checks=%d failures=%d"%[checks,failures])
+	quit(0 if failures == 0 else 1)

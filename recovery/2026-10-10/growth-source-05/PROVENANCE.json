@@ -1,0 +1,59 @@
+{
+  "archive_policy": "Deterministic USTAR, sorted regular files, mode 0644, zero uid/gid/mtime, empty uname/gname; all code/data/config snapshots inert with final .txt suffix.",
+  "chapter": "시간시나구 탈출",
+  "classification": "DERIVED_PRODUCT_PROVENANCE_NOT_EXACT_SOURCE",
+  "content_revision": "ch01.3-rebuild.1",
+  "date_utc": "2026-10-10",
+  "document_derivation": {
+    "PROVENANCE.json": [
+      "Records derivation and source evidence hashes without embedding source reports."
+    ],
+    "README.md": [
+      "New product-facing summary of supported public APIs, arithmetic rules, preservation format, replay steps and explicit limits.",
+      "No source document was edited or represented as an exact copy."
+    ],
+    "SOURCE-MANIFEST.json": [
+      "New inventory of exact inert snapshots, NEW test support, origin classes and pinned external dependencies."
+    ],
+    "TEST-RESULTS.json": [
+      "Extracted bounded result facts, log hashes and exit status from prior verification evidence.",
+      "Added fresh isolated replay results and input identity; no broad pass inferred."
+    ]
+  },
+  "origin": "NEW_REIMPLEMENTATION",
+  "prior_archive_dependency_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+  "product": "진격의 거인: 인류의 날개",
+  "publication_status": "LOCAL_ONLY_NOT_UPLOADED_OR_COMMITTED",
+  "remote_operations_performed": false,
+  "review_scope": "Progression catalogs, deterministic offer materialization, read-only DTO projection and associated tests only.",
+  "reviewed_source_comments": "Existing C1/R0 labels in exact code comments are test-tranche identifiers; no role assignment documents are included.",
+  "scope_exclusions": [
+    "Actual Core source and authority",
+    "Raw source reports and execution logs",
+    "Initial deliberately failing defect reproducer",
+    "Unrelated game modules or art",
+    "Build outputs or signing material"
+  ],
+  "source_bytes_modified": false,
+  "source_inventory_sha256": "4903d4fcd87755ff6ef75fa77b5c4e54441d6e361a02cdd87e0feecb776fd843",
+  "supporting_document_hashes": {
+    "accepted_bounded_review": {
+      "bytes": 5352,
+      "git_blob_sha": "92ccfb7503ab44c786860a7740278f90bc371755",
+      "mode": "100644",
+      "sha256": "af1bed5f0f023f1db331c4352c5b97e2474c8beada02ec0d57064f333fbc8704"
+    },
+    "implementation_interface_reference": {
+      "bytes": 11239,
+      "git_blob_sha": "a363b5a348b641940c52effe5283790b70bf33e9",
+      "mode": "100644",
+      "sha256": "58c7a479793f6a33e332a1549c29de9c83e84637f5742e8598bbf119ebe140ee"
+    },
+    "implementation_inventory": {
+      "bytes": 3784,
+      "git_blob_sha": "4dc6a8a0be4a7b686b5eb0597bd0415fea6cfdff",
+      "mode": "100644",
+      "sha256": "97cb1220e283adf28613e881c97cd3eb2be8d084c54b689e9578935e6b7d04d1"
+    }
+  }
+}
