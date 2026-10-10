@@ -1,0 +1,40 @@
+extends RefCounted
+const F=preload("res://tests/core/core_fixture.gd")
+const A=preload("res://tests/core/test_rebuild_attack_events.gd")
+const L=preload("res://tests/core/test_rebuild_growth_lifecycle.gd")
+func run(t) -> void:
+	var sim=load("res://game/core/run_simulation.gd").new()
+	var chapter:=F.v2_chapter()
+	var state: Dictionary=sim.new_run(chapter,42,F.run_config())
+	F.step(sim,state,Vector2.ZERO,[A._spawn("target","brute",[45,0])])
+	for patch in [{"max_hp":9999.0},{"hp":101.0},{"damage":10000.0},{"speed":10000.0},{"radius":999.0},{"xp":99999},{"boss_id":"ch01_b05"},{"entity_id":"alias"}]:
+		var bad:=state.duplicate(true)
+		bad.entities[0].merge(patch,true)
+		t.check(not sim.restore(bad).get("ok",false),"restored entity cannot forge authored identity/stats: "+str(patch))
+	var bad:=state.duplicate(true)
+	bad.drops.append({"id":bad.next_entity_id,"position":[100,0],"xp":1})
+	t.check(not sim.restore(bad).get("ok",false),"next_entity high-water must exceed every saved numeric ID")
+	var clean: Dictionary=sim.new_run(chapter,42,F.run_config())
+	sim.set_pause(clean,"upgrade",true)
+	t.check(clean.pause_reasons.is_empty() and sim.restore(clean).get("ok",false),"upgrade pause cannot be fabricated without an active offer")
+	L.gain(sim,clean,24)
+	var before:=clean.duplicate(true)
+	sim.set_pause(clean,"upgrade",false)
+	t.check(clean==before,"active modal upgrade pause cannot be cleared by a generic resume")
+	clean.view_revision=2147483647
+	var selected: String=clean.upgrade_offer.selected_option_id
+	for option in clean.upgrade_offer.options:
+		if option.option_id!=selected:
+			before=clean.duplicate(true)
+			sim.set_offer_focus(clean,option.option_id)
+			t.check(clean==before and sim.restore(clean).get("ok",false),"exhausted view revision rejects focus mutation")
+			break
+	var terminal: Dictionary=sim.new_run(chapter,42,F.run_config())
+	sim.abandon_run(terminal)
+	before=terminal.duplicate(true)
+	sim.set_pause(terminal,"background",true)
+	t.check(terminal==before,"terminal semantic pause does not change settled checkpoint")
+	var exhausted: Dictionary=sim.new_run(chapter,42,F.run_config())
+	exhausted.event_seq=2147483647
+	before=exhausted.duplicate(true)
+	t.check(sim.abandon_run(exhausted).is_empty() and exhausted==before and sim.restore(exhausted).get("ok",false),"abandon cannot overflow event identity or partially mutate")

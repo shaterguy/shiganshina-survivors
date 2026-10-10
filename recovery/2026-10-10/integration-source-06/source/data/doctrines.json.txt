@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "content_revision": "ch01.3-rebuild.1",
+  "items": {
+    "doctrine_standard": {
+      "doctrine_id": "doctrine_standard",
+      "base_hp": 100,
+      "base_move_speed": 150,
+      "initial_equipment": {
+        "blade_slash": 1
+      },
+      "initial_passives": {},
+      "unlock_item_id": "",
+      "name": "표준 교리",
+      "description": "쌍검 Lv1, 기본 체력 100, 기본 이동 속도 150으로 시작합니다.",
+      "tradeoff_text": "시작 패시브 없이 균형 잡힌 기본 능력으로 출격합니다."
+    },
+    "doctrine_mobile": {
+      "doctrine_id": "doctrine_mobile",
+      "base_hp": 85,
+      "base_move_speed": 150,
+      "initial_equipment": {
+        "blade_slash": 1
+      },
+      "initial_passives": {
+        "movement": 1
+      },
+      "unlock_item_id": "doctrine_mobile",
+      "name": "기동 교리",
+      "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+      "tradeoff_text": "기본 최대 체력 15를 포기합니다."
+    },
+    "doctrine_artillery": {
+      "doctrine_id": "doctrine_artillery",
+      "base_hp": 100,
+      "base_move_speed": 135,
+      "initial_equipment": {
+        "wall_cannon": 1
+      },
+      "initial_passives": {
+        "fire_interval": 1
+      },
+      "unlock_item_id": "doctrine_artillery",
+      "name": "포격 교리",
+      "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+      "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다."
+    }
+  }
+}

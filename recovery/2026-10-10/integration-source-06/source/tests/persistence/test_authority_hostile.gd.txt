@@ -1,0 +1,74 @@
+extends RefCounted
+const Store = preload("res://game/persistence/game_save_store.gd")
+const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
+const Cases = preload("res://tests/persistence/test_game_save_store.gd")
+var _fixture = Fixture.new()
+var _cases = Cases.new()
+func run(t) -> void:
+	var root := _cases._directory("locations")
+	var store = Store.new(root.path_join("saves"),_fixture.validate_checkpoint)
+	t.check(store.has_method("inspect_known_locations"),"E2 bounded two-location diagnostic API exists")
+	if not store.has_method("inspect_known_locations"): return
+	var empty: Dictionary = store.inspect_known_locations(root)
+	t.check(empty.get("ok") == true and empty.get("decision") == "continue_canonical" and not empty.get("requires_choice",true),"E2 new install does not require recovery choice")
+	t.check(not DirAccess.dir_exists_absolute(root),"E2 empty diagnostic creates no directory")
+	var canonical := root.path_join("saves")
+	var source: Dictionary = _fixture.game_save()
+	source.store_revision = 1
+	var bytes := JSON.stringify(source,"  ")
+	_cases._write(canonical.path_join("game_save.json"),bytes)
+	var normal: Dictionary = store.inspect_known_locations(root)
+	t.check(normal.get("decision") == "continue_canonical" and not normal.get("requires_choice",true),"E2 canonical-only valid authority continues")
+	_cases._write(root.path_join("game_save.json"),bytes)
+	var identical: Dictionary = store.inspect_known_locations(root)
+	t.check(identical.get("decision") == "continue_canonical" and identical.get("duplicate_copy") == true and not identical.get("requires_choice",true),"E2 exact alternate authority copy is a notice, not permanent lock")
+	_cases._write(root.path_join("unrelated.txt"),"not inspected")
+	var ignore_unrelated: Dictionary = store.inspect_known_locations(root)
+	t.check(ignore_unrelated.get("decision") == "continue_canonical","E2 only six known filenames in each location are inspected")
+	var different := source.duplicate(true)
+	different.store_revision = 2
+	_cases._write(root.path_join("game_save.json"),JSON.stringify(different))
+	var conflict: Dictionary = store.inspect_known_locations(root)
+	t.check(conflict.get("decision") == "choose_lineage" and conflict.get("requires_choice") == true,"E2 same career newer revision never automatic winner")
+	different.career_id = "fedcba9876543210fedcba9876543210"
+	_cases._write(root.path_join("game_save.json"),JSON.stringify(different))
+	conflict = store.inspect_known_locations(root)
+	t.check(conflict.get("decision") == "choose_lineage","E2 different careers never silently merged")
+	_cases._write(root.path_join("game_save.json"),"{unverified secret-like raw text")
+	var bad: Dictionary = store.inspect_known_locations(root)
+	t.check(bad.get("requires_choice") == true and not JSON.stringify(bad).contains("secret-like"),"E2 raw corrupt values never become diagnostic UI data")
+	t.check(_cases._read(root.path_join("game_save.json")) == "{unverified secret-like raw text" and _cases._read(canonical.path_join("game_save.json")) == bytes,"E2 diagnosis never modifies either source")
+	var alternate_only := _cases._directory("alternate_only")
+	_cases._write(alternate_only.path_join("game_save.json"),bytes)
+	var root_only: Dictionary = Store.new(alternate_only.path_join("saves"),_fixture.validate_checkpoint).inspect_known_locations(alternate_only)
+	t.check(root_only.get("decision") == "choose_lineage" and not DirAccess.dir_exists_absolute(alternate_only.path_join("saves")),"E2 root-only existing authority never ignored to initialize canonical")
+	var legacy_root := _cases._directory("legacy_locations")
+	var legacy := {"schema_version":1,"settings":{"deadzone":0.2},"cleared_chapter_ids":[],"unlocked_character_ids":["garrison_01"],"best_runs":{}}
+	_cases._write(legacy_root.path_join("saves/profile.json"),JSON.stringify(legacy))
+	_cases._write(legacy_root.path_join("saves/checkpoint.json"),"{old run")
+	var legacy_view: Dictionary = Store.new(legacy_root.path_join("saves"),_fixture.validate_checkpoint).inspect_known_locations(legacy_root)
+	t.check(legacy_view.get("decision") == "continue_canonical" and not legacy_view.get("requires_choice",true),"E2 normal dev1 does not require lineage/recovery choice")
+	t.check(not FileAccess.file_exists(legacy_root.path_join("saves/game_save.json")),"E2 legacy diagnosis does not migrate")
+	var unreadable = Store.new(canonical,_fixture.validate_checkpoint,func(at):return ERR_UNAVAILABLE if at == "read_primary" else OK)
+	var retryable: Dictionary = unreadable.inspect_known_locations(root)
+	t.check(retryable.get("decision") == "retry_read" and not retryable.get("requires_choice",true),"E2 transient location read asks retry, not destructive choice")
+	var hostile: Dictionary = source.duplicate(true)
+	hostile.schema_version = 99
+	hostile.profile.supply_credits = "UNVERIFIED-CREDITS"
+	_cases._write(root.path_join("game_save.json"),JSON.stringify(hostile))
+	var future: Dictionary = store.inspect_known_locations(root)
+	t.check(future.get("decision") == "choose_lineage" and not JSON.stringify(future).contains("UNVERIFIED-CREDITS"),"E2 future whole authority is preserved without raw profile UI")
+	var race_root := _cases._directory("location_race")
+	var race_path := race_root.path_join("saves/game_save.json")
+	_cases._write(race_path,bytes)
+	var reads := [0]
+	var race_store = Store.new(race_root.path_join("saves"),_fixture.validate_checkpoint,func(stage):
+		if stage == "read_primary":
+			reads[0] += 1
+			if reads[0] == 2: _cases._write(race_path,JSON.stringify(different))
+		return OK)
+	var raced: Dictionary = race_store.inspect_known_locations(race_root)
+	t.check(raced.get("decision") == "retry_read" and not raced.get("requires_choice",true),"E2 source race invalidates diagnosis rather than mixing hash and summary")
+	for wrong in [null,123,true,{},[],""]:
+		var invalid: Dictionary = store.inspect_known_locations(wrong)
+		t.check(invalid.get("ok") == false,"E2 invalid diagnostic root fails safely")

@@ -1,0 +1,117 @@
+{
+  "chapter_id": "chapter_01_shiganshina",
+  "display_name": "시간시나구 탈출",
+  "content_revision": "ch01.3-rebuild.1",
+  "doctrine_ids": ["doctrine_standard", "doctrine_mobile", "doctrine_artillery"],
+  "evolution_ids": ["evo_wing_cut", "evo_crossfire"],
+  "story_year": 845,
+  "character_availability": [
+    {
+      "character_id": "garrison_01",
+      "unlock_condition": "default"
+    }
+  ],
+  "map_id": "shiganshina_streets",
+  "spawn_position": [
+    0,
+    0
+  ],
+  "allowed_equipment_ids": [
+    "blade_slash",
+    "spin_slash",
+    "odm_dash",
+    "reentry_combo",
+    "wall_cannon",
+    "ally_cover"
+  ],
+  "enemy_ids": [
+    "walker",
+    "runner",
+    "brute",
+    "sweeper",
+    "grabber"
+  ],
+  "boss_schedule": [
+    {
+      "tick": 18000,
+      "boss_id": "ch01_b05",
+      "enemy_id": "boss_charger"
+    },
+    {
+      "tick": 36000,
+      "boss_id": "ch01_b10",
+      "enemy_id": "boss_sweeper"
+    },
+    {
+      "tick": 54000,
+      "boss_id": "ch01_b15",
+      "enemy_id": "boss_leaper"
+    },
+    {
+      "tick": 72000,
+      "boss_id": "ch01_b20",
+      "enemy_id": "boss_grabber"
+    },
+    {
+      "tick": 90000,
+      "boss_id": "ch01_b25",
+      "enemy_id": "boss_abnormal"
+    }
+  ],
+  "story_events": [
+    {
+      "tick": 0,
+      "text": "845년, 시간시나구. 성벽이 무너졌다. 주민의 대피로를 지켜라."
+    },
+    {
+      "tick": 108000,
+      "text": "갑옷 거인이 접근한다. 마지막 주민이 배에 오를 때까지 버텨라."
+    }
+  ],
+  "clear_rule": "evacuate_then_exit",
+  "evacuation_ticks": 4500,
+  "escape_zone": [
+    -56,
+    320,
+    112,
+    80
+  ],
+  "next_unlocks": [],
+  "wave_schedule": [
+    {
+      "tick": 0,
+      "interval": 120,
+      "count": 1
+    },
+    {
+      "tick": 7200,
+      "interval": 90,
+      "count": 2
+    },
+    {
+      "tick": 18000,
+      "interval": 75,
+      "count": 3
+    },
+    {
+      "tick": 36000,
+      "interval": 60,
+      "count": 4
+    },
+    {
+      "tick": 54000,
+      "interval": 48,
+      "count": 5
+    },
+    {
+      "tick": 72000,
+      "interval": 36,
+      "count": 6
+    },
+    {
+      "tick": 90000,
+      "interval": 30,
+      "count": 7
+    }
+  ]
+}

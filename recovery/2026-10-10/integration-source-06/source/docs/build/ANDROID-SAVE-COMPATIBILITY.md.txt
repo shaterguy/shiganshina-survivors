@@ -1,0 +1,26 @@
+# Android title and save compatibility
+
+Reviewed against Godot 4.6.3 source on 2026-10-10.
+
+The display title changes to **진격의 거인: 인류의 날개**. Chapter 1 is **시간시나구 탈출**. The Android application ID stays `com.shaterguy.shiganshina.dev`; updates must use its existing signing lineage.
+
+## Storage location
+
+Godot's Android IO wrapper resolves the user-data directory through Java `getDataDir()`. That method uses the application's `Context.getFilesDir()` and does not use the display title. Therefore, changing the title while retaining application identity is expected to keep the same app-private save directory. This is source-based evidence, not a completed device upgrade test.
+
+Sources:
+- [Godot 4.6.3 Android IO wrapper, get_user_data_dir](https://github.com/godotengine/godot/blob/4.6.3-stable/platform/android/java_godot_io_wrapper.cpp#L111-L120)
+- [Godot 4.6.3 GodotIO.getDataDir](https://github.com/godotengine/godot/blob/4.6.3-stable/platform/android/java/lib/src/main/java/org/godotengine/godot/GodotIO.java#L151-L153)
+
+The delivered prototype's SaveStore defaults to `user://saves`. The new controller retains that subdirectory. Keeping the application-private root alone would not suffice if the save subdirectory changed. A static wiring regression checks this path; actual disk migration tests remain required. If conflicting root-level development save files exist, they must be diagnosed without automatic overwrite or movement and resolved through an explicit choice.
+
+Desktop development is a different case: its default user-data path can depend on the project name. Desktop tests must use explicit isolated temporary save directories; their fresh state must not be presented as successful Android migration.
+
+## Required migration behavior
+
+- Preserve existing profile settings, character/chapter history and original legacy checkpoint bytes.
+- Validate a supported whole save before adoption. An unsupported future authority is not replaced with an older backup.
+- If the current checkpoint cannot be resumed, offer an explicit preserve-old-run/start-new-run choice after validating the profile. Do not silently delete or reset the career.
+- An uncertain write is reconciled by reading back the same authority and operation identity before retrying. Temporary I/O failures must not permanently lock the game.
+
+Before delivery of a replacement APK, exercise migration in real filesystem tests and, when the existing device/install is available, verify an in-place APK update and unchanged settings/history. Device update verification remains pending.

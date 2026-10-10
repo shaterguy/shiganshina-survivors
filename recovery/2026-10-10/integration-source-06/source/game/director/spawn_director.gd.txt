@@ -1,0 +1,42 @@
+class_name SpawnDirector
+extends RefCounted
+const FINAL_TICK := 108000
+func plan(state: Dictionary, chapter: Dictionary) -> Array[Dictionary]:
+	var commands: Array[Dictionary] = []
+	if not state.pause_reasons.is_empty() or state.phase in ["won", "dead", "abandoned"]: return commands
+	var tick := int(state.active_tick) + 1
+	var player_position := Vector2(state.player.position[0], state.player.position[1])
+	if state.phase == "evacuation":
+		var final_age := tick - int(state.final_started_tick)
+		if final_age >= int(chapter.evacuation_ticks) and not state.get("evacuation_ready", false):
+			commands.append(_command("final_ready", "evacuation_ready", {}))
+		if final_age > 0 and final_age % 150 == 0:
+			commands.append(_hazard("final_%d" % tick, "armored", player_position, Vector2.DOWN, "circle", 56, 95, 30))
+		return commands
+	if int(state.survival_tick) + 1 >= FINAL_TICK:
+		commands.append(_command("final_begin", "begin_evacuation", {"boss_id":"ch01_final_armored", "escape_zone":chapter.escape_zone, "evacuation_ticks":chapter.evacuation_ticks}))
+		return commands
+	var next_id := int(state.next_entity_id)
+	for boss in chapter.boss_schedule:
+		if int(state.survival_tick) + 1 >= int(boss.tick) and not boss.boss_id in state.boss_ids_fired:
+			commands.append(_command(boss.boss_id, "spawn_boss", {"entity_id":next_id, "boss_id":boss.boss_id, "enemy_id":boss.enemy_id, "position":[player_position.x, player_position.y - 260], "scheduled_tick":boss.tick}))
+			next_id += 1
+	var wave := {"interval":120,"count":1}
+	for scheduled in chapter.get("wave_schedule",[]):
+		if int(state.survival_tick) >= int(scheduled.tick): wave = scheduled
+	var interval := int(wave.interval)
+	if int(state.survival_tick) < 7200: interval = maxi(114,120-int(state.survival_tick/1200))
+	if tick % interval == 0 and state.entities.size() < 180:
+		var available := mini(int(wave.count),180-state.entities.size())
+		var count := mini(chapter.enemy_ids.size(),1+int(state.survival_tick/7200))
+		for index in range(available):
+			var angle := fmod(float(tick*173+int(state.seed)*97+index*997),6283.0)/1000.0
+			var pos := player_position + Vector2.from_angle(angle)*290.0
+			var enemy_id: String = chapter.enemy_ids[(tick/interval+index)%count]
+			commands.append(_command("enemy_%d_%d" % [tick,index],"spawn_enemy",{"entity_id":next_id,"enemy_id":enemy_id,"position":[pos.x,pos.y],"spawned_tick":tick}))
+			next_id += 1
+	return commands
+func _command(id: String, kind: String, payload: Dictionary) -> Dictionary:
+	return {"command_id":id, "kind":kind, "payload":payload}
+func _hazard(id: String, source: String, origin: Vector2, direction: Vector2, shape: String, radius: float, warning: int, damage: int) -> Dictionary:
+	return _command(id, "telegraph_attack", {"source_id":source, "shape":shape, "origin":[origin.x,origin.y], "direction":[direction.x,direction.y], "radius":radius, "length":240, "width":40, "warning_ticks":warning, "active_ticks":12, "damage":damage})

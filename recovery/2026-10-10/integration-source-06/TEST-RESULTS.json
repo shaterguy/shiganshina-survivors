@@ -1,0 +1,252 @@
+{
+  "classification": "NEW_DERIVED_VERIFICATION_SUMMARY_NOT_ORIGINAL_DOCUMENT",
+  "core_attack_restore_review": {
+    "evidence": [
+      {
+        "bytes": 101,
+        "evidence_id": "review_additional",
+        "sha256": "e30ff264f7e8197c13ea6bdeaf001dfb7485e56a876dbdae0df29fb720088c0c"
+      },
+      {
+        "bytes": 154,
+        "evidence_id": "review_c2_authored",
+        "sha256": "30b07fe4cf947f2520f8f518eb5c8b54f727a7963fc41a082a1acb940e970582"
+      },
+      {
+        "bytes": 284,
+        "evidence_id": "review_extreme",
+        "sha256": "991280df5059e5885df58097cd979d8f98ec8bfcbfbb2cbaa4e6730bb1c6f16a"
+      },
+      {
+        "bytes": 1419,
+        "evidence_id": "review_hostile",
+        "sha256": "df09c453e932b48604d4cb9d306a656fde44e1070d2b9f6c8a81243cd0e0d3e5"
+      },
+      {
+        "bytes": 191,
+        "evidence_id": "review_independent",
+        "sha256": "472ad046a987ae352b64f5756a8c37a97c378d32fdbed4e9bac3f1e91e90ed6a"
+      },
+      {
+        "bytes": 100,
+        "evidence_id": "review_nested_counter_assertions",
+        "sha256": "888097198bbedfa4bdd656d8f98b8da4ea573be93c40a16f5aae892027f8ff82"
+      },
+      {
+        "bytes": 100,
+        "evidence_id": "review_variant_keys",
+        "sha256": "6ea06b8259ebd8b19fd1a9e916039859b7882a33f10e16b6193e6914c8aa2614"
+      }
+    ],
+    "independent_checks": 141,
+    "independent_failures": 0,
+    "scope": "Frozen tranche08 constructor, actual attacks and restore boundaries only. Growth/terminal lifecycle, streamed-world integration, UI, Android and full gameplay are excluded.",
+    "selected_authored_checks": 411,
+    "selected_authored_failures": 0,
+    "source_sha256": "d2deda44bcb0d065720884a722aeec2eea282d9c6798868fc8f4454b309be0f6",
+    "variant_inputs_are_not_rejection_assertions": true,
+    "variant_probe_inputs": 1409,
+    "variant_probe_runtime_errors": 0
+  },
+  "engine": "4.6.3.stable.official.7d41c59c4",
+  "fresh_preservation_results": {
+    "inputs": [
+      {
+        "bytes": 9605,
+        "path": "chapters/chapter_01/city_templates.json",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      {
+        "bytes": 2192,
+        "path": "chapters/chapter_01/manifest.json",
+        "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897"
+      },
+      {
+        "bytes": 2560,
+        "path": "chapters/chapter_01/map.json",
+        "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+      },
+      {
+        "bytes": 1636,
+        "path": "data/doctrines.json",
+        "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336"
+      },
+      {
+        "bytes": 2058,
+        "path": "data/enemies.json",
+        "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+      },
+      {
+        "bytes": 3818,
+        "path": "data/enemy_roles_ch01_3.json",
+        "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+      },
+      {
+        "bytes": 2382,
+        "path": "data/equipment.json",
+        "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+      },
+      {
+        "bytes": 1943,
+        "path": "data/evolutions.json",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      {
+        "bytes": 1588,
+        "path": "data/passives.json",
+        "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+      },
+      {
+        "bytes": 1644,
+        "path": "data/supply_shop.json",
+        "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f"
+      },
+      {
+        "bytes": 5737,
+        "path": "data/world_props.json",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      {
+        "bytes": 22986,
+        "path": "game/app/run_controller.gd",
+        "sha256": "dde7e9e50b16f9975634c64b48ab500314b1e665bb7587c548ff04aee8949c33"
+      },
+      {
+        "bytes": 9073,
+        "path": "game/combat/world_geometry.gd",
+        "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+      },
+      {
+        "bytes": 7372,
+        "path": "game/director/chapter_catalog.gd",
+        "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72"
+      },
+      {
+        "bytes": 5004,
+        "path": "game/persistence/save_store.gd",
+        "sha256": "0934d79697d2e4b36b1350f5e5b1220d1ce6a551b7fd93838141bc6302bc3d20"
+      },
+      {
+        "bytes": 1124,
+        "path": "tests/app/test_save_directory_identity.py",
+        "sha256": "c0aac95d6bf0be7043b8027e0121c44fad5c857225517fce81a01cb56d3607b8"
+      },
+      {
+        "bytes": 5687,
+        "path": "tests/integration/test_chapter_content_identity.gd",
+        "sha256": "c400971abd803f12f6083ffdfddb8789d25ec8792aa0537636165b2b3951681e"
+      },
+      {
+        "bytes": 1505,
+        "path": "tests/run_all.gd",
+        "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+      }
+    ],
+    "results": [
+      {
+        "checks": 30,
+        "diagnostic_markers": false,
+        "failures": 0,
+        "id": "chapter_definition_identity",
+        "log_bytes": 101,
+        "log_sha256": "5b87568f20368d1d45a2b8dad679f04d4037464fe81883867d000ec8b39272ab",
+        "process_exit_code": 0,
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      },
+      {
+        "diagnostic_markers": false,
+        "failures": 0,
+        "id": "save_directory_static",
+        "log_bytes": 408,
+        "log_sha256": "77acd453c3ceea818060ccecc5f4f20d41af8c750e8ab68192f8edbeb7912de5",
+        "process_exit_code": 0,
+        "tests": 2,
+        "verification": "FRESH_FROZEN_INPUT_EXECUTION"
+      }
+    ],
+    "scope": "Chapter definition identity and static save-directory wiring only. No complete controller/Core/save/store integration, migration, Android execution, or full-suite claim.",
+    "source_inputs_unchanged": true,
+    "support_project_sha256": "e1e2b73e176a3819f70f881a3c9567a497b5301f5e96caeb144b3e468edee135"
+  },
+  "full_candidate_observation": {
+    "checks": 66673,
+    "failures": 30,
+    "full_suite_pass_claimed": false,
+    "scope": "Prior shared-candidate run while other source was changing; not the frozen archive combination.",
+    "script_errors_present": true
+  },
+  "not_established": [
+    "Complete restored application, release build, APK export or signing",
+    "Exact original latest-source recovery",
+    "Full growth/terminal and streamed save integration",
+    "Real-device in-place Android update or save migration",
+    "Device gameplay, touch controls, performance, balance, or art acceptance"
+  ],
+  "persistence_source_identity_review": {
+    "diagnostics": "A prior-hostile invalid-backup case intentionally emits an operating-system fixture error; no unexpected runtime error was reported.",
+    "evidence": [
+      {
+        "bytes": 241,
+        "evidence_id": "run_remaining_race_probe",
+        "sha256": "cbe4ec1a16cfd7c33be137b7fa5856c0f2fa95ec3d572df65a00ade05f6da971"
+      },
+      {
+        "bytes": 1726,
+        "evidence_id": "run_hostile_review",
+        "sha256": "5cae738733225315203d6c2eb79670eaebcebbfbdbcfae7524d5c977789ab330"
+      },
+      {
+        "bytes": 215,
+        "evidence_id": "run_store_gate",
+        "sha256": "9197867bbeb5bede4297bce767adac604fd78b51d0f83d22f6613c7900cca5f7"
+      }
+    ],
+    "failures": 0,
+    "prior_hostile_checks": 264,
+    "scope": "Frozen gate-5 source-identity fixes and bounded prior store regressions. Later lineage/recovery-service changes are excluded.",
+    "source_identity_regression_checks": 11,
+    "store_checks": 144
+  },
+  "previous_bounded_results": [
+    {
+      "checks": 100,
+      "evidence": "PREVIOUS_EXECUTION_LOG_READ_AND_HASHED_NOT_FRESH_REPLAY",
+      "failures": 0,
+      "id": "controller_and_initial_authority",
+      "log": {
+        "bytes": 102,
+        "git_blob_sha": "246d795ac03e1467d98b8baa0efda10909d3c6b6",
+        "mode": "100644",
+        "sha256": "b82968033b3fe1921abb88d6fc303ded57ec0d70388425175525879624a901d5"
+      },
+      "scope": "Observed real app and initial-authority test subset; this exact multi-tranche archive was not rerun as a complete app."
+    },
+    {
+      "checks": 48,
+      "evidence": "PREVIOUS_EXECUTION_LOG_READ_AND_HASHED_NOT_FRESH_REPLAY",
+      "failures": 0,
+      "id": "integration_terminal_audio",
+      "log": {
+        "bytes": 101,
+        "git_blob_sha": "20aa203cc82ae36f26ec3bc1b6388e07206b503b",
+        "mode": "100644",
+        "sha256": "fc60d3c4e27a80ebf45dae2cc1102c2adbc8ea74d6b2a1eb703976d0fba94ee0"
+      },
+      "scope": "Observed integration tests only; no visual/audio-device or complete gameplay approval."
+    },
+    {
+      "checks": 198,
+      "evidence": "PREVIOUS_EXECUTION_LOG_READ_AND_HASHED_NOT_FRESH_REPLAY",
+      "failures": 0,
+      "id": "streamed_helper",
+      "log": {
+        "bytes": 102,
+        "git_blob_sha": "95cc1599173c3edd9a327ede258797e919488081",
+        "mode": "100644",
+        "sha256": "eccf98f38009c478780266156c8bad8fb66a4188033669ece8392296734515a2"
+      },
+      "scope": "NEW streamed helper focused source tests only; not full world/UI/app acceptance."
+    }
+  ],
+  "separate_test_counts_must_not_be_summed_into_quality_or_full_suite_score": true
+}

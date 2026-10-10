@@ -1,0 +1,59 @@
+extends RefCounted
+const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
+const Core = preload("res://game/core/run_simulation.gd")
+const Chapter = preload("res://game/director/chapter_catalog.gd")
+func run(t) -> void:
+	var fixture = Fixture.new()
+	var shape = Contracts.new(fixture.validate_checkpoint)
+	var empty: Dictionary = fixture.game_save()
+	t.check(not Contracts.new(Callable()).validate(empty).is_empty(),"E2 missing real validator always fails closed")
+	t.check(shape.validate(empty).is_empty(),"E2 empty career contract with explicit SHAPE validator")
+	var current: Dictionary = fixture.game_save("started")
+	t.check(shape.validate(current).is_empty(),"E2 current rebuild revision accepted by envelope with SHAPE callback")
+	for revision in ["ch01.3","ch01.3-rebuild.1"]:
+		for field in ["content_revision","run_id","config_run_id","config_run_serial"]:
+			var save: Dictionary = fixture.game_save("started")
+			save.checkpoint.content_revision = revision
+			match field:
+				"content_revision": save.checkpoint.content_revision = 123
+				"run_id": save.checkpoint.run_id = 123
+				"config_run_id": save.checkpoint.run_config.run_id = 123
+				"config_run_serial": save.checkpoint.run_config.run_serial = "1"
+			t.check(not shape.validate(save).is_empty(),"E2 full contract rejects bad scalar before callback "+revision+"/"+field)
+	for field in ["phase","supply_used","run_config","schema_version","run_serial"]:
+		for wrong in [null,"wrong",123,true,[],{}]:
+			var save := current.duplicate(true)
+			save.checkpoint[field] = wrong
+			t.check(not shape.validate(save).is_empty(),"E2 checkpoint envelope type "+field+"/"+str(typeof(wrong)))
+	var missing_prior: Dictionary = empty.duplicate(true)
+	missing_prior.next_run_serial = 2
+	t.check(not shape.validate(missing_prior).is_empty(),"E2 null checkpoint only initial career")
+	var failed = Contracts.new(func(_state):return {"ok":false,"error_code":"world_read_failed"})
+	t.check(failed.validate(current) == ["world_read_failed"],"E2 real validator storage error is preserved, not compatibility lock")
+	for wrong in [null,{},[],true,{"ok":"true","state":{}},{"ok":true,"state":123},{"ok":false,"error_code":123}]:
+		var broken = Contracts.new(func(_state):return wrong)
+		t.check(not broken.validate(current).is_empty(),"E2 malformed validator response fails explicitly")
+	var input := current.duplicate(true)
+	var before := JSON.stringify(input)
+	var normalized: Dictionary = shape.normalize(input)
+	t.check(not normalized.is_empty() and normalized.store_revision is int,"E2 normalization canonicalizes checked economy counters")
+	t.check(JSON.stringify(input) == before,"E2 normalize preserves input")
+	if not normalized.is_empty():
+		normalized.profile.settings.deadzone = 0.3
+		t.check(input.profile.settings.deadzone == 0.2,"E2 normalized nested profile private")
+	var wrong_type := current.duplicate(true)
+	wrong_type.checkpoint.run_config.run_id = 123
+	t.check(shape.normalize(wrong_type).is_empty(),"E2 normalize invalid input cannot return authority")
+	print("E2 REAL INITIAL CORE binding: no terminal/combat/world claim")
+	var chapter: Dictionary = Chapter.new().load_chapter("chapter_01_shiganshina").chapter
+	var factory = Core.new()
+	var validator = Core.new()
+	var actual: Dictionary = factory.new_run(chapter,42,current.checkpoint.run_config)
+	var bound := current.duplicate(true)
+	bound.checkpoint = actual
+	var real = Contracts.new(validator.restore)
+	t.check(real.validate(bound).is_empty(),"E2 actual nonstreamed initial Core accepted")
+	if real.validate(bound).is_empty():
+		var canonical: Dictionary = real.normalize(bound)
+		t.check(canonical.checkpoint.seed is int and canonical.checkpoint.run_serial is int,"E2 actual Core normalization returns canonical initial checkpoint")

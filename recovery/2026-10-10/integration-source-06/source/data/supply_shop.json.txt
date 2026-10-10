@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "content_revision": "ch01.3-rebuild.1",
+  "items": {
+    "doctrine_artillery": {
+      "item_id": "doctrine_artillery",
+      "kind": "doctrine",
+      "price": 40,
+      "max_owned": 1,
+      "name": "포격 교리",
+      "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+      "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+      "effect_id": "unlock_doctrine",
+      "effect_params": {
+        "doctrine_id": "doctrine_artillery"
+      }
+    },
+    "doctrine_mobile": {
+      "item_id": "doctrine_mobile",
+      "kind": "doctrine",
+      "price": 40,
+      "max_owned": 1,
+      "name": "기동 교리",
+      "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+      "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+      "effect_id": "unlock_doctrine",
+      "effect_params": {
+        "doctrine_id": "doctrine_mobile"
+      }
+    },
+    "field_bandage": {
+      "item_id": "field_bandage",
+      "kind": "consumable",
+      "price": 15,
+      "max_owned": 9,
+      "name": "야전 붕대",
+      "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+      "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+      "effect_id": "prepared_bandage",
+      "effect_params": {
+        "heal": 25,
+        "threshold_ratio": 0.3
+      }
+    }
+  }
+}

@@ -1,0 +1,1270 @@
+{
+  "archive_policy": "Deterministic USTAR; sorted regular files; mode 0644; zero uid/gid/mtime; empty owner names.",
+  "chapter": "시간시나구 탈출",
+  "classification": "NEW_DERIVED_PRODUCT_PROVENANCE_NOT_ORIGINAL_DOCUMENT",
+  "content_revision": "ch01.3-rebuild.1",
+  "dependencies_not_duplicated": [
+    {
+      "bytes": 75408,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "f509e77b51ec8746334e734c7bb6743c80a2b728",
+        "path": "assets/manifest.json",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "assets/manifest.json",
+      "sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24"
+    },
+    {
+      "bytes": 9605,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 9605,
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "mode": "100644",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+    },
+    {
+      "bytes": 2560,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+        "path": "chapters/chapter_01/map.json",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "chapters/chapter_01/map.json",
+      "sha256": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb"
+    },
+    {
+      "bytes": 2058,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "1659a2de3c21d067fc895119e41e78ffb332ce7e",
+        "path": "data/enemies.json",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "data/enemies.json",
+      "sha256": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159"
+    },
+    {
+      "bytes": 3818,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/source-02/enemy-original-hash-exact/data/enemy_roles_ch01_3.json.txt",
+        "archive_name": "source-02-20261010.tar",
+        "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+        "bytes": 3818,
+        "git_blob_sha": "b0c69b7b8a183a1639af02024483cddd9253285c",
+        "mode": "100644",
+        "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+      },
+      "restore_target": "data/enemy_roles_ch01_3.json",
+      "sha256": "cbdd04ac5e3293d11bc9fcce27f2fd6233a48edd682ab7badbcb8615d8c57af5"
+    },
+    {
+      "bytes": 2382,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "e7938c8e680f8b480891ea89f338511a6fd89ad1",
+        "path": "data/equipment.json",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "data/equipment.json",
+      "sha256": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f"
+    },
+    {
+      "bytes": 1943,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/growth-source-05/source/data/evolutions.json.txt",
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "bytes": 1943,
+        "git_blob_sha": "3885cee3ee7418f528197a9b5b5ea3005c3cd79c",
+        "mode": "100644",
+        "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+      },
+      "restore_target": "data/evolutions.json",
+      "sha256": "7790bf3cefbd2971814f311321f45ec293bb0865e570ef0ead9974012f9a57f7"
+    },
+    {
+      "bytes": 1588,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+        "path": "data/passives.json",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "data/passives.json",
+      "sha256": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af"
+    },
+    {
+      "bytes": 5737,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 5737,
+        "git_blob_sha": "f1df9395f51a9c292585a01efb29fbb3f7ee62e4",
+        "mode": "100644",
+        "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+      },
+      "restore_target": "data/world_props.json",
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4"
+    },
+    {
+      "bytes": 2845,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/storage/game/app/world_checkpoint_adapter.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 2845,
+        "git_blob_sha": "0e26f5e7a360f31cc73ec2befecd0117cbaab887",
+        "mode": "100644",
+        "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+      },
+      "restore_target": "game/app/world_checkpoint_adapter.gd",
+      "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2"
+    },
+    {
+      "bytes": 1357,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "45a4a3a21cacb7284fd014cdd51cfede25b9f1d0",
+        "path": "game/combat/attack_geometry.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/combat/attack_geometry.gd",
+      "sha256": "f4f3dac3540401fdb4ffb16990183fa347c0ee021c874a26c5fbe0801dc0fc24"
+    },
+    {
+      "bytes": 2628,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "74f4b93e2ac30c104eff66a220f5c4a68b550d6e",
+        "path": "game/combat/enemy_behaviors.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/combat/enemy_behaviors.gd",
+      "sha256": "0e41c80ffa01bc65319058c557d51c66fde1bed8b19221f9914a7ebe989eac7b"
+    },
+    {
+      "bytes": 1006,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "3fc4566629ccc9888617d035d3b365697607633b",
+        "path": "game/combat/spatial_hash.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/combat/spatial_hash.gd",
+      "sha256": "a2b5989c4ec18bc79d0143894f5deaeb0abcb55ffb7f076adc015a443b7ee2f7"
+    },
+    {
+      "bytes": 9073,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "dd2a32d9f8bb4e20adf06fc50805fb1a8de86b2c",
+        "path": "game/combat/world_geometry.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/combat/world_geometry.gd",
+      "sha256": "ae2c492fa2e0126851e1666e4f360efe8b06b47f9c7b4f76aa2315db2185ed74"
+    },
+    {
+      "bytes": 4967,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "10a4bc4456f90bcdc869b77dcd780eda2f57017d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/ui-source-03/candidate-source/game/input/input_router.gd.txt",
+        "archive_name": "ui-source-03-20261010.tar",
+        "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+        "bytes": 4967,
+        "git_blob_sha": "10a4bc4456f90bcdc869b77dcd780eda2f57017d",
+        "mode": "100644",
+        "sha256": "db5787a73297b1d27ef961f064ecc1321b3b53121466b21d841840e2a9753058"
+      },
+      "restore_target": "game/input/input_router.gd",
+      "sha256": "db5787a73297b1d27ef961f064ecc1321b3b53121466b21d841840e2a9753058"
+    },
+    {
+      "bytes": 952,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "3ad0f779d33b2eb27c86a8492291e2e9c86ce597",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "3ad0f779d33b2eb27c86a8492291e2e9c86ce597",
+        "path": "game/input/lifecycle_guard.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/input/lifecycle_guard.gd",
+      "sha256": "34988d4010282a45e0fd30e720f91b924ea68248130b18ed702639cd766803bf"
+    },
+    {
+      "bytes": 5004,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "ab4f8fa07a4bcb7804e6d179f59c01c2843b35e2",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "ab4f8fa07a4bcb7804e6d179f59c01c2843b35e2",
+        "path": "game/persistence/save_store.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/persistence/save_store.gd",
+      "sha256": "0934d79697d2e4b36b1350f5e5b1220d1ce6a551b7fd93838141bc6302bc3d20"
+    },
+    {
+      "bytes": 14905,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/storage/game/persistence/world_delta_store.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 14905,
+        "git_blob_sha": "7f48afd72f1d908e6a7342c4aeb987cae443b1ec",
+        "mode": "100644",
+        "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+      },
+      "restore_target": "game/persistence/world_delta_store.gd",
+      "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4"
+    },
+    {
+      "bytes": 16753,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "6cfce99ef37c068facb4b98afbc4858d9b5d509e",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "6cfce99ef37c068facb4b98afbc4858d9b5d509e",
+        "path": "game/presentation/world_view.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "game/presentation/world_view.gd",
+      "sha256": "6d55a09c0b3bd8e0349da0cccc2447c0711b5c7868660657e6c3bad7cb3a092a"
+    },
+    {
+      "bytes": 9177,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/growth-source-05/source/game/progression/evolution_catalog.gd.txt",
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "bytes": 9177,
+        "git_blob_sha": "25c3ecb6fcae944a5b0b6c2b18080807e2e1de85",
+        "mode": "100644",
+        "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+      },
+      "restore_target": "game/progression/evolution_catalog.gd",
+      "sha256": "ae46c79818dcc047d4974b47a23ff41d0613380b0d9985d51a8cef4ecbea1679"
+    },
+    {
+      "bytes": 4967,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/growth-source-05/source/game/progression/growth_offer_service.gd.txt",
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "bytes": 4967,
+        "git_blob_sha": "39521fa9441f045a220e3be47e092d61e8427d2d",
+        "mode": "100644",
+        "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+      },
+      "restore_target": "game/progression/growth_offer_service.gd",
+      "sha256": "9ad65bc26df411ff3748ccfb07644742217578223a5aef8a1185d94aaa2f8432"
+    },
+    {
+      "bytes": 2164,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "3b77d334782fbc76aac0c42957c66a72d80a6543",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/growth-source-05/source/game/progression/progression_view.gd.txt",
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "bytes": 2164,
+        "git_blob_sha": "3b77d334782fbc76aac0c42957c66a72d80a6543",
+        "mode": "100644",
+        "sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f"
+      },
+      "restore_target": "game/progression/progression_view.gd",
+      "sha256": "4af1dc405b00cbf4b255029abb6259aedf50418a7e6b5d360b316463594a229f"
+    },
+    {
+      "bytes": 15321,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/growth-source-05/source/game/progression/upgrade_catalog.gd.txt",
+        "archive_name": "growth-source-05-20261010.tar",
+        "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+        "bytes": 15321,
+        "git_blob_sha": "90f4274bef002af5b98c3546b84ea5c941a74f5e",
+        "mode": "100644",
+        "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+      },
+      "restore_target": "game/progression/upgrade_catalog.gd",
+      "sha256": "6f6a5ee361efc34b75a6442f70edca9b20b6231775e42804ae2c6b914f8cfa34"
+    },
+    {
+      "bytes": 1413,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "c2558bbf4ec29409e48cacd7d4d1f17292abbb0d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/ui-source-03/candidate-source/game/ui/evolution_detail_panel.gd.txt",
+        "archive_name": "ui-source-03-20261010.tar",
+        "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+        "bytes": 1413,
+        "git_blob_sha": "c2558bbf4ec29409e48cacd7d4d1f17292abbb0d",
+        "mode": "100644",
+        "sha256": "086a31b1b9b8aed69d9b6bdd075bcbce28ba25b7788c6c72a6e89c9b11186fe3"
+      },
+      "restore_target": "game/ui/evolution_detail_panel.gd",
+      "sha256": "086a31b1b9b8aed69d9b6bdd075bcbce28ba25b7788c6c72a6e89c9b11186fe3"
+    },
+    {
+      "bytes": 7019,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "b151ed6745ca86b43461b5880c4a6e8f7ccc49db",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/ui-source-03/candidate-source/game/ui/growth_card.gd.txt",
+        "archive_name": "ui-source-03-20261010.tar",
+        "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+        "bytes": 7019,
+        "git_blob_sha": "b151ed6745ca86b43461b5880c4a6e8f7ccc49db",
+        "mode": "100644",
+        "sha256": "e42717684027e735c288201ab33e46dd8f85206344600ea7a81920d4253b459c"
+      },
+      "restore_target": "game/ui/growth_card.gd",
+      "sha256": "e42717684027e735c288201ab33e46dd8f85206344600ea7a81920d4253b459c"
+    },
+    {
+      "bytes": 5243,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "b5aea8b4d72832973d422911cec51dd04e0c6672",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/ui-source-03/candidate-source/game/ui/loadout_panel.gd.txt",
+        "archive_name": "ui-source-03-20261010.tar",
+        "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+        "bytes": 5243,
+        "git_blob_sha": "b5aea8b4d72832973d422911cec51dd04e0c6672",
+        "mode": "100644",
+        "sha256": "bdd9c926411cbfef8984f4f75fa8c17a258bb37f6efecf628608f972a5187279"
+      },
+      "restore_target": "game/ui/loadout_panel.gd",
+      "sha256": "bdd9c926411cbfef8984f4f75fa8c17a258bb37f6efecf628608f972a5187279"
+    },
+    {
+      "bytes": 5138,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "b3b0090b806ea0c416d29c729b7714da66ff3132",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/ui-source-03/candidate-source/game/ui/supply_shop_panel.gd.txt",
+        "archive_name": "ui-source-03-20261010.tar",
+        "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+        "bytes": 5138,
+        "git_blob_sha": "b3b0090b806ea0c416d29c729b7714da66ff3132",
+        "mode": "100644",
+        "sha256": "18829517003553bd6108026998f55245e00b78b23dd269f5da1269308377312a"
+      },
+      "restore_target": "game/ui/supply_shop_panel.gd",
+      "sha256": "18829517003553bd6108026998f55245e00b78b23dd269f5da1269308377312a"
+    },
+    {
+      "bytes": 5173,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/city_generator.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 5173,
+        "git_blob_sha": "7070cfed281bac2de479f674c5f47424f0a8cf4d",
+        "mode": "100644",
+        "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+      },
+      "restore_target": "game/world/city_generator.gd",
+      "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249"
+    },
+    {
+      "bytes": 8390,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/city_navigation.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 8390,
+        "git_blob_sha": "61b43154b77882f67ef6b1e948eeb2b1dce8ff8c",
+        "mode": "100644",
+        "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+      },
+      "restore_target": "game/world/city_navigation.gd",
+      "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be"
+    },
+    {
+      "bytes": 6309,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/evacuation_route.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 6309,
+        "git_blob_sha": "f5c9c52804be8e74caa89e4a714ddcce9010439b",
+        "mode": "100644",
+        "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+      },
+      "restore_target": "game/world/evacuation_route.gd",
+      "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af"
+    },
+    {
+      "bytes": 12731,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/streamed_world.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 12731,
+        "git_blob_sha": "3e9d501fbee319a967aa6ce7f48f09daf592644f",
+        "mode": "100644",
+        "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+      },
+      "restore_target": "game/world/streamed_world.gd",
+      "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b"
+    },
+    {
+      "bytes": 3564,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/world_address.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 3564,
+        "git_blob_sha": "b99313520c18becf716be447ca17cd563868cf8f",
+        "mode": "100644",
+        "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+      },
+      "restore_target": "game/world/world_address.gd",
+      "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1"
+    },
+    {
+      "bytes": 5961,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_codec.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 5961,
+        "git_blob_sha": "114cce3a9809647c697642d945a0e81e90f94d48",
+        "mode": "100644",
+        "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+      },
+      "restore_target": "game/world/world_delta_codec.gd",
+      "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a"
+    },
+    {
+      "bytes": 7727,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_index.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 7727,
+        "git_blob_sha": "a4ddf18a1e0660de268bc528e531cbfb5e3f0aa6",
+        "mode": "100644",
+        "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+      },
+      "restore_target": "game/world/world_delta_index.gd",
+      "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a"
+    },
+    {
+      "bytes": 3713,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/world_interactions.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 3713,
+        "git_blob_sha": "8cc4d41774b33e2bd4ac4a67157f5b6f51372ffb",
+        "mode": "100644",
+        "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+      },
+      "restore_target": "game/world/world_interactions.gd",
+      "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c"
+    },
+    {
+      "bytes": 3773,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/exact-source-01/world/game/world/world_prop_catalog.gd.txt",
+        "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+        "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+        "bytes": 3773,
+        "git_blob_sha": "efdb02e60c8718d1f6540577be13acb452ed7cd4",
+        "mode": "100644",
+        "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+      },
+      "restore_target": "game/world/world_prop_catalog.gd",
+      "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198"
+    },
+    {
+      "bytes": 13057,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/attack_events.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 13057,
+        "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+        "mode": "100644",
+        "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/attack_events.json",
+      "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+    },
+    {
+      "bytes": 1358,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/content_identity_basis.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 1358,
+        "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+        "mode": "100644",
+        "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/content_identity_basis.json",
+      "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+    },
+    {
+      "bytes": 7276,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/game_save_v2.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 7276,
+        "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+        "mode": "100644",
+        "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/game_save_v2.json",
+      "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+    },
+    {
+      "bytes": 5248,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_source_offers.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 5248,
+        "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+        "mode": "100644",
+        "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_source_offers.json",
+      "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+    },
+    {
+      "bytes": 24852,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_views.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 24852,
+        "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+        "mode": "100644",
+        "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_views.json",
+      "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+    },
+    {
+      "bytes": 5045,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/run_v2.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 5045,
+        "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+        "mode": "100644",
+        "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/run_v2.json",
+      "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+    },
+    {
+      "bytes": 22192,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/supply_views.json.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 22192,
+        "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+        "mode": "100644",
+        "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/supply_views.json",
+      "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+    },
+    {
+      "bytes": 2375,
+      "classification": "EXACT_PRIOR_CHECKPOINT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+      "mode": "100644",
+      "reference": {
+        "archive_member": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply_fixture.gd.txt",
+        "archive_name": "new-source-04-20261010.tar",
+        "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+        "bytes": 2375,
+        "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+        "mode": "100644",
+        "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+      },
+      "restore_target": "tests/fixtures/evolution_supply_fixture.gd",
+      "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+    },
+    {
+      "bytes": 1505,
+      "classification": "EXACT_EXISTING_GIT_REFERENCE_NOT_DUPLICATED",
+      "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+      "mode": "100644",
+      "reference": {
+        "commit": "7e409df28e27ffbabf13677f1c1eef8ade1f5712",
+        "git_blob_sha": "fe6195103c2d7986ed43a025229d2150b7bbc017",
+        "path": "tests/run_all.gd",
+        "tree": "fd56d67286dccb2a5fce5151fc4c8368132bde63"
+      },
+      "restore_target": "tests/run_all.gd",
+      "sha256": "5fb84ff341c60916fd71c2e179c3fe78a120592c75197ec4b020a8da49cb7ff6"
+    }
+  ],
+  "document_derivation": {
+    "PROVENANCE.json": "New exact-byte inventory, classification, restore mapping and dependency references. No source reports copied.",
+    "README.md": "New product-facing summary and explicit preservation/reproduction limits.",
+    "TEST-RESULTS.json": "New bounded result facts and evidence hashes, plus fresh preservation replay identities. Raw execution logs are not included.",
+    "source/docs/build/ANDROID-SAVE-COMPATIBILITY.md.txt": "A requested byte-exact source-document snapshot. Its own pending-device-validation caveat remains in force."
+  },
+  "minimal_replay": "Use the new headless project configuration, chapter identity test and its declared source/definition dependencies, and the exact existing tests/run_all.gd dependency. Static save-directory test needs its recorded controller and baseline save_store files. Fresh inputs are enumerated in TEST-RESULTS.json.",
+  "new_derived_documents": [
+    "README.md",
+    "PROVENANCE.json",
+    "TEST-RESULTS.json"
+  ],
+  "new_test_support_files": 1,
+  "prior_checkpoint_archives": [
+    {
+      "archive_bytes": 307200,
+      "archive_name": "shiganshina-recovered-exact-source-01-20261010.tar",
+      "archive_sha256": "94c9cb99520c7b80062ef3c619ea823b86cc3f4fba5d9c031a6189344dec43f7",
+      "checkpoint": 1
+    },
+    {
+      "archive_bytes": 184320,
+      "archive_name": "source-02-20261010.tar",
+      "archive_sha256": "5177b7e9636afee23ac84f5304211cc6b90323147c9a13df1d27ef845f79570c",
+      "checkpoint": 2
+    },
+    {
+      "archive_bytes": 235520,
+      "archive_name": "ui-source-03-20261010.tar",
+      "archive_sha256": "17ff499b1bc2fd1378e21adf210c2578453f705fb40d4966ad1acf2c4ec0e115",
+      "checkpoint": 3
+    },
+    {
+      "archive_bytes": 245760,
+      "archive_name": "new-source-04-20261010.tar",
+      "archive_sha256": "24ad95c8976a8a2adfa9f1fd7c668bbb4e8a1c8fa3510f432561399d5b9bf35f",
+      "checkpoint": 4
+    },
+    {
+      "archive_bytes": 133120,
+      "archive_name": "growth-source-05-20261010.tar",
+      "archive_sha256": "5f6cf128fb0495dacf0b079abe67b70c2cc926afb024ad3d6d40b88bdf96d3b8",
+      "checkpoint": 5
+    }
+  ],
+  "prior_checkpoint_interpretation": "Checkpoints 01-05 remain inherited byte-for-byte. They contain separately classified historical exact snapshots, reconstructed candidates, NEW implementations and derived evidence. An exact dependency reference means byte identity to that specific artifact, not original-latest-source or whole-game approval.",
+  "product": "진격의 거인: 인류의 날개",
+  "publication_state": "LOCAL_PREPARATION_ONLY",
+  "purpose": "Recovery work-unit preservation. Not a runnable build, accepted game, or complete implementation.",
+  "remote_operations_performed": false,
+  "reproducibility_limits": "The static source dependency list does not supply dynamic art/audio assets or prove the complete multi-tranche app runs. Earlier focused logs predate this combined artifact; only the two fresh bounded replays are claimed here.",
+  "restore_rule": "Restore only into a separate test workspace. Remove one final .txt suffix and use restore_target. Resolve every dependency using its exact referenced Git blob or prior archive member before execution. No source is automatically activated.",
+  "snapshot_selection": {
+    "core": "Ten files from frozen tranche08. Attack/restore scope reviewed; included growth tests and terminal code do not imply broader approval.",
+    "integration": "Sixteen frozen chapter/controller/UI/audio/tests/save-compatibility files.",
+    "persistence": "Seven files from frozen source-identity gate-5.",
+    "persistence-dependencies": "Five matching frozen economy/source-test/content dependencies; later recovery-service changes are not mixed in.",
+    "streaming": "Four NEW streamed-helper implementation/test files."
+  },
+  "source_bytes_modified": false,
+  "source_mapping": [
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/chapters/chapter_01/manifest.json.txt",
+      "bytes": 2192,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "aea29eaeed081e53a3a9898635b677c66c5e5afc",
+      "mode": "100644",
+      "restore_target": "chapters/chapter_01/manifest.json",
+      "sha256": "a41b3b1691b9ffc80319bbeb98fcc710ad7adc51ac8bedb7ca169663fddaf897",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/data/doctrines.json.txt",
+      "bytes": 1636,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "b4ffd4462d47ff85401438a126cd859788e37e8a",
+      "mode": "100644",
+      "restore_target": "data/doctrines.json",
+      "sha256": "98c5b36a9f5b14744c084ebd0e71956e49fd010edf733ebb2ac2263819928336",
+      "source_group": "persistence-dependencies",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/data/supply_shop.json.txt",
+      "bytes": 1644,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "158243f6b5be4bd14b3b4b98c4653c8a48e9806d",
+      "mode": "100644",
+      "restore_target": "data/supply_shop.json",
+      "sha256": "2e2de576231b560bbaa726bc037f2f8fd61f3a27a3d10ac92467c737734b916f",
+      "source_group": "persistence-dependencies",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/docs/build/ANDROID-SAVE-COMPATIBILITY.md.txt",
+      "bytes": 2604,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "9690d0f1e9227a5a1ec51f11b7b40084ea57525c",
+      "mode": "100644",
+      "restore_target": "docs/build/ANDROID-SAVE-COMPATIBILITY.md",
+      "sha256": "247cf063c4e7313463c41abbec30a05e5e249e253e9889a7ba1bba13cc306548",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/app/run_controller.gd.txt",
+      "bytes": 22986,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "129f4e79022e984980b9caec897570c8af7751c4",
+      "mode": "100644",
+      "restore_target": "game/app/run_controller.gd",
+      "sha256": "dde7e9e50b16f9975634c64b48ab500314b1e665bb7587c548ff04aee8949c33",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/combat/evolved_attack_resolver.gd.txt",
+      "bytes": 8655,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "20d37fd868ca163c305833ad7b7734fb85580f52",
+      "mode": "100644",
+      "restore_target": "game/combat/evolved_attack_resolver.gd",
+      "sha256": "434285a47841660e87c84f7730ef81588640d7fe1b4908110bd657cb147bff1a",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/contracts/game_contracts.gd.txt",
+      "bytes": 4095,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "1735750860e3940132ab31ee7be255b9f0f5098f",
+      "mode": "100644",
+      "restore_target": "game/contracts/game_contracts.gd",
+      "sha256": "119c263ba748071b57958281a3ef7e9ee2807ff1e1ad44a7c78505212c1a11e2",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/contracts/game_save_contracts.gd.txt",
+      "bytes": 11525,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "9c5a8e8ef1db6a94ae580b2d01a619793908a90c",
+      "mode": "100644",
+      "restore_target": "game/contracts/game_save_contracts.gd",
+      "sha256": "ab128884e1e846cc2be05d8efff5507d9d4e708d2fc33d00357fd076b3b5e693",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/core/run_simulation.gd.txt",
+      "bytes": 69054,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "f4cb067a65a775baec3e265a15715b6c95511182",
+      "mode": "100644",
+      "restore_target": "game/core/run_simulation.gd",
+      "sha256": "d2deda44bcb0d065720884a722aeec2eea282d9c6798868fc8f4454b309be0f6",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/core/streamed_run_world.gd.txt",
+      "bytes": 31724,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "b87d589a8350b7bc5d759251432e2020bf3a4751",
+      "mode": "100644",
+      "restore_target": "game/core/streamed_run_world.gd",
+      "sha256": "49bd46b5ef1fda08fd066048eacfcab50e9762d4c768acae6d8ca713b0dd4cf1",
+      "source_group": "streaming",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/director/chapter_catalog.gd.txt",
+      "bytes": 7372,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "7bc236ee0766fc40add9115680f0ea95487cb62d",
+      "mode": "100644",
+      "restore_target": "game/director/chapter_catalog.gd",
+      "sha256": "8a53eb258e2864913f709fff80454e20bb84b2f29572571c2a7911292ae35c72",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/director/spawn_director.gd.txt",
+      "bytes": 2955,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "bface9300c8bc6f2ca38b3356ffc309bafc3b8c0",
+      "mode": "100644",
+      "restore_target": "game/director/spawn_director.gd",
+      "sha256": "e9c0784faa108851575c35472052ac6ef08860a6b88ae2c36e02cf2e30c6c1e1",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/economy/supply_catalog.gd.txt",
+      "bytes": 5790,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2fb491f8e44124391943ddec01d54882c94c6135",
+      "mode": "100644",
+      "restore_target": "game/economy/supply_catalog.gd",
+      "sha256": "890044e78e6b3bda635529841a588f23500468a335f4ea8d57265401a8d3c868",
+      "source_group": "persistence-dependencies",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/economy/supply_service.gd.txt",
+      "bytes": 23257,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "5576cc3540ccb7bd9a5481aa3aaa479c708a4343",
+      "mode": "100644",
+      "restore_target": "game/economy/supply_service.gd",
+      "sha256": "5d2bf8d07733ceac1ac6d90cb936d242da6ca900cbd84bde7e1ed6a737350db6",
+      "source_group": "persistence-dependencies",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/persistence/game_save_store.gd.txt",
+      "bytes": 20489,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "23921136841f37aac1cd9dd062b95148c83957c3",
+      "mode": "100644",
+      "restore_target": "game/persistence/game_save_store.gd",
+      "sha256": "b8e0ad4e6725bc5bd19d11581ccf2ca7c7fc4884eb08ed1104a544eaa4b92203",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/persistence/save_migrations.gd.txt",
+      "bytes": 4898,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2cfd1a8144e81f1634636674a6981c85ceb8cf36",
+      "mode": "100644",
+      "restore_target": "game/persistence/save_migrations.gd",
+      "sha256": "9d9af3c54b4eddcc0e6704c693ef30ba16646203905393b01ed0ffc83032238c",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/presentation/audio_director.gd.txt",
+      "bytes": 3423,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "07705eba7da478388357221b88616cbc322e8788",
+      "mode": "100644",
+      "restore_target": "game/presentation/audio_director.gd",
+      "sha256": "16c8816238652ce535773cfb6a568bd3bd526616e46359822e0a0979dc964372",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/game/ui/game_ui.gd.txt",
+      "bytes": 35289,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "29df7ca34cb0cf069af6ab9f0e93df429536bfd6",
+      "mode": "100644",
+      "restore_target": "game/ui/game_ui.gd",
+      "sha256": "afe4e0b0b0af91ae5dceccc19e66ee500af8cf64ff5b0beb2d3f22519167e45b",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/controller_test_support.gd.txt",
+      "bytes": 1781,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "31209d7bcd565b585f990a1431938c5e820c36f0",
+      "mode": "100644",
+      "restore_target": "tests/app/controller_test_support.gd",
+      "sha256": "bacaa1f8919fc2fe84edf68b4796781827a6d3a9f6798588fdf53221da423fae",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/test_presentation_run_boundary.gd.txt",
+      "bytes": 1384,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "fb5f885d50911d5ca50b8c60fcacfe302d8f11fe",
+      "mode": "100644",
+      "restore_target": "tests/app/test_presentation_run_boundary.gd",
+      "sha256": "772ba5fe998c0cf8bfd96a744a12f1ed2d85f9eb82e802ca2c17bcfb47db71b8",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/test_progress_result.gd.txt",
+      "bytes": 981,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "82cb4b2feace205cb18bf618362d3738ac3bf88e",
+      "mode": "100644",
+      "restore_target": "tests/app/test_progress_result.gd",
+      "sha256": "df9939b378e113bf8ffeb10d349125a21ed6be52135fc5cd303d9d09bff65016",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/test_resume_checkpoint.gd.txt",
+      "bytes": 858,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "9789c930fab6f0d1a28a9ca402bf28e878d28909",
+      "mode": "100644",
+      "restore_target": "tests/app/test_resume_checkpoint.gd",
+      "sha256": "0237ee5cfcc35ca538c1fb05ac3b8571686d31357fbb6b58275c61436921929d",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/test_run_controller.gd.txt",
+      "bytes": 1842,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "f3fbe894de75a2535f6a072649c126e17f0403f8",
+      "mode": "100644",
+      "restore_target": "tests/app/test_run_controller.gd",
+      "sha256": "f9ab988859a69577e476f9152991f4dd2d7f3f4eb16c61ee364a950b22061d08",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app/test_save_directory_identity.py.txt",
+      "bytes": 1124,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "71094d4a7667d819d5974ba62f6c788d1c098db9",
+      "mode": "100644",
+      "restore_target": "tests/app/test_save_directory_identity.py",
+      "sha256": "c0aac95d6bf0be7043b8027e0121c44fad5c857225517fce81a01cb56d3607b8",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/app_rebuild/test_initial_run_authority.gd.txt",
+      "bytes": 1605,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "581a98d9cd301e38517ce8e7e01975cc7a85dbd4",
+      "mode": "100644",
+      "restore_target": "tests/app_rebuild/test_initial_run_authority.gd",
+      "sha256": "ef99e1ae5c2629359f2639327f48f7593c866320daeb65e8853063acc5f3e6bf",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/contracts/test_game_save_snapshot.gd.txt",
+      "bytes": 3855,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "d5b6f0d7be110d4eaae149447d06e35812a99788",
+      "mode": "100644",
+      "restore_target": "tests/contracts/test_game_save_snapshot.gd",
+      "sha256": "b79c83680ecb445916c091a81e4c8dfd7cbd6ed00fed692ffed8479c78b79c18",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/core_fixture.gd.txt",
+      "bytes": 4181,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "3a5191d1816644a1efe1329253c2b0a817c4ab84",
+      "mode": "100644",
+      "restore_target": "tests/core/core_fixture.gd",
+      "sha256": "d79c984f9b0749c0cf6f233507d3e40718cf6a1c78d2e8097fc44efd4d253e3b",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_attack_events.gd.txt",
+      "bytes": 9447,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "2438a7bcd3f4d68c8474359aa18d4835dbb828c8",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_attack_events.gd",
+      "sha256": "8bcf382180944037bb019253d01439ec91f1028f3ba0df0c7abbd2af60c055a5",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_attack_restore_boundaries.gd.txt",
+      "bytes": 7787,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "84539a4c3cf1b02aecfa3b73b70037b62dfbc25c",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_attack_restore_boundaries.gd",
+      "sha256": "46cc0ec423ea594bad5a2e04716213fbf2ddd1741afb1e015de5017fb02737c8",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_core_boundaries.gd.txt",
+      "bytes": 2358,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "745a6ff4529eaddeb4da0a8a459b815fc60550a8",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_core_boundaries.gd",
+      "sha256": "cbaf23c514893687e0d6e19776e245b583c586e9fb1cd102223fea675526f9ea",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_growth_lifecycle.gd.txt",
+      "bytes": 14450,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "ad884334947c7e0efd83f8b63dbf24150112d09b",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_growth_lifecycle.gd",
+      "sha256": "c002c3a4478f58fc35b9cd009085ba34c11cb122af9d182c967fe5e6899cefea",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_run_state.gd.txt",
+      "bytes": 7890,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "e6fa043164de6370ec3b251116c02a3037a6c2fc",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_run_state.gd",
+      "sha256": "40aa75eeb84726d3b4327613b10d92a43ba91f1eaffe536df9ce7012b7a6c698",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core/test_rebuild_terminal_precedence.gd.txt",
+      "bytes": 4342,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "afc401eca1adedb840b80d08f747cf2081080343",
+      "mode": "100644",
+      "restore_target": "tests/core/test_rebuild_terminal_precedence.gd",
+      "sha256": "c1674da0270993e58d6eb05e4256947092b2c0022b6b83aebf3bc271213c4566",
+      "source_group": "core",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/new_streamed_helper_fixture.gd.txt",
+      "bytes": 1623,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "81c769f5744a1a91091c5cbe070decf566af8458",
+      "mode": "100644",
+      "restore_target": "tests/core_world/new_streamed_helper_fixture.gd",
+      "sha256": "f2e030618f0149637b2729b515ff5b0e4bdabfa0e8d8c997d272de2fe12e54a5",
+      "source_group": "streaming",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/test_new_streamed_helper.gd.txt",
+      "bytes": 14312,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "85973cb8d9d2b4fafb746e1442cadde1980448ab",
+      "mode": "100644",
+      "restore_target": "tests/core_world/test_new_streamed_helper.gd",
+      "sha256": "20e8f73d2e4301db5fff2288921429365b6841d40c4feebd9ba9e22a77df3324",
+      "source_group": "streaming",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/core_world/test_new_streamed_helper_boundaries.gd.txt",
+      "bytes": 11272,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "83051f1bf6bb5d2e1455b51d2995026249267310",
+      "mode": "100644",
+      "restore_target": "tests/core_world/test_new_streamed_helper_boundaries.gd",
+      "sha256": "8a7262723d30b6dd6499b9391905ed523eb05c6e4f57c2840a25f2898a2b5a81",
+      "source_group": "streaming",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/economy/test_supply_service.gd.txt",
+      "bytes": 20103,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "6d753667ed0e9f904efc0a7d2e6a938805456188",
+      "mode": "100644",
+      "restore_target": "tests/economy/test_supply_service.gd",
+      "sha256": "edfac2791b09d4bdfe4b099be9103f6d219ca44e0f25f251c139446d502f6d3c",
+      "source_group": "persistence-dependencies",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/integration/test_chapter_content_identity.gd.txt",
+      "bytes": 5687,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "035b09e45b9a1ae1a806df904b20b8eadb0add1d",
+      "mode": "100644",
+      "restore_target": "tests/integration/test_chapter_content_identity.gd",
+      "sha256": "c400971abd803f12f6083ffdfddb8789d25ec8792aa0537636165b2b3951681e",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/integration/test_terminal_presentation_gates.gd.txt",
+      "bytes": 1731,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "1888897c1dc561cd8cdb7e07c7ceb8ec756cad6f",
+      "mode": "100644",
+      "restore_target": "tests/integration/test_terminal_presentation_gates.gd",
+      "sha256": "862c7505854bc0a4aa653a8aa18ef62a6b075147f8379f2674c8f70945dda2b6",
+      "source_group": "integration",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/persistence/test_authority_hostile.gd.txt",
+      "bytes": 5983,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "f6b7fc6d748b00253ebed3edff3569226acebc7c",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_authority_hostile.gd",
+      "sha256": "5ee9b720f66c6308f8f4e41bccc468d76c0aec661c5a57db67a260e33ef97637",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/persistence/test_game_save_store.gd.txt",
+      "bytes": 17802,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "894fab5e74a563677bc75e8eb84b14fa33f6b6bd",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_game_save_store.gd",
+      "sha256": "7d766159c50d1d3730e69b9326eaeaad382782d66a69c551a8bb9f39bd681fd3",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/tests/persistence/test_save_migrations.gd.txt",
+      "bytes": 11081,
+      "classification": "BYTE_EXACT_NEW_WORK_SNAPSHOT_NOT_LOST_ORIGINAL",
+      "git_blob_sha": "4b0faa8d0063f43f7817baae6c161f763daac01d",
+      "mode": "100644",
+      "restore_target": "tests/persistence/test_save_migrations.gd",
+      "sha256": "7c0e86596df6237bb4880ff3d7646af0a6fa81f402a7607b8aa1d40d6f02b895",
+      "source_group": "persistence",
+      "transformation": "Only an inert final .txt suffix was added. File bytes are unchanged."
+    },
+    {
+      "archive_path": "recovery/2026-10-10/integration-source-06/source/test-support/project.godot.txt",
+      "bytes": 187,
+      "classification": "NEW_MINIMAL_HEADLESS_REPLAY_CONFIGURATION",
+      "git_blob_sha": "ec5cd20af6c4411c785685e0dddd55cf37c27d9d",
+      "mode": "100644",
+      "restore_target": "project.godot",
+      "sha256": "e1e2b73e176a3819f70f881a3c9567a497b5301f5e96caeb144b3e468edee135",
+      "source_group": "test-support",
+      "transformation": "New test-only project configuration, stored with inert .txt suffix."
+    }
+  ],
+  "source_snapshots": 42
+}
