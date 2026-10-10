@@ -1,5 +1,6 @@
 """Dependency-free, fail-closed Android build checks. No credential I/O or network."""
 from __future__ import annotations
+import copy
 import hashlib
 import json
 import os
@@ -11,6 +12,20 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 PIN = json.loads((Path(__file__).with_name('toolchain.json')).read_text(encoding='utf-8'))
+DEV_MODE = 'development-validation'
+DEV_NOTICE = 'DEV VALIDATION | INCOMPLETE | 5 titan_basic art placeholders'
+DEV_FALLBACK_PATH = 'res://assets/art/characters/titan_basic_v2.png'
+DEV_FALLBACK_SHA256 = 'e7debeea18672d55cd938f213a7738eb93c2a89c9783a201b30421e4e466a62c'
+# This narrow exception covers only the explicitly authorized five placeholders.
+DEV_REJECTED_SHA256 = {
+    'titan_runner': 'b4979340dd3339dfd062143e027d453b7e01c0a1f0b2b83ddfa93b09e690e722',
+    'titan_sweeper': 'eb640f8a8c8617db7da4599554152d41162e7716f513335ed6ba56f002274f0f',
+    'boss_charger': '7ee769802a176e95474e9ce9f88d22aab3aff6e967165cf82c06181c5c617bcb',
+    'boss_leaper': '2da095171c0e6c8bff217837ab86f04120ff1aaebd3da7368ac34ca512e51efa',
+    'boss_abnormal': '9de54f758a3ad0e2370c1d8f469272d4f68f3ab196dd7ee8a65d747ed1ec787a',
+}
+DEV_IDS = sorted(DEV_REJECTED_SHA256)
+RUNTIME_ASSET_PATTERN = r'res://assets/(?:art/(?:characters|environment|effects|ui)/[^/]+\.png|audio/[^/]+\.wav)'
 
 class BuildError(Exception):
     pass
@@ -22,15 +37,18 @@ def sha256(path: Path) -> str:
             digest.update(part)
     return digest.hexdigest()
 
-def read_manifest(root: Path) -> dict:
+def read_manifest(root: Path, development_validation: bool = False) -> dict:
     try:
-        manifest = json.loads(source_file(root, 'assets/manifest.json').read_text(encoding='utf-8'))
+        raw = source_file(root, 'assets/manifest.json').read_bytes()
+        manifest = json.loads(raw)
     except (OSError, ValueError) as exc:
         raise BuildError('Missing or invalid assets/manifest.json') from exc
-    check_readiness(manifest)
+    if development_validation and isinstance(manifest, dict) and 'development_validation' not in manifest:
+        manifest = development_manifest(manifest, hashlib.sha256(raw).hexdigest())
+    check_readiness(manifest, development_validation=development_validation)
     return manifest
 
-def check_readiness(manifest: dict) -> None:
+def _manifest_fields(manifest: dict) -> tuple[list[str], dict]:
     if not isinstance(manifest, dict) or not isinstance(manifest.get('assets'), dict) or not manifest['assets']:
         raise BuildError('EXPORT_BLOCKED missing_manifest')
     blocked = []
@@ -50,8 +68,98 @@ def check_readiness(manifest: dict) -> None:
     status = manifest.get('art_revision_status', {})
     if not isinstance(status, dict) or type(status.get('final_export_allowed', True)) is not bool:
         raise BuildError('EXPORT_BLOCKED invalid art review status')
-    if blocked or not status.get('final_export_allowed', True):
-        raise BuildError('EXPORT_BLOCKED art_review_pending assets=' + ','.join(sorted(blocked)))
+    return sorted(blocked), status
+
+def check_readiness(manifest: dict, development_validation: bool = False) -> None:
+    blocked, status = _manifest_fields(manifest)
+    if development_validation:
+        _check_development_manifest(manifest, blocked, status)
+    elif blocked or not status.get('final_export_allowed', True) or 'development_validation' in manifest:
+        raise BuildError('EXPORT_BLOCKED art_review_pending assets=' + ','.join(blocked))
+
+def _check_fallback(manifest: dict) -> dict:
+    basic = manifest['assets'].get('titan_basic', {})
+    if (basic.get('path') != DEV_FALLBACK_PATH or basic.get('sha256') != DEV_FALLBACK_SHA256
+            or basic.get('export_blocked') is not False
+            or basic.get('review_status') != 'visual_reviewed_revision_2'
+            or 'titan_basic' not in manifest.get('art_revision_status', {}).get('approved_character_ids', [])):
+        raise BuildError('EXPORT_BLOCKED development fallback is not the pinned approved titan_basic')
+    return basic
+
+def _check_dev_scope(blocked: list[str], status: dict) -> None:
+    if blocked != DEV_IDS or sorted(status.get('blocked_character_ids', [])) != DEV_IDS:
+        raise BuildError('EXPORT_BLOCKED development requires exactly the five authorized blocked IDs')
+    if status.get('final_export_allowed') is not False:
+        raise BuildError('EXPORT_BLOCKED development must preserve final_export_allowed=false')
+
+def development_manifest(original: dict, source_manifest_sha256: str) -> dict:
+    """Create temporary metadata only; never write to the original asset manifest."""
+    blocked, status = _manifest_fields(original)
+    basic = _check_fallback(original)
+    _check_dev_scope(blocked, status)
+    if 'development_validation' in original or not re.fullmatch('[0-9a-f]{64}', source_manifest_sha256):
+        raise BuildError('EXPORT_BLOCKED invalid development source manifest')
+    staged = copy.deepcopy(original)
+    staged['development_validation'] = {
+        'mode': DEV_MODE, 'development_only': True, 'notice': DEV_NOTICE,
+        'replacement_ids': DEV_IDS.copy(), 'fallback_asset_id': 'titan_basic',
+        'source_manifest_sha256': source_manifest_sha256,
+    }
+    for name in DEV_IDS:
+        old = original['assets'][name]
+        if (old['path'] != f'res://assets/art/characters/{name}.png'
+                or old['sha256'] != DEV_REJECTED_SHA256[name]
+                or old.get('review_status') != 'rejected_incorrect_clothing'):
+            raise BuildError('EXPORT_BLOCKED development source rejected asset changed: ' + name)
+        record = copy.deepcopy(basic)
+        record.update({
+            'export_blocked': True, 'development_only': True,
+            'reason': 'canon_revision_pending',
+            'review_status': 'development_placeholder_not_final_approval',
+            'development_placeholder': {
+                'fallback_asset_id': 'titan_basic', 'original_path': old['path'],
+                'original_sha256': old['sha256'], 'original_export_blocked': True,
+                'original_review_status': old['review_status'],
+            },
+        })
+        staged['assets'][name] = record
+    check_readiness(staged, development_validation=True)
+    return staged
+
+def _check_development_manifest(manifest: dict, blocked: list[str], status: dict) -> None:
+    _check_dev_scope(blocked, status)
+    basic = _check_fallback(manifest)
+    metadata = manifest.get('development_validation', {})
+    if (not isinstance(metadata, dict) or metadata.get('mode') != DEV_MODE
+            or metadata.get('development_only') is not True or metadata.get('notice') != DEV_NOTICE
+            or metadata.get('replacement_ids') != DEV_IDS or metadata.get('fallback_asset_id') != 'titan_basic'
+            or not re.fullmatch('[0-9a-f]{64}', str(metadata.get('source_manifest_sha256', '')))):
+        raise BuildError('EXPORT_BLOCKED invalid development-validation metadata')
+    for name, record in manifest['assets'].items():
+        if not re.fullmatch(RUNTIME_ASSET_PATTERN, record['path']):
+            raise BuildError('EXPORT_BLOCKED development asset is outside runtime whitelist: ' + name)
+        if record['sha256'] in DEV_REJECTED_SHA256.values() or record['path'] in [f'res://assets/art/characters/{item}.png' for item in DEV_IDS]:
+            raise BuildError('EXPORT_BLOCKED development contains rejected art: ' + name)
+        if name not in DEV_IDS:
+            if record.get('development_only', False) or 'development_placeholder' in record:
+                raise BuildError('EXPORT_BLOCKED unexpected development placeholder: ' + name)
+            continue
+        if (record.get('development_only') is not True or record.get('export_blocked') is not True
+                or record.get('review_status') != 'development_placeholder_not_final_approval'):
+            raise BuildError('EXPORT_BLOCKED invalid development placeholder status: ' + name)
+        for key in ('path', 'sha256', 'width', 'height', 'columns', 'cell_w', 'cell_h', 'anchor_px', 'animations'):
+            if key not in basic or record.get(key) != basic[key]:
+                raise BuildError('EXPORT_BLOCKED development fallback mismatch: ' + name)
+        expected = {'fallback_asset_id': 'titan_basic', 'original_path': f'res://assets/art/characters/{name}.png',
+                    'original_sha256': DEV_REJECTED_SHA256[name], 'original_export_blocked': True,
+                    'original_review_status': 'rejected_incorrect_clothing'}
+        if record.get('development_placeholder') != expected:
+            raise BuildError('EXPORT_BLOCKED invalid development placeholder provenance: ' + name)
+
+def manifest_bytes(root: Path, manifest: dict) -> bytes:
+    if 'development_validation' in manifest:
+        return (json.dumps(manifest, indent=2, ensure_ascii=False) + '\n').encode('utf-8')
+    return source_file(root, 'assets/manifest.json').read_bytes()
 
 def source_file(root: Path, relative: str) -> Path:
     path = root / relative
@@ -102,7 +210,10 @@ def stage_project(root: Path, dest: Path, manifest: dict) -> dict:
         source = source_file(root, relative)
         target = dest / relative
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
+        if relative == 'assets/manifest.json':
+            target.write_bytes(manifest_bytes(root, manifest))
+        else:
+            shutil.copyfile(source, target)
         digest.update(relative.encode('utf-8') + b'\0' + bytes.fromhex(sha256(target)))
     return {'source_sha256': digest.hexdigest(), 'source_file_count': len(selected)}
 
@@ -199,7 +310,7 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         if name not in name_set: raise BuildError('APK missing template runtime entry: ' + name)
     package = parse_android_manifest(archive.read('AndroidManifest.xml'))
     validate_package(package)
-    if archive.read('assets/assets/manifest.json') != (root/'assets/manifest.json').read_bytes():
+    if archive.read('assets/assets/manifest.json') != manifest_bytes(root, manifest):
         raise BuildError('APK asset manifest differs from the current source manifest')
     allowed = {'assets/assets/manifest.json', 'assets/project.binary', 'assets/assets.sparsepck', 'assets/_cl_',
                'assets/.godot/global_script_class_cache.cfg', 'assets/.godot/uid_cache.bin'}
@@ -251,11 +362,19 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         mutable = name in ('AndroidManifest.xml','resources.arsc') or bool(re.fullmatch(r'res/mipmap[^/]*/icon[^/]*\.(webp|png)',name))
         if not mutable and archive.read(name) != template.read(name):
             raise BuildError('APK changed pinned template bytes: ' + name)
+    if 'development_validation' in manifest:
+        check_readiness(manifest, development_validation=True)
+        rejected_paths = [f'assets/assets/art/characters/{name}.png' for name in DEV_IDS]
+        for name in names:
+            if any(name.startswith(path) or Path(path).name + '-' in name for path in rejected_paths):
+                raise BuildError('APK contains a rejected art path: ' + name)
+            if hashlib.sha256(archive.read(name)).hexdigest() in DEV_REJECTED_SHA256.values():
+                raise BuildError('APK contains rejected PNG bytes: ' + name)
     if archive.testzip() is not None: raise BuildError('APK CRC integrity failure')
     return {'package': package['package'], 'version_name': package['versionName'], 'version_code': package['versionCode'], 'abi': 'arm64-v8a', 'permissions': package['permissions'], 'archive_entries': len(names)}
 
-def verify_apk(path: Path, template_path: Path, root: Path, manifest: dict, signed: bool = False) -> dict:
-    check_readiness(manifest)
+def verify_apk(path: Path, template_path: Path, root: Path, manifest: dict, signed: bool = False, development_validation: bool = False) -> dict:
+    check_readiness(manifest, development_validation=development_validation)
     verify_template(template_path)
     try:
         with zipfile.ZipFile(path) as archive, zipfile.ZipFile(template_path) as template:
@@ -266,6 +385,13 @@ def verify_apk(path: Path, template_path: Path, root: Path, manifest: dict, sign
             if not signed and (has_block or has_v1): raise BuildError('Expected unsigned APK, found a signing block')
             if signed and not has_block: raise BuildError('Signed APK lacks v2/v3 signing block')
             report = validate_archive(archive, template, root, manifest)
+            if development_validation:
+                rejected_paths = [f'assets/assets/art/characters/{name}.png' for name in DEV_IDS]
+                report.update({'build_mode': DEV_MODE, 'development_only': True, 'final_export_allowed': False,
+                               'development_validation': manifest['development_validation'],
+                               'excluded_asset_paths': [path.removeprefix('assets/') for path in rejected_paths],
+                               'excluded_asset_sha256': [DEV_REJECTED_SHA256[name] for name in DEV_IDS],
+                               'asset_manifest_sha256': hashlib.sha256(manifest_bytes(root, manifest)).hexdigest()})
     except (OSError, zipfile.BadZipFile, KeyError) as exc:
         raise BuildError('Invalid APK archive') from exc
     report['sha256'] = sha256(path)

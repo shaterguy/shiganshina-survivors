@@ -111,8 +111,8 @@ func _ready() -> void:
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_notice)
 	_dev_notice = Label.new()
-	_dev_notice.text = "개발 검증판 · 일부 거인 외형과 동작 수정 중" if manifest is Dictionary and not manifest.get("art_revision_status",{}).get("final_export_allowed",true) else ""
-	_dev_notice.add_theme_font_size_override("font_size",12)
+	_dev_notice.text = development_notice(manifest if manifest is Dictionary else {})
+	_dev_notice.add_theme_font_size_override("font_size",11)
 	_dev_notice.add_theme_color_override("font_color",Color("f4c36b"))
 	_dev_notice.z_index = 3
 	add_child(_dev_notice)
@@ -440,3 +440,11 @@ func objective_text(snapshot: Dictionary) -> String:
 func _direction_label(offset: Vector2) -> String:
 	if offset.length() < 8: return "●"
 	return ["→","↘","↓","↙","←","↖","↑","↗"][posmod(roundi(offset.angle()/(PI/4)),8)]
+
+func development_notice(manifest: Dictionary) -> String:
+	var development = manifest.get("development_validation",{})
+	if development is Dictionary and development.get("mode","") == "development-validation" and development.get("development_only",false):
+		return "DEV 미완료 · 5종 기본 외형 대체 · 보행 수정 중"
+	if not manifest.get("art_revision_status",{}).get("final_export_allowed",true):
+		return "개발 검증판 · 일부 거인 외형과 동작 수정 중"
+	return ""

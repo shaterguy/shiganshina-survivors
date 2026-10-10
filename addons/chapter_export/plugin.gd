@@ -13,7 +13,9 @@ func _export() -> void:
 		get_tree().quit(2)
 		return
 	var manifest = JSON.parse_string(FileAccess.get_file_as_string("res://assets/manifest.json"))
-	var readiness: Dictionary = load("res://tools/build/export_readiness.gd").new().validate(manifest if manifest is Dictionary else {})
+	var export_mode := OS.get_environment("SHIGAN_EXPORT_MODE")
+	if export_mode.is_empty(): export_mode = "final"
+	var readiness: Dictionary = load("res://tools/build/export_readiness.gd").new().validate(manifest if manifest is Dictionary else {},export_mode)
 	if not readiness.ok:
 		printerr("EXPORT_BLOCKED reason=%s assets=%s" % [readiness.reason,str(readiness.blocked_ids)])
 		get_tree().quit(3)
@@ -26,7 +28,7 @@ func _export() -> void:
 	if kind == "android":
 		preset.set("gradle_build/use_gradle_build",false)
 		preset.set("package/unique_name","com.shaterguy.shiganshina.dev")
-		preset.set("package/name","Shiganshina Survivors DEV")
+		preset.set("package/name","Shiganshina DEV VALIDATION" if export_mode == "development-validation" else "Shiganshina Survivors DEV")
 		preset.set("package/signed",false)
 		preset.set("launcher_icons/main_192x192","res://assets/art/ui/game_icon.png")
 		preset.set("version/code",1)

@@ -111,6 +111,7 @@ def main() -> int:
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--template', type=Path, required=True)
+    parser.add_argument('--development-validation', action='store_true', help='Sign only the explicit incomplete development package, preserving final=false')
     args = parser.parse_args()
     try:
         from android_common import read_manifest, verify_apk
@@ -127,8 +128,8 @@ def main() -> int:
         source, output = args.input.resolve(), args.output.resolve()
         if output.exists() or output.with_suffix('.apk.signing.json').exists() or source == output: raise BuildError('Output must be a new path; existing files are never overwritten')
         if output.suffix.lower() != '.apk': raise BuildError('Output must end in .apk')
-        manifest = read_manifest(ROOT)
-        verify_apk(source, args.template, ROOT, manifest)
+        manifest = read_manifest(ROOT, development_validation=args.development_validation)
+        verify_apk(source, args.template, ROOT, manifest, development_validation=args.development_validation)
         input_hash = sha256(source)
         aligner, signer = tool_command('zipalign', env), tool_command('apksigner', env)
         keytool = [jdk_tool('keytool', env)]
@@ -144,9 +145,11 @@ def main() -> int:
             run_tool(sign_command(signer, settings, aligned, signed), 'apksigner sign', tool_env)
             cert = verify_certificate(run_tool(signer + ['verify', '--verbose', '--print-certs', str(signed)], 'apksigner verify', tool_env), expected)
             run_tool(aligner + ['-c', '-P', '16', '4', str(signed)], 'zipalign verify', tool_env)
-            verify_apk(signed, args.template, ROOT, manifest, signed=True)
+            verify_apk(signed, args.template, ROOT, manifest, signed=True, development_validation=args.development_validation)
             if sha256(source) != input_hash: raise BuildError('Input APK changed during signing')
             report = {'package': PIN['android'], 'input_sha256': input_hash, 'output_sha256': sha256(signed), 'certificate_sha256': cert}
+            if args.development_validation:
+                report.update({'build_mode':'development-validation', 'development_only':True, 'final_export_allowed':False, 'development_validation':manifest['development_validation']})
             # Exclusive creation prevents overwriting even if another process raced us.
             with output.open('xb') as dest, signed.open('rb') as src: shutil.copyfileobj(src, dest)
         if sha256(output) != report['output_sha256']: raise BuildError('Published APK SHA-256 mismatch')

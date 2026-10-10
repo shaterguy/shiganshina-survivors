@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a verified unsigned DEV APK locally, only after art approval."""
+"""Build unsigned Android APKs; final requires approval, explicit validation preserves pending art."""
 from __future__ import annotations
 import argparse
 import json
@@ -18,15 +18,16 @@ def main() -> int:
     parser.add_argument('--godot', default='godot', help='Path to the pinned official standard Godot executable')
     parser.add_argument('--template', type=Path, help='Extracted templates/android_debug.apk (no SDK required)')
     parser.add_argument('--output', type=Path, default=ROOT/'dist/shiganshina-dev-unsigned.apk')
+    parser.add_argument('--development-validation', action='store_true', help='Build incomplete validation-only package with five approved basic placeholders; never approve final art')
     parser.add_argument('--check-ready', action='store_true', help='Check manifest approval and source assets only; never launch Godot')
     parser.add_argument('--timeout', type=int, default=600)
     args = parser.parse_args()
     try:
         root, output = args.project.resolve(), args.output.resolve()
-        manifest = read_manifest(root)  # First: no tool, key, cache or output work while blocked.
+        manifest = read_manifest(root, development_validation=args.development_validation)  # First: no tool, key, cache or output work while blocked.
         verify_source_hashes(root, manifest)
         if args.check_ready:
-            print('EXPORT_READY: approved manifest and asset hashes verified')
+            print('DEVELOPMENT_VALIDATION_READY: five basic placeholders; final_export_allowed=false' if args.development_validation else 'EXPORT_READY: approved manifest and asset hashes verified')
             return 0
         if not args.template: raise BuildError('--template is required; see docs/build/android-local.md')
         template = args.template.expanduser().resolve()
@@ -43,10 +44,10 @@ def main() -> int:
                 raise BuildError('Godot version must be exactly ' + PIN['godot_version'])
             staged = work/'project'
             provenance = stage_project(root, staged, manifest)
-            staged_manifest = read_manifest(staged)
+            staged_manifest = read_manifest(staged, development_validation=args.development_validation)
             verify_source_hashes(staged, staged_manifest)
             built=work/'unsigned.apk'
-            env.update({'SHIGAN_EXPORT_KIND':'android','SHIGAN_EXPORT_TEMPLATE':str(template),'SHIGAN_EXPORT_OUTPUT':str(built)})
+            env.update({'SHIGAN_EXPORT_MODE':'development-validation' if args.development_validation else 'final', 'SHIGAN_EXPORT_KIND':'android','SHIGAN_EXPORT_TEMPLATE':str(template),'SHIGAN_EXPORT_OUTPUT':str(built)})
             # EditorPlugin export_project is intentional. --export-debug invokes the SDK/signing prerequisite check.
             result=subprocess.run([engine,'--headless','--editor','--path',str(staged)], env=env, capture_output=True, text=True, timeout=args.timeout)
             log=result.stdout+'\n'+result.stderr
@@ -54,7 +55,7 @@ def main() -> int:
                 # This process has no credentials or private source files. Limit diagnostic size.
                 print(log[-12000:], file=sys.stderr)
                 raise BuildError('Godot export failed; no output APK was published')
-            report=verify_apk(built,template,staged,staged_manifest)
+            report=verify_apk(built,template,staged,staged_manifest,development_validation=args.development_validation)
             report.update(provenance)
             report.update({'godot_version':PIN['godot_version'],'template_sha256':PIN['template']['sha256'],'signed':False,'certificate_sha256':None})
             output.parent.mkdir(parents=True, exist_ok=True)
