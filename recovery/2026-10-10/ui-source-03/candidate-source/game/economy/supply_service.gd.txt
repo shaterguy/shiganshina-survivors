@@ -1,0 +1,200 @@
+class_name SupplyService
+extends RefCounted
+const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
+const Catalog = preload("res://game/economy/supply_catalog.gd")
+const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const MAX_COUNTER := 2147483647
+const TERMINAL := ["dead", "won", "abandoned"]
+var _catalog = Catalog.new()
+var _upgrades = Upgrades.new()
+var _run_factory: Callable
+var _evolutions: Dictionary = {}
+func _init(run_factory: Callable) -> void:
+	_run_factory = run_factory
+	var recipes = JSON.parse_string(FileAccess.get_file_as_string("res://data/evolutions.json"))
+	if recipes is Dictionary and recipes.get("items") is Dictionary: _evolutions = recipes.items
+func shop_view(game_save: Dictionary) -> Dictionary:
+	var error := _validate_economy(game_save)
+	if not error.is_empty(): return {"view_revision":1,"store_revision":game_save.get("store_revision",0),"balance":0,"items":[],"loadout":{},"can_shop":false,"lock_reason":error,"legacy_checkpoint_present":game_save.get("legacy_checkpoint_present",false),"loadout_options":{"doctrines":[],"targets":[],"supplies":[]},"can_start":false,"start_blocked_reason":error}
+	var profile: Dictionary = game_save.profile
+	var active := _has_unsettled_run(game_save)
+	var items: Array[Dictionary] = []
+	for id in _catalog.item_ids():
+		var definition: Dictionary = _catalog.item(id)
+		var owned := _owned(profile, definition)
+		var blocked := _purchase_blocked(game_save, definition)
+		var row := {"item_id":id,"kind":definition.kind,"price":int(definition.price),"owned":owned,"max_owned":int(definition.max_owned),"can_purchase":blocked.is_empty(),"blocked_reason":blocked,"balance_after":int(profile.supply_credits) - int(definition.price) if blocked.is_empty() else int(profile.supply_credits)}
+		for key in ["name","description","tradeoff_text"]: row[key] = definition[key]
+		if definition.kind == "doctrine":
+			var doctrine: Dictionary = _catalog.doctrine(str(definition.effect_params.doctrine_id))
+			row.description = "%s · %s" % [definition.description,doctrine.description]
+		items.append(row)
+	return {"view_revision":1,"store_revision":int(game_save.store_revision),"balance":int(profile.supply_credits),"items":items,"loadout":profile.loadout.duplicate(true),"can_shop":not active,"lock_reason":"active_run" if active else "","legacy_checkpoint_present":game_save.legacy_checkpoint_present,"loadout_options":_loadout_options(profile,active),"can_start":_start_blocked(game_save).is_empty(),"start_blocked_reason":_start_blocked(game_save)}
+func prepare_purchase(game_save: Dictionary, item_id: String, request_id: String, expected_revision: int) -> Dictionary:
+	var error := _validate_economy(game_save)
+	if not error.is_empty(): return _fail(error)
+	for receipt in game_save.purchase_receipts:
+		if receipt.get("request_id") == request_id:
+			if receipt.get("item_id") != item_id or receipt.get("expected_revision") != expected_revision: return _fail("request_conflict")
+			return {"ok":true,"already_applied":true,"receipt":receipt.duplicate(true)}
+	if expected_revision != game_save.store_revision: return _fail("stale_revision")
+	if request_id != "purchase:%s:%d:%s" % [game_save.career_id,expected_revision,item_id]: return _fail("request_conflict")
+	var definition: Dictionary = _catalog.item(item_id)
+	if definition.is_empty(): return _fail("invalid_item")
+	error = _purchase_blocked(game_save,definition)
+	if not error.is_empty(): return _fail(error)
+	var candidate := game_save.duplicate(true)
+	candidate.profile.supply_credits = int(candidate.profile.supply_credits) - int(definition.price)
+	if definition.kind == "doctrine": candidate.profile.owned_doctrine_ids.append(item_id)
+	else: candidate.profile.consumables[item_id] = int(candidate.profile.consumables[item_id]) + 1
+	var receipt := {"request_id":request_id,"item_id":item_id,"expected_revision":expected_revision,"price":int(definition.price),"balance_after":int(candidate.profile.supply_credits),"owned_after":_owned(candidate.profile,definition)}
+	candidate.purchase_receipts.append(receipt.duplicate(true))
+	while candidate.purchase_receipts.size() > 64: candidate.purchase_receipts.pop_front()
+	return {"ok":true,"candidate":candidate,"receipt":receipt,"already_applied":false}
+func _purchase_blocked(save: Dictionary, definition: Dictionary) -> String:
+	if _has_unsettled_run(save): return "active_run"
+	if save.store_revision >= MAX_COUNTER: return "counter_exhausted"
+	if _owned(save.profile,definition) >= definition.max_owned: return "already_owned" if definition.kind == "doctrine" else "inventory_full"
+	if save.profile.supply_credits < definition.price: return "insufficient_funds"
+	return ""
+func _owned(profile: Dictionary, definition: Dictionary) -> int:
+	if definition.kind == "doctrine": return int(definition.item_id in profile.owned_doctrine_ids)
+	return int(profile.consumables.get(definition.item_id,0))
+func _has_unsettled_run(save: Dictionary) -> bool:
+	if save.checkpoint == null: return false
+	return not save.checkpoint.get("phase") in TERMINAL or save.checkpoint.get("run_serial",MAX_COUNTER) > save.settled_through_serial
+func _validate_economy(save: Dictionary) -> String:
+	var errors: Array[String] = Contracts.new(Callable()).validate_economy(save)
+	if not errors.is_empty(): return errors[0]
+	if save.checkpoint != null and not save.checkpoint is Dictionary: return "invalid_game_save"
+	return ""
+func _counter(value: Variant) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and value >= 0 and value <= MAX_COUNTER and value == floor(value)
+func _fail(code: String) -> Dictionary:
+	return {"ok":false,"error_code":code}
+func prepare_loadout(game_save: Dictionary, selection: Dictionary, expected_revision: int) -> Dictionary:
+	var error := _validate_economy(game_save)
+	if not error.is_empty(): return _fail(error)
+	if expected_revision != game_save.store_revision: return _fail("stale_revision")
+	if game_save.store_revision >= MAX_COUNTER: return _fail("counter_exhausted")
+	if _has_unsettled_run(game_save): return _fail("active_run")
+	if not _loadout_valid(game_save.profile,selection): return _fail("invalid_loadout")
+	var candidate := game_save.duplicate(true)
+	candidate.profile.loadout = selection.duplicate(true)
+	return {"ok":true,"candidate":candidate}
+func prepare_run_start(game_save: Dictionary, chapter: Dictionary, seed: int, request_id: String, expected_revision: int) -> Dictionary:
+	var error := _validate_economy(game_save)
+	if not error.is_empty(): return _fail(error)
+	var prior = game_save.checkpoint
+	if prior is Dictionary and request_id == "start:%s:%d" % [game_save.career_id,int(prior.get("run_serial",0))]:
+		if prior.get("seed") != seed or prior.get("chapter_id") != chapter.get("chapter_id") or prior.get("content_revision") != chapter.get("content_revision"): return _fail("request_conflict")
+		return {"ok":true,"already_applied":true,"receipt":_start_receipt(prior,request_id)}
+	if expected_revision != game_save.store_revision: return _fail("stale_revision")
+	var prefix := "start:%s:" % game_save.career_id
+	if request_id.begins_with(prefix) and request_id.trim_prefix(prefix).is_valid_int() and int(request_id.trim_prefix(prefix)) < int(game_save.next_run_serial): return _fail("stale_revision")
+	if request_id != prefix+str(int(game_save.next_run_serial)): return _fail("request_conflict")
+	if _has_unsettled_run(game_save): return _fail("active_run")
+	if game_save.next_run_serial == MAX_COUNTER or game_save.store_revision == MAX_COUNTER: return _fail("counter_exhausted")
+	var selection: Dictionary = game_save.profile.loadout
+	if not _loadout_valid(game_save.profile,selection): return _fail("invalid_loadout")
+	if not _run_factory.is_valid(): return _fail("invalid_run_config")
+	if chapter.get("content_revision") != "ch01.3": return _fail("content_mismatch")
+	if chapter.has("doctrine_ids") and not selection.doctrine_id in chapter.doctrine_ids: return _fail("invalid_loadout")
+	if chapter.has("evolution_ids") and not selection.target_evolution_id in chapter.evolution_ids: return _fail("invalid_loadout")
+	var serial := int(game_save.next_run_serial)
+	var config := {"run_id":"%s:%d" % [game_save.career_id,serial],"run_serial":serial,"doctrine_id":selection.doctrine_id,"target_evolution_id":selection.target_evolution_id,"prepared_supply":selection.supply_item_id}
+	var state = _run_factory.call(chapter.duplicate(true),seed,config.duplicate(true))
+	if not state is Dictionary: return _fail("invalid_snapshot")
+	if state.get("ok") == false: return state.duplicate(true)
+	if state.get("schema_version") != 2 or state.get("run_id") != config.run_id or state.get("run_serial") != serial or state.get("seed") != seed or state.get("content_revision") != chapter.content_revision or state.get("chapter_id") != chapter.get("chapter_id") or state.get("run_config") != config or state.get("supply_used") != false: return _fail("invalid_snapshot")
+	var candidate := game_save.duplicate(true)
+	if selection.supply_item_id != "": candidate.profile.consumables[selection.supply_item_id] = int(candidate.profile.consumables[selection.supply_item_id])-1
+	candidate.next_run_serial = serial+1
+	candidate.checkpoint = state.duplicate(true)
+	return {"ok":true,"candidate":candidate,"receipt":_start_receipt(state,request_id),"already_applied":false}
+func prepare_settlement(game_save: Dictionary, terminal_state: Dictionary) -> Dictionary:
+	var error := _validate_economy(game_save)
+	if not error.is_empty(): return _fail(error)
+	var serial = terminal_state.get("run_serial")
+	if not _counter(serial) or serial < 1 or terminal_state.get("run_id") != "%s:%d" % [game_save.career_id,int(serial)]: return _fail("invalid_snapshot")
+	var request_id := "settle:"+str(terminal_state.run_id)
+	if serial <= game_save.settled_through_serial:
+		for receipt in game_save.settlement_receipts:
+			if receipt.get("request_id") == request_id: return {"ok":true,"already_applied":true,"receipt":receipt.duplicate(true)}
+		return {"ok":true,"already_applied":true,"receipt":{"request_id":request_id,"run_id":terminal_state.run_id,"run_serial":int(serial),"details_unavailable":true}}
+	if game_save.store_revision == MAX_COUNTER: return _fail("counter_exhausted")
+	if not game_save.checkpoint is Dictionary or game_save.checkpoint.get("run_id") != terminal_state.run_id or serial != game_save.next_run_serial-1: return _fail("invalid_snapshot")
+	if terminal_state.get("schema_version") != 2 or not terminal_state.get("phase") in TERMINAL or not terminal_state.get("stats") is Dictionary or not terminal_state.get("chapter_id") is String: return _fail("invalid_snapshot")
+	for key in ["kills","minibosses_defeated"]:
+		if not _counter(terminal_state.stats.get(key)): return _fail("invalid_snapshot")
+	if not _counter(terminal_state.get("survival_tick")) or not _counter(terminal_state.get("active_tick")) or terminal_state.survival_tick > terminal_state.active_tick or terminal_state.stats.minibosses_defeated > 5: return _fail("invalid_snapshot")
+	if not _settlement_evidence_valid(terminal_state): return _fail("invalid_snapshot")
+	var breakdown := settlement_breakdown(terminal_state)
+	var total := int(breakdown.kills + breakdown.survival + breakdown.minibosses + breakdown.clear)
+	if game_save.profile.supply_credits > MAX_COUNTER-total: return _fail("counter_exhausted")
+	var candidate := game_save.duplicate(true)
+	candidate.profile.supply_credits = int(candidate.profile.supply_credits)+total
+	candidate.settled_through_serial = int(serial)
+	candidate.checkpoint = terminal_state.duplicate(true)
+	_record_result(candidate.profile,terminal_state)
+	var receipt := {"request_id":request_id,"run_id":terminal_state.run_id,"run_serial":int(serial),"breakdown":breakdown,"total":total,"balance_after":int(candidate.profile.supply_credits)}
+	candidate.settlement_receipts.append(receipt.duplicate(true))
+	while candidate.settlement_receipts.size() > 20: candidate.settlement_receipts.pop_front()
+	return {"ok":true,"candidate":candidate,"receipt":receipt,"already_applied":false}
+func settlement_breakdown(state: Dictionary) -> Dictionary:
+	var survival := 0
+	for milestone in [10800,18000,36000,72000]:
+		if int(state.survival_tick) >= milestone: survival += 10
+	return {"kills":mini(int(state.stats.kills)/10,40),"survival":survival,"minibosses":mini(int(state.stats.minibosses_defeated),5)*15,"clear":30 if state.phase == "won" else 0}
+func _record_result(profile: Dictionary, state: Dictionary) -> void:
+	if state.phase == "won" and not state.chapter_id in profile.cleared_chapter_ids: profile.cleared_chapter_ids.append(state.chapter_id)
+	var old: Dictionary = profile.best_runs.get(state.chapter_id,{})
+	if (state.phase == "won" and not old.get("won",false)) or int(state.survival_tick) >= int(old.get("survival_tick",-1)):
+		profile.best_runs[state.chapter_id] = {"survival_tick":int(state.survival_tick),"kills":int(state.stats.kills),"won":state.phase == "won" or old.get("won",false)}
+func _loadout_valid(profile: Dictionary, selection: Dictionary) -> bool:
+	if not selection.get("doctrine_id") is String or not selection.doctrine_id in profile.owned_doctrine_ids: return false
+	if not _evolutions.has(selection.get("target_evolution_id")): return false
+	if not selection.get("supply_item_id") in ["","field_bandage"]: return false
+	return selection.supply_item_id == "" or profile.consumables.field_bandage > 0
+func _start_receipt(state: Dictionary, request_id: String) -> Dictionary:
+	return {"request_id":request_id,"run_id":state.run_id,"run_serial":int(state.run_serial),"seed":state.seed,"chapter_id":state.chapter_id,"content_revision":state.content_revision,"run_config":state.run_config.duplicate(true)}
+
+func _start_blocked(save: Dictionary) -> String:
+	if _has_unsettled_run(save): return "active_run"
+	if save.next_run_serial >= MAX_COUNTER or save.store_revision >= MAX_COUNTER: return "counter_exhausted"
+	if not _loadout_valid(save.profile,save.profile.loadout): return "invalid_loadout"
+	return ""
+func _loadout_options(profile: Dictionary, active: bool) -> Dictionary:
+	var doctrines: Array[Dictionary] = []
+	for id in ["doctrine_standard","doctrine_mobile","doctrine_artillery"]:
+		var definition: Dictionary = _catalog.doctrine(id)
+		var blocked := "active_run" if active else ("" if id in profile.owned_doctrine_ids else "not_owned")
+		doctrines.append({"id":id,"name":definition.name,"description":definition.description,"tradeoff_text":definition.tradeoff_text,"can_select":blocked.is_empty(),"blocked_reason":blocked})
+	var targets: Array[Dictionary] = []
+	for id in _evolutions:
+		var definition: Dictionary = _evolutions[id]
+		var requirements: Array[Dictionary] = [{"kind":"equipment","item_id":definition.base_item_id,"name":_upgrades.equipment[definition.base_item_id].name,"required":int(definition.required_weapon_level)}]
+		for passive in definition.required_passives:
+			requirements.append({"kind":"passive","item_id":passive.passive_id,"name":_upgrades.passives[passive.passive_id].name,"required":int(passive.level)})
+		targets.append({"id":id,"name":definition.name,"description":definition.description,"tradeoff_text":definition.tradeoff_text,"requirements":requirements,"seal_cost":int(definition.seal_cost),"can_select":not active,"blocked_reason":"active_run" if active else ""})
+	var supplies: Array[Dictionary] = [{"id":"","name":"장착 안 함","description":"보급품을 소비하지 않음","tradeoff_text":"","can_select":not active,"blocked_reason":"active_run" if active else "","owned":0}]
+	var bandage: Dictionary = _catalog.item("field_bandage")
+	var owned := int(profile.consumables.field_bandage)
+	var blocked := "active_run" if active else ("" if owned > 0 else "not_owned")
+	supplies.append({"id":"field_bandage","name":bandage.name,"description":bandage.description,"tradeoff_text":bandage.tradeoff_text,"can_select":blocked.is_empty(),"blocked_reason":blocked,"owned":owned})
+	return {"doctrines":doctrines,"targets":targets,"supplies":supplies}
+
+func _settlement_evidence_valid(state: Dictionary) -> bool:
+	if not state.get("reward_ids_claimed") is Array: return false
+	var bosses := {}
+	for id in state.reward_ids_claimed:
+		if not id is String: return false
+		if id.begins_with("boss:"):
+			if bosses.has(id) or not id in ["boss:ch01_b05","boss:ch01_b10","boss:ch01_b15","boss:ch01_b20","boss:ch01_b25"]: return false
+			bosses[id] = true
+	if bosses.size() != int(state.stats.minibosses_defeated): return false
+	if state.phase == "won":
+		if state.get("evacuation_ready") != true or not _counter(state.get("final_started_tick")) or state.survival_tick < 108000: return false
+		if not state.get("rules") is Dictionary or not _counter(state.rules.get("evacuation_ticks")) or state.rules.evacuation_ticks != 4500: return false
+		if state.active_tick-state.final_started_tick < state.rules.evacuation_ticks: return false
+	return true

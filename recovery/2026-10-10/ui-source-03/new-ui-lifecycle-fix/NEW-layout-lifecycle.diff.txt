@@ -1,0 +1,30 @@
+--- a/game/ui/game_ui.gd
++++ b/game/ui/game_ui.gd
+@@ -209,7 +209,7 @@
+ 	_panel.size = Vector2(width,height)
+ 	_panel.position = safe.position + (safe.size-_panel.size)*0.5
+ 	_layout_generation += 1
+-	call_deferred("_settle_panel",_layout_generation)
++	call_deferred("_queue_settle_panel",_layout_generation)
+ 	_choices.columns = 3 if size_px.x > size_px.y and _mode == "upgrade" else 1
+ 	get_node("Pause").position = safe.position + Vector2(safe.size.x-62,10)
+ 	_hud.position = safe.position + Vector2(20,20)
+@@ -600,9 +600,15 @@
+ func _item_icon(id: String) -> String:
+ 	return {"blade_slash":"icon_twin_blades","spin_slash":"icon_spin_slash","odm_dash":"icon_omni_dash","reentry_combo":"icon_reentry_combo","wall_cannon":"icon_wall_cannon","ally_cover":"icon_ally_cover","damage":"icon_damage","fire_interval":"icon_cooldown","movement":"icon_movement","max_health":"icon_health","recovery":"icon_regeneration","pickup":"icon_pickup","pickup_radius":"icon_pickup","range":"icon_range","attack_range":"icon_range","evo_wing_cut":"icon_evo_wing_cut","evo_crossfire":"icon_evo_crossfire","armor":"icon_armor"}.get(id,"")
+ 
+-func _settle_panel(generation: int) -> void:
+-	await get_tree().process_frame
+-	if generation != _layout_generation or not is_instance_valid(_panel): return
++func _queue_settle_panel(generation: int) -> void:
++	# NEW reconstruction repair: schedule one object-bound callback, not a
++	# coroutine that can resume after this scene has been destroyed.
++	if not is_inside_tree() or is_queued_for_deletion() or generation != _layout_generation: return
++	var callback := Callable(self,"_settle_panel")
++	if not get_tree().process_frame.is_connected(callback):
++		get_tree().process_frame.connect(callback,CONNECT_ONE_SHOT | CONNECT_DEFERRED)
++func _settle_panel() -> void:
++	if not is_inside_tree() or is_queued_for_deletion() or not is_instance_valid(_panel): return
+ 	var safe := Rect2(Vector2(_safe_rect.position),Vector2(_safe_rect.size))
+ 	var width := minf(730 if _mode in ["upgrade","shop","loadout","evolution_detail"] else 520,safe.size.x-32)
+ 	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","evolution_detail"] else (390 if _mode in ["title","pause"] else 310))

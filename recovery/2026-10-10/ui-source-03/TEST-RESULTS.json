@@ -1,0 +1,127 @@
+{
+  "engine_errors": 0,
+  "exact_new_diff_replay": {
+    "base_sha256": "257101327d8846a5f84e65cae9dc35e01db272b54b2ac7fb147b005cefe6e509",
+    "exact_diff_replay": true,
+    "final_sha256": "3ee415774cc8472dadd67ef1ea431989800b1207fda2716c132aa8f85060ef0f",
+    "focus_sha256": "ceee053ec095d161c93605cebecdb88986fb1cfeeb0830fd4cbc02606f26fb14",
+    "source_files_modified": false
+  },
+  "failures": 0,
+  "free_probe_clean": true,
+  "full_game_or_android_acceptance": false,
+  "godot_version": "4.6.3.stable.official.7d41c59c4",
+  "input_files": [
+    {
+      "bytes": 4967,
+      "fixture_runtime_path": "game/input/input_router.gd",
+      "preserved_path": "candidate-source/game/input/input_router.gd.txt",
+      "sha256": "db5787a73297b1d27ef961f064ecc1321b3b53121466b21d841840e2a9753058"
+    },
+    {
+      "bytes": 1413,
+      "fixture_runtime_path": "game/ui/evolution_detail_panel.gd",
+      "preserved_path": "candidate-source/game/ui/evolution_detail_panel.gd.txt",
+      "sha256": "086a31b1b9b8aed69d9b6bdd075bcbce28ba25b7788c6c72a6e89c9b11186fe3"
+    },
+    {
+      "bytes": 7019,
+      "fixture_runtime_path": "game/ui/growth_card.gd",
+      "preserved_path": "candidate-source/game/ui/growth_card.gd.txt",
+      "sha256": "e42717684027e735c288201ab33e46dd8f85206344600ea7a81920d4253b459c"
+    },
+    {
+      "bytes": 5243,
+      "fixture_runtime_path": "game/ui/loadout_panel.gd",
+      "preserved_path": "candidate-source/game/ui/loadout_panel.gd.txt",
+      "sha256": "bdd9c926411cbfef8984f4f75fa8c17a258bb37f6efecf628608f972a5187279"
+    },
+    {
+      "bytes": 5138,
+      "fixture_runtime_path": "game/ui/supply_shop_panel.gd",
+      "preserved_path": "candidate-source/game/ui/supply_shop_panel.gd.txt",
+      "sha256": "18829517003553bd6108026998f55245e00b78b23dd269f5da1269308377312a"
+    },
+    {
+      "bytes": 35120,
+      "fixture_runtime_path": "game/ui/game_ui.gd",
+      "preserved_path": "new-ui-lifecycle-fix/source/game/ui/game_ui.gd.txt",
+      "sha256": "3ee415774cc8472dadd67ef1ea431989800b1207fda2716c132aa8f85060ef0f"
+    },
+    {
+      "bytes": 224,
+      "fixture_runtime_path": "project.godot",
+      "preserved_path": "test-fixture-evidence/project.godot.txt",
+      "sha256": "dcda4d3a666ac095fdee1b3d474f614b23c73f41e567ed6a714d77090c7318dc"
+    },
+    {
+      "bytes": 242,
+      "fixture_runtime_path": "game/progression/upgrade_catalog.gd",
+      "preserved_path": "test-fixture-evidence/game/progression/upgrade_catalog.gd.txt",
+      "sha256": "72ce741b2b243d8a0f6bd21ca04a8add20bf9e3694c9e3f8e9591e6515cfa973"
+    },
+    {
+      "bytes": 48,
+      "fixture_runtime_path": "assets/manifest.json",
+      "preserved_path": "test-fixture-evidence/assets/manifest.json.txt",
+      "sha256": "7430a7815ce84ea1b2410fbe8e21f2344386cfa2fc3bae5782ff5c14bcdaeb97"
+    },
+    {
+      "bytes": 63,
+      "fixture_runtime_path": "chapters/chapter_01/manifest.json",
+      "preserved_path": "test-fixture-evidence/chapters/chapter_01/manifest.json.txt",
+      "sha256": "5745916d5c603b41459066d4f0bdff6eae73ba93f130d314d736b2cad0bb879d"
+    },
+    {
+      "bytes": 18974,
+      "fixture_runtime_path": "tests/reconstruction_regression.gd",
+      "preserved_path": "test-fixture-evidence/tests/reconstruction_regression.gd.txt",
+      "sha256": "1ecaf0face06a333b51a6526373de8144253036015b0fb7534643cf79e6b0a97"
+    },
+    {
+      "bytes": 4842,
+      "fixture_runtime_path": "tests/reconstruction_layout_lifecycle.gd",
+      "preserved_path": "test-fixture-evidence/tests/reconstruction_layout_lifecycle.gd.txt",
+      "sha256": "32b5b6a496858c50ccbc0b12f3a045a4663bdc2cfd6d88e04f66c60d3e9ad58e"
+    },
+    {
+      "bytes": 492,
+      "fixture_runtime_path": "tests/reconstruction_deferred_free_probe.gd",
+      "preserved_path": "test-fixture-evidence/tests/reconstruction_deferred_free_probe.gd.txt",
+      "sha256": "ebcd3c9be0b070018ab656dcc5f631d94f1aee40cc5a4354823d3943dd8f9a64"
+    }
+  ],
+  "original_sources_modified": false,
+  "passed": true,
+  "results": [
+    {
+      "checks": 79,
+      "engine_errors": 0,
+      "exit_code": 0,
+      "failures": 0,
+      "log_sha256": "8f11e09f815f68ed8c70bc3c709a45b21d821fef4d254fba6a337ec9f3f0146f",
+      "passed": true,
+      "test": "reconstruction_regression"
+    },
+    {
+      "checks": 14,
+      "engine_errors": 0,
+      "exit_code": 0,
+      "failures": 0,
+      "log_sha256": "1cc5dcb109b362d302952134996c113220cccb5269d68b6d9a6a352d84c97fd7",
+      "passed": true,
+      "test": "reconstruction_layout_lifecycle"
+    },
+    {
+      "checks": 0,
+      "engine_errors": 0,
+      "exit_code": 0,
+      "failures": 0,
+      "log_sha256": "7bd48fa62121a523209ce05497cf135821b4c9305c8fe552e7a4053426ff848d",
+      "passed": true,
+      "test": "reconstruction_deferred_free_probe"
+    }
+  ],
+  "scope": "Isolated presentation/input/lifecycle only; NEVER production validation",
+  "total_assertions": 93
+}

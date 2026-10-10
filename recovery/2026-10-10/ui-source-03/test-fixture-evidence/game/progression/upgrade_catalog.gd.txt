@@ -1,0 +1,5 @@
+extends RefCounted
+# NEW EXPLICIT TEST DOUBLE. The original v2 catalog is missing.
+# Only GameUI's XP bar is exercised; no progression/validation behavior is claimed.
+static func xp_to_next(_level: int, _rules: Dictionary) -> int:
+	return 10

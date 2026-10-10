@@ -1,0 +1,42 @@
+{
+  "android_acceptance_performed": false,
+  "candidate_dependencies_missing": [
+    "game/core/run_simulation.gd",
+    "game/progression/upgrade_catalog.gd",
+    "game/economy/supply_catalog.gd",
+    "tests/app/controller_test_support.gd"
+  ],
+  "candidate_files_in_this_archive": 9,
+  "candidate_files_referenced": 3,
+  "candidate_inventory_count": 12,
+  "controller_stage_history": {
+    "I2RR1_sha256": "da2babc0cb25b33f88f069c6470eed2d73cdb87d7df3ba7dc750a679d052d014",
+    "I2_sha256": "6f472f114423aa59578ef4748bb968023fe927adb9bda1f363d855befbca8538",
+    "audio_reset_sha256": "027f1e1e430763058270943fd19968fbcaa8e257a3eb591836a5f74262b7f5b8",
+    "base_sha256": "8acf581a2763c911c622acbd2a38be8332147bb603c824d8501a0e95573d539b"
+  },
+  "date_utc": "2026-10-10",
+  "excluded": {
+    "conversations": true,
+    "prior_exact_patches": [
+      "recovery/2026-10-10/exact-source-01/ui-history/I2-controller-review-fixes.diff.txt",
+      "recovery/2026-10-10/exact-source-01/ui-authority-fix/I2RR-1-fixes.diff.txt"
+    ],
+    "production_test_doubles": true,
+    "raw_recovery_reports": true
+  },
+  "full_game_integration_verified": false,
+  "historical_hash_scope": "Controller I2RR-1, router, loadout and two prior exact regression bodies only; not later product state.",
+  "new_ui_stages": {
+    "base_sha256": "257101327d8846a5f84e65cae9dc35e01db272b54b2ac7fb147b005cefe6e509",
+    "final_sha256": "3ee415774cc8472dadd67ef1ea431989800b1207fda2716c132aa8f85060ef0f",
+    "focus_sha256": "ceee053ec095d161c93605cebecdb88986fb1cfeeb0830fd4cbc02606f26fb14"
+  },
+  "reconstructed_hash_scope": "Preservation hashes bind present bytes. They do not supply missing historical final digests.",
+  "remote_publication_performed": false,
+  "runtime_activation_performed": false,
+  "source_freeze": {
+    "frozen_adoption_manifest_sha256": "e3f64c046cf061d2306f457f6e6cba217f800e9deed8604851acfc1bc68f9a79",
+    "frozen_deliverables_sha256": "e94981b45c0505620f21dcb07af267567ec1c9c848e51d5483eb62d938d3586a"
+  }
+}

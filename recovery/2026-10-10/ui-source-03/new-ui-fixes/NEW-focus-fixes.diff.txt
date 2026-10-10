@@ -1,0 +1,46 @@
+--- a/game/ui/game_ui.gd
++++ b/game/ui/game_ui.gd
+@@ -391,12 +391,22 @@
+ 	if _buttons.is_empty() or _focus_index >= _buttons.size(): return ""
+ 	return str(_buttons[_focus_index].get_meta("semantic_id",""))
+ func _restore_focus(id: String) -> void:
++	var fallback_start := 0
+ 	for index in range(_buttons.size()):
+-		if str(_buttons[index].get_meta("semantic_id","")) == id:
++		if str(_buttons[index].get_meta("semantic_id","")) != id: continue
++		if not _buttons[index].disabled:
+ 			_focus_index = index
+-			if not _buttons[index].disabled: _buttons[index].grab_focus()
++			_buttons[index].grab_focus()
+ 			return
+-	for index in range(_buttons.size()):
++		# NEW reconstruction fix: an in-flight supply request keeps its semantic
++		# identity while locked. A settled unavailable item moves forward instead.
++		if _supply_locked and _supply_mode in ["shop","loadout"]:
++			_focus_index = index
++			return
++		fallback_start = index+1
++		break
++	for offset in range(_buttons.size()):
++		var index := posmod(fallback_start+offset,_buttons.size())
+ 		if not _buttons[index].disabled:
+ 			_focus_index = index
+ 			_buttons[index].grab_focus()
+@@ -432,6 +442,7 @@
+ 	present(snapshot)
+ func present_progression(view: Dictionary) -> void:
+ 	var previous_focus := focused_semantic_id()
++	var previous_offer_id := _offer_id
+ 	_growth_view = view.duplicate(true)
+ 	var offer: Dictionary = _growth_view.get("active_offer",{})
+ 	if offer.is_empty():
+@@ -451,7 +462,8 @@
+ 	_subtitle.text = _growth_subtitle()
+ 	_render_growth_cards(offer)
+ 	reflow(_screen_size,_safe_rect)
+-	_restore_focus(previous_focus if not previous_focus.is_empty() else str(offer.get("selected_option_id","")))
++	# NEW reconstruction fix: current focus belongs only to the same offer.
++	_restore_focus(previous_focus if previous_offer_id == _offer_id and not previous_focus.is_empty() else str(offer.get("selected_option_id","")))
+ func _growth_subtitle() -> String:
+ 	var copy := "성장 하나를 선택하세요. 전투는 멈춥니다."
+ 	var slots: Dictionary = _growth_view.get("slots",{})

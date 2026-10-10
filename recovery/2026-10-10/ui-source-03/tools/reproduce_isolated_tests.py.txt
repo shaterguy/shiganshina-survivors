@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""Materialize only a NEW isolated test workspace. NEVER a production installer."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import shutil
+import subprocess
+
+RUNTIME = [
+    "game/input/input_router.gd", "game/ui/evolution_detail_panel.gd",
+    "game/ui/growth_card.gd", "game/ui/loadout_panel.gd", "game/ui/supply_shop_panel.gd",
+]
+FIXTURES = [
+    "project.godot", "game/progression/upgrade_catalog.gd", "assets/manifest.json",
+    "chapters/chapter_01/manifest.json", "tests/reconstruction_regression.gd",
+    "tests/reconstruction_layout_lifecycle.gd", "tests/reconstruction_deferred_free_probe.gd",
+]
+SPECS = [
+    ("reconstruction_regression", "RECONSTRUCTION_PRESENTATION_RESULT", 79),
+    ("reconstruction_layout_lifecycle", "RECONSTRUCTION_LAYOUT_RESULT", 14),
+    ("reconstruction_deferred_free_probe", "DEFERRED_FREE_PROBE_FINISHED", 0),
+]
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--output", type=Path, required=True, help="A new, nonexistent test-workspace directory")
+    parser.add_argument("--godot", default="godot")
+    args = parser.parse_args()
+    root = args.source_root.resolve()
+    output = args.output.resolve()
+    if output.exists() or output == root or root in output.parents:
+        raise ValueError("Output must be nonexistent and outside preserved source")
+    manifest = json.loads((root / "SOURCE-MANIFEST.json").read_text())
+    entries = {x["path"].removeprefix(manifest["allowed_prefix"]): x for x in manifest["artifacts"]}
+    chosen = [("candidate-source/" + p + ".txt", p) for p in RUNTIME]
+    chosen += [("new-ui-lifecycle-fix/source/game/ui/game_ui.gd.txt", "game/ui/game_ui.gd")]
+    chosen += [("test-fixture-evidence/" + p + ".txt", p) for p in FIXTURES]
+    material = []
+    for relative, target in chosen:
+        if PurePosixPath(target).is_absolute() or ".." in PurePosixPath(target).parts:
+            raise ValueError("Unsafe fixture destination")
+        source = root / relative
+        if source.is_symlink() or not source.is_file(): raise ValueError("Expected regular source")
+        data = source.read_bytes()
+        entry = entries[relative]
+        if digest(data) != entry["sha256"] or len(data) != entry["bytes"]:
+            raise ValueError("Preserved input hash mismatch")
+        material.append((relative, target, data))
+    executable = shutil.which(args.godot)
+    if not executable: raise FileNotFoundError("Godot must already be installed")
+    output.mkdir(parents=True, exist_ok=False)
+    project = output / "test-fixture-evidence"
+    project.mkdir()
+    for relative, target, data in material:
+        destination = project / target
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+    env = os.environ.copy()
+    for name, subdir in [("HOME", "home"), ("XDG_CACHE_HOME", "cache"), ("XDG_DATA_HOME", "data"), ("XDG_CONFIG_HOME", "config")]:
+        directory = output / "runtime" / subdir
+        directory.mkdir(parents=True, exist_ok=True)
+        env[name] = str(directory)
+    version = subprocess.run([executable, "--version"], env=env, capture_output=True, text=True, check=True, timeout=20).stdout.strip()
+    results = []
+    for spec, marker, expected in SPECS:
+        proc = subprocess.run([executable, "--headless", "--path", str(project), "--script", "tests/" + spec + ".gd"], env=env, capture_output=True, text=True, timeout=120)
+        log = proc.stdout + proc.stderr
+        (output / (spec + ".log")).write_text(log)
+        errors = re.findall(r"(?m)^(?:SCRIPT ERROR|ERROR:).*", log)
+        marker_lines = [line for line in log.splitlines() if line.startswith(marker)]
+        if len(marker_lines) != 1: raise AssertionError("Result marker absent or duplicated: " + spec)
+        stats = json.loads(marker_lines[0].removeprefix(marker).strip()) if expected else {"checks": 0, "failures": 0}
+        passed = proc.returncode == 0 and not errors and stats["checks"] == expected and stats["failures"] == 0
+        results.append({"test": spec, "exit_code": proc.returncode, "checks": stats["checks"], "failures": stats["failures"], "engine_errors": len(errors), "passed": passed, "log_sha256": digest(log.encode())})
+    report = {"scope": "Isolated presentation/input/lifecycle only; NEVER production validation", "godot_version": version, "total_assertions": sum(x["checks"] for x in results), "failures": sum(x["failures"] for x in results), "engine_errors": sum(x["engine_errors"] for x in results), "free_probe_clean": results[2]["passed"], "passed": all(x["passed"] for x in results), "results": results, "input_files": [{"preserved_path": p, "fixture_runtime_path": t, "bytes": len(d), "sha256": digest(d)} for p,t,d in material], "original_sources_modified": False, "full_game_or_android_acceptance": False}
+    (output / "test-result.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(report, indent=2))
+    if not report["passed"]: raise SystemExit(1)
+
+if __name__ == "__main__": main()

@@ -1,0 +1,297 @@
+extends SceneTree
+# NEW reconstruction regressions, 2026-10-10. No original fixture claimed.
+# All DTOs below are deliberately small presentation-only test doubles.
+var checks := 0
+var failures := 0
+var failed: Array[String] = []
+func check(condition: bool, message: String) -> void:
+	checks += 1
+	if not condition:
+		failures += 1
+		failed.append(message)
+		print("FAIL: ",message)
+func _initialize() -> void:
+	call_deferred("_run")
+func settle() -> void:
+	await process_frame
+	await process_frame
+	await process_frame
+func snapshot(phase: String = "combat") -> Dictionary:
+	return {"phase":phase,"active_tick":0,"survival_tick":0,"pause_reasons":[],"player":{"level":1,"max_hp":100,"hp":100,"xp":0,"position":[0,0]},"stats":{"kills":0},"entities":[],"upgrade_offer":{},"rules":{}}
+func progression() -> Dictionary:
+	var options: Array[Dictionary] = []
+	for n in 3:
+		options.append({"option_id":"test-option-"+str(n),"item_id":"damage","name":"성장 검증 "+str(n),"kind":"passive","description":"표시 전용 테스트","level":1,"next_level":2,"can_select":true})
+	return {"slots":{"equipment":{"used":2,"max":3},"passive":{"used":1,"max":3}},"active_offer":{"offer_id":"test-offer","selected_option_id":"test-option-1","options":options},"target":{"evolution_id":"test-evolution","name":"테스트 진화"},"evolutions":[{"evolution_id":"test-evolution","name":"테스트 진화","description":"화면 표시 테스트","status":"ready","requirements":[],"effect_delta":{},"tradeoff_text":"테스트 비용"}]}
+func supply(revision: int = 1, first_owned: bool = false) -> Dictionary:
+	return {"view_revision":revision,"balance":100,"can_shop":true,"can_start":true,"loadout":{"doctrine_id":"test-standard","target_evolution_id":"test-evolution","supply_item_id":""},"items":[{"item_id":"test-permanent","name":"교리 테스트","kind":"doctrine","description":"표시된 실제 혜택","price":20,"balance_after":80,"owned":1 if first_owned else 0,"max_owned":1,"can_purchase":not first_owned,"blocked_reason":"already_owned" if first_owned else ""},{"item_id":"test-consumable","name":"소모품 테스트","kind":"supply","description":"체력 회복","price":10,"balance_after":90,"owned":0,"max_owned":9,"can_purchase":true,"blocked_reason":""}],"loadout_options":{"doctrines":[{"id":"test-standard","name":"기본 교리","description":"기본","can_select":true}],"targets":[{"id":"test-evolution","name":"테스트 진화","description":"60틱 테스트","can_select":true,"requirements":[{"name":"필수 무기","required":3}],"seal_cost":1}],"supplies":[{"id":"","name":"장착 안 함","description":"없음","can_select":true}]}}
+func new_ui():
+	var ui = load("res://game/ui/game_ui.gd").new()
+	root.add_child(ui)
+	return ui
+func _run() -> void:
+	await _test_authority_reset()
+	await _test_growth_rotation_touch()
+	await _test_supply_request_gates()
+	await _test_transition_gate()
+	await _test_input_ownership()
+	await _test_permanent_purchase_focus()
+	await _test_offer_focus_identity()
+	await _test_locked_focus_and_next_eligible()
+	await _test_loadout_locked_focus()
+	print("RECONSTRUCTION_PRESENTATION_RESULT ",JSON.stringify({"checks":checks,"failures":failures,"failed":failed}))
+	quit(0 if failures==0 else 1)
+func _test_authority_reset() -> void:
+	var ui = new_ui()
+	var emitted: Array[String] = []
+	ui.upgrade_chosen.connect(func(_offer,_option): emitted.append("upgrade"))
+	ui.shop_closed.connect(func(): emitted.append("shop_closed"))
+	ui.resume_requested.connect(func(): emitted.append("resume"))
+	ui.present_progression(progression())
+	ui.open_evolution_details("test-evolution")
+	check(ui._mode=="evolution_detail","authority reset fixture enters detail")
+	ui.reset_obsolete_presentation({},true)
+	check(ui._growth_view.is_empty() and ui._detail_id.is_empty() and ui._return_focus_id.is_empty(),"obsolete authority clears growth, detail and return focus")
+	check(ui._mode=="title" and ui._checkpoint_available and ui.focused_semantic_id()=="이어서 출격","authoritative explicit resume is reachable")
+	check(emitted.is_empty(),"reset emits no gameplay intent or shop-close")
+	ui.navigate("cancel")
+	check(ui._mode=="title" and ui._growth_view.is_empty(),"cancel cannot reconstruct obsolete mandatory growth")
+	ui.accept_released()
+	ui.navigate("accept")
+	check(emitted==["resume"],"fresh accept emits only resume")
+	ui.present_progression(progression())
+	ui.open_evolution_details("test-evolution")
+	ui.reset_obsolete_presentation(snapshot("dead"),false)
+	check(ui._mode=="dead" and ui._detail_id.is_empty() and ui._growth_view.is_empty(),"authority terminal presentation clears obsolete detail")
+	await settle()
+	check(ui._scroll.follow_focus,"reset restores focus-follow behavior")
+	ui.free()
+func _test_growth_rotation_touch() -> void:
+	var ui = new_ui()
+	var view := progression()
+	ui.present_progression(view)
+	check(ui.focused_semantic_id()=="test-option-1","QUALITY GATE: entering growth uses supplied selected option rather than obsolete title focus")
+	ui._restore_focus("test-option-1")
+	check(ui._subtitle.text.contains("무기 2/3") and ui._subtitle.text.contains("보조 기술 1/3"),"captured subtitle excerpt displays slot usage")
+	ui.open_evolution_details("test-evolution")
+	check(not ui._scroll.follow_focus,"detail scroll is independent of button focus")
+	ui.close_evolution_details()
+	check(ui.focused_semantic_id()=="test-option-1","detail return restores semantic growth focus")
+	for shape in [Vector2i(450,800),Vector2i(800,450),Vector2i(1080,1920),Vector2i(1920,1080)]:
+		ui.reflow(shape,Rect2i(Vector2i(10,20),shape-Vector2i(20,40)))
+		await settle()
+		check(ui.focused_semantic_id()=="test-option-1","rotation preserves selected growth focus "+str(shape))
+		check(ui._choices.columns==(3 if shape.x>shape.y else 1),"rotation reflows column count "+str(shape))
+		check(ui._panel.position.x>=10 and ui._panel.position.y>=20 and ui._panel.position.x+ui._panel.size.x<=shape.x-10 and ui._panel.position.y+ui._panel.size.y<=shape.y-20,"panel remains within safe rectangle "+str(shape))
+	ui.present(snapshot())
+	var touch := InputEventScreenTouch.new()
+	touch.index=7;touch.position=Vector2(40,300);touch.pressed=true
+	ui.reflow(Vector2i(800,450),Rect2i(0,0,800,450))
+	ui._input(touch)
+	var drag := InputEventScreenDrag.new()
+	drag.index=7;drag.position=Vector2(90,300)
+	ui._input(drag)
+	check(ui._touch_id==7 and ui._touch_vector.x>0.9,"touch movement acquired before rotation")
+	ui.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	check(ui._touch_id==-1 and ui._touch_vector==Vector2.ZERO,"rotation cancels retained touch ownership")
+	await settle(); ui.free()
+	var card = load("res://game/ui/growth_card.gd").new()
+	card.present({"option_id":"blocked","name":"선택 불가","can_select":false,"blocked_reason":"missing_weapon","description":"60틱"})
+	var chosen: Array[String]=[]
+	card.chosen.connect(func(id): chosen.append(id))
+	card.pressed.emit()
+	check(card.disabled and chosen.is_empty(),"disabled growth card emits no selection")
+	check(card.display_text().contains("초") and not card.display_text().contains("틱") and card._option.description=="60틱","display converts tick wording without DTO timing mutation")
+	card.free()
+func _test_supply_request_gates() -> void:
+	var ui = new_ui()
+	var purchases: Array[String]=[]
+	ui.purchase_requested.connect(func(id,_revision): purchases.append(id))
+	ui.present_supply(supply())
+	ui.open_supply_shop()
+	ui._supply_panel.item_button("test-permanent").pressed.emit()
+	ui._supply_panel.item_button("test-permanent").pressed.emit()
+	check(purchases==["test-permanent"],"pending purchase prevents duplicate panel signals")
+	check(ui._supply_locked and ui._supply_waiting_result,"UI waits for transaction result")
+	ui.open_loadout();ui.open_supply_shop()
+	ui._request_purchase("test-consumable",1)
+	check(purchases.size()==1,"modal round trip cannot bypass pending purchase lock")
+	ui.present_action_result({"ok":true,"action":"purchase","message":"test result"})
+	ui.present_supply(supply())
+	ui._request_purchase("test-consumable",1)
+	check(purchases.size()==1,"same revision after result does not rearm purchase")
+	ui.present_supply(supply(2,true))
+	ui._supply_panel.item_button("test-consumable").pressed.emit()
+	check(purchases==["test-permanent","test-consumable"],"new authoritative revision rearms an eligible purchase")
+	await settle();ui.free()
+	var panel = load("res://game/ui/loadout_panel.gd").new()
+	root.add_child(panel);panel.present(supply())
+	var changes:Array=[]
+	panel.loadout_changed.connect(func(selection,revision):changes.append([selection,revision]))
+	panel.option_button("target_evolution_id","test-evolution").pressed.emit()
+	panel.option_button("target_evolution_id","test-evolution").pressed.emit()
+	check(changes.size()==1,"loadout prevents duplicate request")
+	check(panel.display_text().contains("필수 무기 Lv 3") and panel.display_text().contains("전술 개조권 1개") and not panel.display_text().contains("60틱"),"hash-exact loadout displays recipe and player-readable units")
+	panel.present_action_result({"ok":false})
+	panel.present(supply())
+	check(panel.start_button().disabled,"same authority cannot rearm loadout after result")
+	panel.present(supply(2))
+	check(not panel.start_button().disabled,"new authority rearms loadout")
+	panel.free()
+func _test_transition_gate() -> void:
+	var ui = new_ui()
+	var purchases:Array[String]=[]
+	var shop_intents:Array[String]=[]
+	ui.purchase_requested.connect(func(id,_revision):purchases.append(id))
+	ui.shop_open_requested.connect(func():shop_intents.append("open"))
+	ui.shop_closed.connect(func():shop_intents.append("close"))
+	ui.present_supply(supply())
+	ui._restore_focus("shop_open")
+	ui.navigate("accept")
+	check(ui._mode=="shop" and shop_intents==["open"],"focused shop accept opens modal with one pause-owner intent")
+	ui.navigate("accept")
+	check(purchases.is_empty(),"same held accept cannot spill into purchase on new screen")
+	ui.accept_released();ui.navigate("accept")
+	check(purchases==["test-permanent"],"released explicit accept can purchase once")
+	ui.navigate("cancel")
+	check(ui._mode=="title" and shop_intents==["open","close"],"shop cancel restores origin and emits one close intent")
+	check(ui.focused_semantic_id()=="shop_open","shop close restores semantic origin focus")
+	await settle();ui.free()
+func _test_input_ownership() -> void:
+	var ui = new_ui()
+	var router = load("res://game/input/input_router.gd").new()
+	root.add_child(router); router.set_process(false)
+	router.ui_action.connect(ui.navigate)
+	await settle()
+	check(ui.focused_semantic_id()=="출격","input ownership fixture starts on first button")
+	var key:=InputEventKey.new();key.keycode=KEY_DOWN;key.pressed=true
+	root.push_input(key)
+	router._process(0.016)
+	check(ui.focused_semantic_id()=="설정","one native directional event causes exactly one semantic focus step")
+	var up:=InputEventKey.new();up.keycode=KEY_DOWN;up.pressed=false
+	root.push_input(up);router._process(0.016)
+	var intents:Array[String]=[]
+	router.ui_action.connect(func(action):intents.append(action))
+	var accept:=InputEventJoypadButton.new();accept.button_index=JOY_BUTTON_A;accept.pressed=true;accept.device=4
+	router.handle_event(accept);router.handle_event(accept)
+	check(intents.count("accept")==1,"held controller accept emits once")
+	router.set_touch_vector(Vector2.RIGHT)
+	router.set_active(false)
+	check(router.sample_move()==Vector2.ZERO and not router._accept_armed,"background ownership clears movement and accept latch")
+	router.handle_event(accept)
+	check(intents.count("accept")==1,"disabled router ignores accept")
+	router.set_active(true)
+	router.handle_event(accept)
+	check(intents.count("accept")==1,"foreground return does not rearm retained press")
+	accept.pressed=false;router.handle_event(accept);accept.pressed=true;router.handle_event(accept)
+	check(intents.count("accept")==2,"explicit release rearms controller accept")
+	var lost:Array[int]=[]
+	router.active_controller_lost.connect(func():lost.append(1))
+	router.active_device=4;router.set_touch_vector(Vector2.RIGHT);router._on_connection(4,false)
+	check(lost.size()==1 and router.sample_move()==Vector2.ZERO and not router._accept_armed,"active controller disconnect clears retained ownership and emits pause intent")
+	router.set_active(false)
+	check(not router._enabled,"disabled router relinquishes input ownership")
+	var motion:=InputEventJoypadMotion.new()
+	motion.device=2;motion.axis=JOY_AXIS_LEFT_X;motion.axis_value=0.1
+	router.set_active(true);router.handle_event(motion)
+	check(router.sample_move()==Vector2.ZERO,"stick below deadzone produces no movement")
+	motion.axis_value=1.0;router.handle_event(motion)
+	check(router.sample_move()==Vector2.RIGHT,"full stick retains analog direction")
+	router.set_touch_vector(Vector2.DOWN)
+	check(router.sample_move()==Vector2.DOWN,"active touch owns movement over retained stick")
+	motion.axis_value=1.0;router.handle_event(motion)
+	check(router.sample_move()==Vector2.RIGHT and router._touch==Vector2.ZERO,"new active gamepad motion clears touch ownership")
+	router.clear_transient_input();intents.clear()
+	var dpad:=InputEventJoypadButton.new();dpad.device=2;dpad.button_index=JOY_BUTTON_DPAD_DOWN;dpad.pressed=true
+	root.push_input(dpad);router._process(0.01)
+	check(intents==["down"],"D-pad viewport input has one directional owner")
+	router._process(0.29)
+	check(intents==["down"],"held D-pad respects initial repeat delay")
+	router._process(0.02)
+	check(intents==["down","down"],"held D-pad repeats once after initial delay")
+	dpad.pressed=false;root.push_input(dpad);router._process(0.01);router._process(1.0)
+	check(intents==["down","down"],"D-pad release stops repeat")
+	await settle();router.free();ui.free()
+func _test_permanent_purchase_focus() -> void:
+	var ui = new_ui()
+	ui.present_supply(supply())
+	ui.open_supply_shop()
+	ui._restore_focus("purchase:test-permanent")
+	check(ui.focused_semantic_id()=="purchase:test-permanent","permanent purchase focus fixture targets item")
+	ui.present_action_result({"ok":true,"action":"purchase","message":"saved"})
+	ui.present_supply(supply(2,true))
+	check(ui.focused_semantic_id()=="purchase:test-consumable" and not ui._buttons[ui._focus_index].disabled,"QUALITY GATE: completed permanent purchase moves semantic focus to next eligible action")
+	await settle();ui.free()
+
+func _test_offer_focus_identity() -> void:
+	var ui = new_ui()
+	var view := progression()
+	ui.present_progression(view)
+	ui._restore_focus("test-option-2")
+	ui.present_progression(view.duplicate(true))
+	check(ui.focused_semantic_id()=="test-option-2","same offer refresh preserves current semantic selection instead of resetting DTO focus")
+	ui.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	ui.present_progression(view.duplicate(true))
+	check(ui.focused_semantic_id()=="test-option-2","same offer portrait reflow preserves current semantic selection")
+	view.active_offer.offer_id="new-test-offer"
+	view.active_offer.selected_option_id="test-option-1"
+	ui.present_progression(view)
+	check(ui.focused_semantic_id()=="test-option-1","new offer identity gives explicit selected_option_id priority over old semantic focus")
+	ui._restore_focus("test-option-2")
+	view.active_offer.offer_id="another-new-offer"
+	view.active_offer.selected_option_id="missing-option"
+	ui.present_progression(view)
+	check(ui.focused_semantic_id()=="test-option-0","missing new-offer selection falls back to eligible first choice")
+	await settle();ui.free()
+func _test_locked_focus_and_next_eligible() -> void:
+	var ui = new_ui()
+	var purchases:Array[String]=[]
+	ui.purchase_requested.connect(func(id,_revision):purchases.append(id))
+	ui.present_supply(supply())
+	ui.open_supply_shop()
+	ui._restore_focus("purchase:test-permanent")
+	ui._supply_panel.item_button("test-permanent").pressed.emit()
+	ui.open_loadout();ui.open_supply_shop()
+	check(ui._supply_locked and ui.focused_semantic_id()=="purchase:test-permanent","pending request keeps same disabled semantic focus through modal rebuild")
+	ui.present_supply(supply(2,true))
+	check(ui._supply_waiting_result and ui._supply_locked and ui.focused_semantic_id()=="purchase:test-permanent","unresolved request keeps semantic identity even if a newer view makes item permanently disabled")
+	ui.present_action_result({"ok":false,"action":"purchase","error_code":"commit_outcome_unknown"})
+	ui.present_supply(supply(2,true))
+	check(ui._supply_locked and ui.focused_semantic_id()=="purchase:test-permanent","retry or unresolved-result lock preserves semantic identity at same revision")
+	ui.accept_released();ui.navigate("accept")
+	check(purchases==["test-permanent"],"retained locked semantic focus never creates a duplicate request")
+	ui.present_supply(supply(3,true))
+	check(not ui._supply_locked and ui.focused_semantic_id()=="purchase:test-consumable","resolved new authority moves focus to next eligible item")
+	var updated:=supply(4)
+	updated.items[1].can_purchase=false
+	updated.items[1].blocked_reason="inventory_full"
+	ui.present_supply(updated)
+	check(ui.focused_semantic_id()=="loadout_open","disabled selected final shop item advances to following action rather than earlier purchase")
+	check(not ui._buttons[ui._focus_index].disabled,"settled focus always lands on enabled action when one exists")
+	await settle();ui.free()
+
+func _test_loadout_locked_focus() -> void:
+	var ui = new_ui()
+	var changes:Array=[]
+	ui.loadout_changed.connect(func(selection,revision):changes.append([selection,revision]))
+	ui.present_supply(supply())
+	ui.open_supply_shop();ui.open_loadout()
+	var semantic:="loadout:target_evolution_id:test-evolution"
+	ui._restore_focus(semantic)
+	ui._supply_panel.option_button("target_evolution_id","test-evolution").pressed.emit()
+	ui.present_supply(supply())
+	check(ui._mode=="loadout" and ui._supply_locked and ui.focused_semantic_id()==semantic,"pending loadout keeps disabled semantic identity during refresh")
+	ui.open_supply_shop();ui.open_loadout()
+	check(ui.focused_semantic_id()==semantic,"pending loadout semantic identity survives shop round trip")
+	ui.present_supply(supply(2))
+	check(ui._supply_waiting_result and ui._supply_locked and ui.focused_semantic_id()==semantic,"new view alone cannot unlock or move unresolved loadout selection")
+	ui.present_action_result({"ok":false,"action":"loadout","error_code":"write_failed"})
+	ui.present_supply(supply(2))
+	check(ui._supply_locked and ui.focused_semantic_id()==semantic,"failed loadout result at same revision keeps locked semantic identity")
+	ui.accept_released();ui.navigate("accept")
+	check(changes.size()==1,"locked loadout semantic focus cannot duplicate request")
+	ui.present_supply(supply(3))
+	check(not ui._supply_locked and ui.focused_semantic_id()==semantic and not ui._buttons[ui._focus_index].disabled,"fresh authority rearms still-eligible loadout choice without moving focus")
+	ui.accept_released();ui.navigate("accept")
+	check(changes.size()==2,"rearmed loadout emits exactly one new explicit request")
+	await settle();ui.free()

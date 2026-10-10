@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Check the two NEW UI diffs without modifying any preserved source."""
+import argparse
+import hashlib
+import re
+from pathlib import Path
+
+BASE = "257101327d8846a5f84e65cae9dc35e01db272b54b2ac7fb147b005cefe6e509"
+FOCUS = "ceee053ec095d161c93605cebecdb88986fb1cfeeb0830fd4cbc02606f26fb14"
+FINAL = "3ee415774cc8472dadd67ef1ea431989800b1207fda2716c132aa8f85060ef0f"
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+def apply_exact(source, diff):
+    lines = source.decode("utf-8").splitlines(keepends=True)
+    patch = diff.decode("utf-8").splitlines(keepends=True)
+    if patch[:2] != ["--- a/game/ui/game_ui.gd\n", "+++ b/game/ui/game_ui.gd\n"]:
+        raise ValueError("Unexpected diff target")
+    result, cursor, i = [], 0, 2
+    while i < len(patch):
+        match = re.fullmatch(r"@@ -(\d+),(\d+) \+(\d+),(\d+) @@\n", patch[i])
+        if not match:
+            raise ValueError("Invalid unified hunk header")
+        old_start, old_count, new_start, new_count = map(int, match.groups())
+        start = old_start - 1
+        if start < cursor:
+            raise ValueError("Overlapping or reordered hunks")
+        result.extend(lines[cursor:start])
+        before, after = [], []
+        i += 1
+        while i < len(patch) and not patch[i].startswith("@@ "):
+            line = patch[i]
+            if line[:1] not in (" ", "+", "-"):
+                raise ValueError("Unsupported hunk line")
+            if line[0] in " -": before.append(line[1:])
+            if line[0] in " +": after.append(line[1:])
+            i += 1
+        if len(before) != old_count or len(after) != new_count:
+            raise ValueError("Hunk count mismatch")
+        if lines[start:start + old_count] != before or len(result) != new_start - 1:
+            raise ValueError("Hunk exact context or output position mismatch")
+        result.extend(after)
+        cursor = start + old_count
+    result.extend(lines[cursor:])
+    return "".join(result).encode("utf-8")
+
+def replay(root):
+    source = (root / "candidate-source/game/ui/game_ui.gd.txt").read_bytes()
+    if digest(source) != BASE: raise ValueError("Base hash mismatch")
+    focus = apply_exact(source, (root / "new-ui-fixes/NEW-focus-fixes.diff.txt").read_bytes())
+    if digest(focus) != FOCUS: raise ValueError("Focus stage hash mismatch")
+    final = apply_exact(focus, (root / "new-ui-lifecycle-fix/NEW-layout-lifecycle.diff.txt").read_bytes())
+    if digest(final) != FINAL: raise ValueError("Final stage hash mismatch")
+    if final != (root / "new-ui-lifecycle-fix/source/game/ui/game_ui.gd.txt").read_bytes():
+        raise ValueError("Final source bytes differ")
+    return {"base_sha256": BASE, "focus_sha256": FOCUS, "final_sha256": FINAL, "exact_diff_replay": True, "source_files_modified": False}
+
+if __name__ == "__main__":
+    import json
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1])
+    args = parser.parse_args()
+    print(json.dumps(replay(args.source_root), indent=2))

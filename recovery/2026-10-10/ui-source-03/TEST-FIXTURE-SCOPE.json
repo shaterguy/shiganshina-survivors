@@ -1,0 +1,28 @@
+{
+  "DTOs": "Small presentation-only dictionaries embedded in reconstruction_regression.gd",
+  "assertions": {
+    "layout_lifecycle": 14,
+    "presentation_input": 79,
+    "total": 93
+  },
+  "fixture_paths": [
+    "test-fixture-evidence/project.godot.txt",
+    "test-fixture-evidence/game/progression/upgrade_catalog.gd.txt",
+    "test-fixture-evidence/assets/manifest.json.txt",
+    "test-fixture-evidence/chapters/chapter_01/manifest.json.txt",
+    "test-fixture-evidence/tests/reconstruction_regression.gd.txt",
+    "test-fixture-evidence/tests/reconstruction_layout_lifecycle.gd.txt",
+    "test-fixture-evidence/tests/reconstruction_deferred_free_probe.gd.txt"
+  ],
+  "free_probe": "Engine error and clean completion check, not counted as a numbered assertion",
+  "mock_assets": "Empty asset map and TEST ONLY chapter display name",
+  "mock_catalog_behavior": "Fixed xp_to_next return of 10; no progression/economy/catalog validation",
+  "not_executed": [
+    "run_controller.gd integration",
+    "supply_service.gd integration",
+    "preserved original controller regressions",
+    "full game",
+    "Android"
+  ],
+  "status": "TEST FIXTURES ONLY; NEVER PRODUCTION"
+}

@@ -1,0 +1,15 @@
+extends SceneTree
+# NEW diagnostic for the explicitly unrecovered deferred-layout invocation.
+# Failure is detected from engine SCRIPT ERROR output, not a manufactured validator.
+func _initialize() -> void:
+	call_deferred("_run")
+func _run() -> void:
+	var ui = load("res://game/ui/game_ui.gd").new()
+	root.add_child(ui)
+	ui.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	await process_frame
+	ui.free()
+	await process_frame
+	await process_frame
+	print("DEFERRED_FREE_PROBE_FINISHED")
+	quit(0)

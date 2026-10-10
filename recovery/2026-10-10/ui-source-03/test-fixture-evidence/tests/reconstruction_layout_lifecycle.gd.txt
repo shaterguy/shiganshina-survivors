@@ -1,0 +1,106 @@
+extends SceneTree
+# NEW lifecycle regressions. These do not recover the missing old call site.
+var checks:=0
+var failures:=0
+func check(condition:bool,message:String) -> void:
+	checks+=1
+	if not condition:
+		failures+=1
+		print("FAIL: ",message)
+func _initialize() -> void:
+	call_deferred("_run")
+func wait_frames() -> void:
+	await process_frame
+	await process_frame
+	await process_frame
+func new_ui():
+	var ui=load("res://game/ui/game_ui.gd").new()
+	root.add_child(ui)
+	return ui
+func _run() -> void:
+	var immediate=new_ui()
+	immediate.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	# Deferred layout starts in the idle queue; queue_free is flushed afterwards.
+	immediate.queue_free()
+	await wait_frames()
+	check(not is_instance_valid(immediate),"queue-free boundary destroys UI without live deferred ownership")
+	var later=new_ui()
+	await process_frame
+	later.reflow(Vector2i(800,450),Rect2i(0,0,800,450))
+	later.queue_free()
+	await wait_frames()
+	check(not is_instance_valid(later),"later-frame reflow followed by queue_free destroys UI safely")
+	var awaiting=new_ui()
+	await wait_frames()
+	if awaiting.has_method("_queue_settle_panel"):
+		awaiting._queue_settle_panel(awaiting._layout_generation)
+	else:
+		# Explicitly enter the old async function before the queue_free boundary.
+		awaiting.call("_settle_panel",awaiting._layout_generation)
+	awaiting.queue_free()
+	await wait_frames()
+	check(not is_instance_valid(awaiting),"already-waiting layout safely crosses queue_free boundary")
+	var direct=new_ui()
+	direct.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	await process_frame
+	direct.free()
+	await wait_frames()
+	check(not is_instance_valid(direct),"immediate free during pending frame delivery leaves no live instance")
+	var ui=new_ui()
+	ui.reflow(Vector2i(800,450),Rect2i(10,20,780,410))
+	ui.reflow(Vector2i(450,800),Rect2i(12,24,426,752))
+	ui._panel.position=Vector2(-500,-500)
+	await wait_frames()
+	var expected:Vector2=Vector2(12,24)+(Vector2(426,752)-ui._panel.size)*0.5
+	check(ui._panel.position.is_equal_approx(expected),"normal deferred layout executes and uses latest rotation/safe area")
+	check(ui._panel.position.x>=12 and ui._panel.position.y>=24,"normal deferred layout leaves panel inside safe origin")
+	check(ui.has_method("_queue_settle_panel"),"NEW object-bound deferred scheduling entry exists")
+	if ui.has_method("_queue_settle_panel"):
+		ui._queue_settle_panel(ui._layout_generation-1)
+		var stale_count:=0
+		for connection in process_frame.get_connections():
+			if connection.callable.get_object()==ui and connection.callable.get_method()=="_settle_panel":stale_count+=1
+		check(stale_count==0,"stale layout generation does not schedule a callback")
+		ui._queue_settle_panel(ui._layout_generation)
+		ui._queue_settle_panel(ui._layout_generation)
+		var count:=0
+		for connection in process_frame.get_connections():
+			if connection.callable.get_object()==ui and connection.callable.get_method()=="_settle_panel":count+=1
+		check(count==1,"repeated current-generation scheduling coalesces into one object-bound callback")
+		ui.queue_free()
+		await wait_frames()
+		check(not is_instance_valid(ui),"connected object-bound callback disconnects when scene is queue-freed")
+	else:
+		ui.queue_free();await wait_frames()
+	var queued=new_ui()
+	await wait_frames()
+	queued._panel.position=Vector2(-80,-80)
+	queued.queue_free()
+	if queued.has_method("_queue_settle_panel"):
+		queued._queue_settle_panel(queued._layout_generation)
+		queued._settle_panel()
+		check(queued._panel.position==Vector2(-80,-80),"already-queued scene rejects both scheduling and callback layout mutation")
+	await wait_frames()
+	var detached=new_ui()
+	await wait_frames()
+	detached.reflow(Vector2i(450,800),Rect2i(0,0,450,800))
+	detached._panel.position=Vector2(-100,-100)
+	root.remove_child(detached)
+	await wait_frames()
+	check(detached._panel.position==Vector2(-100,-100),"detached scene does not receive deferred layout work")
+	detached.free()
+	var connected_detached=new_ui()
+	await wait_frames()
+	if connected_detached.has_method("_queue_settle_panel"):
+		connected_detached._queue_settle_panel(connected_detached._layout_generation)
+		var connected_count:=0
+		for connection in process_frame.get_connections():
+			if connection.callable.get_object()==connected_detached and connection.callable.get_method()=="_settle_panel":connected_count+=1
+		check(connected_count==1,"detach regression begins with an actually connected layout callback")
+		connected_detached._panel.position=Vector2(-70,-70)
+		root.remove_child(connected_detached)
+		await wait_frames()
+		check(connected_detached._panel.position==Vector2(-70,-70),"already-connected callback performs no layout after scene detachment")
+	connected_detached.free()
+	print("RECONSTRUCTION_LAYOUT_RESULT ",JSON.stringify({"checks":checks,"failures":failures}))
+	quit(0 if failures==0 else 1)
