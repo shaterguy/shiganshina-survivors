@@ -1,0 +1,165 @@
+class_name GameSaveStore
+extends RefCounted
+const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const Service = preload("res://game/economy/supply_service.gd")
+const Legacy = preload("res://game/persistence/save_store.gd")
+const Migrations = preload("res://game/persistence/save_migrations.gd")
+const MAX_BYTES := 16*1024*1024
+static var _commit_mutex: Mutex = Mutex.new()
+var _directory: String
+var _contracts
+var _fault_injector: Callable
+func _init(directory: String, checkpoint_validator: Callable, fault_injector: Callable = Callable()) -> void:
+	_directory = directory
+	_contracts = Contracts.new(checkpoint_validator)
+	_fault_injector = fault_injector
+func load_game() -> Dictionary:
+	_commit_mutex.lock()
+	var result := _load_authority()
+	if not result.ok and result.error_code == "not_found": result = _migrate_first_load()
+	_commit_mutex.unlock()
+	return result
+func _migrate_first_load() -> Dictionary:
+	# Called only when both v2 authority and backup are absent. Failed temps are not authority.
+	var legacy: Dictionary = Legacy.new(_directory).load_profile()
+	if not legacy.ok: return legacy
+	var had_profile := FileAccess.file_exists(_directory.path_join("profile.json")) or FileAccess.file_exists(_directory.path_join("profile.json.bak"))
+	var had_checkpoint := FileAccess.file_exists(_directory.path_join("checkpoint.json")) or FileAccess.file_exists(_directory.path_join("checkpoint.json.bak"))
+	var career_id := Crypto.new().generate_random_bytes(16).hex_encode()
+	var migration: Dictionary = Migrations.new().from_v1(legacy.profile,had_checkpoint,career_id)
+	if not migration.ok: return migration
+	var committed := _commit_locked(migration.game_save,0)
+	if not committed.ok: return committed
+	committed.merge({"recovered":false,"migrated":had_profile or had_checkpoint,"notice_code":"legacy_checkpoint_preserved" if had_checkpoint else ""})
+	return committed
+func commit_game(candidate: Dictionary, expected_revision: int) -> Dictionary:
+	_commit_mutex.lock()
+	var result := _commit_locked(candidate,expected_revision)
+	_commit_mutex.unlock()
+	return result
+func _commit_locked(candidate: Dictionary, expected_revision: int) -> Dictionary:
+	var errors: Array[String] = _contracts.validate(candidate)
+	if not errors.is_empty(): return {"ok":false,"error_code":errors[0],"errors":errors}
+	if candidate.store_revision != expected_revision: return _fail("stale_revision")
+	if expected_revision >= 2147483647: return _fail("counter_exhausted")
+	var current := _load_authority()
+	if not current.ok and current.error_code != "not_found": return current
+	if (current.ok and current.game_save.store_revision != expected_revision) or (not current.ok and expected_revision != 0): return _fail("stale_revision")
+	var canonical: Dictionary = _contracts.normalize(candidate)
+	if current.ok and not _transition_valid(current.game_save,canonical): return _fail("invalid_game_save")
+	canonical.store_revision = expected_revision+1
+	var serialized := JSON.stringify(canonical,"",true,true)
+	if serialized.to_utf8_buffer().size() > MAX_BYTES: return _fail("invalid_game_save")
+	if DirAccess.make_dir_recursive_absolute(_directory) != OK: return _fail("write_failed")
+	var path := _directory.path_join("game_save.json")
+	var temp := path+".tmp"
+	if _fault("write") != OK: return _fail("write_failed")
+	var file := FileAccess.open(temp,FileAccess.WRITE)
+	if file == null: return _fail("write_failed")
+	file.store_string(serialized)
+	if file.get_error() != OK:
+		file.close()
+		return _fail("write_failed")
+	if _fault("flush") != OK:
+		file.close()
+		return _fail("write_failed")
+	file.flush()
+	var write_error := file.get_error()
+	file.close()
+	if write_error != OK: return _fail("write_failed")
+	if _fault("verify") != OK: return _fail("verify_failed")
+	var verified := _read(temp)
+	if not verified.ok or not _same(verified.game_save,canonical): return _fail("verify_failed")
+	var primary := _read(path)
+	if primary.ok:
+		if _fault("backup") != OK: return _fail("backup_failed")
+		var backup_temp := path+".bak.tmp"
+		if DirAccess.copy_absolute(path,backup_temp) != OK: return _fail("backup_failed")
+		var backup_check := _read(backup_temp)
+		if not backup_check.ok or not _same(backup_check.game_save,primary.game_save): return _fail("backup_failed")
+		if DirAccess.rename_absolute(backup_temp,path+".bak") != OK: return _fail("backup_failed")
+	elif FileAccess.file_exists(path):
+		# Preserve corrupt bytes as evidence; never use them to replace a valid backup.
+		var preserved := path+".corrupt."+str(Time.get_ticks_usec())
+		if DirAccess.copy_absolute(path,preserved) != OK: return _fail("backup_failed")
+	if _fault("replace") != OK: return _fail("replace_failed")
+	# On app-private Android/POSIX storage, same-directory rename is the atomic boundary.
+	if DirAccess.rename_absolute(temp,path) != OK: return _fail("replace_failed")
+	if _fault("after_replace_before_return") != OK: return _fail("commit_outcome_unknown")
+	var reread := _read(path)
+	if not reread.ok or not _same(reread.game_save,canonical): return _fail("commit_outcome_unknown")
+	return {"ok":true,"game_save":reread.game_save}
+func _load_authority() -> Dictionary:
+	var path := _directory.path_join("game_save.json")
+	var primary := _read(path)
+	if primary.ok:
+		primary.merge({"recovered":false,"migrated":false,"notice_code":"legacy_checkpoint_preserved" if primary.game_save.legacy_checkpoint_present else ""})
+		return primary
+	if primary.error_code in ["unsupported_schema","content_mismatch"]: return primary
+	var backup := _read(path+".bak")
+	if backup.ok:
+		backup.merge({"recovered":true,"migrated":false,"notice_code":"recovered_previous_save"})
+		return backup
+	if backup.error_code in ["unsupported_schema","content_mismatch"]: return backup
+	return primary if primary.error_code != "not_found" else backup
+func _read(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path): return _fail("not_found")
+	var file := FileAccess.open(path,FileAccess.READ)
+	if file == null: return _fail("read_failed")
+	if file.get_length() > MAX_BYTES:
+		file.close()
+		return _fail("read_failed")
+	var source := file.get_as_text()
+	file.close()
+	var parser := JSON.new()
+	if parser.parse(source) != OK or not parser.data is Dictionary: return _fail("invalid_game_save")
+	var errors: Array[String] = _contracts.validate(parser.data)
+	if not errors.is_empty(): return {"ok":false,"error_code":errors[0],"errors":errors}
+	return {"ok":true,"game_save":_contracts.normalize(parser.data)}
+func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
+	if current.career_id != candidate.career_id or current.legacy_checkpoint_present != candidate.legacy_checkpoint_present: return false
+	var expected := current.duplicate(true)
+	var service = Service.new(Callable())
+	var operation := "checkpoint"
+	if candidate.settled_through_serial != current.settled_through_serial:
+		operation = "settlement"
+		if not candidate.checkpoint is Dictionary: return false
+		var settled: Dictionary = service.prepare_settlement(current,candidate.checkpoint)
+		if not settled.ok or settled.get("already_applied",false): return false
+		expected = settled.candidate
+	elif candidate.next_run_serial != current.next_run_serial:
+		operation = "start"
+		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
+		var config: Dictionary = candidate.checkpoint.run_config
+		var loadout: Dictionary = current.profile.loadout
+		if config.doctrine_id != loadout.doctrine_id or config.target_evolution_id != loadout.target_evolution_id or config.prepared_supply != loadout.supply_item_id or candidate.checkpoint.run_serial != current.next_run_serial or candidate.checkpoint.supply_used: return false
+		expected.next_run_serial += 1
+		if config.prepared_supply != "":
+			if expected.profile.consumables.field_bandage < 1: return false
+			expected.profile.consumables.field_bandage -= 1
+	elif not _same(candidate.purchase_receipts,current.purchase_receipts):
+		operation = "purchase"
+		if candidate.purchase_receipts.is_empty(): return false
+		var receipt: Dictionary = candidate.purchase_receipts.back()
+		var purchased: Dictionary = service.prepare_purchase(current,receipt.item_id,receipt.request_id,int(current.store_revision))
+		if not purchased.ok or purchased.get("already_applied",false): return false
+		expected = purchased.candidate
+	if not _same(_economy(candidate),_economy(expected)): return false
+	if operation != "start":
+		if (current.checkpoint == null) != (candidate.checkpoint == null): return false
+		if current.checkpoint is Dictionary:
+			for key in ["run_id","run_serial","run_config","seed","chapter_id","content_revision"]:
+				if not _same(candidate.checkpoint.get(key),current.checkpoint.get(key)): return false
+			if current.checkpoint.phase in ["won","dead","abandoned"] and not _same(candidate.checkpoint,current.checkpoint): return false
+	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
+	return true
+func _economy(save: Dictionary) -> Dictionary:
+	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids}
+func _same(a: Variant, b: Variant) -> bool:
+	# Parse both sides so JSON-integer floats and in-memory ints compare equivalently.
+	return JSON.parse_string(JSON.stringify(a,"",true,true)) == JSON.parse_string(JSON.stringify(b,"",true,true))
+func _fail(code: String) -> Dictionary:
+	return {"ok":false,"error_code":code}
+
+func _fault(stage: String) -> int:
+	return int(_fault_injector.call(stage)) if _fault_injector.is_valid() else OK

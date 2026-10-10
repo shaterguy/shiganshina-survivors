@@ -1,0 +1,26 @@
+{
+  "enemy_historical_record_time_utc": "2026-10-10T11:37:00Z",
+  "enemy_status_reconciliation": "The later verified-original-hashes-1230.json record supplies original digests absent from the earlier SOURCE_MANIFEST.tsv and PROVENANCE.json. Every selected enemy artifact is independently compared with that later record.",
+  "excluded_already_preserved_storage_modules": [
+    "game/app/world_checkpoint_adapter.gd",
+    "game/persistence/world_delta_store.gd",
+    "game/world/world_delta_codec.gd",
+    "game/world/world_delta_index.gd"
+  ],
+  "historical_test_reports_are_current_verification": false,
+  "incomplete_project_components": [
+    "Full Core source",
+    "Original UID sidecars",
+    "Complete golden outputs",
+    "Dependency and runtime integration"
+  ],
+  "integration_verified": false,
+  "original_hash_exact_artifacts": 10,
+  "preservation_date_utc": "2026-10-10",
+  "product_execution_performed": false,
+  "purpose": "Product source preservation only",
+  "runtime_activation_performed": false,
+  "source_artifacts": 20,
+  "transcript_reconstructed_artifacts": 10,
+  "world_storage_provenance": "Seven complete source/edit reconstructions and three complete source read outputs; historical digests unavailable. Current preservation bytes match the recovery inventory."
+}

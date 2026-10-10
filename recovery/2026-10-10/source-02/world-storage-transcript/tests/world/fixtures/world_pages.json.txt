@@ -1,0 +1,69 @@
+[
+  {
+    "name": "empty_leaf",
+    "page": {
+      "format_revision": 1,
+      "kind": "leaf",
+      "records": []
+    },
+    "bytes": "{\"format_revision\":1,\"kind\":\"leaf\",\"records\":[]}",
+    "hash": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28"
+  },
+  {
+    "name": "signed_records",
+    "page": {
+      "format_revision": 1,
+      "kind": "leaf",
+      "records": [
+        {
+          "chunk": [
+            "-2",
+            "-2"
+          ],
+          "props": [
+            {
+              "slot_id": "house_1",
+              "hp": 2,
+              "destroyed": false
+            }
+          ]
+        },
+        {
+          "chunk": [
+            "10",
+            "-2"
+          ],
+          "props": [
+            {
+              "slot_id": "house_1",
+              "hp": 2,
+              "destroyed": false
+            }
+          ]
+        }
+      ]
+    },
+    "bytes": "{\"format_revision\":1,\"kind\":\"leaf\",\"records\":[{\"chunk\":[\"-2\",\"-2\"],\"props\":[{\"destroyed\":false,\"hp\":2,\"slot_id\":\"house_1\"}]},{\"chunk\":[\"10\",\"-2\"],\"props\":[{\"destroyed\":false,\"hp\":2,\"slot_id\":\"house_1\"}]}]}",
+    "hash": "96cda902fd8a6be4d016f6e34863e96b8ccfb6da04746fb3b8492c622874dea4"
+  },
+  {
+    "name": "branch",
+    "page": {
+      "format_revision": 1,
+      "kind": "branch",
+      "depth": 0,
+      "children": [
+        {
+          "nibble": 1,
+          "hash": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28"
+        },
+        {
+          "nibble": 12,
+          "hash": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28"
+        }
+      ]
+    },
+    "bytes": "{\"children\":[{\"hash\":\"e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28\",\"nibble\":1},{\"hash\":\"e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28\",\"nibble\":12}],\"depth\":0,\"format_revision\":1,\"kind\":\"branch\"}",
+    "hash": "bf9e26f4bc00255575db35bb114f0645bc5fea2ad4c7f6574421ec6fb330accc"
+  }
+]

@@ -1,0 +1,29 @@
+extends RefCounted
+# Test-only DTO fixtures, not an alternative production simulation/validator.
+const ROOT := "res://tests/fixtures/evolution_supply/"
+func _read(name: String) -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string(ROOT+name))
+func run_state(_case_id: String = "initial") -> Dictionary:
+	return _read("run_v2.json")
+func game_save(_case_id: String = "initial") -> Dictionary:
+	return _read("game_save_v2.json")
+func progression_view(case_id: String) -> Dictionary:
+	return _read("progression_views.json").get(case_id,{}).duplicate(true)
+func supply_view(case_id: String) -> Dictionary:
+	return _read("supply_views.json").get(case_id,{}).duplicate(true)
+func attack_events(case_id: String) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(_read("attack_events.json").get(case_id,[]))
+	return result
+func make_run(_chapter: Dictionary, seed: int, config: Dictionary) -> Dictionary:
+	var result := run_state()
+	result.seed = seed
+	result.run_config = config.duplicate(true)
+	result.run_id = config.run_id
+	result.run_serial = config.run_serial
+	return result
+func validate_checkpoint(value: Dictionary) -> Dictionary:
+	# Only E's isolated file/transaction tests may inject this shape-only fake.
+	if value.get("schema_version") != 2 or not value.get("run_id") is String or not value.get("player") is Dictionary:
+		return {"ok":false,"error_code":"invalid_snapshot"}
+	return {"ok":true,"state":value.duplicate(true)}
