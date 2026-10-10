@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "purpose": "Existing private Android DEV signing identity; public metadata only",
+  "package": "com.shaterguy.shiganshina.dev",
+  "key_alias": "shiganshina-dev",
+  "keystore_type": "PKCS12",
+  "certificate_sha256": "4256200e2c63dbfec3d0e9370ecca4b611ee11c65e1e2edad88003ea858c174c",
+  "provisioned_on": "2026-10-10",
+  "custody": "User's PHONE; private key and password remain on that device until user-controlled encrypted backup/recovery",
+  "verification": "Public certificate fingerprint verified after successful local provisioning."
+}

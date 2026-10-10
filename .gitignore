@@ -1,0 +1,46 @@
+# Godot caches/build outputs. Keep original art/audio, .gd.uid and .import settings.
+.godot/
+.import/
+dist/
+.export/
+.build/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
+# Local SDK/tool configuration and downloaded binaries.
+local.properties
+export_credentials.cfg
+.env
+.env.*
+!.env.example
+*.apk
+*.aab
+*.idsig
+*.tpz
+
+# Never version signing keys, password files, credential forms or encrypted backups.
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.key
+*.pk8
+*.pem
+*.pass
+*.password
+*password*.txt
+*passphrase*.txt
+keystore.properties
+key.properties
+credentials*.json
+*-credentials.json
+client_secret*.json
+service-account*.json
+secrets/
+passwords/
+*.gpg
+*.age
+*.enc

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "godot_version": "4.6.3.stable.official.7d41c59c4",
+  "template": {
+    "filename": "android_debug-4.6.3.apk",
+    "archive_entry": "templates/android_debug.apk",
+    "sha256": "5cd4cfc1a8fc23ed45be5f0a36a6cc279d15b50a40c6ef69c89276895441cd1d",
+    "bytes": 124546428,
+    "official_download": "https://downloads.godotengine.org/?version=4.6.3&flavor=stable&slug=export_templates.tpz&platform=templates"
+  },
+  "android": {
+    "package": "com.shaterguy.shiganshina.dev",
+    "version_name": "0.1.0-dev1",
+    "version_code": 1,
+    "abi": "arm64-v8a"
+  }
+}
