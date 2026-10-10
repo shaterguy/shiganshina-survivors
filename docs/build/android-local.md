@@ -127,6 +127,8 @@ The signer rechecks the art gate and unsigned archive, exports only the public c
 
 ## 5. Back up and recover the existing key on another machine
 
+For the owner's minimal PHONE steps, use [한국어 키 백업·복원 안내](KEY-BACKUP-KO.md).
+
 Source alone cannot recover a lost signing key. Android updates require the same signing identity; a different key generally requires uninstalling the old app, potentially losing local data. Keep the existing alias, certificate fingerprint, keystore password and optional separate key password recoverable.
 
 User-controlled backup workflow (backs up both the existing key and its existing random password):
