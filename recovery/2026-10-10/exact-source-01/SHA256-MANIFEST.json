@@ -1,0 +1,250 @@
+{
+  "format_version": 1,
+  "classification": "exact historical source snapshots, not a complete latest build",
+  "game_title": "진격의 거인: 인류의 날개",
+  "parent_main": "31a097f032a49375467197705883287167a91aad",
+  "files": [
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_address.gd.txt",
+      "original_path": "game/world/world_address.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 3564,
+      "sha256": "81d35dba7a9212a43d2fc5ebbb74642566eedfb1682d85863ab80ad52cdbfbc1",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_prop_catalog.gd.txt",
+      "original_path": "game/world/world_prop_catalog.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 3773,
+      "sha256": "76919adab07747284047f10ff4f498b959c35a55f2b3d037f5c93b3b45a57198",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_generator.gd.txt",
+      "original_path": "game/world/city_generator.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 5173,
+      "sha256": "6b7a3d46876ebd8ff05842379edde92eda710b10454cd9c9d54ad83af970f249",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/streamed_world.gd.txt",
+      "original_path": "game/world/streamed_world.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 12731,
+      "sha256": "7a6262b58bc10e24d259772b27d58269054536b1610329eda22fc54cd804fc7b",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/city_navigation.gd.txt",
+      "original_path": "game/world/city_navigation.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 8390,
+      "sha256": "eb84b9f55eb1741e91b5aa0560828d22debcf7f6a61f1f0201e9fff6aeb369be",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/world_interactions.gd.txt",
+      "original_path": "game/world/world_interactions.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 3713,
+      "sha256": "87e0b8e17430ddf07d8c7f97c7a5cefec4c4819aaa7606ce9a27edc4ccbe927c",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/world/evacuation_route.gd.txt",
+      "original_path": "game/world/evacuation_route.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 6309,
+      "sha256": "12d49738b2084237869cb6da426a8f6bb21a03d0a83c0670a97145c9884757af",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/game/presentation/city_render.gd.txt",
+      "original_path": "game/presentation/city_render.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 3357,
+      "sha256": "7ab645e1a23cece4b6fa108917bb3e91fc29c1e59b41d53b80980ee4ec7c2cef",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/tests/world/test_streamed_world.gd.txt",
+      "original_path": "tests/world/test_streamed_world.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 10130,
+      "sha256": "16d38ec36cb402355014cacf0cc9f45d3f3de0569b00df82e7e92b5fd453dd1b",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/tests/world/test_city_render.gd.txt",
+      "original_path": "tests/world/test_city_render.gd",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 7761,
+      "sha256": "fb0d4b169aa808234814034ff2ab7edd5f0923e10b362c6da2ea5c3fa7ba2fdb",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/world/data/world_props.json.txt",
+      "original_path": "data/world_props.json",
+      "snapshot_status": "recorded reviewed world-module snapshot",
+      "bytes": 5737,
+      "sha256": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/game/presentation/combat_vfx_catalog.gd.txt",
+      "original_path": "game/presentation/combat_vfx_catalog.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 8437,
+      "sha256": "7a3607d0c2d0326055ba5d902899eff69718f700c89a10b46ea81a992fd6938b",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/game/presentation/combat_vfx_director.gd.txt",
+      "original_path": "game/presentation/combat_vfx_director.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 17110,
+      "sha256": "97fa4dd86094ab8134854ed148f454926e995adbb4c95f154de3cddae2d6a47d",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/game/presentation/combat_vfx_renderer.gd.txt",
+      "original_path": "game/presentation/combat_vfx_renderer.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 7903,
+      "sha256": "0cdfec0cf1e263f82ac61d37bebecc3030274c44c377c989a71b6fa196f0dd00",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/data/combat_vfx.json.txt",
+      "original_path": "data/combat_vfx.json",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 21652,
+      "sha256": "fafba37089b58ea460e661a141246a1dffc4ef62314c5208799e65895290a4bb",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/tests/presentation_vfx/test_catalog.gd.txt",
+      "original_path": "tests/presentation_vfx/test_catalog.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 7574,
+      "sha256": "623d2ffa817c7e306073b9b756f2705ac040d56997213757426cd850d9fe4106",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/tests/presentation_vfx/test_director.gd.txt",
+      "original_path": "tests/presentation_vfx/test_director.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 20859,
+      "sha256": "0824c25fe26e3e607aeae44d514c1d6273e2ceac0ed1dc91f6d7d54a749df708",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/vfx/tests/presentation_vfx/test_renderer.gd.txt",
+      "original_path": "tests/presentation_vfx/test_renderer.gd",
+      "snapshot_status": "recorded final VFX-module snapshot",
+      "bytes": 8936,
+      "sha256": "feff04c606c81c02228cdc912e9db1a9f9086f7ed08fb245a6ae647f8a10ae5a",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_codec.gd.txt",
+      "original_path": "game/world/world_delta_codec.gd",
+      "snapshot_status": "recorded final storage-module snapshot",
+      "bytes": 5961,
+      "sha256": "d99712121de70d30958d0176165bed6871940f40c6bae1fcddad155c29088f6a",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/storage/game/world/world_delta_index.gd.txt",
+      "original_path": "game/world/world_delta_index.gd",
+      "snapshot_status": "recorded final storage-module snapshot",
+      "bytes": 7727,
+      "sha256": "a7513f350b9253b0a4d6ede0a42f760a1aeace84902f82748a2504706c5dd07a",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/storage/game/persistence/world_delta_store.gd.txt",
+      "original_path": "game/persistence/world_delta_store.gd",
+      "snapshot_status": "recorded final storage-module snapshot",
+      "bytes": 14905,
+      "sha256": "4bb65635df10f3dab490aedbb830951c7be709f877ff013ffe43297f267449d4",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/storage/game/app/world_checkpoint_adapter.gd.txt",
+      "original_path": "game/app/world_checkpoint_adapter.gd",
+      "snapshot_status": "recorded final storage-module snapshot",
+      "bytes": 2845,
+      "sha256": "33ef569b0f43677567aab59dc642b385bd16cf81656a31ee70c8c4b359fab9c2",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-history/input_router.latest.gd.txt",
+      "original_path": "game/input/input_router.gd",
+      "snapshot_status": "latest recorded input-router snapshot",
+      "bytes": 4967,
+      "sha256": "db5787a73297b1d27ef961f064ecc1321b3b53121466b21d841840e2a9753058",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-history/game_ui.initial-105654.gd.txt",
+      "original_path": "game/ui/game_ui.gd",
+      "snapshot_status": "historical initial UI snapshot; later fixes not integrated",
+      "bytes": 33155,
+      "sha256": "9ee894cd627efb49dedb1ab6b6f8d3814e742e19512e5162e3ce3889ee0b0d2a",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-history/loadout_panel.initial.gd.txt",
+      "original_path": "game/ui/loadout_panel.gd",
+      "snapshot_status": "historical initial loadout-panel snapshot",
+      "bytes": 4846,
+      "sha256": "e841dd4a9b9d456a8a0e8a6ddce2e351362774c1ccf79e110c972728b3bcb4f7",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-history/I2-controller-review-fixes.diff.txt",
+      "original_path": "controller-review-fixes.diff",
+      "snapshot_status": "exact recorded patch; unapplied",
+      "bytes": 14222,
+      "sha256": "663ac6e2c693736ab0d2b9f2665cd646742bbefbcc71b93182be3eea3909270d",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-authority-fix/I2RR-1-fixes.diff.txt",
+      "original_path": "I2RR-1-fixes.diff",
+      "snapshot_status": "exact recorded patch/test evidence; unapplied",
+      "bytes": 6587,
+      "sha256": "982294b70cf8978ba979847a265b9120618c4df87720fca311329fdd921c36b9",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-authority-fix/test_obsolete_authority_presentation.gd.txt",
+      "original_path": "tests/ui/test_obsolete_authority_presentation.gd",
+      "snapshot_status": "exact recorded patch/test evidence; unapplied",
+      "bytes": 2122,
+      "sha256": "e620d47b439879503fcba8ed57051b557e20a5e4a84ab526beedaa5f3732f9c6",
+      "matches_recorded_pre_incident_sha256": true
+    },
+    {
+      "path": "recovery/2026-10-10/exact-source-01/ui-authority-fix/test_stale_detail_resume_access.gd.txt",
+      "original_path": "tests/app/test_stale_detail_resume_access.gd",
+      "snapshot_status": "exact recorded patch/test evidence; unapplied",
+      "bytes": 2569,
+      "sha256": "ba7526757a641a56c11e198a70183013d12282ba3f2e983338a487681ad2c868",
+      "matches_recorded_pre_incident_sha256": true
+    }
+  ],
+  "fresh_validation_scope": [
+    "Isolated codec regression:31 checks,0 failures.",
+    "Isolated VFX renderer regression:200 checks,0 failures."
+  ],
+  "limits": [
+    "Full latest simulation and integration are not in this checkpoint.",
+    "Other reconstructed files lacking original recorded hashes are kept separate.",
+    "This branch must not be treated as an approved APK or complete game.",
+    "Historical art rejection and incomplete animation decisions remain in force."
+  ]
+}

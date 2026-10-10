@@ -1,0 +1,268 @@
+--- a/game/app/run_controller.gd
++++ b/game/app/run_controller.gd
+@@ -37,6 +37,8 @@
+ var audio
+ var _accumulator := 0.0
+ var _foreground := true
++var _lifecycle_generation := 0
++var _lifecycle_pause_intent := {"background":false,"controller_lost":false}
+ var _shop_open := false
+ func _ready() -> void:
+ 	chapter = Chapters.new().load_chapter("chapter_01_shiganshina").chapter
+@@ -82,9 +84,8 @@
+ 	input_router.ui_action.connect(ui.navigate)
+ 	input_router.input_hint_changed.connect(ui.set_input_hint)
+ 	input_router.active_controller_lost.connect(func():
+-		if not state.is_empty():
+-			simulation.set_pause(state,"controller_lost",true)
+-			_save_checkpoint()
++		_latch_lifecycle_pause("controller_lost")
++		if not state.is_empty(): _save_checkpoint()
+ 		_present())
+ 	get_viewport().size_changed.connect(_resize)
+ 	_resize()
+@@ -149,7 +150,8 @@
+ 		_present()
+ 		return
+ 	if state.is_empty(): return
+-	if not state.pause_reasons.is_empty() or state.phase in TERMINAL:
++	if _lifecycle_blocked() or not state.pause_reasons.is_empty() or state.phase in TERMINAL:
++		_apply_lifecycle_pause(state)
+ 		_accumulator = 0
+ 		_present()
+ 		return
+@@ -216,6 +218,7 @@
+ 	_present()
+ func request_resume() -> void:
+ 	if not _foreground or not _pending_transaction.is_empty(): return
++	if not _command_ready("resume"): return
+ 	if state.is_empty() and not pending_checkpoint.is_empty():
+ 		if not checkpoint_matches_chapter(pending_checkpoint,chapter): return
+ 		var restored: Dictionary = simulation.restore(pending_checkpoint)
+@@ -228,6 +231,8 @@
+ 		pending_checkpoint.clear()
+ 		ui.set_checkpoint_available(false)
+ 	if state.is_empty() or state.phase in TERMINAL: return
++	_lifecycle_generation += 1
++	_lifecycle_pause_intent = {"background":false,"controller_lost":false}
+ 	input_router.clear_transient_input()
+ 	for reason in ["user","background","controller_lost","slow_frame"]:
+ 		simulation.set_pause(state,reason,false)
+@@ -292,13 +297,13 @@
+ 	if not loaded.ok:
+ 		_action_failed(action,loaded.error_code)
+ 		return false
+-	if int(loaded.game_save.store_revision) != int(game_save.store_revision):
+-		_install_authority(loaded.game_save)
++	if not _same_json(loaded.game_save,game_save):
++		_quarantine_authority(loaded.game_save)
+ 		_action_failed(action,"stale_revision")
+ 		return false
+ 	return true
+ func _commit_candidate(candidate: Dictionary, action: String, receipt: Dictionary = {}, replace_state: bool = false, events: Array = [], reset_presentation: bool = false) -> void:
+-	var transaction := {"candidate":candidate.duplicate(true),"expected_revision":int(candidate.store_revision),"action":action,"receipt":receipt.duplicate(true),"replace_state":replace_state,"events":events.duplicate(true),"reset_presentation":reset_presentation}
++	var transaction := {"candidate":candidate.duplicate(true),"expected_revision":int(candidate.store_revision),"action":action,"receipt":receipt.duplicate(true),"replace_state":replace_state,"events":events.duplicate(true),"reset_presentation":reset_presentation,"lifecycle_generation":_lifecycle_generation}
+ 	var result: Dictionary = save_store.commit_game(candidate,int(candidate.store_revision))
+ 	if result.ok:
+ 		_publish_transaction(result.game_save,transaction)
+@@ -339,6 +344,8 @@
+ 		state = game_save.checkpoint.duplicate(true)
+ 		_accumulator = 0
+ 		input_router.clear_transient_input()
++	if transaction.replace_state or transaction.lifecycle_generation != _lifecycle_generation:
++		_apply_lifecycle_pause(state)
+ 	if transaction.reset_presentation:
+ 		world.reset_presentation()
+ 		audio.reset_presentation()
+@@ -353,11 +360,33 @@
+ 	if not transaction.events.is_empty():
+ 		var events: Array[Dictionary] = []
+ 		events.assign(transaction.events)
+-		audio.consume_events(events)
++		if not _lifecycle_blocked(): audio.consume_events(events)
+ 		world.consume_events(events)
+-	if transaction.action == "purchase": audio.play_sound("select")
++	if transaction.action == "purchase" and not _lifecycle_blocked(): audio.play_sound("select")
+ 	if not transaction.action in ["checkpoint","settings"]: _action_succeeded(transaction.action,transaction.receipt)
+ 	else: _present()
++func _quarantine_authority(authority: Dictionary) -> void:
++	# A changed disk authority invalidates every writable checkpoint derived from
++	# the old revision. Hold its validated checkpoint for a new explicit resume.
++	_install_authority(authority)
++	state = {}
++	pending_checkpoint = {}
++	_failed_growth.clear()
++	_accumulator = 0
++	_last_save_tick = -1
++	_last_phase = ""
++	_presented_growth_key = ""
++	if game_save.checkpoint is Dictionary and checkpoint_matches_chapter(game_save.checkpoint,chapter):
++		if game_save.checkpoint.phase in TERMINAL:
++			state = game_save.checkpoint.duplicate(true)
++			_apply_lifecycle_pause(state)
++		else: pending_checkpoint = game_save.checkpoint.duplicate(true)
++	input_router.clear_transient_input()
++	world.reset_presentation()
++	audio.reset_presentation()
++	ui.set_checkpoint_available(not pending_checkpoint.is_empty())
++	_install_settings(profile.settings)
++	if _shop_open: ui.close_supply_shop()
+ func _install_authority(authority: Dictionary) -> void:
+ 	game_save = authority.duplicate(true)
+ 	profile = game_save.profile.duplicate(true)
+@@ -401,17 +430,35 @@
+ 	ui.reflow(viewport,safe_area)
+ 	if not state.is_empty(): simulation.set_pause(state,"rotation",false)
+ 	_present()
++func _lifecycle_blocked() -> bool:
++	return not _foreground or _lifecycle_pause_intent.background or _lifecycle_pause_intent.controller_lost
++func _apply_lifecycle_pause(runtime: Dictionary) -> void:
++	if runtime.is_empty(): return
++	# Environmental intent belongs to this controller generation, not to the
++	# immutable candidate whose exact committed bytes/receipt we are verifying.
++	for reason in _lifecycle_pause_intent:
++		if _lifecycle_pause_intent[reason]: simulation.set_pause(runtime,reason,true)
++	if not _foreground: simulation.set_pause(runtime,"background",true)
++func _latch_lifecycle_pause(reason: String) -> void:
++	_lifecycle_generation += 1
++	_lifecycle_pause_intent[reason] = true
++	_accumulator = 0
++	input_router.clear_transient_input()
++	_apply_lifecycle_pause(state)
+ func _notification(what: int) -> void:
+ 	if not is_instance_valid(input_router): return
+ 	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT,NOTIFICATION_APPLICATION_PAUSED]:
+ 		_foreground = false
+ 		input_router.set_active(false)
+-		if not state.is_empty():
+-			simulation.set_pause(state,"background",true)
+-			_save_checkpoint()
++		_latch_lifecycle_pause("background")
++		if not state.is_empty(): _save_checkpoint()
++		_present()
+ 	elif what in [NOTIFICATION_APPLICATION_FOCUS_IN,NOTIFICATION_APPLICATION_RESUMED]:
+ 		_foreground = true
++		_lifecycle_generation += 1
+ 		input_router.set_active(true)
++		# Focus return changes availability, not the user's resume decision.
++		_present()
+ func _unhandled_key_input(event: InputEvent) -> void:
+ 	if not OS.has_feature("debug") or OS.has_feature("mobile"): return
+ 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F9:
+--- /dev/null
++++ b/tests/app/test_controller_authority_lifecycle.gd
+@@ -0,0 +1,114 @@
++extends RefCounted
++const Support = preload("res://tests/app/controller_test_support.gd")
++class HiddenStore:
++	extends "res://game/persistence/game_save_store.gd"
++	var hide_load := false
++	func load_game() -> Dictionary:
++		return {"ok":false,"error_code":"read_failed"} if hide_load else super.load_game()
++func run(t) -> void:
++	for action in ["run_start","upgrade"]:
++		for reason in ["background","controller_lost"]:
++			_test_unknown_publication_preserves_latest_lifecycle(t,action,reason)
++	_test_stale_live_checkpoint_cannot_rollback_evolution(t)
++	_test_stale_pending_checkpoint_requires_fresh_explicit_resume(t)
++func _test_unknown_publication_preserves_latest_lifecycle(t,action: String,reason: String) -> void:
++	var support := Support.new()
++	var f := support.make(t)
++	var app = f.app
++	if action == "upgrade":
++		app.start_run(42)
++		support.evolution_offer(app)
++	var store = HiddenStore.new(f.directory,Callable(app.simulation,"restore"))
++	store._fault_injector = func(stage):
++		if stage == "after_replace_before_return":
++			store.hide_load = true
++			return ERR_CANT_CREATE
++		return OK
++	app.save_store = store
++	# Real input is held when the unknown commit crosses the lifecycle boundary.
++	var move := InputEventJoypadMotion.new()
++	move.device = 0
++	move.axis = JOY_AXIS_LEFT_X
++	move.axis_value = 1.0
++	app.input_router.handle_event(move)
++	app.input_router.set_touch_vector(Vector2.RIGHT)
++	if action == "run_start": app.start_run(42)
++	else: app.apply_upgrade(app.state.upgrade_offer.offer_id,app.state.upgrade_offer.options[0].option_id)
++	t.check(not app._pending_transaction.is_empty(),"unknown %s fixture reaches actual post-rename boundary" % action)
++	if reason == "background": app._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
++	else:
++		app.input_router.active_device = 0
++		app.input_router._on_connection(0,false)
++	var press := InputEventJoypadButton.new()
++	press.device = 0
++	press.button_index = JOY_BUTTON_A
++	press.pressed = true
++	app.input_router.handle_event(press)
++	store.hide_load = false
++	store._fault_injector = Callable()
++	app.resolve_pending_transaction()
++	var label := "unknown %s after %s" % [action,reason]
++	t.check(reason in app.state.pause_reasons,label+" publishes latest runtime pause")
++	t.check(not reason in app.game_save.checkpoint.pause_reasons,label+" leaves committed candidate environmental state untouched")
++	t.check(app.input_router.sample_move() == Vector2.ZERO and not app.input_router._accept_armed,label+" clears retained movement and accept input")
++	var before: Dictionary = app.simulation.snapshot(app.state)
++	var sounds: Dictionary = app.audio._last_played.duplicate(true)
++	t.check(not sounds.has("select") and not sounds.has("slash") and not sounds.has("cannon") and not sounds.has("gas"),label+" cannot play pending selection or attack sounds")
++	t.check(app.audio._music.stream_paused,label+" presents paused combat music")
++	for frame in 4: app.advance_frame(1.0/60.0)
++	t.check(app.state.active_tick == before.active_tick and app.state.survival_tick == before.survival_tick and app.state.player.position == before.player.position and app.state.event_seq == before.event_seq,label+" advances zero combat or survival ticks")
++	t.check(app.audio._last_played == sounds,label+" emits no new sounds while paused")
++	if reason == "background": app._notification(Node.NOTIFICATION_APPLICATION_RESUMED)
++	app.advance_frame(1.0/60.0)
++	t.check(app.state.active_tick == before.active_tick and reason in app.state.pause_reasons,label+" never auto-resumes on focus return or reconnect opportunity")
++	app.request_resume()
++	app.advance_frame(1.0/60.0)
++	t.check(app.state.active_tick == before.active_tick+1 and not reason in app.state.pause_reasons,label+" resumes only after explicit continue")
++	app.free()
++func _test_stale_live_checkpoint_cannot_rollback_evolution(t) -> void:
++	var support := Support.new()
++	var f := support.make(t)
++	var old = f.app
++	old.start_run(42)
++	support.evolution_offer(old)
++	# A second controller is a disposable authority-change fixture, not a supported
++	# real concurrent-play assumption. Both commits use the actual validated store.
++	var writer = support.restart(t,f.directory)
++	writer.request_resume()
++	writer.apply_upgrade(writer.state.upgrade_offer.offer_id,writer.state.upgrade_offer.options[0].option_id)
++	var newer: Dictionary = writer.save_store.load_game().game_save
++	t.check(newer.checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and newer.checkpoint.tactical_seals == 0,"newer authority fixture commits real evolution")
++	old.apply_upgrade(old.state.upgrade_offer.offer_id,old.state.upgrade_offer.options[0].option_id)
++	t.check(old.ui._notice.text.contains("stale_revision"),"obsolete intent is rejected at authority refresh")
++	t.check(old.state.is_empty() and old.pending_checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and old.pending_checkpoint.tactical_seals == 0,"authority refresh quarantines obsolete live offer and seal until explicit resume")
++	old.set_user_pause(true)
++	old._save_checkpoint()
++	var settings: Dictionary = old.game_save.profile.settings.duplicate(true)
++	settings.reduce_effects = true
++	old._apply_settings(settings)
++	var disk: Dictionary = old.save_store.load_game().game_save
++	t.check(disk.checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and disk.checkpoint.tactical_seals == 0 and disk.checkpoint.upgrade_offer.is_empty(),"pause checkpoint and settings after stale refresh never roll back confirmed evolution")
++	old.advance_frame(1.0/60.0)
++	t.check(old.state.is_empty(),"quarantined authority does not automatically resume combat")
++	old.request_resume()
++	t.check(old.state.evolutions.get("blade_slash") == "evo_wing_cut" and old.state.tactical_seals == 0 and old.state.upgrade_offer.is_empty(),"explicit continue adopts only the newest authoritative growth checkpoint")
++	old.free()
++	writer.free()
++func _test_stale_pending_checkpoint_requires_fresh_explicit_resume(t) -> void:
++	var support := Support.new()
++	var f := support.make(t)
++	f.app.start_run(42)
++	support.evolution_offer(f.app)
++	f.app.free()
++	var reader = support.restart(t,f.directory)
++	var writer = support.restart(t,f.directory)
++	writer.request_resume()
++	writer.apply_upgrade(writer.state.upgrade_offer.offer_id,writer.state.upgrade_offer.options[0].option_id)
++	reader.request_resume()
++	t.check(reader.state.is_empty() and reader.pending_checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and reader.pending_checkpoint.tactical_seals == 0,"stale pending resume quarantines current authority before exposing an obsolete run")
++	reader.request_resume()
++	t.check(reader.state.evolutions.get("blade_slash") == "evo_wing_cut" and reader.state.tactical_seals == 0,"fresh explicit continue restores latest pending checkpoint")
++	var disk: Dictionary = reader.save_store.load_game().game_save
++	t.check(disk.checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and disk.checkpoint.tactical_seals == 0,"pending-resume checkpoint write retains committed evolution")
++	reader.free()
++	writer.free()
