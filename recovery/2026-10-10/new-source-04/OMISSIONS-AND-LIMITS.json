@@ -1,0 +1,30 @@
+{
+  "README.md": {
+    "classification": "OMITTED_EXACT_HISTORICAL_DOCUMENT",
+    "reason": "Contains historical key-backup-policy wording whose current policy is unresolved. Omitted rather than treating it as a current instruction or inventing a new policy. Product title is preserved independently in code and tests.",
+    "source": {
+      "bytes": 3245,
+      "git_blob_sha": "53ab674606eb0141181b81b3f81026f784706e2b",
+      "mode": "100644",
+      "sha256": "68709a58a763d288a8ad76aaba5b15afc649b58100c6fb7be3b348b71dcf8cf9"
+    }
+  },
+  "dependencies": {
+    "classification": "NOT_INCLUDED_IN_THIS_TRANCHE",
+    "paths": [
+      "tools/build/toolchain.json",
+      "game/world/city_generator.gd",
+      "game/world/city_navigation.gd",
+      "game/world/streamed_world.gd",
+      "game/world/world_address.gd",
+      "game/world/world_prop_catalog.gd",
+      "data/world_props.json",
+      "assets/manifest.json"
+    ],
+    "reason": "This is a bounded tranche, not a self-contained game/build/world-test distribution. Additional transitive source dependencies are also outside scope."
+  },
+  "raw_reports_and_logs": {
+    "classification": "OMITTED",
+    "reason": "Only concise derived verification facts are included."
+  }
+}

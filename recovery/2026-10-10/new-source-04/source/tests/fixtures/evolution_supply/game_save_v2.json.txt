@@ -1,0 +1,281 @@
+{
+  "empty": {
+    "schema_version": 2,
+    "career_id": "0123456789abcdef0123456789abcdef",
+    "store_revision": 0,
+    "next_run_serial": 1,
+    "settled_through_serial": 0,
+    "profile": {
+      "schema_version": 2,
+      "settings": {
+        "deadzone": 0.2,
+        "audio_master": 0.8,
+        "screen_shake": 0.5,
+        "reduce_effects": false
+      },
+      "cleared_chapter_ids": [],
+      "unlocked_character_ids": [
+        "garrison_01"
+      ],
+      "best_runs": {},
+      "supply_credits": 0,
+      "owned_doctrine_ids": [
+        "doctrine_standard"
+      ],
+      "consumables": {
+        "field_bandage": 0
+      },
+      "loadout": {
+        "doctrine_id": "doctrine_standard",
+        "target_evolution_id": "evo_wing_cut",
+        "supply_item_id": ""
+      }
+    },
+    "checkpoint": null,
+    "purchase_receipts": [],
+    "settlement_receipts": [],
+    "legacy_checkpoint_present": false
+  },
+  "started": {
+    "schema_version": 2,
+    "career_id": "0123456789abcdef0123456789abcdef",
+    "store_revision": 1,
+    "next_run_serial": 2,
+    "settled_through_serial": 0,
+    "profile": {
+      "schema_version": 2,
+      "settings": {
+        "deadzone": 0.2,
+        "audio_master": 0.8,
+        "screen_shake": 0.5,
+        "reduce_effects": false
+      },
+      "cleared_chapter_ids": [],
+      "unlocked_character_ids": [
+        "garrison_01"
+      ],
+      "best_runs": {},
+      "supply_credits": 0,
+      "owned_doctrine_ids": [
+        "doctrine_standard"
+      ],
+      "consumables": {
+        "field_bandage": 0
+      },
+      "loadout": {
+        "doctrine_id": "doctrine_standard",
+        "target_evolution_id": "evo_wing_cut",
+        "supply_item_id": ""
+      }
+    },
+    "checkpoint": {
+      "active_tick": 0,
+      "boss_ids_fired": [],
+      "chapter_id": "chapter_01_shiganshina",
+      "character_id": "garrison_01",
+      "command_ids_applied": [],
+      "content_revision": "ch01.3-rebuild.1",
+      "drops": [],
+      "entities": [],
+      "equipment": {
+        "blade_slash": 1
+      },
+      "escape_zone": [
+        -56.0,
+        320.0,
+        112.0,
+        80.0
+      ],
+      "evacuation_ready": false,
+      "event_seq": 0,
+      "final_started_tick": -1,
+      "next_entity_id": 1,
+      "passives": {},
+      "pause_reasons": [],
+      "pending_offers": [],
+      "phase": "survival",
+      "player": {
+        "attack_ready_ticks": {},
+        "facing": [
+          1.0,
+          0.0
+        ],
+        "hp": 100.0,
+        "id": "player",
+        "invulnerable_until": 0,
+        "level": 1,
+        "max_hp": 100.0,
+        "position": [
+          0.0,
+          0.0
+        ],
+        "radius": 8.0,
+        "velocity": [
+          0.0,
+          0.0
+        ],
+        "xp": 0
+      },
+      "projectiles": [],
+      "reward_ids_claimed": [],
+      "rng_state": "708718527385777908",
+      "rules": {
+        "allowed_equipment_ids": [
+          "blade_slash",
+          "spin_slash",
+          "odm_dash",
+          "reentry_combo",
+          "wall_cannon",
+          "ally_cover"
+        ],
+        "enemy_catalog": {
+          "boss_abnormal": {
+            "art_id": "boss_abnormal",
+            "behavior": "combo",
+            "damage": 35.0,
+            "hp": 4200.0,
+            "name": "퇴각로의 기행종",
+            "radius": 32.0,
+            "speed": 28.0,
+            "xp": 180
+          },
+          "boss_charger": {
+            "art_id": "boss_charger",
+            "behavior": "charge",
+            "damage": 24.0,
+            "hp": 1000.0,
+            "name": "돌진 기행종",
+            "radius": 28.0,
+            "speed": 22.0,
+            "xp": 80
+          },
+          "boss_grabber": {
+            "art_id": "boss_grabber",
+            "behavior": "grab",
+            "damage": 33.0,
+            "hp": 3400.0,
+            "name": "대피로의 강적",
+            "radius": 30.0,
+            "speed": 24.0,
+            "xp": 150
+          },
+          "boss_leaper": {
+            "art_id": "boss_leaper",
+            "behavior": "leap",
+            "damage": 30.0,
+            "hp": 2600.0,
+            "name": "도약 기행종",
+            "radius": 28.0,
+            "speed": 24.0,
+            "xp": 120
+          },
+          "boss_sweeper": {
+            "art_id": "boss_sweeper",
+            "behavior": "sweep",
+            "damage": 27.0,
+            "hp": 1800.0,
+            "name": "광장의 강적",
+            "radius": 30.0,
+            "speed": 20.0,
+            "xp": 100
+          },
+          "brute": {
+            "art_id": "titan_brute",
+            "behavior": "brute",
+            "damage": 17.0,
+            "hp": 100.0,
+            "name": "대형 거인",
+            "radius": 24.0,
+            "speed": 17.0,
+            "xp": 10
+          },
+          "grabber": {
+            "art_id": "titan_grabber",
+            "behavior": "grab",
+            "damage": 12.0,
+            "hp": 58.0,
+            "name": "붙잡는 거인",
+            "radius": 20.0,
+            "speed": 30.0,
+            "xp": 8
+          },
+          "runner": {
+            "art_id": "titan_runner",
+            "behavior": "runner",
+            "damage": 7.0,
+            "hp": 24.0,
+            "name": "빠른 거인",
+            "radius": 16.0,
+            "speed": 43.0,
+            "xp": 5
+          },
+          "sweeper": {
+            "art_id": "titan_sweeper",
+            "behavior": "sweep",
+            "damage": 13.0,
+            "hp": 65.0,
+            "name": "팔을 휘두르는 거인",
+            "radius": 20.0,
+            "speed": 24.0,
+            "xp": 8
+          },
+          "walker": {
+            "art_id": "titan_basic",
+            "behavior": "chase",
+            "damage": 9.0,
+            "hp": 32.0,
+            "name": "거인",
+            "radius": 18.0,
+            "speed": 23.0,
+            "xp": 4
+          }
+        },
+        "evacuation_ticks": 4500,
+        "move_speed": 150,
+        "pickup_radius": 30.0,
+        "progression": {
+          "base_xp": 24,
+          "xp_per_level": 8
+        },
+        "world_geometry": {},
+        "base_hp": 100,
+        "base_move_speed": 150,
+        "equipment_slots": 4,
+        "passive_slots": 4,
+        "content_fingerprint": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      "schema_version": 2,
+      "seed": 42,
+      "stats": {
+        "damage_dealt": 0.0,
+        "kills": 0,
+        "minibosses_defeated": 0
+      },
+      "survival_tick": 0,
+      "telegraphs": [],
+      "upgrade_offer": {},
+      "run_id": "0123456789abcdef0123456789abcdef:1",
+      "run_serial": 1,
+      "run_config": {
+        "run_id": "0123456789abcdef0123456789abcdef:1",
+        "run_serial": 1,
+        "doctrine_id": "doctrine_standard",
+        "target_evolution_id": "evo_wing_cut",
+        "prepared_supply": ""
+      },
+      "evolutions": {},
+      "tactical_seals": 0,
+      "player_attack_instances": [],
+      "enemy_attack_instances": [],
+      "evolution_runtime": {},
+      "supply_used": false,
+      "progression_rng_state": "2647525101076341191",
+      "attack_seq": 0,
+      "offer_seq": 0,
+      "view_revision": 1
+    },
+    "purchase_receipts": [],
+    "settlement_receipts": [],
+    "legacy_checkpoint_present": false
+  }
+}

@@ -1,0 +1,74 @@
+# NEW connected city definitions: derived design reference
+
+Derived document, not exact source. Design geometry, data identity, results and limitations are retained; internal assignment references are omitted.
+
+Date: 2026-10-10 UTC. Content revision: `ch01.3-rebuild.1`.
+
+## Provenance and scope
+
+`chapters/chapter_01/city_templates.json` is **newly authored compatible data**. The original template file was lost. This work does not reconstruct original layouts, claim an original definition hash, or alter the exact recovered generator, world queries, navigation, prop catalog or renderer.
+
+Actual definition SHA-256: `d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062`.
+
+The eventual production content manifest must include these actual bytes, `data/world_props.json`, and the other enabled definitions. The R0 fixture-only fingerprint is a separate contract example, not this actual production identity. Existing internal interface labels remain `city_v1` and `ch01_city_1` as required by the exact generator; they do not assert compatibility with missing historical layouts.
+
+No Core, shared fixture, legacy test, renderer, prop metadata, asset, or persistent authority file was changed by the NEW city definition work.
+
+## Frozen interface
+
+- Chunk 768 × 768 pixels; navigation cell 32 pixels.
+- Exactly four ordered templates, each with stable template/slot IDs.
+- All four edge ports use interval `[288,480]`; both intersecting reserved streets stay free of solid footprints.
+- Central retreat/passage rectangle `[336,336,96,96]`.
+- Slots contain `slot_id`, `definition_id`, `position`, `rotation_degrees:0`.
+- Eight, nine, ten and ten authored props respectively; maximum 12.
+- Extra names, design intent and provenance are documentation metadata. The unchanged generator does not turn them into hazards, shop services, destinations or runtime rules.
+
+## Four district designs
+
+1. **제빵 시장 골목 / new_bakery_market:** two bakery fronts, two narrow homes, two western delivery wagons, two eastern rubble clusters. The staggered western wagon lanes and breakable shops create a civilian market layout with alternative approaches.
+2. **주둔병 포대 거리 / new_garrison_battery:** four cannon positions around narrow quarters, a warehouse and a fixed ruined building. The durable batteries retain their flanking detours after nearby buildings collapse.
+3. **보급 창고 지구 / new_supply_warehouses:** four broad warehouses and four loading wagons, plus two rubble clusters. Wider building footprints create the longest measured radius-32 retreat detour in these definitions; warehouse destruction opens a shorter route while wagons remain.
+4. **피난 수레와 붕괴 구역 / new_breach_refuge:** two fixed ruined shells, two intact eastern homes, two refuge wagons, one cannon and three passable rubble clusters. Durable western ruins and destructible eastern homes make different route choices.
+
+The setting metadata is year 845. Every placed landmark references an existing raster asset through the exact existing prop catalog. No new bitmap, geometric substitute, rotated raster or invented asset ID was added. These are authored compositions, not empty chunks or random prop scatter; the recovered deterministic layout hash selects among the four compositions.
+
+## Collision, destruction and rendering facts
+
+The catalog alone defines collision/cover/destruction. Narrow/bakery/warehouse buildings are destructible with structure HP 3; collapsed instances use existing `burning_rubble`, an empty footprint and zero collision/cover masks. Ruined houses, cannons and wagons are durable. Burning rubble is passable and has zero contact damage; its name does not imply a fire damage hazard.
+
+An intact house's ground footprint is only 44–60 pixels deep while its upright art can be 192 pixels tall. The renderer uses the catalog's full bounds and foot depth; these definitions do not replace those with collision rectangles. Slots keep solid footprints within each chunk and outside the cross streets. Test coverage establishes the declared geometric contracts, not hand-calibrated pixel contact.
+
+Overlapping tall raster bounds, landmark visibility, player outlines, front/back occlusion, visible destruction cues and four-side contact must still be inspected through the integrated renderer in real play. Existing catalog calibration remains `candidate_pending_four_side_contact`. No visual/contact acceptance, finished-world claim, Android performance claim or gameplay quality approval follows from these tests.
+
+## Fresh verification
+
+Engine: normal Godot `4.6.3.stable.official.7d41c59c4`.
+
+- Initial behavioral RED against absent definitions: generator reports `invalid_template_contract` and `four_templates_required`, two checks / one expected failure, no parse error.
+- Final focused `RefCounted.run(t)` suite: **1,150 checks / 0 failures**, engine exit 0, no `SCRIPT ERROR:` / `ERROR:`.
+- Unchanged recovered `test_streamed_world.gd`: **200 checks / 0 failures**, exit 0. Its existing contact/delta assertions happen to remain compatible with the new data; this is not historical layout recovery.
+- Unchanged recovered `test_city_render.gd`: **33 checks / 0 failures**, exit 0. This includes its real baseline Core projectile adapter probe, not final NEW Core integration acceptance.
+- All 11 protected world module/catalog/renderer hashes match their pre-work values.
+- Mutation checks reject a solid moved into the reserved street, a required durable cannon replaced by passable rubble, and data-byte drift against the pinned NEW vector fixture. These are isolated mutated definition copies using the same actual modules and tests.
+
+For every free 32-pixel cell, the actual CityNavigation and StreamedWorld queries validate a safe retreat path at both radii. Observed free cells / longest route in pixels:
+
+| District | Radius 8 | Radius 32 |
+|---|---|---|
+| Bakery market | 524 / 693.72 | 440 / 721.80 |
+| Garrison battery | 518 / 693.72 | 421 / 721.71 |
+| Supply warehouses | 520 / 693.72 | 416 / 752.35 |
+| Breach refuge | 524 / 693.72 | 442 / 724.47 |
+
+All are within the 900-pixel retreat bound. Actual collapse tests show a shorter safe route through a formerly solid building in every district.
+
+Seams cover every one of the 16 ordered district pairs in each cardinal direction, crossing both ways at radii 8 and 32. Four origins include zero, negative coordinates, exact decimal strings beyond 2^53, and near-int64 endpoints. NEW domain vectors additionally exercise both exact signed-int64 endpoints, stable slot IDs, repeat generation, non-aliasing and invalid-address rejection.
+
+`tests/world/fixtures/NEW-city-vectors.json` is a **NEW independent reference fixture**. Python computes documented SHA-256 domain strings and expected slot IDs directly from the authored definitions; no Godot result is serialized as its own expected answer. Its provenance and definition-byte hash are explicit. It cannot substitute for missing original golden fixtures.
+
+## Broader suite boundary
+
+The standard world and complete-suite commands were attempted and their raw logs retained. The world run encountered the known missing `game/persistence/save_migrations.gd` dependency in `test_world_checkpoint_adapter.gd`; the complete run also encountered current missing progression/controller-support dependencies and missing imported texture caches. Both were stopped with SIGINT/130 before unrelated long storage stress completed. They are **incomplete, dependency-blocked observations**, not completed regressions or green suites. No existing test was weakened, skipped inside its source, or rewritten to hide those errors.
+
+Independent code review and actual content-manifest binding remain required. Streamed Core readiness/rollback, checkpoint closure, world/render binding and real visual/contact/play gates are later packages.

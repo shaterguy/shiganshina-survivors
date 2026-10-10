@@ -1,0 +1,58 @@
+{
+  "identity_kind": "NEW R0 contract-only fixture basis; not production content manifest",
+  "content_revision": "ch01.3-rebuild.1",
+  "chapter_id": "chapter_01_shiganshina",
+  "doctrine_standard": {
+    "base_hp": 100,
+    "base_move_speed": 150,
+    "initial_equipment": {
+      "blade_slash": 1
+    },
+    "initial_passives": {}
+  },
+  "rules": {
+    "equipment_slots": 4,
+    "passive_slots": 4,
+    "level_cap": 5,
+    "seal_cost": 1,
+    "seal_cap": 5
+  },
+  "wing_cut": {
+    "damage": [
+      27,
+      36
+    ],
+    "ticks": [
+      0,
+      12
+    ],
+    "radius": 88,
+    "arc_degrees": 110,
+    "cooldown_ticks": 48
+  },
+  "crossfire": {
+    "damage": [
+      44.8,
+      44.8
+    ],
+    "ticks": [
+      36,
+      66
+    ],
+    "radius": 56,
+    "point_offset": 24,
+    "cooldown_ticks": 168,
+    "acquisition_range": 456
+  },
+  "prices": {
+    "doctrine_mobile": 40,
+    "doctrine_artillery": 40,
+    "field_bandage": 15
+  },
+  "source_hashes": {
+    "data/equipment.json": "e55f5489ab6b3a5946e179068fa7a4a76582c5fdc65ea72c297f35fbbd1d699f",
+    "data/passives.json": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af",
+    "data/enemies.json": "2bfe7ab6239d937455d008bb5fdee8485f9fab6d58757643bd6f0f61931cd159",
+    "chapters/chapter_01/manifest.json": "f94e9081c0dc6076ed6320974f5d43362b81dde710132e31e5e1bee9bf038f11"
+  }
+}

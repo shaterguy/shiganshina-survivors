@@ -1,0 +1,482 @@
+{
+  "allowed_prefix": "recovery/2026-10-10/new-source-04/",
+  "derived_documents": 4,
+  "exact_source_files": 18,
+  "mapping": [
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/addons/chapter_export/plugin.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 2491,
+        "git_blob_sha": "450d01614cf169b8f06964016cbd4ad07c3e6ba7",
+        "mode": "100644",
+        "sha256": "3cb43f17bdc0ab7b94ec40abd72c6beb728e5fdee0663c8025d815de1b9c166c"
+      },
+      "restore_target": "addons/chapter_export/plugin.gd",
+      "source": {
+        "bytes": 2491,
+        "git_blob_sha": "450d01614cf169b8f06964016cbd4ad07c3e6ba7",
+        "mode": "100644",
+        "sha256": "3cb43f17bdc0ab7b94ec40abd72c6beb728e5fdee0663c8025d815de1b9c166c"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/city_templates.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 9605,
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "mode": "100644",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      "restore_target": "chapters/chapter_01/city_templates.json",
+      "source": {
+        "bytes": 9605,
+        "git_blob_sha": "951a96a1c162ac4abd133fb8a80771aa761cf733",
+        "mode": "100644",
+        "sha256": "d7586dedbb2884ad79df214c563f1955b9c162ab6605c436b5eecc70f051f062"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/chapters/chapter_01/manifest.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 2046,
+        "git_blob_sha": "e8f05d96c91d9838d4f4644ef201accaeb3ad806",
+        "mode": "100644",
+        "sha256": "0a9941a764bedb204bc515db628754b06dc7f6fca5bded11375ad8c85fc12bb9"
+      },
+      "restore_target": "chapters/chapter_01/manifest.json",
+      "source": {
+        "bytes": 2046,
+        "git_blob_sha": "e8f05d96c91d9838d4f4644ef201accaeb3ad806",
+        "mode": "100644",
+        "sha256": "0a9941a764bedb204bc515db628754b06dc7f6fca5bded11375ad8c85fc12bb9"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/docs/design/new-city-definitions.md.txt",
+      "byte_equal_to_source": false,
+      "classification": "DERIVED_DOCUMENT_NOT_EXACT_SOURCE",
+      "preserved": {
+        "bytes": 7889,
+        "git_blob_sha": "ddf30e02ec02ab85ab9c1ed8f9b57bc56dc43630",
+        "mode": "100644",
+        "sha256": "fd92c9bb9b049f3423e1dc7a2a3cb6b956f3b6a540aa14ca665d56b90cc95fea"
+      },
+      "restore_target": "docs/design/new-city-definitions.md",
+      "source": {
+        "bytes": 7724,
+        "git_blob_sha": "3eee4937d135d6393c1a9e8880ba58300ff5fbb0",
+        "mode": "100644",
+        "sha256": "a720df10f8655d114bfc08c8072ddbefd7f1c47814bb394a73cf12b672aa4ba6"
+      },
+      "transformations": [
+        "Retained city layout, collision, asset, navigation, verification and limitation content.",
+        "Removed internal assignment/review wording.",
+        "Added explicit derived-document label."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/docs/design/rebuild-contracts-v1.md.txt",
+      "byte_equal_to_source": false,
+      "classification": "DERIVED_DOCUMENT_NOT_EXACT_SOURCE",
+      "preserved": {
+        "bytes": 28589,
+        "git_blob_sha": "8751582a9cf5b5ebd5e622dcfecf72f091b2abe8",
+        "mode": "100644",
+        "sha256": "dc0013c0fd90a3dc2ae192646022901235ff3dafa3db2f1a79d888f5fcf242ca"
+      },
+      "restore_target": "docs/design/rebuild-contracts-v1.md",
+      "source": {
+        "bytes": 28482,
+        "git_blob_sha": "f7a776bab4fe22adb93eb86bba96502728e464e3",
+        "mode": "100644",
+        "sha256": "fb3157e77898e4773b53a985fb783e62d977d38ae1ed1019a2a126008d885cad"
+      },
+      "transformations": [
+        "Retained public fields, signatures, requirements, error codes and test-scope limits.",
+        "Removed internal assignment/review labels and internal plan reference.",
+        "Reworded pending validation responsibilities as product requirements.",
+        "Added explicit derived-document label."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/project.godot.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 1034,
+        "git_blob_sha": "c7510b4983662a89ebd5e42f2a6427f9b3fe3603",
+        "mode": "100644",
+        "sha256": "60231c1d1e82212d519d430db2fc6839309d255a52b690e6a33fad57804cb929"
+      },
+      "restore_target": "project.godot",
+      "source": {
+        "bytes": 1034,
+        "git_blob_sha": "c7510b4983662a89ebd5e42f2a6427f9b3fe3603",
+        "mode": "100644",
+        "sha256": "60231c1d1e82212d519d430db2fc6839309d255a52b690e6a33fad57804cb929"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/build/test_rebuild_title_identity.py.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 1384,
+        "git_blob_sha": "3ae1d07b9a905b9e328d998e8fb8e6b424b585ca",
+        "mode": "100644",
+        "sha256": "1faab34efb0aadfd863efbc6a3d3a4d2b928d3a9d072f7941b91ab9c0a04dbe0"
+      },
+      "restore_target": "tests/build/test_rebuild_title_identity.py",
+      "source": {
+        "bytes": 1384,
+        "git_blob_sha": "3ae1d07b9a905b9e328d998e8fb8e6b424b585ca",
+        "mode": "100644",
+        "sha256": "1faab34efb0aadfd863efbc6a3d3a4d2b928d3a9d072f7941b91ab9c0a04dbe0"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/contracts/test_evolution_supply_fixtures.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 21393,
+        "git_blob_sha": "ad8c960b71685f1a55ed2b087143b286ecdfbe00",
+        "mode": "100644",
+        "sha256": "39cc3e7e837188954723d8b5d3946c2aeeb0632dd38696da09c9919ad720a410"
+      },
+      "restore_target": "tests/contracts/test_evolution_supply_fixtures.gd",
+      "source": {
+        "bytes": 21393,
+        "git_blob_sha": "ad8c960b71685f1a55ed2b087143b286ecdfbe00",
+        "mode": "100644",
+        "sha256": "39cc3e7e837188954723d8b5d3946c2aeeb0632dd38696da09c9919ad720a410"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/contracts/test_rebuild_content_identity.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 2689,
+        "git_blob_sha": "ea34efb2f5e89f65d55a0d4c1f964b62d7a2dc4d",
+        "mode": "100644",
+        "sha256": "712e6411a0e35f3d29baacb0d1d657d12f7c846bc3bd5d9c572892bb8d6bd9f8"
+      },
+      "restore_target": "tests/contracts/test_rebuild_content_identity.gd",
+      "source": {
+        "bytes": 2689,
+        "git_blob_sha": "ea34efb2f5e89f65d55a0d4c1f964b62d7a2dc4d",
+        "mode": "100644",
+        "sha256": "712e6411a0e35f3d29baacb0d1d657d12f7c846bc3bd5d9c572892bb8d6bd9f8"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/README.md.txt",
+      "byte_equal_to_source": false,
+      "classification": "DERIVED_DOCUMENT_NOT_EXACT_SOURCE",
+      "preserved": {
+        "bytes": 1830,
+        "git_blob_sha": "c5bfa9605103a2920e9b8884ce45d15cd2b35f27",
+        "mode": "100644",
+        "sha256": "8f1412b1b2002c1d3554319b607a9e09cfa2ef4e7cdf1691a5b214c03657c3b7"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/README.md",
+      "source": {
+        "bytes": 1845,
+        "git_blob_sha": "6a598b3a8e9d22ab2309d43040f40e614ce1f19c",
+        "mode": "100644",
+        "sha256": "bd2f1d1bf0c79f2792deb61633c7789cdd4081a7e475729ebd7803e992d710d9"
+      },
+      "transformations": [
+        "Removed scratch-directory command values and internal wrapper/report reference.",
+        "Retained test entry point and explicit shape-only/non-production boundaries.",
+        "Added explicit derived-document label."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/attack_events.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 13057,
+        "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+        "mode": "100644",
+        "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/attack_events.json",
+      "source": {
+        "bytes": 13057,
+        "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+        "mode": "100644",
+        "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/content_identity_basis.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 1358,
+        "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+        "mode": "100644",
+        "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/content_identity_basis.json",
+      "source": {
+        "bytes": 1358,
+        "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+        "mode": "100644",
+        "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/game_save_v2.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 7276,
+        "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+        "mode": "100644",
+        "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/game_save_v2.json",
+      "source": {
+        "bytes": 7276,
+        "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+        "mode": "100644",
+        "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_source_offers.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 5248,
+        "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+        "mode": "100644",
+        "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_source_offers.json",
+      "source": {
+        "bytes": 5248,
+        "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+        "mode": "100644",
+        "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/progression_views.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 24852,
+        "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+        "mode": "100644",
+        "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/progression_views.json",
+      "source": {
+        "bytes": 24852,
+        "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+        "mode": "100644",
+        "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/provenance.json.txt",
+      "byte_equal_to_source": false,
+      "classification": "DERIVED_METADATA_DOCUMENT_NOT_EXACT_SOURCE",
+      "preserved": {
+        "bytes": 3955,
+        "git_blob_sha": "d7bf76d2c40b5894d1bf61f15d6d99c8e12dbcf0",
+        "mode": "100644",
+        "sha256": "c28133597f929c7459e6a731911d065b5962e538df60ce2b1ebd541c09744e3b"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/provenance.json",
+      "source": {
+        "bytes": 3570,
+        "git_blob_sha": "71bd41e6f59393552ab26b3d84e3db40ab82ab1c",
+        "mode": "100644",
+        "sha256": "66ad196de32b540059f1bea72983c97336b7bfe8e2bdf7532fd7d5284fa7ab46"
+      },
+      "transformations": [
+        "Replaced local recovery paths with public module identifiers.",
+        "Removed scratch execution command.",
+        "Reworded assignment references as pending validation requirements.",
+        "Preserved all tested identity keys, exact fixture hashes and claim limits."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/run_v2.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 5045,
+        "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+        "mode": "100644",
+        "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/run_v2.json",
+      "source": {
+        "bytes": 5045,
+        "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+        "mode": "100644",
+        "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply/supply_views.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 22192,
+        "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+        "mode": "100644",
+        "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+      },
+      "restore_target": "tests/fixtures/evolution_supply/supply_views.json",
+      "source": {
+        "bytes": 22192,
+        "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+        "mode": "100644",
+        "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/evolution_supply_fixture.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 2375,
+        "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+        "mode": "100644",
+        "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+      },
+      "restore_target": "tests/fixtures/evolution_supply_fixture.gd",
+      "source": {
+        "bytes": 2375,
+        "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+        "mode": "100644",
+        "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/fixtures/r0_contract_runner.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 939,
+        "git_blob_sha": "59b3a344fe0b60b5f0ab9a1a43cef17b9bbb54ef",
+        "mode": "100644",
+        "sha256": "da86931ff72beca172063db716ca3ad895de71b801c905ed2e2ea499c531b376"
+      },
+      "restore_target": "tests/fixtures/r0_contract_runner.gd",
+      "source": {
+        "bytes": 939,
+        "git_blob_sha": "59b3a344fe0b60b5f0ab9a1a43cef17b9bbb54ef",
+        "mode": "100644",
+        "sha256": "da86931ff72beca172063db716ca3ad895de71b801c905ed2e2ea499c531b376"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/world/fixtures/NEW-city-vectors.json.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 9642,
+        "git_blob_sha": "79438d5beb7edd1acb1921214fb838f73cc27ebd",
+        "mode": "100644",
+        "sha256": "7ca1589febb6f582c7b6df400e21ccf14dfea817256500eb4b94dfecb0980841"
+      },
+      "restore_target": "tests/world/fixtures/NEW-city-vectors.json",
+      "source": {
+        "bytes": 9642,
+        "git_blob_sha": "79438d5beb7edd1acb1921214fb838f73cc27ebd",
+        "mode": "100644",
+        "sha256": "7ca1589febb6f582c7b6df400e21ccf14dfea817256500eb4b94dfecb0980841"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    },
+    {
+      "archive_path": "recovery/2026-10-10/new-source-04/source/tests/world/test_new_city_definitions.gd.txt",
+      "byte_equal_to_source": true,
+      "classification": "EXACT_CURRENT_SOURCE_BYTES",
+      "preserved": {
+        "bytes": 12076,
+        "git_blob_sha": "145e7296f92e4184845e2976ef8a9f4d4ada2d3c",
+        "mode": "100644",
+        "sha256": "f0764b8755b91d5c951cddc054eaef1e2e7b2ba4b9d39931269979e93ffd48ec"
+      },
+      "restore_target": "tests/world/test_new_city_definitions.gd",
+      "source": {
+        "bytes": 12076,
+        "git_blob_sha": "145e7296f92e4184845e2976ef8a9f4d4ada2d3c",
+        "mode": "100644",
+        "sha256": "f0764b8755b91d5c951cddc054eaef1e2e7b2ba4b9d39931269979e93ffd48ec"
+      },
+      "transformations": [
+        "Only an inert .txt suffix was added; file bytes unchanged."
+      ]
+    }
+  ],
+  "restore_rule": "Remove only the final .txt from a source/ snapshot and map to its restore_target in a separate workspace. Derived files restore as derived documents, never as claims of exact originals. No automatic activation is supplied.",
+  "schema_version": 1,
+  "source_integrity": "All exact files retain source bytes. Derived documents are individually identified with original and preserved hashes. No source file was modified."
+}

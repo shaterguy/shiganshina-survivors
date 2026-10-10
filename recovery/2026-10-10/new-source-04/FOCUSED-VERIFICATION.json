@@ -1,0 +1,206 @@
+{
+  "broader_suite_status": "Earlier broader world and full-suite observations were dependency-blocked and incomplete. They are not counted as passing.",
+  "classification": "DERIVED_VERIFICATION_SUMMARY",
+  "fresh_isolated_r0_replay": {
+    "archive_wide_test_replay_claim": false,
+    "checks": 448,
+    "engine": "Godot 4.6.3.stable.official.7d41c59c4",
+    "failures": 0,
+    "full_candidate_executed": false,
+    "input_files": [
+      {
+        "bytes": 2375,
+        "git_blob_sha": "46088c804a1cbad36347f98e79600a541390146d",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply_fixture.gd",
+        "sha256": "1a9b35d96fcfc8ca2277e0487cf47dcd066933b006704b268918e1c3334667a6"
+      },
+      {
+        "bytes": 939,
+        "git_blob_sha": "59b3a344fe0b60b5f0ab9a1a43cef17b9bbb54ef",
+        "mode": "100644",
+        "path": "tests/fixtures/r0_contract_runner.gd",
+        "sha256": "da86931ff72beca172063db716ca3ad895de71b801c905ed2e2ea499c531b376"
+      },
+      {
+        "bytes": 21393,
+        "git_blob_sha": "ad8c960b71685f1a55ed2b087143b286ecdfbe00",
+        "mode": "100644",
+        "path": "tests/contracts/test_evolution_supply_fixtures.gd",
+        "sha256": "39cc3e7e837188954723d8b5d3946c2aeeb0632dd38696da09c9919ad720a410"
+      },
+      {
+        "bytes": 2689,
+        "git_blob_sha": "ea34efb2f5e89f65d55a0d4c1f964b62d7a2dc4d",
+        "mode": "100644",
+        "path": "tests/contracts/test_rebuild_content_identity.gd",
+        "sha256": "712e6411a0e35f3d29baacb0d1d657d12f7c846bc3bd5d9c572892bb8d6bd9f8"
+      },
+      {
+        "bytes": 5045,
+        "git_blob_sha": "15db7b71bd71008cca6b934cead230f50fcfcbc7",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/run_v2.json",
+        "sha256": "468e6821daceef281eaf42fd44f411d59cf9635dda7b11830d67ca7033c0c14d"
+      },
+      {
+        "bytes": 7276,
+        "git_blob_sha": "5252a82c2e17fc9658cf17e2237231c6aa0d0d71",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/game_save_v2.json",
+        "sha256": "4b8fdc4a2815897c01d73f3f47453ca11f62c3d48435c09ec43e18a3408a5c8a"
+      },
+      {
+        "bytes": 24852,
+        "git_blob_sha": "a69bf0dbc30ee96f1eed5b4489d7691898ed151d",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/progression_views.json",
+        "sha256": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309"
+      },
+      {
+        "bytes": 5248,
+        "git_blob_sha": "0ade9996169ddeb0332c33dde3024116d51b0aea",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/progression_source_offers.json",
+        "sha256": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a"
+      },
+      {
+        "bytes": 22192,
+        "git_blob_sha": "d7c70a5f1c2f83169d6e627d7b49e2314351e07b",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/supply_views.json",
+        "sha256": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+      },
+      {
+        "bytes": 13057,
+        "git_blob_sha": "2b0c52cb447da3065e1890adb461a55833f756da",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/attack_events.json",
+        "sha256": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a"
+      },
+      {
+        "bytes": 1358,
+        "git_blob_sha": "dce661f7970bce2f0c84429766e0f9031f2b74c8",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/content_identity_basis.json",
+        "sha256": "f36ef864a709a52fc0d6ddc1093d549215a983be5ee38cdec75153775c6db48d"
+      },
+      {
+        "bytes": 1034,
+        "git_blob_sha": "c7510b4983662a89ebd5e42f2a6427f9b3fe3603",
+        "mode": "100644",
+        "path": "project.godot",
+        "sha256": "60231c1d1e82212d519d430db2fc6839309d255a52b690e6a33fad57804cb929"
+      },
+      {
+        "bytes": 28589,
+        "git_blob_sha": "8751582a9cf5b5ebd5e622dcfecf72f091b2abe8",
+        "mode": "100644",
+        "path": "docs/design/rebuild-contracts-v1.md",
+        "sha256": "dc0013c0fd90a3dc2ae192646022901235ff3dafa3db2f1a79d888f5fcf242ca"
+      },
+      {
+        "bytes": 1830,
+        "git_blob_sha": "c5bfa9605103a2920e9b8884ce45d15cd2b35f27",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/README.md",
+        "sha256": "8f1412b1b2002c1d3554319b607a9e09cfa2ef4e7cdf1691a5b214c03657c3b7"
+      },
+      {
+        "bytes": 3955,
+        "git_blob_sha": "d7bf76d2c40b5894d1bf61f15d6d99c8e12dbcf0",
+        "mode": "100644",
+        "path": "tests/fixtures/evolution_supply/provenance.json",
+        "sha256": "c28133597f929c7459e6a731911d065b5962e538df60ce2b1ebd541c09744e3b"
+      }
+    ],
+    "log_bytes": 364,
+    "log_sha256": "669186206e03e593a535d08b9a9cbabd3e7414c5a1849bd1d7f17870b5845291",
+    "process_exit_code": 0,
+    "scope": "Exact R0 scripts and seven JSON fixtures with declared derived contract/provenance documents. Shape/identity/copy/arithmetic only; no real Core, GameSave or streamed validator.",
+    "verification_type": "FRESH_ISOLATED_FIXED_R0_RUNNER_ON_PRESERVED_BYTES"
+  },
+  "not_established": [
+    "Full game integration",
+    "Actual production content fingerprint",
+    "Visual/contact/play quality",
+    "Android device acceptance",
+    "APK build or signing"
+  ],
+  "observed_focused_results": [
+    {
+      "checks_or_tests": 448,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "r0_original_contract_agreement",
+      "exit_evidence": "Recorded explicit exit marker 0.",
+      "failures": 0,
+      "scope": "Contract-only shape/semantic-ID/deep-copy/hand-arithmetic agreement; no real Core/GameSave/world validity.",
+      "source_log_bytes": 379,
+      "source_log_sha256": "2e7950e5ef90f5c8c7c75459e63cd889b7a84413e22c033f28c0fadd6b7d20fb",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    },
+    {
+      "checks_or_tests": 1150,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "new_city_actual_modules_focused",
+      "exit_evidence": "Recorded explicit exit marker 0.",
+      "failures": 0,
+      "scope": "NEW city definitions against actual recovered world/query/navigation modules; no NEW Core integration or visual/play acceptance.",
+      "source_log_bytes": 1065,
+      "source_log_sha256": "8f9c579dfd3fc88ae4c7f1c8ffb3758d76bad4ad4b5a63c2d7b3548d79475007",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    },
+    {
+      "checks_or_tests": 200,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "streamed_world_existing_regression",
+      "exit_evidence": "Recorded explicit exit marker 0.",
+      "failures": 0,
+      "scope": "Existing focused streamed-world regression with NEW layouts; not historical layout proof.",
+      "source_log_bytes": 127,
+      "source_log_sha256": "1ec162211cb1ce9a943bef1a36f6132e8055683cb9d09ad09219212ce30a7b6b",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    },
+    {
+      "checks_or_tests": 33,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "city_render_existing_regression",
+      "exit_evidence": "Recorded explicit exit marker 0.",
+      "failures": 0,
+      "scope": "Existing renderer regression and baseline projectile adapter probe; not NEW Core integration or visual acceptance.",
+      "source_log_bytes": 126,
+      "source_log_sha256": "73ccb89a658490bb0a16e6447b8d264888c57676f7b2f9b3fb2493723deaf309",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    },
+    {
+      "checks_or_tests": 5,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "title_identity_python",
+      "exit_evidence": "Log records unittest OK; no numeric process exit marker is present.",
+      "failures": 0,
+      "scope": "Product/chapter title and Android identity assertions only; no APK build.",
+      "source_log_bytes": 103,
+      "source_log_sha256": "888a0c0ed615e57d32cf72be501b0c355f33b8613c81dfdaa99db33d7959487e",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    },
+    {
+      "checks_or_tests": 49,
+      "date_utc": "2026-10-10",
+      "engine_error_scan": "No SCRIPT ERROR: or line-start ERROR:",
+      "evidence_id": "build_python_regressions",
+      "exit_evidence": "Log records unittest OK; no numeric process exit marker is present.",
+      "failures": 0,
+      "scope": "Python build-tool regression tests, including the five title tests; counts are not additive. No APK build.",
+      "source_log_bytes": 148,
+      "source_log_sha256": "dce726fb3bc8413aad208bd0462064bbb188404f9e7cc46a447c4cbc982bd2ce",
+      "verification_type": "READ_EXISTING_FOCUSED_RESULT_LOG"
+    }
+  ],
+  "r0_artifact_hash_inventory_sha256": "17cefd3f80479bac15e22919afd7213e4b5759718920c9131dfbfad15ea87877",
+  "r0_report_sha256": "edfaf986ee3a1903f3297c49f4c970a3939731bbed8411c52a17d13175911e80"
+}
