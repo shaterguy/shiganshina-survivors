@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "policy": "github-new-dev",
+  "repository": "shaterguy/shiganshina-survivors",
+  "identity_id": null,
+  "package": "com.shaterguy.shiganshina.dev",
+  "key_alias": null,
+  "keystore_type": "PKCS12",
+  "certificate_sha256": null
+}
