@@ -8,7 +8,7 @@ const RoleCatalog = preload("res://game/combat/enemy_role_catalog.gd")
 const RoleModel = preload("res://game/combat/enemy_attack_model.gd")
 const RoleBudget = preload("res://game/combat/enemy_threat_budget.gd")
 const RoleQuery = preload("res://game/combat/enemy_world_query.gd")
-const LIVE_ROLE_IDS := ["grabber"]
+const LIVE_ROLE_IDS := ["grabber","quadruped","stone_thrower"]
 const ROLE_RETRY_TICKS := 15
 const Behaviors = preload("res://game/combat/enemy_behaviors.gd")
 const Catalog = preload("res://game/progression/upgrade_catalog.gd")
@@ -945,7 +945,36 @@ func _set_action(entity: Dictionary, action: String, tick: int, duration: int) -
 	entity.action_started_tick = tick
 	entity.action_ends_tick = tick+duration
 	entity.velocity = [0.0,0.0]
+func _legacy_role_slot_available(state: Dictionary, _entity: Dictionary) -> bool:
+	# A legacy windup consumes the same two slots observed by RoleBudget.
+	# Never cancel an admitted attack, and never count its hazard and body twice.
+	if state.phase != "survival": return true
+	var role_present := false
+	for actor in state.entities:
+		if _is_live_role(actor) and actor.hp > 0: role_present = true; break
+	if not role_present: return true
+	var tick := int(state.active_tick)
+	var used := 0
+	var sources := {}
+	for attack in state.enemy_attack_instances:
+		if int(attack.attack_ends_tick) <= tick: continue
+		sources[str(attack.source_id)] = true
+		used += int(attack.profile.threat_cost)
+	for hazard in state.telegraphs:
+		var source := str(hazard.source_id)
+		if int(hazard.expires_tick) <= tick or sources.has(source): continue
+		sources[source] = true
+		used += 2
+	if used+2 > (2 if int(state.survival_tick) < 10800 else 3): return false
+	# One shared 30/120-tick opportunity drains legacy-first reservations.
+	# A role that cannot find a safe path cannot freeze legacy attacks forever.
+	for waiting in state.entities:
+		if not _is_live_role(waiting) or waiting.hp <= 0 or waiting.get("action_state") != "move": continue
+		var since := int(waiting.get("role_wait_since",-1))
+		if since >= 0 and tick-since >= 60 and tick%120 < 30: return false
+	return true
 func _start_enemy_action(state: Dictionary, entity: Dictionary, profile: Dictionary, events: Array[Dictionary]) -> bool:
+	if not _legacy_role_slot_available(state,entity): return false
 	# Reserve the command/hazard identity before mutating the actor windup.
 	# Capacity refusal defers this action while ordinary chase can continue.
 	var hazard_limit := 512 if state.has("world") else 1024
@@ -2100,10 +2129,10 @@ func _role_serial(attack: Dictionary) -> int:
 func _role_owner_valid(state: Dictionary, entity: Dictionary) -> bool:
 	if not entity.has("action_state"):
 		return _owned_role_attack(state,str(entity.id)).is_empty() and not entity.has("role_hand_reach") and not entity.has("role_wait_since") and not entity.has("role_retry_tick")
-	if not entity.get("action_state") in ["move","windup","attack","recover"] or not entity.get("attack_kind") in ["none","grab"]: return false
+	if not entity.get("action_state") in ["move","windup","attack","recover"] or not entity.get("attack_kind") in ["none","grab","charge","throw"]: return false
 	for key in ["action_started_tick","action_ends_tick","next_action_tick","pattern_index","role_retry_tick"]:
 		if not Catalog.integer_valid(entity.get(key)): return false
-	if not Catalog.integer_valid(entity.get("role_wait_since"),-1,int(state.active_tick)) or not Catalog.number_valid(entity.get("role_hand_reach"),-1.0,210.0): return false
+	if not Catalog.integer_valid(entity.get("role_wait_since"),-1,int(state.active_tick)) or not Catalog.number_valid(entity.get("role_hand_reach"),-1.0,float(_role_profile(entity.enemy_id).length)): return false
 	if entity.action_started_tick > state.active_tick or entity.action_ends_tick < entity.action_started_tick or entity.role_retry_tick > int(state.active_tick)+ROLE_RETRY_TICKS: return false
 	for key in ["locked_origin","locked_direction","locked_target","facing"]:
 		if not _position_valid(entity.get(key)): return false
@@ -2114,7 +2143,8 @@ func _role_owner_valid(state: Dictionary, entity: Dictionary) -> bool:
 		if entity.action_ends_tick != entity.action_started_tick or entity.next_action_tick != int(entity.action_started_tick)+cooldown: return false
 		if int(entity.role_wait_since) >= 0 and (entity.role_wait_since < entity.action_started_tick or state.active_tick < entity.next_action_tick): return false
 		return entity.action_state == "move" and entity.attack_kind == "none" and entity.role_hand_reach == -1.0 and entity.pattern_index <= state.attack_seq and (entity.role_wait_since >= 0 or entity.role_retry_tick == 0)
-	if entity.role_wait_since != -1 or entity.role_retry_tick != 0 or entity.role_hand_reach < 0: return false
+	if entity.role_wait_since != -1 or entity.role_retry_tick != 0: return false
+	if entity.role_hand_reach < 0: return false
 	if not RoleModel.validate_checked(attack,_role_profile(entity.enemy_id)).is_empty(): return false
 	var tick := int(state.active_tick)
 	var serial := _role_serial(attack)
@@ -2122,13 +2152,14 @@ func _role_owner_valid(state: Dictionary, entity: Dictionary) -> bool:
 	if attack.started_tick > tick or attack.recover_ends_tick <= tick or attack.recover_ends_tick > MAX_COUNTER-int(attack.profile.cooldown_ticks): return false
 	if entity.next_action_tick != int(attack.recover_ends_tick)+int(attack.profile.cooldown_ticks): return false
 	var phase := "windup" if tick < attack.active_from_tick else ("attack" if tick < attack.attack_ends_tick else "recover")
-	if entity.action_state != phase or entity.attack_kind != "grab": return false
+	if entity.action_state != phase or entity.attack_kind != attack.kind: return false
 	var start: int = attack.started_tick if phase == "windup" else (attack.active_from_tick if phase == "attack" else attack.attack_ends_tick)
 	var end: int = attack.active_from_tick if phase == "windup" else (attack.attack_ends_tick if phase == "attack" else attack.recover_ends_tick)
 	if entity.action_started_tick != start or entity.action_ends_tick != end: return false
 	for key in ["locked_origin","locked_direction","locked_target"]:
 		if not _same_json(entity[key],attack[key]): return false
-	if _vec(entity.position).distance_to(_vec(attack.locked_origin)) > 0.001 or not _vec(entity.velocity).is_zero_approx() or _vec(entity.facing).distance_to(_vec(attack.locked_direction)) > 0.0001: return false
+	if _vec(entity.facing).distance_to(_vec(attack.locked_direction)) > 0.0001: return false
+	if attack.kind != "charge" and (_vec(entity.position).distance_to(_vec(attack.locked_origin)) > 0.001 or not _vec(entity.velocity).is_zero_approx()): return false
 	return true
 func _validate_role_attacks(state: Dictionary, validation_helper = null) -> bool:
 	if state.enemy_attack_instances.size() > (64 if state.has("world") else 128): return false
@@ -2163,6 +2194,8 @@ func _role_samples_checked(state: Dictionary, helper = null) -> Dictionary:
 		if not owners.has(attack.source_id): return _failure("invalid_role_owner")
 		var result: Dictionary = RoleModel.sample_query(attack,int(state.active_tick),query,float(owners[attack.source_id].role_hand_reach))
 		if not result.get("ok",false): return result
+		var owner: Dictionary = owners[attack.source_id]
+		if _vec(owner.position).distance_to(_vec(result.sample.position)) > 0.03125 or _vec(owner.velocity).distance_to(_vec(result.sample.velocity)) > 0.03125: return _failure("role_motion_mismatch")
 		samples[attack.source_id] = result.sample
 	return {"ok":true,"samples":samples}
 func _role_view_packet(state: Dictionary, samples: Dictionary) -> Dictionary:
@@ -2173,7 +2206,9 @@ func _role_view_packet(state: Dictionary, samples: Dictionary) -> Dictionary:
 		if not samples.has(attack.source_id): continue
 		var sample: Dictionary = samples[attack.source_id]
 		var entry := {"attack_id":attack.attack_id,"source_id":attack.source_id,"role_id":attack.role_id}
-		for key in ["phase","position","telegraph_geometry","damage_geometry","hand_pose"]: entry[key] = sample[key]
+		for key in ["phase","position","telegraph_geometry","damage_geometry"]: entry[key] = sample[key]
+		for key in ["hand_pose","projectile_pose"]:
+			if sample.has(key): entry[key] = sample[key]
 		packet.attacks.append(entry.duplicate(true))
 	return packet
 func enemy_attack_view(state: Dictionary) -> Dictionary:
@@ -2196,8 +2231,14 @@ func _reconcile_role_rebase(source: Dictionary, candidate: Dictionary, original:
 	if not before.get("ok",false): return before
 	if not after.get("ok",false): return after
 	var shift := _vec(entity.locked_origin)-_vec(original.locked_origin)
-	for key in ["rest","previous","current","warning_start","warning_end"]:
-		if (_vec(before.sample.hand_pose[key])+shift).distance_to(_vec(after.sample.hand_pose[key])) > 0.03125: return _failure("rebase_motion_discontinuity")
+	if (_vec(before.sample.position)+shift).distance_to(_vec(after.sample.position)) > 0.03125: return _failure("rebase_motion_discontinuity")
+	for pose in ["hand_pose","projectile_pose"]:
+		if not before.sample.has(pose): continue
+		if not after.sample.has(pose): return _failure("rebase_motion_discontinuity")
+		for key in before.sample[pose]:
+			if before.sample[pose][key] is Array:
+				if (_vec(before.sample[pose][key])+shift).distance_to(_vec(after.sample[pose][key])) > 0.03125: return _failure("rebase_motion_discontinuity")
+			elif before.sample[pose][key] != after.sample[pose][key]: return _failure("rebase_motion_discontinuity")
 	return {"ok":true}
 func _observed_legacy_reservations(state: Dictionary, candidate: Dictionary) -> Dictionary:
 	var tick := int(state.active_tick)

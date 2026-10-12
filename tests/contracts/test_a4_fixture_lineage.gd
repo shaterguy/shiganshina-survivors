@@ -1,5 +1,5 @@
 extends RefCounted
-# Previous .2/.5 fixture bytes remain verifiable; current tests use separately generated .6 data.
+# Historical fixture bytes remain verifiable independently from current content.
 func run(t) -> void:
  var hashes:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/a4_prior_fixture_hashes.json"))
  for path in hashes:t.check(FileAccess.get_sha256("res://"+path)==hashes[path],"Source21 historical fixture unchanged: "+path)
@@ -15,7 +15,11 @@ func run(t) -> void:
   if id!="armored_titan":t.check(old.enemy_catalog[id]==current.enemy_catalog[id],"A4 fixture keeps non-final enemy definition: "+id)
  var actual:Dictionary=load("res://game/director/chapter_catalog.gd").new().load_chapter("chapter_01_shiganshina").chapter
  var grabber:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/c4/finite_chapter_definition_grabber.json"))
- t.check(actual==grabber,"current finite source comes from exact actual catalog before separately bound finite_test identity")
+ for id in grabber.enemy_catalog:
+  t.check(actual.enemy_catalog.get(id)==grabber.enemy_catalog[id],"current content preserves exact historical enemy definition: "+id)
+ for id in grabber.enemy_role_catalog.roles:
+  t.check(actual.enemy_role_catalog.roles.get(id)==grabber.enemy_role_catalog.roles[id],"current content preserves exact historical role profile: "+id)
+ t.check(actual.enemy_catalog.has("quadruped") and actual.enemy_catalog.has("stone_thrower") and actual.content_fingerprint != grabber.content_fingerprint,"new roles have a distinct current content identity; historical fixture is not current")
  for id in current.enemy_catalog:
   if id != "grabber": t.check(current.enemy_catalog[id] == grabber.enemy_catalog[id],"grabber revision keeps every unrelated enemy definition: "+id)
  t.check(grabber.enemy_catalog.grabber.speed == 50 and current.enemy_catalog.grabber.speed == 30,"grabber speed change is explicit and old definition preserved")
@@ -26,4 +30,4 @@ func run(t) -> void:
  var core=load("res://game/core/run_simulation.gd").new(provider)
  var config:Dictionary=load("res://tests/core/core_fixture.gd").run_config()
  var state:Dictionary=core.new_run(chapter,42,config)
- t.check(not state.has("error_code") and core.restore(state).get("ok",false),"current finite fixture constructs and restores with unmodified current Core")
+ t.check(not state.has("error_code") and core.restore(state).get("ok",false),"historical finite_test provider constructs and restores its own bound content with current Core")

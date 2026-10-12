@@ -33,3 +33,13 @@ static func choose_roles(survival_tick: int, ordinal: int, requested_count: int)
 	var first := int(ordinal/choices.size())%2 if requested_count == 1 and not choices.is_empty() else 0
 	for index in requested_count: result.append(pair[(index+first)%2])
 	return result
+
+# Runtime extension retains the authored wave cap and old role selector. A new
+# silhouette is introduced alone before mixed encounters; no extra actors.
+static func runtime_role(survival_tick: int, ordinal: int, index: int, legacy_id: String) -> String:
+	if index > 0: return "walker" if (survival_tick >= 3600 and survival_tick < 4200) or (survival_tick >= 7200 and survival_tick < 7800) else legacy_id
+	if survival_tick >= 3600 and survival_tick < 4200: return "quadruped"
+	if survival_tick >= 7200 and survival_tick < 7800: return "stone_thrower"
+	if survival_tick >= 7800 and ordinal%4 == 2: return "stone_thrower"
+	if survival_tick >= 4200 and ordinal%4 == 0: return "quadruped"
+	return legacy_id

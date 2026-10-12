@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "role_revision": "enemy_roles.1",
+  "role_revision": "enemy_roles.2",
   "story_year": 845,
   "roles": {
     "walker": {
@@ -162,6 +162,60 @@
         "arc_degrees": 0,
         "rush_speed": 0,
         "airborne_ticks": 24,
+        "threat_cost": 1
+      }
+    },
+    "quadruped": {
+      "definition": {
+        "name": "사족 질주 거인",
+        "hp": 46,
+        "speed": 62,
+        "damage": 11,
+        "xp": 7,
+        "radius": 18,
+        "behavior": "charge",
+        "art_id": "titan_quadruped"
+      },
+      "profile": {
+        "kind": "charge",
+        "trigger_range": 170,
+        "warning_ticks": 54,
+        "active_ticks": 32,
+        "recovery_ticks": 84,
+        "cooldown_ticks": 105,
+        "radius": 0,
+        "length": 176,
+        "width": 36,
+        "arc_degrees": 0,
+        "rush_speed": 330,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "stone_thrower": {
+      "definition": {
+        "name": "투석 거인",
+        "hp": 76,
+        "speed": 28,
+        "damage": 14,
+        "xp": 10,
+        "radius": 24,
+        "behavior": "throw",
+        "art_id": "titan_stone_thrower"
+      },
+      "profile": {
+        "kind": "throw",
+        "trigger_range": 300,
+        "warning_ticks": 66,
+        "active_ticks": 54,
+        "recovery_ticks": 90,
+        "cooldown_ticks": 150,
+        "radius": 0,
+        "length": 324,
+        "width": 14,
+        "arc_degrees": 0,
+        "rush_speed": 360,
+        "airborne_ticks": 0,
         "threat_cost": 1
       }
     }

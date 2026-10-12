@@ -133,7 +133,7 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 			if collection == "entities":
 				if not point_valid(record.get("position")) or not number(record.get("radius")) or record.radius > 32 or not number(record.get("speed")) or record.speed > 960: return failure("invalid_snapshot")
 				rectangles.append(segment_rect(vec(record.position),player,64))
-			elif collection == "enemy_attack_instances" and record.get("role_id") == "grabber":
+			elif collection == "enemy_attack_instances" and record.get("role_id") in ["grabber","quadruped","stone_thrower"]:
 				if not point_valid(record.get("locked_origin")) or not point_valid(record.get("locked_direction")) or not record.get("profile") is Dictionary or not number(record.profile.get("length")) or not number(record.profile.get("width")): return failure("invalid_snapshot")
 				rectangles.append(segment_rect(vec(record.locked_origin),vec(record.locked_origin)+vec(record.locked_direction)*float(record.profile.length),float(record.profile.width)*0.5))
 			elif collection == "projectiles":

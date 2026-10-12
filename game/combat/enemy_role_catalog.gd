@@ -1,10 +1,10 @@
 class_name EnemyRoleCatalog
 extends RefCounted
 # This catalog is opt-in. Reading or merging it never activates runtime behavior.
-const ROLE_IDS := ["walker", "runner", "grabber", "sweeper", "brute", "leaper"]
-const BODY_RADII := {"walker":18.0,"runner":16.0,"grabber":20.0,"sweeper":20.0,"brute":24.0,"leaper":20.0}
-const KINDS := {"walker":"bite", "runner":"charge", "grabber":"grab", "sweeper":"sweep", "brute":"slam", "leaper":"leap"}
-const BEHAVIORS := {"walker":"chase", "runner":"runner", "grabber":"grab", "sweeper":"sweep", "brute":"brute", "leaper":"leap"}
+const ROLE_IDS := ["walker", "runner", "grabber", "sweeper", "brute", "leaper", "quadruped", "stone_thrower"]
+const BODY_RADII := {"walker":18.0,"runner":16.0,"grabber":20.0,"sweeper":20.0,"brute":24.0,"leaper":20.0,"quadruped":18.0,"stone_thrower":24.0}
+const KINDS := {"walker":"bite", "runner":"charge", "grabber":"grab", "sweeper":"sweep", "brute":"slam", "leaper":"leap","quadruped":"charge","stone_thrower":"throw"}
+const BEHAVIORS := {"walker":"chase", "runner":"runner", "grabber":"grab", "sweeper":"sweep", "brute":"brute", "leaper":"leap","quadruped":"charge","stone_thrower":"throw"}
 const PROFILE_FIELDS := ["kind", "trigger_range", "warning_ticks", "active_ticks", "recovery_ticks", "cooldown_ticks", "radius", "length", "width", "arc_degrees", "rush_speed", "airborne_ticks", "threat_cost"]
 const DEFINITION_FIELDS := ["name", "hp", "speed", "damage", "xp", "radius", "behavior", "art_id"]
 static func read(path: String = "res://data/enemy_roles_ch01_3.json") -> Dictionary:
@@ -20,13 +20,14 @@ static func validate(value: Variant) -> Array[String]:
 	if not value is Dictionary: return ["catalog must be a dictionary"]
 	_keys(value, ["schema_version", "role_revision", "story_year", "roles"], "catalog", errors)
 	if not _number(value.get("schema_version"),true,true) or value.schema_version != 1: errors.append("schema_version must be 1")
-	if not value.get("role_revision") is String or value.role_revision != "enemy_roles.1": errors.append("role_revision must be enemy_roles.1")
+	if not value.get("role_revision") is String or not value.role_revision in ["enemy_roles.1","enemy_roles.2"]: errors.append("role_revision must be enemy_roles.1 or enemy_roles.2")
 	if not _number(value.get("story_year"),true,true) or value.story_year != 845: errors.append("story_year must be 845")
 	if not value.get("roles") is Dictionary:
 		errors.append("roles must be a dictionary")
 		return errors
-	_keys(value.roles, ROLE_IDS, "roles", errors)
-	for id in ROLE_IDS:
+	var expected: Array = ROLE_IDS.slice(0,6) if value.get("role_revision") is String and value.role_revision == "enemy_roles.1" else ROLE_IDS
+	_keys(value.roles, expected, "roles", errors)
+	for id in expected:
 		if not value.roles.get(id) is Dictionary:
 			errors.append(id + " must have definition and profile")
 			continue
@@ -40,7 +41,7 @@ static func validate(value: Variant) -> Array[String]:
 static func merge_enemy_definitions(catalog: Dictionary, legacy: Dictionary) -> Dictionary:
 	var result := legacy.duplicate(true)
 	if not validate(catalog).is_empty(): return result
-	for id in ROLE_IDS: result[id] = catalog.roles[id].definition.duplicate(true)
+	for id in catalog.roles: result[id] = catalog.roles[id].definition.duplicate(true)
 	return result
 static func profile(catalog: Dictionary, enemy_id: String) -> Dictionary:
 	if not enemy_id in ROLE_IDS or not catalog.get("roles") is Dictionary: return {}
@@ -75,14 +76,14 @@ static func _profile_errors(value: Dictionary, id: String, errors: Array[String]
 		if not _number(value.get(field),positive,integer): errors.append(id + ": invalid " + field)
 	if not _number(value.get("airborne_ticks"),false,true) or value.airborne_ticks != (24 if id == "leaper" else 0): errors.append(id + ": invalid airborne ticks")
 	if not _number(value.get("threat_cost"),false,true) or value.threat_cost != (0 if id == "walker" else 1): errors.append(id + ": invalid threat cost")
-	var used: Array = {"walker":["radius","arc_degrees"], "runner":["length","width","rush_speed"], "grabber":["length","width"], "sweeper":["radius","width","arc_degrees"], "brute":["radius"], "leaper":["radius"]}[id]
+	var used: Array = {"walker":["radius","arc_degrees"], "runner":["length","width","rush_speed"], "grabber":["length","width"], "sweeper":["radius","width","arc_degrees"], "brute":["radius"], "leaper":["radius"],"quadruped":["length","width","rush_speed"],"stone_thrower":["length","width","rush_speed"]}[id]
 	for field in ["radius", "length", "width", "arc_degrees", "rush_speed"]:
 		if field in used:
 			if not _number(value.get(field),true): errors.append(id + ": required dimension " + field)
 		elif not _number(value.get(field)) or value[field] != 0: errors.append(id + ": unused dimension " + field + " must be zero")
 	if _number(value.get("arc_degrees")) and float(value.arc_degrees) > 360.0: errors.append(id + ": arc exceeds 360 degrees")
-	if id == "runner" and _number(value.get("rush_speed")) and _number(value.get("active_ticks")) and _number(value.get("length")):
+	if id in ["runner","quadruped","stone_thrower"] and _number(value.get("rush_speed")) and _number(value.get("active_ticks")) and _number(value.get("length")):
 		if not is_equal_approx(float(value.length),float(value.rush_speed)*float(value.active_ticks)/60.0): errors.append("runner: length must equal timed body travel")
 
-	var reach_field: String = {"walker":"radius","runner":"length","grabber":"length","sweeper":"radius","brute":"radius","leaper":"trigger_range"}[id]
+	var reach_field: String = {"walker":"radius","runner":"length","grabber":"length","sweeper":"radius","brute":"radius","leaper":"trigger_range","quadruped":"length","stone_thrower":"length"}[id]
 	if _number(value.get("trigger_range"),true) and _number(value.get(reach_field),true) and float(value.trigger_range) > float(value[reach_field]): errors.append(id + ": trigger exceeds actual reach")

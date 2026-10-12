@@ -266,11 +266,11 @@ static func _checked_inputs(reservations: Array[Dictionary], attacks: Array[Dict
 		var source := str(a.source_id)
 		if sources.has(source): return "duplicate_reservation_source"
 		sources[source] = true
-		if not a.get("legacy_projection",false) and a.kind == "grab":
+		if not a.get("legacy_projection",false) and a.role_id in ["grabber","quadruped","stone_thrower"]:
 			if not _nonnegative(caps.get(a.attack_id)) or float(caps[a.attack_id]) > float(a.profile.length): return "invalid_grab_reach_cap"
 	for a in reservations:
 		if not a.get("legacy_projection",false):
-			if a.kind == "grab" and (not _nonnegative(caps.get(a.attack_id)) or float(caps[a.attack_id]) > float(a.profile.length)): return "invalid_grab_reach_cap"
+			if a.role_id in ["grabber","quadruped","stone_thrower"] and (not _nonnegative(caps.get(a.attack_id)) or float(caps[a.attack_id]) > float(a.profile.length)): return "invalid_grab_reach_cap"
 			continue
 		if not modes.get(a.attack_id) is Array or modes[a.attack_id].size() != a.damage_geometry.size(): return "invalid_legacy_cover_modes"
 		for mode in modes[a.attack_id]:

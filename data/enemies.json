@@ -128,5 +128,25 @@
       "structure_admission_interval_ticks": 180,
       "max_structure_attacks": 1
     }
+  },
+  "quadruped": {
+    "name": "사족 질주 거인",
+    "hp": 46,
+    "speed": 62,
+    "damage": 11,
+    "xp": 7,
+    "radius": 18,
+    "behavior": "charge",
+    "art_id": "titan_quadruped"
+  },
+  "stone_thrower": {
+    "name": "투석 거인",
+    "hp": 76,
+    "speed": 28,
+    "damage": 14,
+    "xp": 10,
+    "radius": 24,
+    "behavior": "throw",
+    "art_id": "titan_stone_thrower"
   }
 }

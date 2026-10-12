@@ -11,9 +11,10 @@ func test_six_roles_only(t, api, catalog: Dictionary) -> void:
 	var keys: Array = catalog.roles.keys()
 	keys.sort()
 	var expected := Fixture.ROLE_IDS.duplicate()
+	expected.append_array(["quadruped","stone_thrower"])
 	expected.sort()
-	t.check(keys == expected, "exactly six approved role IDs")
-	t.check(catalog.schema_version == 1 and catalog.role_revision == "enemy_roles.1" and catalog.story_year == 845, "approved catalog identity")
+	t.check(keys == expected, "six preserved roles and two encounter extensions")
+	t.check(catalog.schema_version == 1 and catalog.role_revision == "enemy_roles.2" and catalog.story_year == 845, "approved catalog identity")
 	var values := {
 		"walker":[32,42,9,4,18,"bite",44,42,8,36,48,52,0,0,70,0,0,0],
 		"runner":[24,72,9,5,16,"charge",96,45,42,66,90,0,294,32,0,420,0,1],

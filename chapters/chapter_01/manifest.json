@@ -29,7 +29,9 @@
     "runner",
     "brute",
     "sweeper",
-    "grabber"
+    "grabber",
+    "quadruped",
+    "stone_thrower"
   ],
   "boss_schedule": [
     {

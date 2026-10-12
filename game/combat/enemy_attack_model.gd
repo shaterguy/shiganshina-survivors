@@ -14,7 +14,7 @@ static func begin_query(actor: Dictionary, player: Dictionary, tick: int, profil
 	if not status.ok: return status
 	var begun := _begin(actor,player,tick,profile,query,attack_id,true)
 	if not begun.ok: return begun
-	if begun.attack.kind == "grab":
+	if begun.attack.role_id in ["grabber","quadruped","stone_thrower"]:
 		var origin := _vec(begun.attack.locked_origin)
 		var direction := _vec(begun.attack.locked_direction)
 		var clipped := query.sweep(origin,direction*float(profile.length),float(profile.width)*0.5)
@@ -51,7 +51,7 @@ static func _begin(actor: Dictionary, player: Dictionary, tick: int, profile: Di
 	if not query.status().ok: return query.status()
 	var active := tick+int(profile.warning_ticks)+int(profile.airborne_ticks)
 	var attack := {"attack_id":attack_id,"source_id":source_id,"role_id":role_id,"kind":profile.kind,"started_tick":tick,"active_from_tick":active,"attack_ends_tick":active+int(profile.active_ticks),"recover_ends_tick":active+int(profile.active_ticks)+int(profile.recovery_ticks),"locked_origin":_array(origin),"locked_direction":_array(direction),"locked_target":_array(target),"profile":profile.duplicate(true),"hit_target_ids":[]}
-	return {"ok":true,"attack":attack}
+	return {"ok":true,"attack":attack,"grab_reach_cap":-1.0}
 static func sample(attack: Dictionary, tick: int, world_geometry: Dictionary) -> Dictionary:
 	if not World.valid(world_geometry): return _empty()
 	var result := _sample(attack,tick,Query.for_finite(world_geometry))
@@ -62,7 +62,7 @@ static func sample_query(attack: Dictionary, tick: int, query: Query, grab_reach
 static func _sample(attack: Dictionary, tick: int, query: Query, grab_reach_cap: float = -1.0, checked: bool = false) -> Dictionary:
 	if not attack.get("profile") is Dictionary or not (validate_checked(attack,attack.profile) if checked else validate(attack,attack.profile)).is_empty(): return _error("invalid_attack")
 	if not query.status().ok: return query.status()
-	if checked and attack.kind == "grab" and (not is_finite(grab_reach_cap) or grab_reach_cap < 0.0 or grab_reach_cap > float(attack.profile.length)): return _error("invalid_grab_reach_cap")
+	if checked and attack.role_id in ["grabber","quadruped","stone_thrower"] and (not is_finite(grab_reach_cap) or grab_reach_cap < 0.0 or grab_reach_cap > float(attack.profile.length)): return _error("invalid_grab_reach_cap")
 	if checked:
 		var legal := query.walkable(_vec(attack.locked_origin),maxf(BODY_RADII[attack.role_id],float(attack.profile.width)*0.5))
 		if not legal.ok: return legal
@@ -82,18 +82,36 @@ static func _sample(attack: Dictionary, tick: int, query: Query, grab_reach_cap:
 	var damage: Array[Dictionary] = []
 	var warning: Array[Dictionary] = []
 	var hand_pose: Dictionary = {}
+	var projectile_pose: Dictionary = {}
 	var show_warning := phase in ["windup","airborne"] and tick >= int(attack.started_tick)
 	match str(attack.kind):
 		"charge":
 			var steps := clampi(tick-active+1,0,int(p.active_ticks))
-			position = _charge_point(origin,direction,p,steps,query)
-			var previous := _charge_point(origin,direction,p,maxi(0,steps-1),query)
+			var cap := grab_reach_cap if checked and attack.role_id == "quadruped" else -1.0
+			position = _charge_point(origin,direction,p,steps,query,cap)
+			var previous := _charge_point(origin,direction,p,maxi(0,steps-1),query,cap)
 			if phase == "attack":
 				velocity = (position-previous)*60.0
 				damage.append(_line(previous,position,float(p.width)))
 			if show_warning:
-				var end := _charge_point(origin,direction,p,int(p.active_ticks),query)
+				var end := _charge_point(origin,direction,p,int(p.active_ticks),query,cap)
 				warning.append(_line(origin,end,float(p.width)+8.0))
+		"throw":
+			# Derive the rock from its locked ray. Sweep actual solid geometry;
+			# once the previous step was clipped, the projectile stays expired.
+			var steps := clampi(tick-active+1,0,int(p.active_ticks))
+			var previous_distance := float(maxi(0,steps-1))*float(p.rush_speed)/60.0
+			var distance := float(steps)*float(p.rush_speed)/60.0
+			var cap := grab_reach_cap if checked else float(p.length)
+			var previous := _sweep_point(origin,direction*minf(cap,previous_distance),float(p.width)*0.5,query)
+			var current := _sweep_point(origin,direction*minf(cap,distance),float(p.width)*0.5,query)
+			var blocked := current.distance_to(origin+direction*distance) > 0.001
+			var expired := previous.distance_to(origin+direction*previous_distance) > 0.001
+			if phase == "attack" and not expired: damage.append(_line(previous,current,float(p.width)))
+			if show_warning:
+				var endpoint := _sweep_point(origin,direction*cap,float(p.width)*0.5,query)
+				warning.append(_line(origin,endpoint,float(p.width)+8.0))
+			projectile_pose = {"previous":_array(previous),"current":_array(current),"radius":float(p.width)*0.5,"visible":phase == "attack" and not blocked,"blocked":phase == "attack" and blocked}
 		"grab":
 			var step := clampi(tick-active+1,0,int(p.active_ticks))
 			var cap := grab_reach_cap if checked else float(p.length)
@@ -139,6 +157,7 @@ static func _sample(attack: Dictionary, tick: int, query: Query, grab_reach_cap:
 	if not query.status().ok: return query.status()
 	var result := {"phase":phase,"position":_array(position),"velocity":_array(velocity),"telegraph_geometry":warning,"damage_geometry":damage,"finished":phase == "finished","requires_visibility":attack.kind in ["bite","slam","leap"],"visibility_origin":_array(position)}
 	if checked and attack.kind == "grab": result.hand_pose = hand_pose
+	if checked and attack.kind == "throw": result.projectile_pose = projectile_pose
 	return {"ok":true,"sample":result}
 # Shared by Core hit application and the threat planner. A geometry overlap alone
 # never authorizes a radial/sector hit. For a swept target, accept occlusion only
@@ -201,8 +220,9 @@ static func _arm_sweep(origin: Vector2, direction: Vector2, p: Dictionary, previ
 	return [_line(old_start,old_end,float(p.width)),_line(start,end,float(p.width)),_line(old_end,swept_end,float(p.width))]
 static func _hand_point(origin: Vector2, direction: Vector2, distance: float, radius: float, world: Query) -> Vector2:
 	return _sweep_point(origin,direction*distance,radius,world)
-static func _charge_point(origin: Vector2, direction: Vector2, p: Dictionary, steps: int, world: Query) -> Vector2:
-	return _sweep_point(origin,direction*(float(steps)*float(p.rush_speed)/60.0),float(p.width)*0.5,world)
+static func _charge_point(origin: Vector2, direction: Vector2, p: Dictionary, steps: int, world: Query, cap: float = -1.0) -> Vector2:
+	var distance := float(steps)*float(p.rush_speed)/60.0
+	return _sweep_point(origin,direction*(minf(distance,cap) if cap >= 0.0 else distance),float(p.width)*0.5,world)
 static func _sweep_point(origin: Vector2, delta: Vector2, radius: float, query: Query) -> Vector2:
 	var result := query.sweep(origin,delta,radius)
 	# Internal placeholder only. The shared caller must propagate sticky error.

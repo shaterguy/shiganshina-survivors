@@ -1,5 +1,6 @@
 class_name SpawnDirector
 extends RefCounted
+const Encounters = preload("res://game/director/enemy_encounter_schedule.gd")
 const FINAL_TICK := 108000
 func plan(state: Dictionary, chapter: Dictionary) -> Array[Dictionary]:
 	var commands: Array[Dictionary] = []
@@ -26,11 +27,15 @@ func plan(state: Dictionary, chapter: Dictionary) -> Array[Dictionary]:
 	if int(state.survival_tick) < 7200: interval = maxi(114,120-int(state.survival_tick/1200))
 	if tick % interval == 0 and state.entities.size() < 180:
 		var available := mini(int(wave.count),180-state.entities.size())
-		var count := mini(chapter.enemy_ids.size(),1+int(state.survival_tick/7200))
+		var legacy_ids: Array = chapter.enemy_ids.filter(func(id): return not id in ["quadruped","stone_thrower"])
+		if legacy_ids.is_empty(): legacy_ids = chapter.enemy_ids
+		var count := mini(legacy_ids.size(),1+int(state.survival_tick/7200))
 		for index in range(available):
 			var angle := fmod(float(tick*173+int(state.seed)*97+index*997),6283.0)/1000.0
 			var pos := player_position + Vector2.from_angle(angle)*290.0
-			var enemy_id: String = chapter.enemy_ids[(tick/interval+index)%count]
+			var enemy_id: String = legacy_ids[(tick/interval+index)%count]
+			var encounter_id := Encounters.runtime_role(int(state.survival_tick),int(tick/interval),index,enemy_id)
+			if encounter_id in chapter.enemy_ids: enemy_id = encounter_id
 			commands.append(_command("enemy_%d_%d" % [tick,index],"spawn_enemy",{"entity_id":next_id,"enemy_id":enemy_id,"position":[pos.x,pos.y],"spawned_tick":tick}))
 			next_id += 1
 	return commands

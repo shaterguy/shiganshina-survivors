@@ -16,4 +16,8 @@ func run(t) -> void:
 	t.check(chosen.evolutions.get("blade_slash") == "evo_wing_cut" and chosen.tactical_seals == 0 and chosen.stats.minibosses_defeated == 1,"real boss reward and evolution consume exactly one seal")
 	var chapter: Dictionary = load("res://game/director/chapter_catalog.gd").new().load_chapter("chapter_01_shiganshina").chapter
 	var exported: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/c4/finite_chapter_definition_grabber.json"))
-	t.check(sim._same_json(chapter,exported),"new finite source is exact current actual catalog output")
+	for id in exported.enemy_catalog:
+		t.check(sim._same_json(chapter.enemy_catalog.get(id),exported.enemy_catalog[id]),"current content preserves historical enemy definition: "+id)
+	for id in exported.enemy_role_catalog.roles:
+		t.check(sim._same_json(chapter.enemy_role_catalog.roles.get(id),exported.enemy_role_catalog.roles[id]),"current content preserves historical role profile: "+id)
+	t.check(chapter.enemy_catalog.has("quadruped") and chapter.enemy_catalog.has("stone_thrower") and chapter.content_fingerprint != exported.content_fingerprint,"current extended content is explicitly distinct from preserved finite source")
