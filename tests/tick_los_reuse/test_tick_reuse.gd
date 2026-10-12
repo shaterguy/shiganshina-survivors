@@ -22,7 +22,7 @@ func run(t) -> void:
  t.check(repeated == 2,"same-tick route reuses successful LOS and still validates both endpoint walkabilities; got "+str(repeated))
  before = w.diagnostics().query_count
  t.check(n.direction(A,B,8,1) == oracle.direction(A,B,8,1),"new tick remains exact")
- t.check(w.diagnostics().query_count-before > 2,"new tick obtains authoritative LOS again")
+ t.check(w.diagnostics().query_count-before == 2,"new tick reuses static LOS and rechecks endpoint walkability")
  before = w.diagnostics().query_count
  t.check(n.direction(A,B,8,0) == oracle.direction(A,B,8,0),"rewound tick remains exact")
  t.check(w.diagnostics().query_count-before > 2,"tick rewind discards prior memo")
@@ -55,4 +55,11 @@ func _bounded_memo(t) -> void:
  n.direction(Vector2(384.0+4099.0/128.0,384),Vector2(640,384),8,10)
  t.check(w.diagnostics().query_count-before > 2,"capacity falls back to authoritative collision, never unchecked motion")
  n.direction(Vector2(384,384),Vector2(640,384),8,11)
- t.check(n._tick_los.queries.size() == 1,"new tick discards the full prior memo")
+ t.check(n._tick_los.queries.size() == 1,"a full memo rolls over at the next tick to preserve fresh same-tick reuse")
+ var fresh := Vector2(416.0625,384)
+ before = w.diagnostics().query_count
+ n.direction(fresh,Vector2(640,384),8,11)
+ t.check(w.diagnostics().query_count-before > 2,"new observation remains authoritative after rollover")
+ before = w.diagnostics().query_count
+ n.direction(fresh,Vector2(640,384),8,11)
+ t.check(w.diagnostics().query_count-before == 2,"new observations can still seed useful same-tick reuse after rollover")

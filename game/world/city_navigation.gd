@@ -21,16 +21,20 @@ static func clearance_class(radius: float) -> int:
 	return -1
 func direction(position: Vector2, target: Vector2, radius: float, tick: int) -> Dictionary:
 	# Exact immutable geometry may share successful LOS observations between
-	# actors in one tick. Unknown callbacks still use the authoritative path.
+	# actors/ticks until its geometry epoch changes. Unknown callbacks stay authoritative.
 	_direction_los = _direction_reuse_scope()
 	if not _direction_los.is_empty():
-		if not _tick_los.is_empty() and _tick_los.tick == tick and _tick_los.view == _direction_los.view and _tick_los.source == _direction_los.source and _tick_los.coverage == _direction_los.coverage and _tick_los.revision == _direction_los.revision and _tick_los.origin == _direction_los.origin:
+		# A saturated old memo must not prevent fresh same-tick observations.
+		if not _tick_los.is_empty() and _tick_los.tick < tick and _tick_los.queries.size() >= MAX_TICK_LOS: _tick_los.clear()
+		if not _tick_los.is_empty() and _tick_los.tick <= tick and _tick_los.view == _direction_los.view and _tick_los.source == _direction_los.source and _tick_los.coverage == _direction_los.coverage and _tick_los.revision == _direction_los.revision and _tick_los.origin == _direction_los.origin:
 			_direction_los.queries = _tick_los.queries
 		_direction_los.tick = tick
 	_tick_los = _direction_los
 	var result: Dictionary = _direction_impl(position,target,radius,tick)
+	# Endpoint walkability can fail before _visible observes a real sweep.
+	if not _direction_los.is_empty() and (not _world._query_failure.is_empty() or not _direction_los.source._last_error.is_empty()): _direction_los.clear()
 	# Private queries outside direction must never use this memo. Failed real
-	# sweeps clear the shared scope, retiring the tick memo at the same time.
+	# sweeps clear the shared scope, retiring the retained memo at the same time.
 	_direction_los = {}
 	return result
 func _direction_reuse_scope() -> Dictionary:
@@ -67,6 +71,8 @@ func _direction_impl(position: Vector2, target: Vector2, radius: float, tick: in
 		current = goal
 	return _success(position,_smooth(position,points,radius))
 func invalidate(chunk_ids: Array) -> void:
+	_tick_los.clear()
+	_direction_los.clear()
 	for key in _grids.keys():
 		if _grids[key].chunk_id in chunk_ids: _grids.erase(key)
 func diagnostics() -> Dictionary:
