@@ -86,11 +86,30 @@ func _record_valid(state: Dictionary, record: Variant) -> bool:
 	if not _past_modifier_matches(state,record.damage,base_damage,"damage"): return false
 	if not _past_modifier_matches(state,record.radius,float(recipe.effect_params.radius),"attack_range"): return false
 	return true
+# Restore only: recover the exact cast-time operation order after JSON decimal
+# parsing. Never select an arbitrary first near-match from ambiguous tuning.
+func canonicalize_damage(state: Dictionary) -> bool:
+	var values: Array[float] = []
+	for record in state.player_attack_instances:
+		var recipe: Dictionary = _catalog.evolutions.definition(record.evolution_id)
+		var definition: Dictionary = _catalog.equipment[record.base_item_id]
+		var base := float(definition.damage)+4.0*float(definition.damage_per_level)
+		var multiplier := float(recipe.effect_params.damage_multipliers[int(record.stage_index)])
+		var permanent := float(state.rules.get("permanent_damage_bonus",0.0))
+		var matches: Array[float] = []
+		for level in range(int(state.passives.get("damage",0))+1):
+			var expected := base*(1.0+permanent+float(_catalog.passives.damage.increment)*level)*multiplier
+			if absf(float(record.damage)-expected) <= 0.000001 and not expected in matches: matches.append(expected)
+		if matches.size() != 1: return false
+		values.append(matches[0])
+	for index in values.size(): state.player_attack_instances[index].damage = values[index]
+	return true
 func _past_modifier_matches(state: Dictionary, value: Variant, base: float, passive: String) -> bool:
 	if not Upgrades.number_valid(value,0,10000000): return false
 	var definition: Dictionary = _catalog.passives[passive]
 	for level in range(int(state.passives.get(passive,0))+1):
-		var expected := base*(1.0+float(definition.increment)*level)
+		var permanent: float = float(state.rules.get("permanent_damage_bonus",0.0)) if passive == "damage" else 0.0
+		var expected := base*(1.0+permanent+float(definition.increment)*level)
 		if absf(float(value)-expected) <= 0.000001: return true
 	return false
 static func _cast_id_valid(state: Dictionary, value: String) -> bool:

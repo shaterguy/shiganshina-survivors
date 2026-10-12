@@ -160,23 +160,29 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	growth_rng.seed = (int(seed) ^ 0x5EED1203) & 0x7fffffff
 	var config := run_config.duplicate(true)
 	config.run_serial = int(config.run_serial)
-	var rules := _rules_for(current.chapter,doctrine)
-	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":"garrison_01","seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(doctrine.base_hp),"max_hp":float(doctrine.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
+	var rules := _rules_for(current.chapter,doctrine,config)
+	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":"garrison_01","seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
 		state.escape_zone = Streamed.CITY_INACTIVE_EXIT.duplicate()
 	if not _normalize_saved_numbers(state): return _failure("invalid_core_state")
 	return state
 func _config_valid(config: Dictionary, chapter: Dictionary) -> bool:
-	if config.size() != 5 or not config.has_all(["run_id","run_serial","doctrine_id","target_evolution_id","prepared_supply"]) or not Catalog.json_data_valid(config): return false
+	if not _supplies.run_upgrade_config_valid(config) or not config.has_all(["run_id","run_serial","doctrine_id","target_evolution_id","prepared_supply"]) or not Catalog.json_data_valid(config): return false
 	if not Growth._run_id_valid(config.run_id) or not Catalog.integer_valid(config.run_serial,1) or config.run_id.get_slice(":",1) != str(int(config.run_serial)): return false
 	for field in ["doctrine_id","target_evolution_id","prepared_supply"]:
 		if not config[field] is String: return false
 	if not config.doctrine_id in chapter.doctrine_ids or _supplies.doctrine(config.doctrine_id).is_empty(): return false
 	if not config.target_evolution_id in chapter.evolution_ids or _catalog.evolutions.definition(config.target_evolution_id).is_empty(): return false
 	return config.prepared_supply in ["","field_bandage"]
-func _rules_for(chapter: Dictionary, doctrine: Dictionary) -> Dictionary:
-	return {"world_geometry":World.canonical(chapter.world_geometry),"allowed_equipment_ids":chapter.allowed_equipment_ids.duplicate(),"enemy_catalog":chapter.enemy_catalog.duplicate(true),"move_speed":float(doctrine.base_move_speed),"pickup_radius":30.0,"evacuation_ticks":4500,"progression":_catalog.progression,"base_hp":float(doctrine.base_hp),"base_move_speed":float(doctrine.base_move_speed),"equipment_slots":4,"passive_slots":4,"content_fingerprint":chapter.content_fingerprint}
+func _rules_for(chapter: Dictionary, doctrine: Dictionary, config: Dictionary = {}) -> Dictionary:
+	var rules := {"world_geometry":World.canonical(chapter.world_geometry),"allowed_equipment_ids":chapter.allowed_equipment_ids.duplicate(),"enemy_catalog":chapter.enemy_catalog.duplicate(true),"move_speed":float(doctrine.base_move_speed),"pickup_radius":30.0,"evacuation_ticks":4500,"progression":_catalog.progression,"base_hp":float(doctrine.base_hp),"base_move_speed":float(doctrine.base_move_speed),"equipment_slots":4,"passive_slots":4,"content_fingerprint":chapter.content_fingerprint}
+	if config.has("permanent_upgrades"):
+		var levels: Dictionary = config.permanent_upgrades
+		rules.base_hp += _supplies.permanent_bonus(levels,"max_hp")
+		rules.pickup_radius += _supplies.permanent_bonus(levels,"pickup_radius")
+		rules.permanent_damage_bonus = _supplies.permanent_bonus(levels,"damage_multiplier")
+	return rules
 func _same_json(left: Variant, right: Variant) -> bool:
 	# JSON integral floats and engine integers are the same semantic value.
 	# Exact numeric comparison retains authored tuning without tolerance widening.
@@ -420,7 +426,7 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 	if not value.rules.get("content_fingerprint") is String or value.rules.content_fingerprint != current.chapter.content_fingerprint: return _failure("content_mismatch")
 	if not _config_valid(value.run_config,current.chapter) or value.run_config.run_id != value.run_id or value.run_config.run_serial != value.run_serial: return _failure("invalid_run_config")
 	var doctrine: Dictionary = _supplies.doctrine(value.run_config.doctrine_id)
-	if not _same_json(value.rules,_rules_for(current.chapter,doctrine)): return _failure("invalid_core_state")
+	if not _same_json(value.rules,_rules_for(current.chapter,doctrine,value.run_config)): return _failure("invalid_core_state")
 	var restored: Dictionary = value.duplicate(true)
 	if not _normalize_saved_numbers(restored): return _failure("invalid_core_state")
 	if not _catalog.evolutions.progression_state_valid(restored) or not _v2_relationships_valid(restored,current.chapter): return _failure("invalid_core_state")
@@ -457,6 +463,15 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 	for descriptor in restored.pending_offers:
 		if not descriptor is Dictionary or not Growth.new(_catalog)._descriptor_valid(restored,descriptor): return _failure("invalid_offer_queue")
 	if not _offer_queue_ids_valid(restored): return _failure("invalid_offer_queue")
+	# Purchased damage introduces decimal products that JSON may parse one ULP
+	# away. Reconstruct only uniquely validated cast-time values; legacy runs
+	# retain their original representation and no current passive is reapplied.
+	if float(restored.rules.get("permanent_damage_bonus",0.0)) > 0.0:
+		if not _evolved.canonicalize_damage(restored): return _failure("invalid_core_state")
+		for projectile in restored.projectiles:
+			var canonical_damage: Array[float] = []
+			if not _projectile_valid(restored,projectile,canonical_damage): return _failure("invalid_core_state")
+			projectile.damage = canonical_damage[0]
 	_canonicalize_saved_vectors(restored)
 	if validation_helper != null:
 		var status: Dictionary = validation_helper.query_status()
@@ -1323,7 +1338,7 @@ func _normalize_saved_numbers(value: Variant, parent_key := "") -> bool:
 				var child = value[key]
 				value.erase(key)
 				value[str(key)] = child
-			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks"] or key in ["recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
+			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
 				var number: float = value[key]
 				if not is_finite(number) or number != floor(number) or number < (-1.0 if key in ["final_started_tick","role_wait_since"] else 0.0) or number > MAX_COUNTER: return false
 				value[key] = int(number)
@@ -1461,7 +1476,7 @@ func _entity_definition_valid(state: Dictionary, record: Dictionary, chapter: Di
 	if not record.boss_id in REAL_BOSS_IDS or not record.boss_id in state.boss_ids_fired or "boss:"+record.boss_id in state.reward_ids_claimed: return false
 	var authored: Dictionary = chapter.boss_schedule[REAL_BOSS_IDS.find(record.boss_id)]
 	return record.enemy_id == authored.enemy_id and record.spawned_tick == authored.tick and state.survival_tick >= authored.tick
-func _projectile_valid(state: Dictionary, record: Dictionary) -> bool:
+func _projectile_valid(state: Dictionary, record: Dictionary, canonical_damage: Variant = null) -> bool:
 	var fields := ["id","item_id","attack_id","cast_id","position","velocity","damage","splash_radius","remaining_distance","radius"]
 	if record.size() != fields.size() or not record.has_all(fields): return false
 	if not Catalog.integer_valid(record.id,1,int(state.next_entity_id)-1) or not record.item_id is String or not state.equipment.has(record.item_id): return false
@@ -1476,16 +1491,21 @@ func _projectile_valid(state: Dictionary, record: Dictionary) -> bool:
 	var range_increment: float = _catalog.passives.attack_range.increment
 	for level in range(1,int(state.equipment[record.item_id])+1):
 		var base_damage := float(definition.damage)+(level-1)*float(definition.damage_per_level)
-		var possible_damage := false
+		var possible_damage: Array[float] = []
 		for damage_level in range(int(state.passives.get("damage",0))+1):
-			if absf(float(record.damage)-base_damage*(1.0+damage_increment*damage_level)) <= 0.000001: possible_damage = true
-		if not possible_damage: continue
+			var expected := base_damage*(1.0+float(state.rules.get("permanent_damage_bonus",0.0))+damage_increment*damage_level)
+			if absf(float(record.damage)-expected) <= 0.000001 and not expected in possible_damage: possible_damage.append(expected)
+		if possible_damage.is_empty(): continue
 		for range_level in range(int(state.passives.get("attack_range",0))+1):
 			var scale := 1.0+range_increment*range_level
 			var splash := float(definition.splash_radius)*scale
 			var reach := (float(definition.range)+(level-1)*float(definition.range_per_level))*scale+48.0
-			if absf(float(record.splash_radius)-splash) <= 0.000001 and float(record.remaining_distance) <= reach+0.000001: return true
-	return false
+			if absf(float(record.splash_radius)-splash) <= 0.000001 and float(record.remaining_distance) <= reach+0.000001:
+				if canonical_damage == null: return true
+				for damage in possible_damage:
+					if not damage in canonical_damage: canonical_damage.append(damage)
+				break
+	return canonical_damage is Array and canonical_damage.size() == 1
 func _run_relationships_valid(value: Dictionary) -> bool:
 	if int(value.active_tick) < int(value.survival_tick): return false
 	if value.phase in ["dead","won","abandoned"] and (not value.upgrade_offer.is_empty() or not value.pending_offers.is_empty() or "upgrade" in value.pause_reasons): return false

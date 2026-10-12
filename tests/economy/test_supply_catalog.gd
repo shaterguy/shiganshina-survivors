@@ -4,7 +4,7 @@ const Catalog = preload("res://game/economy/supply_catalog.gd")
 func run(t) -> void:
 	var catalog = Catalog.new()
 	t.check(catalog.validate().is_empty(), "E1 catalog accepts reviewed definitions")
-	t.check(catalog.item_ids() == ["doctrine_artillery","doctrine_mobile","field_bandage"], "E1 catalog stable sorted sale identities")
+	t.check(catalog.item_ids() == ["doctrine_artillery","doctrine_mobile","field_bandage","permanent_magnet","permanent_might","permanent_vitality"], "E1 catalog stable sorted sale identities")
 	var expected := {
 		"doctrine_standard":{"base_hp":100,"base_move_speed":150,"initial_equipment":{"blade_slash":1},"initial_passives":{},"unlock_item_id":""},
 		"doctrine_mobile":{"base_hp":85,"base_move_speed":150,"initial_equipment":{"blade_slash":1},"initial_passives":{"movement":1},"unlock_item_id":"doctrine_mobile"},
@@ -37,7 +37,7 @@ func run(t) -> void:
 	t.check(catalog.item("doctrine_mobile").effect_params.doctrine_id == "doctrine_mobile","E1 nested sale effects copied")
 	var items: Array = catalog.item_ids()
 	items.clear()
-	t.check(catalog.item_ids().size() == 3, "E1 IDs returned privately")
+	t.check(catalog.item_ids().size() == 6, "E1 IDs returned privately")
 	var shop = JSON.parse_string(FileAccess.get_file_as_string("res://data/supply_shop.json"))
 	var doctrines = JSON.parse_string(FileAccess.get_file_as_string("res://data/doctrines.json"))
 	if not shop is Dictionary or not doctrines is Dictionary:

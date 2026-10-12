@@ -60,7 +60,7 @@ func _validate(value: Variant, normalized: Variant = null, scope = null, context
 	if not counter(state.get("run_serial")) or state.run_serial < 1 or state.run_serial != value.next_run_serial-1 or not state.get("run_id") is String or state.run_id != "%s:%d" % [value.career_id,int(state.run_serial)]: return ["invalid_snapshot"]
 	if not state.get("run_config") is Dictionary: return ["invalid_snapshot"]
 	var config: Dictionary = state.run_config
-	if config.size() != 5 or not config.get("run_id") is String or not counter(config.get("run_serial")): return ["invalid_snapshot"]
+	if not _catalog.run_upgrade_config_valid(config) or not config.get("run_id") is String or not counter(config.get("run_serial")): return ["invalid_snapshot"]
 	if config.run_id != state.run_id or config.run_serial != state.run_serial or not _selection_valid(value.profile,{"doctrine_id":config.get("doctrine_id"),"target_evolution_id":config.get("target_evolution_id"),"supply_item_id":config.get("prepared_supply")}): return ["invalid_snapshot"]
 	if not state.get("supply_used") is bool or (config.prepared_supply == "" and state.supply_used): return ["invalid_snapshot"]
 	if not state.get("phase") is String or not state.phase in ["survival","evacuation","dead","won","abandoned"]: return ["invalid_snapshot"]
@@ -98,6 +98,8 @@ func validate_and_normalize(value: Variant, scope = null, context: Dictionary = 
 	result.profile.schema_version = 2
 	result.profile.supply_credits = int(result.profile.supply_credits)
 	result.profile.consumables.field_bandage = int(result.profile.consumables.field_bandage)
+	if result.profile.has("permanent_upgrades"):
+		for id in result.profile.permanent_upgrades: result.profile.permanent_upgrades[id] = int(result.profile.permanent_upgrades[id])
 	for record in result.profile.best_runs.values():
 		for key in ["survival_tick","kills"]:
 			if record.has(key): record[key] = int(record[key])
@@ -119,6 +121,7 @@ func _profile_valid(profile: Dictionary) -> bool:
 	for id in profile.owned_doctrine_ids:
 		if _catalog.doctrine(id).is_empty(): return false
 	if profile.consumables.size() != 1 or not counter(profile.consumables.get("field_bandage")) or profile.consumables.field_bandage > 9: return false
+	if profile.has("permanent_upgrades") and not _catalog.permanent_levels_valid(profile.permanent_upgrades): return false
 	if not _selection_valid(profile,profile.loadout): return false
 	for key in ["deadzone","audio_master","screen_shake"]:
 		var number = profile.settings.get(key)
@@ -142,7 +145,7 @@ func _purchase_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 	if item.is_empty(): return false
 	for key in ["expected_revision","price","balance_after","owned_after"]:
 		if not counter(receipt.get(key)): return false
-	return receipt.expected_revision <= save.store_revision and receipt.get("request_id") == "purchase:%s:%d:%s" % [save.career_id,int(receipt.expected_revision),receipt.item_id] and receipt.price == item.price and receipt.owned_after >= 1 and receipt.owned_after <= item.max_owned
+	return receipt.expected_revision <= save.store_revision and receipt.get("request_id") == "purchase:%s:%d:%s" % [save.career_id,int(receipt.expected_revision),receipt.item_id] and receipt.price == _catalog.purchase_price(item,int(receipt.owned_after)-1) and receipt.owned_after >= 1 and receipt.owned_after <= item.max_owned
 func _settlement_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 	if not receipt is Dictionary or not receipt.get("run_id") is String or not receipt.get("request_id") is String: return false
 	for key in ["run_serial","total","balance_after"]:
@@ -215,7 +218,7 @@ func validate_recovery_source(value: Variant) -> Array[String]:
 	if not counter(state.get("seed")) or not state.get("supply_used") is bool: return ["invalid_snapshot"]
 	if not state.get("run_config") is Dictionary: return ["invalid_snapshot"]
 	var config: Dictionary = state.run_config
-	if config.size() != 5 or not config.get("run_id") is String or not counter(config.get("run_serial")) or config.run_id != state.run_id or config.run_serial != state.run_serial: return ["invalid_snapshot"]
+	if not _catalog.run_upgrade_config_valid(config) or not config.get("run_id") is String or not counter(config.get("run_serial")) or config.run_id != state.run_id or config.run_serial != state.run_serial: return ["invalid_snapshot"]
 	if not _selection_valid(value.profile,{"doctrine_id":config.get("doctrine_id"),"target_evolution_id":config.get("target_evolution_id"),"supply_item_id":config.get("prepared_supply")}): return ["invalid_snapshot"]
 	if config.prepared_supply == "" and state.supply_used: return ["invalid_snapshot"]
 	if not state.phase in ["survival","evacuation","dead","won","abandoned"]: return ["invalid_snapshot"]

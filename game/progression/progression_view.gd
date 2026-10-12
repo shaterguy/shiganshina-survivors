@@ -23,6 +23,8 @@ func build(state: Dictionary) -> Dictionary:
 			var option: Dictionary = _catalog.decorate_option(state,original)
 			if option.is_empty() or identities.has(option.option_id): return {}
 			identities[option.option_id] = true
+			var definitions: Dictionary = _catalog.passives if option.kind == "passive" else _catalog.equipment
+			option.max_level = int(definitions[option.item_id].max_level)
 			options.append(option)
 		if not identities.has(source.selected_option_id): return {}
 		offer = {"offer_id":source.offer_id,"source":source.source,"level_ordinal":source.level_ordinal,"selected_option_id":source.selected_option_id,"options":options}
@@ -67,7 +69,9 @@ func _attack_summary(definition: Dictionary, row: Dictionary) -> String:
 	if row.is_evolved:
 		var times: Array[String] = []
 		for tick in stats.stage_delays: times.append(String.num(float(tick)/60.0,2)+"초")
-		var form := "방향을 고정한 연속 베기" if row.evolution_id == "evo_wing_cut" else "고정한 두 지점 포격"
+		var form: String = definition.description
+		if row.evolution_id == "evo_wing_cut": form = "방향을 고정한 연속 베기"
+		elif row.evolution_id == "evo_crossfire": form = "고정한 두 지점 포격"
 		return "%s · %d회 타격 (%s) · %s" % [form,int(stats.stages)," / ".join(times),interval]
 	var form := str({"sector":"전방 부채꼴 베기","circle":"주변 원형 베기","line":"목표 방향 직선 베기","combo":"한 목표 집중 연격","projectile":"목표 방향 투사체"}.get(definition.mode,definition.description))
 	if definition.mode == "combo": form += " · 총 피해 "+String.num(float(stats.total_damage),2)

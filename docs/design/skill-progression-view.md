@@ -14,7 +14,7 @@
 
 ## View DTO
 
-Existing fields remain `view_revision`, `slots`, `target`, `evolutions`, and `active_offer`. The added `owned` field has `equipment` and `passives` arrays, sorted by item ID. Each row contains:
+Existing fields remain `view_revision`, `slots`, `target`, `evolutions`, and `active_offer`. Each projected active-offer option additionally exposes `max_level` from its equipment/passive catalog row. This cap is added only to the view copy, never to the saved option. The added `owned` field has `equipment` and `passives` arrays, sorted by item ID. Each row contains:
 
 - `item_id`, `name`: canonical base item identity and authored name.
 - `level`, `max_level`, `is_max`: actual level, catalog cap, and cap status.
@@ -41,3 +41,11 @@ Use `scheduled` only for anticipation; actual cast feedback follows `executed`. 
 ## Compatibility
 
 This change adds only derived view data. It does not change gameplay catalogs, content fingerprints, save schemas, saved offers, player career data, world/navigation behavior, or existing attack timing. Existing frozen fixtures and prior saves retain their authority and validation rules.
+
+## Purchased damage contribution
+
+When the immutable run rules contain `permanent_damage_bonus`, all base and evolved weapon damage uses `1 + permanent_damage_bonus + earned_damage_passive_bonus`. The permanent value is derived by the run owner from purchased `permanent_might` levels, in five-percent steps through 25 percent; an absent value is exactly zero. The catalog rejects nonnumeric, nonfinite, negative, and above-cap values. Core independently verifies the rules against the run configuration.
+
+The damage-passive card includes this fixed contribution in its before/after values, for example 1.05 → 1.20 for a first passive level after one permanent purchase. The contribution consumes no weapon/passive slot. A later passive upgrade does not retroactively change a flying projectile or pending evolved stage.
+
+Boosted pending attacks can contain decimal products that the JSON parser changes by one double ULP. After validation, restore reconstructs a unique legal cast-time damage value in the original operation order. Multiple distinct near-matches are refused. The reconstruction runs only when permanent damage is positive, preserving the previous representation for legacy runs. This does not grant missing prerequisites, repair malformed offers, or accept altered damage outside the existing tolerance.

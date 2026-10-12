@@ -288,6 +288,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
 		var config: Dictionary = candidate.checkpoint.run_config
 		var loadout: Dictionary = current.profile.loadout
+		if not _same(config.get("permanent_upgrades",{}),current.profile.get("permanent_upgrades",{})): return false
 		if config.doctrine_id != loadout.doctrine_id or config.target_evolution_id != loadout.target_evolution_id or config.prepared_supply != loadout.supply_item_id or candidate.checkpoint.run_serial != current.next_run_serial or candidate.checkpoint.supply_used: return false
 		expected.next_run_serial += 1
 		if config.prepared_supply != "":
@@ -310,7 +311,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
 	return true
 func _economy(save: Dictionary) -> Dictionary:
-	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
+	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"permanent_upgrades":save.profile.get("permanent_upgrades",{}),"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
 func _same(a: Variant, b: Variant) -> bool:
 	# Parse both sides so JSON-integer floats and in-memory ints compare equivalently.
 	return JSON.parse_string(JSON.stringify(a,"",true,true)) == JSON.parse_string(JSON.stringify(b,"",true,true))
@@ -573,6 +574,7 @@ func _recovery_transition_valid(source: Dictionary, candidate: Dictionary) -> bo
 	var service = Service.new(Callable())
 	if not service._loadout_valid(source.profile,selection): return false
 	var config: Dictionary = state.run_config
+	if not _same(config.get("permanent_upgrades",{}),source.profile.get("permanent_upgrades",{})): return false
 	if config.doctrine_id != selection.doctrine_id or config.target_evolution_id != selection.target_evolution_id or config.prepared_supply != selection.supply_item_id: return false
 	var expected: Dictionary = source.duplicate(true)
 	expected.profile.loadout = selection.duplicate(true)

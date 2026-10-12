@@ -24,11 +24,14 @@ func shop_view(game_save: Variant) -> Dictionary:
 		var definition: Dictionary = _catalog.item(id)
 		var owned := _owned(profile, definition)
 		var blocked := _purchase_blocked(game_save, definition)
-		var row := {"item_id":id,"kind":definition.kind,"price":int(definition.price),"owned":owned,"max_owned":int(definition.max_owned),"can_purchase":blocked.is_empty(),"blocked_reason":blocked,"balance_after":int(profile.supply_credits) - int(definition.price) if blocked.is_empty() else int(profile.supply_credits)}
+		var price := _catalog.purchase_price(definition,owned)
+		var row := {"item_id":id,"kind":definition.kind,"price":price,"owned":owned,"max_owned":int(definition.max_owned),"can_purchase":blocked.is_empty(),"blocked_reason":blocked,"balance_after":int(profile.supply_credits) - price if blocked.is_empty() else int(profile.supply_credits)}
 		for key in ["name","description","tradeoff_text"]: row[key] = definition[key]
 		if definition.kind == "doctrine":
 			var doctrine: Dictionary = _catalog.doctrine(str(definition.effect_params.doctrine_id))
 			row.description = doctrine.description
+		if definition.kind == "permanent_upgrade":
+			row.merge({"level":owned,"max_level":int(definition.max_owned),"is_max":owned >= definition.max_owned,"current_effect_text":_catalog.permanent_effect_text(definition,owned),"next_effect_text":_catalog.permanent_effect_text(definition,owned+1) if owned < definition.max_owned else "최고 단계","next_price":price if owned < definition.max_owned else null})
 		items.append(row)
 	return {"view_revision":1,"store_revision":int(game_save.store_revision),"balance":int(profile.supply_credits),"items":items,"loadout":profile.loadout.duplicate(true),"can_shop":not active,"lock_reason":"active_run" if active else "","legacy_checkpoint_present":game_save.legacy_checkpoint_present,"loadout_options":_loadout_options(profile,active),"can_start":_start_blocked(game_save).is_empty(),"start_blocked_reason":_start_blocked(game_save)}
 func prepare_purchase(game_save: Variant, item_id: Variant, request_id: Variant, expected_revision: Variant) -> Dictionary:
@@ -49,21 +52,26 @@ func prepare_purchase(game_save: Variant, item_id: Variant, request_id: Variant,
 	var error := _purchase_blocked(game_save,definition)
 	if not error.is_empty(): return _fail(error)
 	var candidate: Dictionary = game_save.duplicate(true)
-	candidate.profile.supply_credits = int(candidate.profile.supply_credits) - int(definition.price)
+	var price := _catalog.purchase_price(definition,_owned(game_save.profile,definition))
+	candidate.profile.supply_credits = int(candidate.profile.supply_credits) - price
 	if definition.kind == "doctrine": candidate.profile.owned_doctrine_ids.append(item_id)
+	elif definition.kind == "permanent_upgrade":
+		candidate.profile.permanent_upgrades = _catalog.permanent_levels(candidate.profile)
+		candidate.profile.permanent_upgrades[item_id] = _owned(game_save.profile,definition)+1
 	else: candidate.profile.consumables[item_id] = int(candidate.profile.consumables[item_id]) + 1
-	var receipt := {"request_id":request_id,"item_id":item_id,"expected_revision":expected_revision,"price":int(definition.price),"balance_after":int(candidate.profile.supply_credits),"owned_after":_owned(candidate.profile,definition)}
+	var receipt := {"request_id":request_id,"item_id":item_id,"expected_revision":expected_revision,"price":price,"balance_after":int(candidate.profile.supply_credits),"owned_after":_owned(candidate.profile,definition)}
 	candidate.purchase_receipts.append(receipt.duplicate(true))
 	while candidate.purchase_receipts.size() > 64: candidate.purchase_receipts.pop_front()
 	return {"ok":true,"candidate":candidate,"receipt":receipt,"already_applied":false}
 func _purchase_blocked(save: Dictionary, definition: Dictionary) -> String:
 	if _has_unsettled_run(save): return "active_run"
 	if save.store_revision >= MAX_COUNTER: return "counter_exhausted"
-	if _owned(save.profile,definition) >= definition.max_owned: return "already_owned" if definition.kind == "doctrine" else "inventory_full"
-	if save.profile.supply_credits < definition.price: return "insufficient_funds"
+	if _owned(save.profile,definition) >= definition.max_owned: return "max_level" if definition.kind == "permanent_upgrade" else ("already_owned" if definition.kind == "doctrine" else "inventory_full")
+	if save.profile.supply_credits < _catalog.purchase_price(definition,_owned(save.profile,definition)): return "insufficient_funds"
 	return ""
 func _owned(profile: Dictionary, definition: Dictionary) -> int:
 	if definition.kind == "doctrine": return int(definition.item_id in profile.owned_doctrine_ids)
+	if definition.kind == "permanent_upgrade": return int(profile.get("permanent_upgrades",{}).get(definition.item_id,0))
 	return int(profile.consumables.get(definition.item_id,0))
 func _has_unsettled_run(save: Dictionary) -> bool:
 	if save.checkpoint == null: return false
@@ -101,7 +109,7 @@ func _run_envelope_valid(state: Dictionary) -> bool:
 	if not state.get("rules") is Dictionary or not state.rules.get("content_fingerprint") is String or state.rules.content_fingerprint.is_empty(): return false
 	if not state.get("run_config") is Dictionary: return false
 	var config: Dictionary = state.run_config
-	if config.size() != 5 or not _counter(config.get("run_serial")): return false
+	if not _catalog.run_upgrade_config_valid(config) or not _counter(config.get("run_serial")): return false
 	for key in ["run_id","doctrine_id","target_evolution_id","prepared_supply"]:
 		if not config.get(key) is String: return false
 	if config.run_id != state.run_id or config.run_serial != state.run_serial: return false
@@ -154,6 +162,8 @@ func prepare_run_start(game_save: Variant, chapter: Variant, seed: Variant, requ
 	return _prepare_start_candidate(game_save,chapter,seed,selection,serial,request_id)
 func _prepare_start_candidate(game_save: Dictionary, chapter: Dictionary, seed: int, selection: Dictionary, serial: int, request_id: String) -> Dictionary:
 	var config := {"run_id":"%s:%d" % [game_save.career_id,serial],"run_serial":serial,"doctrine_id":selection.doctrine_id,"target_evolution_id":selection.target_evolution_id,"prepared_supply":selection.supply_item_id}
+	var levels := _catalog.permanent_levels(game_save.profile)
+	if not levels.is_empty(): config.permanent_upgrades = levels
 	var state = _run_factory.call(chapter.duplicate(true),seed,config.duplicate(true))
 	if not state is Dictionary: return _fail("invalid_snapshot")
 	if state.has("ok"):

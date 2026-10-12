@@ -76,6 +76,7 @@ func validate() -> Array[String]:
 	return errors
 func state_valid(state: Dictionary) -> bool:
 	if not _base_errors.is_empty() or not state.get("equipment") is Dictionary or not state.get("passives") is Dictionary or not state.get("rules") is Dictionary: return false
+	if not number_valid(state.rules.get("permanent_damage_bonus",0.0),0.0,0.25): return false
 	var allowed = state.rules.get("allowed_equipment_ids")
 	if not allowed is Array or allowed.size() > _equipment.size(): return false
 	var unique := {}
@@ -147,6 +148,7 @@ func stat(state: Dictionary, stat_name: String, base: float) -> float:
 	if not is_finite(base): return 0.0
 	if not validate().is_empty() or not state_valid(state): return base
 	var value := base
+	if stat_name == "damage_multiplier": value += float(state.rules.get("permanent_damage_bonus",0.0))
 	var owned = state.get("passives",{})
 	if not owned is Dictionary: return value
 	var ids: Array = owned.keys()
@@ -204,6 +206,7 @@ func decorate_option(state: Dictionary, original: Dictionary) -> Dictionary:
 		option.description = "%s · 피해 %s → %s"%[row.description,str(before.damage),str(after.damage)]
 	else:
 		var base := _stat_base(state,row.stat)
+		if row.stat == "damage_multiplier": base += float(state.rules.get("permanent_damage_bonus",0.0))
 		option.effect_delta = {"stat":row.stat,"before":base+float(row.increment)*int(option.level),"after":base+float(row.increment)*int(option.next_level)}
 	if option.can_select and option.level == 0 and not detail.is_empty() and detail.status == "collecting":
 		var owned: Dictionary = state.equipment if option.kind == "equipment" else state.passives
