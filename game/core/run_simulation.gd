@@ -90,6 +90,12 @@ func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dicti
 		_content_error = "content_mismatch"
 		return
 	_chapter = loaded.chapter.duplicate(true)
+	# Validated live profiles are immutable private inputs. Prepare their clocks
+	# once; derived Core callbacks keep the original per-call normalization.
+	if get_script() == load("res://game/core/run_simulation.gd"):
+		for enemy_id in LIVE_ROLE_IDS:
+			if _chapter.enemy_role_catalog.roles.has(enemy_id):
+				_normalize_saved_numbers(_chapter.enemy_role_catalog.roles[enemy_id].profile)
 	if _chapter.get("world_mode","") == "streamed_city":
 		var supplied = Streamed.new(_chapter.world_definitions) if world_helper == null else world_helper
 		if not _helper_matches(supplied,_chapter):
@@ -2092,7 +2098,7 @@ func _is_live_role(entity: Dictionary) -> bool:
 	return entity.get("enemy_id","") in LIVE_ROLE_IDS and entity.get("boss_id","") == ""
 func _role_profile(enemy_id: String) -> Dictionary:
 	var profile := RoleCatalog.profile(_chapter.enemy_role_catalog,enemy_id) if enemy_id in LIVE_ROLE_IDS else {}
-	_normalize_saved_numbers(profile)
+	if get_script() != load("res://game/core/run_simulation.gd"): _normalize_saved_numbers(profile)
 	return profile
 func _role_query(state: Dictionary, helper = null):
 	var live: bool = helper == null and is_same(state,_role_tick_state)
