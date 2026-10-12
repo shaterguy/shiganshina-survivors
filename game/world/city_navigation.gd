@@ -10,6 +10,8 @@ var _grid_builds := 0
 var _route_builds := 0
 var _coverage_revision := -1
 var _direction_los: Dictionary = {}
+var _tick_los: Dictionary = {}
+const MAX_TICK_LOS := 4096
 func _init(world) -> void:
 	_world = world
 static func clearance_class(radius: float) -> int:
@@ -18,9 +20,17 @@ static func clearance_class(radius: float) -> int:
 		if value >= radius: return value
 	return -1
 func direction(position: Vector2, target: Vector2, radius: float, tick: int) -> Dictionary:
-	# One synchronous exact call only. Every return, including failure, retires it.
+	# Exact immutable geometry may share successful LOS observations between
+	# actors in one tick. Unknown callbacks still use the authoritative path.
 	_direction_los = _direction_reuse_scope()
+	if not _direction_los.is_empty():
+		if not _tick_los.is_empty() and _tick_los.tick == tick and _tick_los.view == _direction_los.view and _tick_los.source == _direction_los.source and _tick_los.coverage == _direction_los.coverage and _tick_los.revision == _direction_los.revision and _tick_los.origin == _direction_los.origin:
+			_direction_los.queries = _tick_los.queries
+		_direction_los.tick = tick
+	_tick_los = _direction_los
 	var result: Dictionary = _direction_impl(position,target,radius,tick)
+	# Private queries outside direction must never use this memo. Failed real
+	# sweeps clear the shared scope, retiring the tick memo at the same time.
 	_direction_los = {}
 	return result
 func _direction_reuse_scope() -> Dictionary:
@@ -211,7 +221,8 @@ func _visible(a: Vector2, b: Vector2, radius: float) -> bool:
 	var visible: bool = hit.ok and hit.fraction == 1.0
 	if not _direction_los.is_empty():
 		# A blocked successful sweep is reusable; a failed query never is.
-		if hit.ok: _direction_los.queries[key] = visible
+		if hit.ok:
+			if _direction_los.queries.size() < MAX_TICK_LOS: _direction_los.queries[key] = visible
 		else: _direction_los.clear()
 	return visible
 static func _neighbors(id: int) -> Array[int]:

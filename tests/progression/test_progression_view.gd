@@ -14,7 +14,7 @@ func run(t) -> void:
 	state.upgrade_offer = R0.new().progression_source_offer("missing")
 	var before := state.duplicate(true)
 	var view: Dictionary = builder.build(state)
-	t.check(view.keys().size() == 5 and view.has_all(["view_revision","slots","target","evolutions","active_offer"]),"view returns exact R0 top-level DTO")
+	t.check(view.keys().size() == 6 and view.has_all(["view_revision","slots","target","evolutions","active_offer","owned"]),"view preserves R0 fields and adds derived owned progress")
 	if not view.has("active_offer"): return
 	t.check(view.slots == {"equipment":{"used":1,"max":4},"passive":{"used":1,"max":4}},"singular passive slot consumer shape")
 	t.check(view.target.evolution_id == "evo_wing_cut" and view.target.requirements[0].current == 4 and view.target.requirements[1].current == 2,"view shows actual target progress")
