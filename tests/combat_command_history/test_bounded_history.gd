@@ -1,7 +1,7 @@
 extends RefCounted
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Director = preload("res://game/director/spawn_director.gd")
 func run(t) -> void:
 	_capacity(t)
@@ -19,13 +19,13 @@ func _new(sim) -> Dictionary:
 func _spawn(id: Variant, tick: int, command_id: String, enemy := "walker") -> Dictionary:
 	return {"command_id":command_id,"kind":"spawn_enemy","payload":{"entity_id":id,"enemy_id":enemy,"position":[40.0,0.0],"spawned_tick":tick}}
 func _capacity(t) -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state: Dictionary = _arranged(sim,90000)
 	t.check(sim.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state)))).get("ok",false),"arranged cap is cold-restorable before its first actual tick")
 	F.step(sim,state,Vector2.ZERO)
 	t.check(state.entities[0].pattern_index == 16384 and state.entities[0].action_state == "windup" and state.telegraphs.size() == 1,"history at prior cap does not permanently disable ordinary attack")
 	t.check(state.command_ids_applied.size() < 16,"obsolete numeric behavior history compacts without raising snapshot cap")
-	var cold := Core.new(Finite.new())
+	var cold := Core.new(Current.new())
 	var restored: Dictionary = cold.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state))))
 	t.check(restored.get("ok",false),"new active action survives cold restore after compaction")
 	if restored.get("ok",false):
@@ -40,7 +40,7 @@ func _capacity(t) -> void:
 	events = F.step(sim,final,Vector2.ZERO,commands)
 	t.check(final.final_started_tick == final_tick and F.types(events,"boss_spawned").is_empty(),"final duplicate retry stays once after history compaction")
 func _retry_lifecycle(t) -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state := _new(sim)
 	var command := _spawn(1,1,"enemy_1_0")
 	var changed_same_tick := command.duplicate(true)
@@ -70,7 +70,7 @@ func _retry_lifecycle(t) -> void:
 	F.step(sim,state,Vector2.ZERO,[new_command,new_command])
 	t.check(state.entities.size() == 1 and state.telegraphs.size() == 1,"fresh numeric actor and current attack still work after old ID refusals")
 	var snapshot: Dictionary = JSON.parse_string(JSON.stringify(sim.snapshot(state)))
-	var cold := Core.new(Finite.new())
+	var cold := Core.new(Current.new())
 	var restored: Dictionary = cold.restore(snapshot)
 	t.check(restored.get("ok",false),"compacted identity boundaries survive cold restore")
 	if restored.get("ok",false):
@@ -79,7 +79,7 @@ func _retry_lifecycle(t) -> void:
 	snapshot.command_ids_applied.append(snapshot.command_ids_applied[0])
 	t.check(not cold.restore(snapshot).get("ok",false),"duplicate ledger validation is never hidden by compaction")
 func _opaque_and_future(t) -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state := _new(sim)
 	F.step(sim,state,Vector2.ZERO,[_spawn(1,1,"ordinary-spawn","sweeper")])
 	var current := "behavior:1:1"
@@ -95,7 +95,7 @@ func _opaque_and_future(t) -> void:
 	t.check("final:armored_actor" in state.command_ids_applied and "final-impact:1:1" in state.command_ids_applied,"final actor once marker and current impact marker retained")
 	t.check("behavior:string-actor:1" in state.command_ids_applied and "ordinary-spawn" in state.command_ids_applied,"opaque and string-identity historical duplicates are not weakened")
 func _bosses_and_final(t) -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state := _new(sim)
 	var boss_events := 0
 	for boss in F.chapter().boss_schedule:
@@ -130,14 +130,14 @@ func _arranged(sim, tick: int) -> Dictionary:
 	return state
 func _numeric_shapes(t) -> void:
 	for shape in [1,1.0,"1","01"]:
-		var sim = Core.new(Finite.new())
+		var sim = Core.new(Current.new())
 		var state := _new(sim)
 		F.step(sim,state,Vector2.ZERO,[_spawn(shape,1,"opaque-first")])
 		t.check(state.entities.size() == 1,"numeric/string input accepted according to existing DTO: "+str(shape))
 		state.entities.clear()
 		F.step(sim,state,Vector2.ZERO,[_spawn(shape,2,"opaque-second")])
 		t.check(state.entities.size() == (1 if shape is String and shape == "01" else 0),"canonical int/float/string identities share high-water, noncanonical string stays opaque: "+str(shape))
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var spoofed := _new(sim)
 	F.step(sim,spoofed,Vector2.ZERO,[_spawn(1,1,"enemy_9000_0")])
 	t.check(spoofed.entities.is_empty() and spoofed.command_ids_applied.is_empty(),"future command-ID tick with otherwise current payload cannot reserve a future identity")

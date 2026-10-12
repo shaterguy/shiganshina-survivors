@@ -67,12 +67,16 @@ func _attack_summary(definition: Dictionary, row: Dictionary) -> String:
 	var stats: Dictionary = row.effect_stats
 	var interval := String.num(float(stats.cooldown_ticks)/60.0,2)+"초 간격"
 	if row.is_evolved:
+		if row.evolution_id == "evo_storm_chain": return "폭풍 번개 · 최대 %d연결 · %s" % [int(stats.chain_count),interval]
+		if row.evolution_id == "evo_inferno_zone": return "지옥불 %d회 + 마지막 대폭발 · %s초 뒤 폭발 · %s" % [int(stats.stages)-1,String.num(float(stats.stage_delays[-1])/60.0,2),interval]
 		var times: Array[String] = []
 		for tick in stats.stage_delays: times.append(String.num(float(tick)/60.0,2)+"초")
 		var form: String = definition.description
 		if row.evolution_id == "evo_wing_cut": form = "방향을 고정한 연속 베기"
 		elif row.evolution_id == "evo_crossfire": form = "고정한 두 지점 포격"
 		return "%s · %d회 타격 (%s) · %s" % [form,int(stats.stages)," / ".join(times),interval]
+	if definition.mode == "chain": return "연쇄번개 · 최대 %d연결 · %s" % [int(stats.chain_count),interval]
+	if definition.mode == "zone": return "고정 화염지대 · %d회 타격 · %s초마다 피해 · %s" % [int(stats.pulse_count),String.num(float(stats.pulse_interval)/60.0,2),interval]
 	var form := str({"sector":"전방 부채꼴 베기","circle":"주변 원형 베기","line":"목표 방향 직선 베기","combo":"한 목표 집중 연격","projectile":"목표 방향 투사체"}.get(definition.mode,definition.description))
 	if definition.mode == "combo": form += " · 총 피해 "+String.num(float(stats.total_damage),2)
 	elif definition.mode == "projectile" and float(stats.splash_radius) > 0: form += " · 폭발 반경 "+String.num(float(stats.splash_radius),1)

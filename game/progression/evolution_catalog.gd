@@ -3,7 +3,7 @@ extends RefCounted
 # NEW recipe/evaluation authority. Only the approved 845 chapter is supported.
 # A weak owner avoids a Catalog -> EvolutionCatalog -> Catalog reference cycle.
 const CHAPTER_YEARS := {"chapter_01_shiganshina":845}
-const EFFECT_BASES := {"wing_cut":"blade_slash","crossfire":"wall_cannon"}
+const EFFECT_BASES := {"wing_cut":"blade_slash","crossfire":"wall_cannon","storm_chain":"chain_lightning","inferno_zone":"fire_zone"}
 var _owner: WeakRef
 var _items: Dictionary = {}
 var _errors: Array[String] = []
@@ -40,14 +40,28 @@ func _recipe_valid(id: Variant, row: Variant, equipment: Dictionary, passives: D
 	for chapter in row.chapter_ids:
 		if not chapter is String or not CHAPTER_YEARS.has(chapter) or CHAPTER_YEARS[chapter] != row.story_year or seen.has(chapter): return false
 		seen[chapter] = true
-	if not row.get("required_passives") is Array or row.required_passives.is_empty() or row.required_passives.size() > 4: return false
+	if not row.get("required_passives") is Array or row.required_passives.size() > 4: return false
 	seen.clear()
 	for required in row.required_passives:
 		if not required is Dictionary or required.size() != 2 or not required.get("passive_id") is String or not passives.has(required.passive_id) or not _integer(required.get("level"),3,3) or seen.has(required.passive_id): return false
 		seen[required.passive_id] = true
+	var required_equipment = row.get("required_equipment",[])
+	if not required_equipment is Array or required_equipment.size() > 3 or (required_equipment.is_empty() and row.required_passives.is_empty()): return false
+	seen.clear()
+	for required in required_equipment:
+		if not required is Dictionary or required.size() != 2 or not required.get("equipment_id") is String or not equipment.has(required.equipment_id) or required.equipment_id == row.base_item_id or not _integer(required.get("level"),3,3) or seen.has(required.equipment_id): return false
+		seen[required.equipment_id] = true
 	return _effect_valid(row.effect_id,row.get("effect_params"))
 func _effect_valid(effect_id: String, params: Variant) -> bool:
 	if not params is Dictionary: return false
+	if effect_id == "storm_chain":
+		return params.size() == 5 and params.has_all(["damage_multiplier","chain_count","hop_range","acquisition_range","cooldown_ticks"]) and _number(params.damage_multiplier,0.001,100) and _integer(params.chain_count,1,12) and _number(params.hop_range,1,10000) and _number(params.acquisition_range,1,10000) and _integer(params.cooldown_ticks,1,36000)
+	if effect_id == "inferno_zone":
+		if params.size() != 6 or not params.has_all(["damage_multipliers","stage_delays","radius","eruption_radius","acquisition_range","cooldown_ticks"]): return false
+		if not params.damage_multipliers is Array or params.damage_multipliers.size() != 8 or not params.stage_delays is Array or params.stage_delays.size() != 8 or params.stage_delays[0] != 0: return false
+		for index in 8:
+			if not _number(params.damage_multipliers[index],0.001,100) or not _integer(params.stage_delays[index],0,420) or (index > 0 and params.stage_delays[index] <= params.stage_delays[index-1]): return false
+		return _number(params.radius,1,10000) and _number(params.eruption_radius,1,10000) and _number(params.acquisition_range,1,10000) and _integer(params.cooldown_ticks,1,36000)
 	var fields := ["damage_multipliers","stage_delays","radius","cooldown_ticks"]
 	fields.append_array(["arc_degrees"] if effect_id == "wing_cut" else ["acquisition_range","point_offset"])
 	if params.size() != fields.size() or not params.has_all(fields): return false
@@ -72,6 +86,8 @@ func progression_state_valid(state: Dictionary) -> bool:
 		if recipe.base_item_id != base or state.equipment.get(base,0) != recipe.required_weapon_level or not state.get("chapter_id","") in recipe.chapter_ids: return false
 		for passive in recipe.required_passives:
 			if state.passives.get(passive.passive_id,0) < passive.level: return false
+		for required in recipe.get("required_equipment",[]):
+			if state.equipment.get(required.equipment_id,0) < required.level: return false
 	return true
 func evaluate(state: Dictionary, evolution_id: String) -> Dictionary:
 	if not _items.has(evolution_id) or not progression_state_valid(state): return {}
@@ -93,6 +109,12 @@ func evaluate(state: Dictionary, evolution_id: String) -> Dictionary:
 		if current == 0: reason = "passive_slots" if state.passives.size() >= 4 else "missing_passive"
 		elif current < passive.level: reason = "passive_level"
 		requirements.append(_requirement("passive",passive.passive_id,passives[passive.passive_id].name,current,int(passive.level),reason))
+	for required in recipe.get("required_equipment",[]):
+		var current := int(state.equipment.get(required.equipment_id,0))
+		var reason := ""
+		if current == 0: reason = "equipment_slots" if state.equipment.size() >= 4 else "missing_weapon"
+		elif current < required.level: reason = "weapon_level"
+		requirements.append(_requirement("equipment",required.equipment_id,equipment[required.equipment_id].name,current,int(required.level),reason))
 	var seals := int(state.get("tactical_seals",0))
 	requirements.append(_requirement("seal","tactical_seal","전술 개조권",seals,int(recipe.seal_cost),"" if seals >= recipe.seal_cost else "seal_required"))
 	var complete := true
@@ -113,12 +135,17 @@ func _effect_delta(state: Dictionary, recipe: Dictionary) -> Dictionary:
 	var params: Dictionary = recipe.effect_params
 	var weapon: Dictionary = owner.weapon_stats(state,recipe.base_item_id,int(recipe.required_weapon_level))
 	var scale: float = owner.stat(state,"range_multiplier",1.0)
+	if recipe.effect_id == "storm_chain":
+		return {"stages":int(params.chain_count),"stage_damage":[float(weapon.damage)*float(params.damage_multiplier)],"stage_delays":[0],"damage":float(weapon.damage)*float(params.damage_multiplier),"radius":float(params.acquisition_range)*scale,"acquisition_range":float(params.acquisition_range)*scale,"range":float(params.acquisition_range)*scale,"chain_count":int(params.chain_count),"hop_range":float(params.hop_range)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0))))}
 	var character_cooldown := float(state.rules.get("character_blade_cooldown_multiplier",1.0)) if recipe.base_item_id == "blade_slash" else 1.0
 	var damage := []
 	for multiplier in params.damage_multipliers: damage.append(float(weapon.damage)*float(multiplier))
-	var result := {"stages":2,"stage_damage":damage,"stage_delays":[int(params.stage_delays[0]),int(params.stage_delays[1])],"radius":float(params.radius)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0)*character_cooldown)))}
+	var result := {"stages":params.stage_delays.size(),"stage_damage":damage,"stage_delays":params.stage_delays.map(func(tick): return int(tick)),"radius":float(params.radius)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0)*character_cooldown)))}
 	# Linear distances scale once. Sector angles and tick delays never scale.
-	if recipe.effect_id == "wing_cut": result.arc_degrees = params.arc_degrees
+	if recipe.effect_id == "inferno_zone":
+		result.eruption_radius = float(params.eruption_radius)*scale
+		result.acquisition_range = float(params.acquisition_range)*scale
+	elif recipe.effect_id == "wing_cut": result.arc_degrees = params.arc_degrees
 	else:
 		result.acquisition_range = float(params.acquisition_range)*scale
 		result.point_offset = float(params.point_offset)*scale

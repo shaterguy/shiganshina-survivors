@@ -3,14 +3,14 @@ extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const B = preload("res://game/combat/enemy_behaviors.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Chapters = preload("res://game/director/chapter_catalog.gd")
 const IDS := ["runner","brute","sweeper","grabber","boss_charger","boss_sweeper","boss_leaper","boss_grabber","boss_abnormal"]
 class Provider:
 	extends RefCounted
 	var chapter: Dictionary
 	func _init() -> void:
-		chapter = Finite.new().load_chapter("chapter_01_shiganshina").chapter
+		chapter = Current.new().load_chapter("chapter_01_shiganshina").chapter
 		chapter.content_identity_kind = "isolated_enemy_recovery_contact"
 		chapter.content_fingerprint = Chapters.new().definition_digest({"chapter":chapter,"core_sha256":FileAccess.get_sha256("res://game/core/run_simulation.gd"),"purpose":"new recovery-contact regression runs only"})
 	func load_chapter(id: String) -> Dictionary:
@@ -165,8 +165,8 @@ func _airborne(t) -> void:
 	t.check(f.state.entities[0].action_state == "airborne" and hits(events).is_empty() and f.state.player.hp == hp,"airborne contact stays harmless")
 func _fixture_identity(t) -> void:
 	var f := make("runner")
-	var original_sim := Core.new(Finite.new())
+	var original_sim := Core.new(Current.new())
 	var original: Dictionary = original_sim.new_run(F.chapter(),44,F.run_config())
 	var before: Dictionary = original.duplicate(true)
-	t.check(f.sim.restore(original).get("error_code") == "content_mismatch" and original == before,"original .5 finite checkpoint rejected unchanged by isolated provider identity")
-	t.check(original_sim.restore(f.state).get("error_code") == "content_mismatch","isolated new runs are not accepted as original .5 fixture saves")
+	t.check(f.sim.restore(original).get("error_code") == "content_mismatch" and original == before,"newly generated current finite checkpoint rejected unchanged by isolated provider identity")
+	t.check(original_sim.restore(f.state).get("error_code") == "content_mismatch","isolated new runs are not accepted as current finite combat saves")

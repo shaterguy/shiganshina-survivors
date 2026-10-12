@@ -1,12 +1,12 @@
 extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
 const Service = preload("res://game/economy/supply_service.gd")
 const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
 func run(t) -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var legacy: Dictionary = sim.new_run(F.chapter(),42,F.run_config())
 	t.check(sim.restore(legacy).get("ok") == true and not legacy.rules.has("permanent_damage_bonus"),"Legacy run retains exact rules and restores")
 	var config: Dictionary = F.run_config()

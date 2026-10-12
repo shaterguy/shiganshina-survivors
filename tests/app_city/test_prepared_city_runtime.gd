@@ -8,7 +8,7 @@ const Save = preload("res://game/persistence/game_save_store.gd")
 const Helper = preload("res://game/core/streamed_run_world.gd")
 const Checkpoint = preload("res://game/app/world_checkpoint_adapter.gd")
 const Generator = preload("res://game/world/city_generator.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const F = preload("res://tests/core/core_fixture.gd")
 class BadHydration:
 	extends "res://game/persistence/world_delta_store.gd"
@@ -129,7 +129,7 @@ func _closure_and_provider(t,script,s: Dictionary) -> void:
 	t.check(not bad_hydration.prepare_load(game).get("ok",false),"malformed hydrated props fail closed")
 	var missing = script.new(s.provider,Disk.new(s.directory.path_join("missing")))
 	t.check(not missing.prepare_load(game).get("ok",false),"missing world closure rejects valid GameSave")
-	var finite = script.new(Finite.new(),s.disk)
+	var finite = script.new(Current.new(),s.disk)
 	t.check(not finite.prepare_load(game).get("ok",false),"finite provider cannot claim city authority")
 	var wrong := game.duplicate(true)
 	wrong.checkpoint.world.content_fingerprint = "0".repeat(64)

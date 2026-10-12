@@ -29,8 +29,8 @@ func run(t) -> void:
 	for method in Core.get_script_method_list():
 		if method.name == "_init": injected = method.args.size() >= 2 and method.args[0].name == "chapter_provider" and method.args[1].name == "world_helper"
 	t.check(injected,"C4 Core accepts explicit chapter provider and private helper dependencies")
-	var finite_path := "res://tests/core/finite_chapter_provider.gd"
-	t.check(FileAccess.file_exists(finite_path),"C4 has a frozen finite_test provider with a separate identity")
+	var finite_path := "res://tests/core/current_combat_provider.gd"
+	t.check(FileAccess.file_exists(finite_path),"C4 has a current finite_test provider with a separate identity")
 	if not injected or not FileAccess.file_exists(finite_path): return
 	var finite = load(finite_path).new()
 	var chapter: Dictionary = finite.load_chapter("chapter_01_shiganshina").chapter

@@ -93,7 +93,13 @@ func _purchase_cases(t) -> void:
 			t.check(not row.can_purchase and row.balance_after == 39,"E1 blocked price leaves actual after balance")
 	view.loadout.doctrine_id = "unknown"
 	t.check(_same(view_save,view_before),"E1 view cannot mutate its actual input authority")
-	t.check(view.loadout_options.doctrines.size() == 3 and view.loadout_options.targets.size() == 2 and view.loadout_options.supplies.size() == 2,"E1 meaningful loadout options supplied")
+	t.check(view.loadout_options.doctrines.size() == 3 and view.loadout_options.supplies.size() == 2,"E1 meaningful doctrine and supply options supplied")
+	var expected_targets: Array = load("res://game/progression/upgrade_catalog.gd").new().evolutions.ids()
+	var actual_targets := []
+	for target in view.loadout_options.targets: actual_targets.append(target.id)
+	actual_targets.sort()
+	expected_targets.sort()
+	t.check(actual_targets == expected_targets,"E1 loadout exposes every actual ultimate recipe exactly once")
 	for target in view.loadout_options.targets:
 		t.check(target.seal_cost == 1 and target.requirements.size() == 2,"E1 shop target uses actual recipe costs")
 		for requirement in target.requirements: t.check(not requirement.name.is_empty(),"E1 named target prerequisite")

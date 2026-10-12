@@ -176,7 +176,10 @@ func run_upgrade_config_valid(config: Dictionary) -> bool:
 	return config.size() == 6+character_fields and permanent_levels_valid(config.permanent_upgrades)
 func permanent_levels(profile: Dictionary) -> Dictionary:
 	var value: Variant = profile.get("permanent_upgrades",{})
-	return value.duplicate(true) if permanent_levels_valid(value) else {}
+	if not permanent_levels_valid(value): return {}
+	var levels := {}
+	for id in value: levels[id] = int(value[id])
+	return levels
 func permanent_bonus(levels: Dictionary, stat: String) -> float:
 	if not permanent_levels_valid(levels): return 0.0
 	var result := 0.0

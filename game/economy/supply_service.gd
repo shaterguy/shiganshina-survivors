@@ -285,6 +285,8 @@ func _loadout_options(profile: Dictionary, active: bool) -> Dictionary:
 		var requirements: Array[Dictionary] = [{"kind":"equipment","item_id":definition.base_item_id,"name":_upgrades.equipment[definition.base_item_id].name,"required":int(definition.required_weapon_level)}]
 		for passive in definition.required_passives:
 			requirements.append({"kind":"passive","item_id":passive.passive_id,"name":_upgrades.passives[passive.passive_id].name,"required":int(passive.level)})
+		for required in definition.get("required_equipment",[]):
+			requirements.append({"kind":"equipment","item_id":required.equipment_id,"name":_upgrades.equipment[required.equipment_id].name,"required":int(required.level)})
 		targets.append({"id":id,"name":definition.name,"description":definition.description,"tradeoff_text":definition.tradeoff_text,"requirements":requirements,"seal_cost":int(definition.seal_cost),"can_select":not active,"blocked_reason":"active_run" if active else ""})
 	var supplies: Array[Dictionary] = [{"id":"","name":"장착 안 함","description":"보급품을 소비하지 않음","tradeoff_text":"","can_select":not active,"blocked_reason":"active_run" if active else "","owned":0}]
 	var bandage: Dictionary = _catalog.item("field_bandage")

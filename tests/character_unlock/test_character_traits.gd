@@ -1,10 +1,10 @@
 extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 func run(t) -> void:
-	var sim = Core.new(Finite.new())
-	var chapter: Dictionary = Finite.new().load_chapter("chapter_01_shiganshina").chapter
+	var sim = Core.new(Current.new())
+	var chapter: Dictionary = Current.new().load_chapter("chapter_01_shiganshina").chapter
 	var config := F.run_config()
 	var plain: Dictionary = sim.new_run(chapter,42,config)
 	config.character_id = "mikasa_01"
@@ -18,7 +18,7 @@ func run(t) -> void:
 		F.step(sim,plain,Vector2.RIGHT)
 		F.step(sim,mikasa,Vector2.RIGHT)
 	t.check(is_equal_approx(mikasa.player.position[0]-origin,(plain.player.position[0]-origin)*1.08),"Actual movement travels eight percent farther")
-	var restored: Dictionary = Core.new(Finite.new()).restore(JSON.parse_string(JSON.stringify(sim.snapshot(mikasa),"",true,true)))
+	var restored: Dictionary = Core.new(Current.new()).restore(JSON.parse_string(JSON.stringify(sim.snapshot(mikasa),"",true,true)))
 	t.check(restored.get("ok",false) and restored.state.character_id == "mikasa_01","Cold Core JSON restore preserves character movement")
 	var forged := sim.snapshot(mikasa)
 	forged.rules.character_blade_cooldown_multiplier = 0.01

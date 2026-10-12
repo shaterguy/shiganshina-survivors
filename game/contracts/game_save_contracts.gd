@@ -142,7 +142,7 @@ func _selection_valid(profile: Dictionary, selection: Dictionary) -> bool:
 	if selection.size() != 3: return false
 	for key in ["doctrine_id","target_evolution_id","supply_item_id"]:
 		if not selection.get(key) is String: return false
-	return selection.get("doctrine_id") in profile.owned_doctrine_ids and selection.get("target_evolution_id") in ["evo_wing_cut","evo_crossfire"] and selection.get("supply_item_id") in ["","field_bandage"]
+	return selection.get("doctrine_id") in profile.owned_doctrine_ids and selection.get("target_evolution_id") in ["evo_wing_cut","evo_crossfire","evo_storm_chain","evo_inferno_zone"] and selection.get("supply_item_id") in ["","field_bandage"]
 func _purchase_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 	if not receipt is Dictionary or not receipt.get("item_id") is String or not receipt.get("request_id") is String: return false
 	var item: Dictionary = _catalog.item(receipt.item_id)

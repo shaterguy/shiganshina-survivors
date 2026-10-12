@@ -43,12 +43,16 @@ func _target_option(state: Dictionary) -> String:
 	var detail: Dictionary = _catalog.evolutions.evaluate(state,id)
 	if detail.get("status","") != "collecting": return ""
 	var recipe: Dictionary = _catalog.evolutions.definition(id)
+	for required in recipe.get("required_equipment",[]):
+		if not state.equipment.has(required.equipment_id): return "equipment:"+required.equipment_id
 	for required in recipe.required_passives:
 		if not state.passives.has(required.passive_id): return "passive:"+required.passive_id
 	if not state.equipment.has(recipe.base_item_id): return "equipment:"+recipe.base_item_id
 	if int(state.equipment[recipe.base_item_id]) < int(recipe.required_weapon_level): return "equipment:"+recipe.base_item_id
 	for required in recipe.required_passives:
 		if int(state.passives[required.passive_id]) < int(required.level): return "passive:"+required.passive_id
+	for required in recipe.get("required_equipment",[]):
+		if int(state.equipment[required.equipment_id]) < int(required.level): return "equipment:"+required.equipment_id
 	return ""
 func _descriptor_valid(state: Dictionary, descriptor: Dictionary) -> bool:
 	if descriptor.size() != 3 or not descriptor.has_all(["offer_id","source","level_ordinal"]): return false

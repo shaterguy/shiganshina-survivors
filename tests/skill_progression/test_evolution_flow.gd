@@ -3,13 +3,13 @@ extends RefCounted
 # boss reward, casts, hits and restores below go through the real Core API.
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const View = preload("res://game/progression/progression_view.gd")
 const Catalog = preload("res://game/progression/upgrade_catalog.gd")
 func run(t) -> void:
 	for recipe in ["evo_wing_cut","evo_crossfire"]: _flow(t,recipe)
 func _flow(t,recipe: String) -> void:
-	var sim := Core.new(Finite.new())
+	var sim := Core.new(Current.new())
 	var catalog := Catalog.new()
 	var definition: Dictionary = catalog.evolutions.definition(recipe)
 	var base: String = definition.base_item_id
@@ -79,7 +79,7 @@ func _flow(t,recipe: String) -> void:
 	var restored := sim.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state),"",true,true)))
 	t.check(restored.get("ok",false),"delayed ultimate checkpoint survives exact JSON save/restore")
 	if not restored.get("ok",false): return
-	var replay_sim := Core.new(Finite.new())
+	var replay_sim := Core.new(Current.new())
 	var executed: Array = F.types(events,"player_attack").filter(func(event): return event.payload.phase == "executed")
 	var hits: Array = F.types(events,"damage")
 	for tick in int(owned.effect_stats.stage_delays[1]):

@@ -1,6 +1,6 @@
 extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Store = preload("res://game/persistence/game_save_store.gd")
 const Service = preload("res://game/economy/supply_service.gd")
@@ -28,9 +28,9 @@ func _catalog(t) -> void:
 	mikasa.traits.move_speed_multiplier = 999
 	t.check(registry.run_traits("mikasa_01").move_speed_multiplier == 1.08,"Registry values do not alias callers")
 func _bundle(t) -> Dictionary:
-	var core = Core.new(Finite.new())
-	var validator = Core.new(Finite.new())
-	var chapter: Dictionary = Finite.new().load_chapter("chapter_01_shiganshina").chapter
+	var core = Core.new(Current.new())
+	var validator = Core.new(Current.new())
+	var chapter: Dictionary = Current.new().load_chapter("chapter_01_shiganshina").chapter
 	var service = Service.new(core.new_run)
 	var directory := "user://character_unlock_%d_%d" % [OS.get_process_id(),Time.get_ticks_usec()]
 	var store = Store.new(directory,validator.restore)

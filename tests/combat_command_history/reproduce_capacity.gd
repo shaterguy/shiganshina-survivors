@@ -1,7 +1,7 @@
 extends SceneTree
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Director = preload("res://game/director/spawn_director.gd")
 func _initialize() -> void:
 	call_deferred("run")
@@ -23,7 +23,7 @@ func arranged(sim, tick: int) -> Dictionary:
 	for n in range(1,16384): state.command_ids_applied.append("behavior:1:%d"%n)
 	return state
 func run() -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state := arranged(sim,90000)
 	var restored: Dictionary = sim.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state))))
 	var result := {"scope":"ARRANGED_CAP: actual Core, synthetic prior history; not natural reachability", "cap":state.command_ids_applied.size(),"cold_restore_ok":restored.get("ok",false)}

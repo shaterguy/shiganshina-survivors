@@ -27,7 +27,7 @@ func run(t) -> void:
  for path in prior:t.check(FileAccess.get_sha256("res://"+path)==prior[path],"Source23 .6 fixture remains byte-identical: "+path)
  var provider=load("res://tests/core/finite_chapter_provider.gd").new()
  var chapter:Dictionary=provider.load_chapter("chapter_01_shiganshina").chapter
- var core=load("res://game/core/run_simulation.gd").new(provider)
+ var core=load("res://tests/core/frozen_gameplay_fixture.gd").simulation()
  var config:Dictionary=load("res://tests/core/core_fixture.gd").run_config()
  var state:Dictionary=core.new_run(chapter,42,config)
  t.check(not state.has("error_code") and core.restore(state).get("ok",false),"historical finite_test provider constructs and restores its own bound content with current Core")

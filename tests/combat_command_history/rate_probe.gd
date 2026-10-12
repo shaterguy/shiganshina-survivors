@@ -3,11 +3,11 @@ extends SceneTree
 # FSM boundary times, not all movement/world ticks and not natural survival.
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Director = preload("res://game/director/spawn_director.gd")
 func _initialize() -> void: call_deferred("run")
 func run() -> void:
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var state: Dictionary = sim.new_run(F.chapter(),19,F.run_config())
 	state.player.attack_ready_ticks.blade_slash = 2147483647
 	state.player.invulnerable_until = 2147483647
@@ -40,7 +40,7 @@ func run() -> void:
 			replay.survival_tick = next_tick-1
 			replay_ok = replay_ok and events == F.step(cold,replay,Vector2.ZERO) and state == replay
 		elif next_tick > 100000:
-			cold = Core.new(Finite.new())
+			cold = Core.new(Current.new())
 			var result: Dictionary = cold.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state))))
 			replay_ok = result.get("ok",false)
 			if replay_ok: replay = result.state

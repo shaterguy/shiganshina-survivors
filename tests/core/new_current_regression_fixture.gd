@@ -1,14 +1,14 @@
 extends "res://tests/core/core_fixture.gd"
-# Historical regression arrangements use the separately identified finite_test
-# provider. No production chapter, enemy definition or gameplay hash is weakened.
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+# Current combat arrangements use actual gameplay definitions with an explicit
+# finite_test identity. Frozen historical providers and saves remain unchanged.
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Core = preload("res://game/core/run_simulation.gd")
 const Chapters = preload("res://game/director/chapter_catalog.gd")
 static func chapter() -> Dictionary:
-	return Finite.new().load_chapter("chapter_01_shiganshina").chapter
+	return Current.new().load_chapter("chapter_01_shiganshina").chapter
 static func simulation(t):
-	var sim := Core.new(Finite.new())
-	t.check(not sim.new_run(chapter(),1,run_config()).has("error_code"),"explicit finite regression provider constructs current Core")
+	var sim := Core.new(Current.new())
+	t.check(not sim.new_run(chapter(),1,run_config()).has("error_code"),"explicit current finite combat provider constructs current Core")
 	return sim
 static func spawn(id: String, position: Array, enemy_id := "walker") -> Dictionary:
 	return {"command_id":"spawn:"+id,"kind":"spawn_enemy","payload":{"entity_id":id,"enemy_id":enemy_id,"position":position,"spawned_tick":0}}
@@ -46,19 +46,19 @@ static func boss_reward_state(sim, seed := 11) -> Dictionary:
 	state.entities[0].hp = 12.0
 	return state
 
-# Geometry-only arrangements retain frozen gameplay definitions. Their derived
-# finite_test identity includes the new geometry and spawn; no production ID is
-# copied onto an edited chapter, and Core validates that pinned provider normally.
+# Geometry-only arrangements retain current gameplay definitions. Their derived
+# finite_test identity includes the new geometry and spawn; Core validates the
+# explicit test provider without weakening production or historical identities.
 class GeometryProvider:
 	extends RefCounted
 	var _definition: Dictionary
 	func _init(world: Dictionary, spawn_position: Array) -> void:
-		_definition = Finite.new().load_chapter("chapter_01_shiganshina").chapter
+		_definition = Current.new().load_chapter("chapter_01_shiganshina").chapter
 		var base_fingerprint: String = _definition.content_fingerprint
 		_definition.world_geometry = world.duplicate(true)
 		_definition.spawn_position = spawn_position.duplicate()
 		_definition.escape_zone = [-20.0,280.0,40.0,40.0]
-		_definition.content_identity_kind = "finite_regression_geometry"
+		_definition.content_identity_kind = "current_finite_regression_geometry"
 		_definition.content_fingerprint = Chapters.new().definition_digest({"base_fingerprint":base_fingerprint,"geometry_arrangement":_definition})
 	func load_chapter(id: String) -> Dictionary:
 		return {"ok":true,"chapter":_definition.duplicate(true)} if id == _definition.chapter_id else {"ok":false,"error_code":"unknown_chapter"}

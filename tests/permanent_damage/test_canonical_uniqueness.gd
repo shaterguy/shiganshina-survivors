@@ -1,6 +1,6 @@
 extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const A = preload("res://tests/core/test_rebuild_attack_events.gd")
 const Catalog = preload("res://game/progression/upgrade_catalog.gd")
@@ -12,7 +12,7 @@ func run(t) -> void:
 	passives.items.damage.increment = 0.000000001
 	var catalog := Catalog.new(null,passives)
 	t.check(catalog.validate().is_empty(),"tiny positive modifier is legal authored catalog tuning")
-	var sim := Core.new(Finite.new())
+	var sim := Core.new(Current.new())
 	var state := A.evolved_state(sim,F.chapter(),"evo_crossfire")
 	state.rules.permanent_damage_bonus = 0.05
 	state.passives.damage = 1

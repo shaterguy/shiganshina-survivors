@@ -9,7 +9,7 @@ func run(t) -> void:
 	var script = load(path)
 	var catalog = script.new(upgrades)
 	t.check(catalog.validate().is_empty(),"initial 845 recipes validate")
-	t.check(catalog.ids() == ["evo_crossfire","evo_wing_cut"],"recipe IDs have stable sorted order")
+	t.check(catalog.ids() == ["evo_crossfire","evo_inferno_zone","evo_storm_chain","evo_wing_cut"],"recipe IDs have stable sorted order")
 	var state := Fixture.state()
 	for weapon in [4,5]:
 		for passive in [0,2,3]:

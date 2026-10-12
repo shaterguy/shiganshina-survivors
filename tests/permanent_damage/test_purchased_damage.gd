@@ -1,7 +1,7 @@
 extends RefCounted
 const Core = preload("res://game/core/run_simulation.gd")
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
-const Finite = preload("res://tests/core/finite_chapter_provider.gd")
+const Current = preload("res://tests/core/current_combat_provider.gd")
 const Supply = preload("res://game/economy/supply_service.gd")
 const SaveFixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
 const Catalog = preload("res://game/progression/upgrade_catalog.gd")
@@ -20,7 +20,7 @@ func _bought(sim) -> Dictionary:
 	var started := service.prepare_run_start(bought.candidate,F.chapter(),42,"start:%s:1" % save.career_id,0)
 	return started.candidate.checkpoint if started.get("ok",false) else {}
 func _base_damage(t) -> void:
-	var sim := Core.new(Finite.new())
+	var sim := Core.new(Current.new())
 	var catalog := Catalog.new()
 	for item in F.EQUIPMENT_IDS:
 		var state := _bought(sim)
@@ -48,7 +48,7 @@ func _base_damage(t) -> void:
 	var legacy := sim.new_run(F.chapter(),42,F.run_config())
 	t.check(catalog.weapon_stats(legacy,"blade_slash",1).damage == 12.0 and not legacy.rules.has("permanent_damage_bonus"),"legacy missing bonus remains exactly zero")
 func _projectiles(t) -> void:
-	var sim := Core.new(Finite.new())
+	var sim := Core.new(Current.new())
 	for item in ["wall_cannon","ally_cover"]:
 		var state := _bought(sim)
 		state.equipment = {item:2}
@@ -67,7 +67,7 @@ func _projectiles(t) -> void:
 		var restored := sim.restore(JSON.parse_string(JSON.stringify(state,"",true,true)))
 		t.check(restored.get("ok",false),"old projectile tuning with fixed purchase bonus survives later run upgrades")
 		if not restored.get("ok",false): continue
-		var cold := Core.new(Finite.new())
+		var cold := Core.new(Current.new())
 		var damage_events := []
 		for tick in 30:
 			var left := F.step(sim,state,Vector2.ZERO)
@@ -81,7 +81,7 @@ func _projectiles(t) -> void:
 				t.check(is_equal_approx(event.payload.amount,expected),"actual projectile hit retains purchased pre-upgrade damage")
 		t.check(found,"purchased projectile reaches and damages its target")
 func _evolved(t,evolution: String) -> void:
-	var sim := Core.new(Finite.new())
+	var sim := Core.new(Current.new())
 	var state := _bought(sim)
 	var catalog := Catalog.new()
 	var recipe: Dictionary = catalog.evolutions.definition(evolution)
@@ -123,7 +123,7 @@ func _evolved(t,evolution: String) -> void:
 	state.passives.damage = 1
 	restored.state.passives.damage = 1
 	t.check(sim.restore(state).get("ok",false),"late passive upgrade preserves fixed bonus and earlier reserved damage")
-	var cold := Core.new(Finite.new())
+	var cold := Core.new(Current.new())
 	var executed := F.types(events,"player_attack").filter(func(event): return event.payload.phase == "executed")
 	for tick in int(recipe.effect_params.stage_delays[1]):
 		var left := F.step(sim,state,Vector2.ZERO)

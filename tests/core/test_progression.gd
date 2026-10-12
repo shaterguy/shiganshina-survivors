@@ -38,7 +38,11 @@ func test_upgrade_offer(t, sim) -> void:
 		t.check(option.kind != "equipment" or state.equipment.has(option.item_id), "equipment slot cap 4 filters new families")
 	var equipment: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/equipment.json"))
 	var passives: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/passives.json"))
-	t.check(equipment.items.size() == 6 and passives.items.size() == 8, "six equipment families and eight passive axes")
+	var current_families: Array = equipment.items.keys()
+	var allowed_families: Array = Fixture.chapter().allowed_equipment_ids.duplicate()
+	current_families.sort()
+	allowed_families.sort()
+	t.check(current_families == allowed_families and "chain_lightning" in current_families and "fire_zone" in current_families and passives.items.size() == 8, "current chapter exposes every authored equipment family and eight passive axes")
 func test_simultaneous_rewards(t, sim) -> void:
 	var state := Fixture.boss_reward_state(sim)
 	t.check(sim.restore(state).ok,"arranged authored boss remaining health is a valid checkpoint")
@@ -91,8 +95,9 @@ func test_passive_effects(t, sim) -> void:
 	state.passives = {"damage":1,"fire_interval":1,"attack_range":1}
 	Fixture.step(sim,state,Vector2.ZERO,[Fixture.spawn("buff_target",[68,0])])
 	t.check(is_equal_approx(state.stats.damage_dealt,13.8) and state.player.attack_ready_ticks.blade_slash == 45,"damage interval and range passives alter attack")
-	# A fixed seed yields a real earned max-health option, with full decoration.
-	state = sim.new_run(Fixture.chapter(),10,Fixture.run_config())
+	# Current eight-weapon candidate pool: seed21 earns a real decorated health
+	# choice. This arrangement does not rewrite any frozen six-weapon offer.
+	state = sim.new_run(Fixture.chapter(),21,Fixture.run_config())
 	state.player.hp = 50.0
 	Fixture.drop_xp(sim,state,24)
 	var selected := ""

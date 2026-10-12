@@ -6,6 +6,7 @@ const MAX_LEVEL := 5
 const SLOT_LIMIT := 4
 const MAX_COUNTER := 2147483647
 const EQUIPMENT_IDS := ["ally_cover","blade_slash","odm_dash","reentry_combo","spin_slash","wall_cannon"]
+const OPTIONAL_EQUIPMENT_IDS := ["chain_lightning","fire_zone"]
 const PASSIVE_STATS := {"damage":"damage_multiplier","fire_interval":"cooldown_multiplier","movement":"move_multiplier","max_health":"max_hp","recovery":"regen_per_second","pickup_radius":"pickup_radius","attack_range":"range_multiplier","armor":"armor"}
 var _equipment: Dictionary = {}
 var _passives: Dictionary = {}
@@ -47,10 +48,11 @@ func _load_base(equipment_data: Variant, passive_data: Variant) -> void:
 	passive_ids.sort()
 	var expected_passives := PASSIVE_STATS.keys()
 	expected_passives.sort()
-	if equipment_ids != EQUIPMENT_IDS or passive_ids != expected_passives: _base_errors.append("invalid_item")
+	var required_equipment: Array = equipment_ids.filter(func(id): return not id in OPTIONAL_EQUIPMENT_IDS)
+	if required_equipment != EQUIPMENT_IDS or passive_ids != expected_passives: _base_errors.append("invalid_item")
 	for id in _equipment:
 		var row = _equipment[id]
-		if not _row_valid(row) or not row.get("mode") in ["sector","circle","line","combo","projectile"]:
+		if not _row_valid(row) or not row.get("mode") in ["sector","circle","line","combo","projectile","chain","zone"]:
 			_base_errors.append("invalid_item")
 			continue
 		for field in ["damage","damage_per_level","range","range_per_level"]:
@@ -58,6 +60,12 @@ func _load_base(equipment_data: Variant, passive_data: Variant) -> void:
 		for field in ["cooldown_ticks","cooldown_per_level"]:
 			if not integer_valid(row.get(field),0,MAX_COUNTER): _base_errors.append("invalid_item")
 		if number_valid(row.get("cooldown_ticks"),0,MAX_COUNTER) and number_valid(row.get("cooldown_per_level"),0,MAX_COUNTER) and row.cooldown_ticks-4*row.cooldown_per_level < 1: _base_errors.append("invalid_item")
+		if row.mode == "zone":
+			if not integer_valid(row.get("pulse_count"),1,8) or not integer_valid(row.get("pulse_per_level"),0,1) or row.pulse_count+4*row.pulse_per_level > 8 or not integer_valid(row.get("pulse_interval"),1,60): _base_errors.append("invalid_item")
+			if not number_valid(row.get("zone_radius"),1,10000) or not number_valid(row.get("zone_radius_per_level"),0,1000): _base_errors.append("invalid_item")
+		if row.mode == "chain":
+			if not integer_valid(row.get("chain_count"),1,12) or not integer_valid(row.get("chain_per_level"),0,2) or row.chain_count+4*row.chain_per_level > 12: _base_errors.append("invalid_item")
+			if not number_valid(row.get("hop_range"),1,10000) or not number_valid(row.get("hop_range_per_level"),0,1000): _base_errors.append("invalid_item")
 		if row.mode == "sector" and not number_valid(row.get("arc_degrees"),1,360): _base_errors.append("invalid_item")
 		if row.mode == "line" and not number_valid(row.get("width"),1,1000000): _base_errors.append("invalid_item")
 		if row.mode == "combo" and not integer_valid(row.get("hits"),1,64): _base_errors.append("invalid_item")
@@ -169,6 +177,13 @@ func weapon_stats(state: Dictionary, item_id: String, level: int) -> Dictionary:
 		if row.has(field): result[field] = float(row[field])*range_scale
 	for field in ["arc_degrees","hits","projectile_speed"]:
 		if row.has(field): result[field] = row[field]
+	if row.mode == "chain":
+		result.chain_count = int(row.chain_count)+offset*int(row.chain_per_level)
+		result.hop_range = (float(row.hop_range)+offset*float(row.hop_range_per_level))*range_scale
+	if row.mode == "zone":
+		result.pulse_count = int(row.pulse_count)+offset*int(row.pulse_per_level)
+		result.pulse_interval = int(row.pulse_interval)
+		result.zone_radius = (float(row.zone_radius)+offset*float(row.zone_radius_per_level))*range_scale
 	return result
 func presentation_state_valid(state: Dictionary) -> bool:
 	if not evolutions.progression_state_valid(state) or not state.get("run_config") is Dictionary or not json_data_valid(state.run_config): return false

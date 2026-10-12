@@ -16,6 +16,7 @@ const Catalog = preload("res://game/progression/upgrade_catalog.gd")
 const Chapters = preload("res://game/director/chapter_catalog.gd")
 const Supplies = preload("res://game/economy/supply_catalog.gd")
 const Growth = preload("res://game/progression/growth_offer_service.gd")
+const Fantasy = preload("res://game/combat/fantasy_attack_resolver.gd")
 const Evolved = preload("res://game/combat/evolved_attack_resolver.gd")
 const Streamed = preload("res://game/core/streamed_run_world.gd")
 const Population = preload("res://game/core/city_population.gd")
@@ -474,11 +475,12 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 	# away. Reconstruct only uniquely validated cast-time values; legacy runs
 	# retain their original representation and no current passive is reapplied.
 	if float(restored.rules.get("permanent_damage_bonus",0.0)) > 0.0:
-		if not _evolved.canonicalize_damage(restored): return _failure("invalid_core_state")
+		if not _evolved.canonicalize_damage(_legacy_attack_state(restored)): return _failure("invalid_core_state")
 		for projectile in restored.projectiles:
 			var canonical_damage: Array[float] = []
 			if not _projectile_valid(restored,projectile,canonical_damage): return _failure("invalid_core_state")
 			projectile.damage = canonical_damage[0]
+	if not Fantasy.canonicalize(restored,_catalog): return _failure("invalid_core_state")
 	_canonicalize_saved_vectors(restored)
 	if validation_helper != null:
 		var status: Dictionary = validation_helper.query_status()
@@ -512,7 +514,7 @@ func _v2_relationships_valid(state: Dictionary, chapter: Dictionary) -> bool:
 	if state.phase == "dead" and state.player.hp != 0: return false
 	if state.phase in ["survival","evacuation","won"] and not _number_valid(state.player.get("hp"),0.0000001): return false
 	# Raw enemy records are validated with their prepared world below.
-	if not _evolved.validate_records(state) or not state.evolution_runtime.is_empty(): return false
+	if not _evolved.validate_records(_legacy_attack_state(state)) or not Fantasy.validate_records(state,_catalog) or not state.evolution_runtime.is_empty(): return false
 	return true
 # Old production commands have durable monotonic owners already in RunState.
 # Batch collection bounds work and preserves opaque historical IDs unchanged.
@@ -1027,6 +1029,9 @@ func _auto_attack(state: Dictionary, events: Array[Dictionary], _boss_rewards: A
 		var evolution: String = state.evolutions.get(item_id,"")
 		var detail: Dictionary = _catalog.evolutions.evaluate(state,evolution) if not evolution.is_empty() else {}
 		if not evolution.is_empty() and detail.get("status") != "evolved": continue
+		if definition.mode == "chain":
+			_cast_chain(state,stats if evolution.is_empty() else detail.effect_delta,item_id,events)
+			continue
 		var radius: float = stats.range if evolution.is_empty() else detail.effect_delta.get("acquisition_range",detail.effect_delta.radius)
 		var targets: Array[int] = _spatial.query(_vec(state.player.position),radius+48.0)
 		var target_index := -1
@@ -1037,19 +1042,25 @@ func _auto_attack(state: Dictionary, events: Array[Dictionary], _boss_rewards: A
 			var distance := _vec(entity.position).distance_to(_vec(state.player.position))
 			if distance <= radius+float(entity.radius) and distance < nearest:
 				var mask := 16 if evolution == "evo_crossfire" else (8 if definition.mode == "projectile" else 4)
-				if not _cover_clear(state,_vec(state.player.position),_vec(entity.position),0,mask): continue
+				var visible := _fantasy_cover_clear(state,_vec(state.player.position),_vec(entity.position)) if definition.mode == "zone" else _cover_clear(state,_vec(state.player.position),_vec(entity.position),0,mask)
+				if not visible: continue
 				nearest = distance
 				target_index = index
 		if target_index < 0: continue
 		var direction := _vec(state.player.position).direction_to(_vec(state.entities[target_index].position))
 		if direction.is_zero_approx(): direction = _vec(state.player.facing)
 		var count := 1 if evolution.is_empty() else 2
-		if state.player_attack_instances.size()+count > 64: continue
+		if definition.mode != "zone" and state.player_attack_instances.size()+count > 64: continue
 		if evolution.is_empty() and definition.mode == "projectile" and projectile_reservations >= MAX_PROJECTILES: continue
 		var cast_id: String = state.run_id+":attack:"+str(int(state.attack_seq)+1)
 		var records: Array = []
 		var cooldown: int = int(stats.cooldown_ticks)
-		if not evolution.is_empty():
+		if definition.mode == "zone":
+			records = Fantasy.fire_records(state,_catalog,_vec(state.entities[target_index].position),direction,cast_id)
+			if records.is_empty(): continue
+			if not evolution.is_empty(): cooldown = int(detail.effect_delta.cooldown_ticks)
+			if not _fantasy_capacity(state,item_id,records.size(),events): continue
+		elif not evolution.is_empty():
 			var proposal: Dictionary = _evolved.reserve(state,item_id,_vec(state.entities[target_index].position),direction,cast_id)
 			if not proposal.get("ok",false): continue
 			records = proposal.records
@@ -1069,7 +1080,42 @@ func _auto_attack(state: Dictionary, events: Array[Dictionary], _boss_rewards: A
 		state.player.attack_ready_ticks[item_id] = int(state.active_tick)+cooldown
 		for record in records:
 			state.player_attack_instances.append(record)
-			if not evolution.is_empty(): _emit(state,events,"player_attack",_attack_payload(record,"scheduled"))
+			if not evolution.is_empty() or definition.mode == "zone": _emit(state,events,"player_attack",_attack_payload(record,"scheduled"))
+func _cast_chain(state: Dictionary, stats: Dictionary, item_id: String, events: Array[Dictionary]) -> void:
+	var cast_id: String = state.run_id+":attack:"+str(int(state.attack_seq)+1)
+	var query := func(point: Vector2, radius: float): return _spatial.query(point,radius)
+	var clear := func(from: Vector2, to: Vector2): return _fantasy_cover_clear(state,from,to)
+	var records: Array = Fantasy.chain_records(state,stats,item_id,cast_id,query,clear)
+	if records.is_empty(): return
+	if int(state.active_tick)+int(stats.cooldown_ticks) > MAX_COUNTER: return
+	if not _fantasy_capacity(state,item_id,records.size(),events): return
+	state.attack_seq = int(state.attack_seq)+1
+	state.player.attack_ready_ticks[item_id] = int(state.active_tick)+int(stats.cooldown_ticks)
+	state.player_attack_instances.append_array(records)
+func _fantasy_cover_clear(state: Dictionary, origin: Vector2, target: Vector2) -> bool:
+	if state.has("world"): return _cover_clear(state,origin,target,0,4)
+	# Historical finite attacks retain their old cover contract. New families
+	# use the actual finite collision footprint rather than passing through it.
+	return World.sweep(origin,target-origin,0,_finite_geometry(state)).distance_to(target) <= 0.001
+func _legacy_attack_state(state: Dictionary) -> Dictionary:
+	var legacy := state.duplicate()
+	legacy.player_attack_instances = state.player_attack_instances.filter(func(record): return not record is Dictionary or not Fantasy.is_fantasy(record))
+	return legacy
+func _fantasy_capacity(state: Dictionary, item_id: String, count: int, events: Array[Dictionary]) -> bool:
+	var casts := {}
+	var next_release := MAX_COUNTER
+	for record in state.player_attack_instances:
+		next_release = mini(next_release,int(record.execute_tick))
+		if record.base_item_id == "fire_zone": casts[record.cast_id] = maxi(int(casts.get(record.cast_id,0)),int(record.execute_tick))
+	var fields_full: bool = item_id == "fire_zone" and casts.size() >= 2
+	if state.player_attack_instances.size()+count <= 64 and not fields_full: return true
+	if fields_full:
+		next_release = MAX_COUNTER
+		for tick in casts.values(): next_release = mini(next_release,int(tick))
+	var retry_tick := mini(MAX_COUNTER,maxi(int(state.active_tick)+1,next_release+1))
+	state.player.attack_ready_ticks[item_id] = retry_tick
+	_emit(state,events,"player_attack_deferred",{"base_item_id":item_id,"reason":"field_capacity" if fields_full else "attack_capacity","retry_tick":retry_tick})
+	return false
 func _attack_payload(record: Dictionary, phase: String) -> Dictionary:
 	var result := record.duplicate(true)
 	result.phase = phase
@@ -1099,7 +1145,9 @@ func _execute_player_attacks(state: Dictionary, events: Array[Dictionary], boss_
 			var id := str(entity.id)
 			if entity.hp <= 0.0 or id in record.hit_entity_ids: continue
 			if record.has("target_id") and record.target_id != id: continue
-			if Geometry.overlaps(record,_vec(entity.position),float(entity.radius)) and _cover_clear(state,_vec(record.origin),_vec(entity.position),0,16 if record.evolution_id == "evo_crossfire" else 4):
+			if not Geometry.overlaps(record,_vec(entity.position),float(entity.radius)): continue
+			var visible := _fantasy_cover_clear(state,_vec(record.origin),_vec(entity.position)) if Fantasy.is_fantasy(record) else _cover_clear(state,_vec(record.origin),_vec(entity.position),0,16 if record.evolution_id == "evo_crossfire" else 4)
+			if visible:
 				record.hit_entity_ids.append(id)
 				_hit_entity(state,entity,float(record.damage),record.base_item_id,events,boss_rewards,record.attack_id)
 	state.player_attack_instances = pending

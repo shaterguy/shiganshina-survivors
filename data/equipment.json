@@ -79,6 +79,39 @@
       "range_per_level": 20.0,
       "projectile_speed": 600.0,
       "splash_radius": 0.0
+    },
+    "chain_lightning": {
+      "name": "연쇄번개",
+      "description": "가까운 적부터 한 번씩 이어지는 번개를 쏜다",
+      "mode": "chain",
+      "max_level": 5,
+      "damage": 10.0,
+      "damage_per_level": 4.0,
+      "cooldown_ticks": 108,
+      "cooldown_per_level": 6,
+      "range": 180.0,
+      "range_per_level": 12.0,
+      "chain_count": 3,
+      "chain_per_level": 1,
+      "hop_range": 72.0,
+      "hop_range_per_level": 4.0
+    },
+    "fire_zone": {
+      "name": "화염지대",
+      "description": "목표 지점에 잠시 남는 화염을 만들어 주기적으로 태운다",
+      "mode": "zone",
+      "max_level": 5,
+      "damage": 4.0,
+      "damage_per_level": 2.0,
+      "cooldown_ticks": 240,
+      "cooldown_per_level": 12,
+      "range": 180.0,
+      "range_per_level": 12.0,
+      "zone_radius": 42.0,
+      "zone_radius_per_level": 4.0,
+      "pulse_count": 4,
+      "pulse_per_level": 1,
+      "pulse_interval": 30
     }
   }
 }

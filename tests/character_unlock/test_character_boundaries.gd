@@ -25,12 +25,12 @@ func _legacy(t) -> void:
 	t.check(start.get("ok",false),"Legacy empty unlock list continues to start its original protagonist")
 func _dto(t) -> void:
 	var Core = load("res://game/core/run_simulation.gd")
-	var Finite = load("res://tests/core/finite_chapter_provider.gd")
+	var Current = load("res://tests/core/current_combat_provider.gd")
 	var F = load("res://tests/core/new_current_regression_fixture.gd")
 	var Catalog = load("res://game/progression/upgrade_catalog.gd")
 	var Registry = load("res://game/progression/character_catalog.gd")
 	var catalog = Catalog.new()
-	var sim = Core.new(Finite.new())
+	var sim = Core.new(Current.new())
 	var config: Dictionary = F.run_config()
 	config.character_id = "mikasa_01"
 	var state: Dictionary = sim.new_run(F.chapter(),42,config)
