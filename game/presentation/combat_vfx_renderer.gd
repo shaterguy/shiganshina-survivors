@@ -70,6 +70,13 @@ func _command(effect: Dictionary, layer: Dictionary, component: String, asset: D
 	var radius := maxf(0.0,float(geometry.get("radius",0.0)))
 	var contact_size := Vector2.ONE*maxf(radius*2.0,8.0)
 	if shape == "line": contact_size = Vector2(maxf(0.001,float(geometry.get("length",radius))),maxf(0.001,float(geometry.get("width",1.0))))
+	# A confirmed single-target hit owns a separate display footprint. The
+	# unchanged contact_geometry below still records Core's acquisition geometry.
+	if effect.has("contact_position"):
+		if not Catalog.presentation_size_valid(effect.get("presentation_size_px",null)): return _diagnostic(effect,"invalid_presentation_size",str(layer.art_id))
+		anchor = _vec(effect.contact_position)
+		rotation = 0.0
+		contact_size = _vec(effect.presentation_size_px)
 	if component == "wire":
 		var endpoint := _vec(geometry.wire_anchor)
 		contact_size = Vector2(maxf(0.001,anchor.distance_to(endpoint)),2.0)

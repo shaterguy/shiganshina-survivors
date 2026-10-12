@@ -60,6 +60,9 @@ def is_runtime_asset(record: dict) -> bool:
     if path in enemy_records:
         return (record.get('enemy_art_development_ready') is True and record.get('export_blocked') is False
                 and (record.get('kind'), record.get('packing_profile')) == enemy_records[path])
+    if path.startswith('res://assets/art/effects/vfx_remaining_v1/'):
+        return (record.get('kind') == 'effect' and vfx_render_enabled(record)
+                and re.fullmatch(r'res://assets/art/effects/vfx_remaining_v1/vfx_(?:dash_compressed_gas|dash_cross_tip|reentry_triple|ally_gas_swoop|ally_arrival_cut)\.png', path) is not None)
     return (record.get('kind') == 'effect' and vfx_render_enabled(record)
             and re.fullmatch(r'res://assets/art/effects/vfx_(?:rebuild|evolution|fantasy)_v1/vfx_[A-Za-z0-9_-]+\.png', path) is not None)
 

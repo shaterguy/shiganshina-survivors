@@ -30,7 +30,7 @@ func run(t) -> void:
 	t.check(reviewed.size() == 5,"existing five reviewed VFX remain the only vfx_approved assets")
 	t.check(catalog.has_method("render_problem"),"Catalog exposes shared strict development render policy")
 	if not catalog.has_method("render_problem") or not manifest.assets.has("vfx_chain_lightning"): return
-	t.check(catalog.validate(manifest).all(func(problem): return problem in ["missing_art:vfx_dash_compressed_gas","missing_art:vfx_wire_taut","missing_art:vfx_dash_cross_tip","missing_art:vfx_reentry_triple","missing_art:vfx_ally_gas_swoop","missing_art:vfx_ally_arrival_cut"]),"new ten and existing five assets validate; six unrelated original art gaps remain explicit")
+	t.check(catalog.validate(manifest) == ["missing_art:vfx_wire_taut"],"all twenty registered VFX validate; only anchor-conditional wire remains absent")
 	_gates(t,catalog,manifest)
 	_reconfigure_cache(t,manifest)
 	for pair in [["chain_lightning",""],["chain_lightning","evo_storm_chain"],["fire_zone",""],["fire_zone","evo_inferno_zone"]]: _public_flow(t,manifest,pair[0],pair[1])

@@ -81,5 +81,8 @@ func is_runtime_asset_path(record: Dictionary) -> bool:
 	if enemy_records.has(path):
 		return record.get("enemy_art_development_ready") is bool and record.enemy_art_development_ready and record.get("export_blocked") is bool and not record.export_blocked and [record.get("kind"),record.get("packing_profile")] == enemy_records[path]
 	if record.get("kind") != "effect" or not VfxCatalog.render_enabled(record): return false
+	if path.begins_with("res://assets/art/effects/vfx_remaining_v1/"):
+		var remaining := RegEx.create_from_string("^res://assets/art/effects/vfx_remaining_v1/vfx_(dash_compressed_gas|dash_cross_tip|reentry_triple|ally_gas_swoop|ally_arrival_cut)\\.png$")
+		return remaining.search(path) != null
 	var nested := RegEx.create_from_string("^res://assets/art/effects/vfx_(rebuild|evolution|fantasy)_v1/vfx_[A-Za-z0-9_-]+\\.png$")
 	return nested.search(path) != null

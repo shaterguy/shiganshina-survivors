@@ -63,6 +63,7 @@ func validate(manifest: Dictionary) -> Array[String]:
 			if pid.is_empty() or pid in phase_ids: errors.append("duplicate_phase:"+pid)
 			phase_ids.append(pid)
 			if not p.get("role","") in ROLES: errors.append("invalid_role:"+pid)
+			if record.get("base_item_id") == "reentry_combo" and phase == "cast" and not presentation_size_valid(p.get("presentation_size_px",null)): errors.append("invalid_presentation_size:"+pid)
 			if not p.get("render_pass","") in PASSES: errors.append("invalid_pass:"+pid)
 			var duration = p.get("duration_ticks",-1)
 			if not (duration is int or duration is float) or not is_finite(float(duration)) or duration < 0 or duration != floor(float(duration)): errors.append("invalid_duration:"+pid)
@@ -86,6 +87,14 @@ func _validate_art(id: String, assets: Dictionary, errors: Array[String]) -> voi
 	for error in validate_art_metadata(id,metadata): _append_error(errors,error)
 	var problem := render_problem(id,metadata)
 	if not problem.is_empty() and problem != "invalid_art_metadata": _append_error(errors,problem+":"+id)
+static func presentation_size_valid(value: Variant) -> bool:
+	if not value is Array or value.size() != 2: return false
+	for axis in value:
+		if not (axis is int or axis is float) or not is_finite(float(axis)) or axis <= 0.0: return false
+	# Canvas uses Vector2 components: reject finite source numbers that would
+	# overflow or underflow into an invalid/zero display footprint on conversion.
+	var size := Vector2(value[0],value[1])
+	return size.is_finite() and size.x > 0.0 and size.y > 0.0
 # Activation is separate from native review. Legacy reviewed originals retain
 # their existing gate; new originals need every explicit development field.
 static func render_enabled(metadata: Dictionary) -> bool:

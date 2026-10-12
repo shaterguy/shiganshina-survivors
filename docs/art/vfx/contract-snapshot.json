@@ -1,0 +1,275 @@
+{
+  "art_requirements": [
+    {
+      "art_id": "vfx_dash_compressed_gas",
+      "cell_px": [
+        128,
+        32
+      ],
+      "pivot_px": [
+        0,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Compressed gas tail following +X attack line, exact length/width from geometry."
+    },
+    {
+      "art_id": "vfx_dash_cross_tip",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Crossed blade tip at exact line endpoint; no actor movement."
+    },
+    {
+      "art_id": "vfx_reentry_triple",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Three distinct angled blade contacts in same frame. No invented stagger for simultaneous core hit."
+    },
+    {
+      "art_id": "vfx_ally_gas_swoop",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Slender gas-backed support silhouette, visually distinct from cannonball. Follow actual projectile, curve is inside sprite only."
+    },
+    {
+      "art_id": "vfx_ally_arrival_cut",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Arrival blade contact, never cannon explosion; zero splash uses small contact footprint."
+    }
+  ],
+  "recipes": [
+    {
+      "recipe_id": "odm_dash",
+      "base_item_id": "odm_dash",
+      "evolution_id": "",
+      "visual_identity": "taut_axis_gas_cross",
+      "phases": {
+        "cast": {
+          "recipe_id": "odm_dash.cast",
+          "role": "cast",
+          "art_id": "vfx_dash_compressed_gas",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_dash_compressed_gas",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_dash_cross_tip",
+              "component": "tip",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "reentry_combo",
+      "base_item_id": "reentry_combo",
+      "evolution_id": "",
+      "visual_identity": "simultaneous_three_angles",
+      "phases": {
+        "cast": {
+          "recipe_id": "reentry_combo.cast",
+          "role": "cast",
+          "art_id": "vfx_reentry_triple",
+          "anchor_policy": "target_ground",
+          "render_pass": "world",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "targeted",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_reentry_triple",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "ally_cover",
+      "base_item_id": "ally_cover",
+      "evolution_id": "",
+      "visual_identity": "slender_support_arrival",
+      "phases": {
+        "cast": {
+          "recipe_id": "ally_cover.cast",
+          "role": "projectile",
+          "art_id": "vfx_ally_gas_swoop",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_gas_swoop",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "projectile": {
+          "recipe_id": "ally_cover.projectile",
+          "role": "projectile",
+          "art_id": "vfx_ally_gas_swoop",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_gas_swoop",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "impact": {
+          "recipe_id": "ally_cover.impact",
+          "role": "impact",
+          "art_id": "vfx_ally_arrival_cut",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 10,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_arrival_cut",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

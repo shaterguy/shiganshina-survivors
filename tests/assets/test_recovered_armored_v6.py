@@ -111,14 +111,14 @@ class RecoveredArmoredV6Tests(unittest.TestCase):
             expected.update(vfx_approved=True, approval_status='DEVELOPMENT_RENDER_REVIEWED',
                             review_record='docs/validation/vfx/primary-five-native-review.md')
             self.assertEqual(protected['assets'].pop(asset_id), expected)
-        # These ten originals are activated only for development rendering.
+        # These fifteen originals are activated only for development rendering.
         # Exact descriptor equality plus explicit false review flags prevents
         # this additive exception from relaxing any native/final art boundary.
         development_vfx = {}
-        for filename in ('evolution-runtime-candidate.json', 'fantasy-runtime-candidate.json'):
+        for filename in ('evolution-runtime-candidate.json', 'fantasy-runtime-candidate.json', 'remaining-runtime-candidate.json'):
             source = json.loads((ROOT / 'docs/art/vfx' / filename).read_text())
             development_vfx.update(source['assets'])
-        self.assertEqual(set(development_vfx), {'vfx_hit_spark', 'vfx_wing_first_arc', 'vfx_wing_second_arc', 'vfx_crossfire_ally_aim', 'vfx_crossfire_falling_shell', 'vfx_crossfire_contact_blast', 'vfx_chain_lightning', 'vfx_storm_chain', 'vfx_fire_zone', 'vfx_inferno_zone'})
+        self.assertEqual(set(development_vfx), {'vfx_hit_spark', 'vfx_wing_first_arc', 'vfx_wing_second_arc', 'vfx_crossfire_ally_aim', 'vfx_crossfire_falling_shell', 'vfx_crossfire_contact_blast', 'vfx_chain_lightning', 'vfx_storm_chain', 'vfx_fire_zone', 'vfx_inferno_zone', 'vfx_dash_compressed_gas', 'vfx_dash_cross_tip', 'vfx_reentry_triple', 'vfx_ally_gas_swoop', 'vfx_ally_arrival_cut'})
         for asset_id, candidate in development_vfx.items():
             expected = copy.deepcopy(candidate)
             expected.update(development_render_enabled=True, native_reviewed=False,

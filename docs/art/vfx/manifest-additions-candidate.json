@@ -1,0 +1,244 @@
+{
+  "assets": {
+    "vfx_dash_cross_tip": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_dash_cross_tip.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "9fb80cbd31ba872a03c125095401311a435fbb2057ba631c0dfdd16128d550b9",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_cross_tip-generation-v1.png",
+      "source_sha256": "03f674a8f9d5bdf0c57f8faf732cdb64e1194c6da19e45e1dea9ce363daf5e99",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_dash_cross_tip-nearest-4x.png",
+      "notes": "Crossed blade tip at exact line endpoint; no actor movement.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_ally_gas_swoop": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_ally_gas_swoop.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "544abe2cd5c3a0a2ba61d9a785eae248b27e398117e0bdf293b98d5c3d92b016",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_gas_swoop-generation-v1.png",
+      "source_sha256": "ef9232177ef73200c7a87f9dcea12751b0371fbe1d0620409910a624d3178ffe",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_ally_gas_swoop-nearest-4x.png",
+      "notes": "Slender gas-backed support silhouette, visually distinct from cannonball. Follow actual projectile, curve is inside sprite only.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_dash_compressed_gas": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_dash_compressed_gas.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 64,
+      "cell_w": 128,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        0,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "2b98594b8ad7b2c01ffd020e0074399bccc0bb7a794b17222f126a446070c394",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_compressed_gas-generation-v1.png",
+      "source_sha256": "03158c890789447628842a1688cf17c065839f04107d415f0ab4bf9fa7147d01",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_dash_compressed_gas-nearest-4x.png",
+      "notes": "Compressed gas tail following +X attack line, exact length/width from geometry.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_reentry_triple": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_reentry_triple.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "28cf33307a7caf4832e8b10bc17484336706d6f003de006bc5bdaefa329ebd4b",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_reentry_triple-generation-v1.png",
+      "source_sha256": "b27a5fca86b43f32be14105ab5692b6673832fc85c3155570c5004aa345ed72f",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_reentry_triple-nearest-4x.png",
+      "notes": "Three distinct angled blade contacts in same frame. No invented stagger for simultaneous core hit.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_ally_arrival_cut": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_ally_arrival_cut.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "78f9027c998f35a827475a0dfc7355bbc17795a22c4b8e9c388adf601ccdec40",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_arrival_cut-generation-v1.png",
+      "source_sha256": "baab61dfd3e135a974b2421e3c80026a8b7c01a38f1d0d4714d636c6dafdb5f7",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_ally_arrival_cut-nearest-4x.png",
+      "notes": "Arrival blade contact, never cannon explosion; zero splash uses small contact footprint.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    }
+  }
+}

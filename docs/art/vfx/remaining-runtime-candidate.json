@@ -1,0 +1,1615 @@
+{
+  "schema_version": 1,
+  "candidate_group": "vfx_remaining_v1",
+  "source_status": "NEW",
+  "native_reviewed": false,
+  "final_art_approved": false,
+  "vfx_approved": false,
+  "filter": "nearest",
+  "mipmaps": false,
+  "frame_order": "row_major_zero_based",
+  "assets": {
+    "vfx_dash_cross_tip": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_dash_cross_tip.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "9fb80cbd31ba872a03c125095401311a435fbb2057ba631c0dfdd16128d550b9",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_cross_tip-generation-v1.png",
+      "source_sha256": "03f674a8f9d5bdf0c57f8faf732cdb64e1194c6da19e45e1dea9ce363daf5e99",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_dash_cross_tip-nearest-4x.png",
+      "notes": "Crossed blade tip at exact line endpoint; no actor movement.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_ally_gas_swoop": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_ally_gas_swoop.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "544abe2cd5c3a0a2ba61d9a785eae248b27e398117e0bdf293b98d5c3d92b016",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_gas_swoop-generation-v1.png",
+      "source_sha256": "ef9232177ef73200c7a87f9dcea12751b0371fbe1d0620409910a624d3178ffe",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_ally_gas_swoop-nearest-4x.png",
+      "notes": "Slender gas-backed support silhouette, visually distinct from cannonball. Follow actual projectile, curve is inside sprite only.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_dash_compressed_gas": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_dash_compressed_gas.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 64,
+      "cell_w": 128,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        0,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "2b98594b8ad7b2c01ffd020e0074399bccc0bb7a794b17222f126a446070c394",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_compressed_gas-generation-v1.png",
+      "source_sha256": "03158c890789447628842a1688cf17c065839f04107d415f0ab4bf9fa7147d01",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_dash_compressed_gas-nearest-4x.png",
+      "notes": "Compressed gas tail following +X attack line, exact length/width from geometry.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_reentry_triple": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_reentry_triple.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "28cf33307a7caf4832e8b10bc17484336706d6f003de006bc5bdaefa329ebd4b",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_reentry_triple-generation-v1.png",
+      "source_sha256": "b27a5fca86b43f32be14105ab5692b6673832fc85c3155570c5004aa345ed72f",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_reentry_triple-nearest-4x.png",
+      "notes": "Three distinct angled blade contacts in same frame. No invented stagger for simultaneous core hit.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_ally_arrival_cut": {
+      "path": "res://assets/art/effects/vfx_remaining_v1/vfx_ally_arrival_cut.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "vfx_approved": false,
+      "source_method": "Original built-in imagegen raster; only transparent cell extraction, binary alpha, uniform nearest resize, explicit integer pivot, palette24 remap and atlas packing. No vector, code-drawn art, silhouette masks, or third-party art.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "78f9027c998f35a827475a0dfc7355bbc17795a22c4b8e9c388adf601ccdec40",
+      "source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_arrival_cut-generation-v1.png",
+      "source_sha256": "baab61dfd3e135a974b2421e3c80026a8b7c01a38f1d0d4714d636c6dafdb5f7",
+      "preview_path": "assets/art/effects/vfx_remaining_v1/previews/vfx_ally_arrival_cut-nearest-4x.png",
+      "notes": "Arrival blade contact, never cannon explosion; zero splash uses small contact footprint.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    }
+  },
+  "packing_audit": {
+    "vfx_dash_cross_tip": {
+      "source_sha256": "03f674a8f9d5bdf0c57f8faf732cdb64e1194c6da19e45e1dea9ce363daf5e99",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.095,
+      "palette_sha256": "4f919cc03a71fb108719277a8d6407e38e96357a25712bebe02dfc58c5200c65",
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "transparent_grid_boundaries_after_alpha_threshold": true,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap cell extraction",
+        "hard alpha threshold 50 percent",
+        "uniform-scale nearest-neighbor resize",
+        "explicit integer pivot registration",
+        "24-color nearest palette remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes source pixel count; clipping zero is boundary retention, not one-to-one high-resolution pixel retention. Alpha below 128 is explicitly discarded and counted. No silhouettes are removed.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 4,
+          "integer_translation_px": [
+            -5,
+            -6
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 38648,
+          "alpha_threshold_pixels_discarded": 20568,
+          "source_hard_alpha_pixels": 18080,
+          "packed_opaque_pixel_count": 158,
+          "opaque_bbox_px": [
+            3,
+            3,
+            28,
+            28
+          ],
+          "sha256": "eb00df190deb0622a8ab81f2741fe39229711332c530b7fa2c5e268d304922fe"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 31,
+          "integer_translation_px": [
+            -5,
+            -6
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 32396,
+          "alpha_threshold_pixels_discarded": 20493,
+          "source_hard_alpha_pixels": 11903,
+          "packed_opaque_pixel_count": 110,
+          "opaque_bbox_px": [
+            4,
+            4,
+            28,
+            27
+          ],
+          "sha256": "f85485019133e1e3d7f70ffbddc8327e4663a531fd1ddc19d04fb1e15bd77677"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 73,
+          "integer_translation_px": [
+            -5,
+            -6
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 29711,
+          "alpha_threshold_pixels_discarded": 21484,
+          "source_hard_alpha_pixels": 8227,
+          "packed_opaque_pixel_count": 70,
+          "opaque_bbox_px": [
+            5,
+            5,
+            27,
+            26
+          ],
+          "sha256": "e7c85a4364f56795af18f02c33993f3cc4bc363334b6070d040ce22f673304fb"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 36,
+          "integer_translation_px": [
+            -5,
+            -6
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 22114,
+          "alpha_threshold_pixels_discarded": 16086,
+          "source_hard_alpha_pixels": 6028,
+          "packed_opaque_pixel_count": 59,
+          "opaque_bbox_px": [
+            7,
+            7,
+            25,
+            24
+          ],
+          "sha256": "247b6ef4872dd8db3b76adbd0603eff7ccc40f0392ac3d9be2c4ffa9d8c3a299"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 9,
+          "integer_translation_px": [
+            -5,
+            -5
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 18395,
+          "alpha_threshold_pixels_discarded": 13961,
+          "source_hard_alpha_pixels": 4434,
+          "packed_opaque_pixel_count": 35,
+          "opaque_bbox_px": [
+            8,
+            8,
+            25,
+            24
+          ],
+          "sha256": "faabb591910dfd7f65fff63777273246fd0cedf6afa3f49ed21e36f52033f494"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 50,
+          "integer_translation_px": [
+            -5,
+            -5
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 14313,
+          "alpha_threshold_pixels_discarded": 11516,
+          "source_hard_alpha_pixels": 2797,
+          "packed_opaque_pixel_count": 19,
+          "opaque_bbox_px": [
+            12,
+            11,
+            23,
+            24
+          ],
+          "sha256": "64e6f96a2e19595a65be38a429849ab9c49c54cc4408d37cd417c528caa3a639"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 75,
+          "integer_translation_px": [
+            -5,
+            -5
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 16288,
+          "alpha_threshold_pixels_discarded": 14001,
+          "source_hard_alpha_pixels": 2287,
+          "packed_opaque_pixel_count": 20,
+          "opaque_bbox_px": [
+            9,
+            10,
+            23,
+            24
+          ],
+          "sha256": "1fc47fa07198862f49b8ebcefb5a082db4a05ffa817864865331443111833aac"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 25,
+          "integer_translation_px": [
+            -5,
+            -5
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 11372,
+          "alpha_threshold_pixels_discarded": 9599,
+          "source_hard_alpha_pixels": 1773,
+          "packed_opaque_pixel_count": 19,
+          "opaque_bbox_px": [
+            11,
+            11,
+            23,
+            24
+          ],
+          "sha256": "3819c5ce974c467f0cf5f7718c1b314e7a1649121d7a5f5c8e9403f4eb041793"
+        }
+      ]
+    },
+    "vfx_ally_gas_swoop": {
+      "source_sha256": "ef9232177ef73200c7a87f9dcea12751b0371fbe1d0620409910a624d3178ffe",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.08,
+      "palette_sha256": "4f919cc03a71fb108719277a8d6407e38e96357a25712bebe02dfc58c5200c65",
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "transparent_grid_boundaries_after_alpha_threshold": true,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap cell extraction",
+        "hard alpha threshold 50 percent",
+        "uniform-scale nearest-neighbor resize",
+        "explicit integer pivot registration",
+        "24-color nearest palette remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes source pixel count; clipping zero is boundary retention, not one-to-one high-resolution pixel retention. Alpha below 128 is explicitly discarded and counted. No silhouettes are removed.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 2,
+          "source_grid_edge_subthreshold_count": 69,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 39824,
+          "alpha_threshold_pixels_discarded": 19217,
+          "source_hard_alpha_pixels": 20607,
+          "packed_opaque_pixel_count": 135,
+          "opaque_bbox_px": [
+            1,
+            11,
+            30,
+            21
+          ],
+          "sha256": "c52f79885c28cdbf0c59869c34a811a92691254c88ee6999f92764fe178590c2"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 46,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 42308,
+          "alpha_threshold_pixels_discarded": 23170,
+          "source_hard_alpha_pixels": 19138,
+          "packed_opaque_pixel_count": 118,
+          "opaque_bbox_px": [
+            1,
+            11,
+            29,
+            21
+          ],
+          "sha256": "eba6836f528a22d249346c59774ccfd72c71ad61b4725e1bd6c5d6289e8a0f00"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 69,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 44736,
+          "alpha_threshold_pixels_discarded": 23643,
+          "source_hard_alpha_pixels": 21093,
+          "packed_opaque_pixel_count": 134,
+          "opaque_bbox_px": [
+            0,
+            11,
+            29,
+            21
+          ],
+          "sha256": "f086d88ff0ef97a9c1871be30fd406ad98a995f67ee35ac50f2ed1116f199dcd"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 30,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 38987,
+          "alpha_threshold_pixels_discarded": 18231,
+          "source_hard_alpha_pixels": 20756,
+          "packed_opaque_pixel_count": 134,
+          "opaque_bbox_px": [
+            2,
+            12,
+            30,
+            21
+          ],
+          "sha256": "f9a54ddcdb20a222e934d51ae4fdbe5111bf2a8479aafc6b2530656e89256133"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 46,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 36885,
+          "alpha_threshold_pixels_discarded": 17550,
+          "source_hard_alpha_pixels": 19335,
+          "packed_opaque_pixel_count": 127,
+          "opaque_bbox_px": [
+            1,
+            11,
+            30,
+            21
+          ],
+          "sha256": "c4790d7c78778881c5923678355482bd00fb6684d50fb6ab19f56ba623095022"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 108,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 40868,
+          "alpha_threshold_pixels_discarded": 19919,
+          "source_hard_alpha_pixels": 20949,
+          "packed_opaque_pixel_count": 137,
+          "opaque_bbox_px": [
+            1,
+            10,
+            29,
+            21
+          ],
+          "sha256": "f0b8d0d6d7d19d38530efaed8600b4562ed8420084f55a92118585f731fa4c0d"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 73,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 41559,
+          "alpha_threshold_pixels_discarded": 21756,
+          "source_hard_alpha_pixels": 19803,
+          "packed_opaque_pixel_count": 125,
+          "opaque_bbox_px": [
+            0,
+            11,
+            29,
+            21
+          ],
+          "sha256": "c6cb9071512f0d1467f35cf6a3beeecea702d4ecb68a2451b471a8bf6249ff9b"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_local_pivot": [
+            222,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 20,
+          "integer_translation_px": [
+            -2,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 38502,
+          "alpha_threshold_pixels_discarded": 19110,
+          "source_hard_alpha_pixels": 19392,
+          "packed_opaque_pixel_count": 130,
+          "opaque_bbox_px": [
+            2,
+            11,
+            30,
+            21
+          ],
+          "sha256": "c28233fc99c00f0818f43e8c2b3505325a81b2457b1ffe49c9765ddd8154f48a"
+        }
+      ]
+    },
+    "vfx_dash_compressed_gas": {
+      "source_sha256": "03158c890789447628842a1688cf17c065839f04107d415f0ab4bf9fa7147d01",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.32,
+      "palette_sha256": "4f919cc03a71fb108719277a8d6407e38e96357a25712bebe02dfc58c5200c65",
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "transparent_grid_boundaries_after_alpha_threshold": true,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap cell extraction",
+        "hard alpha threshold 50 percent",
+        "uniform-scale nearest-neighbor resize",
+        "explicit integer pivot registration",
+        "24-color nearest palette remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes source pixel count; clipping zero is boundary retention, not one-to-one high-resolution pixel retention. Alpha below 128 is explicitly discarded and counted. No silhouettes are removed.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_local_pivot": [
+            44,
+            225
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 79,
+          "integer_translation_px": [
+            -14,
+            -56
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 23503,
+          "alpha_threshold_pixels_discarded": 8329,
+          "source_hard_alpha_pixels": 15174,
+          "packed_opaque_pixel_count": 1573,
+          "opaque_bbox_px": [
+            0,
+            6,
+            123,
+            27
+          ],
+          "sha256": "84d7b064af61902d48f425dd2f53376f7173d0b84a9180a20a521782735ce361"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_local_pivot": [
+            39,
+            225
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 133,
+          "integer_translation_px": [
+            -12,
+            -56
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 24185,
+          "alpha_threshold_pixels_discarded": 9010,
+          "source_hard_alpha_pixels": 15175,
+          "packed_opaque_pixel_count": 1554,
+          "opaque_bbox_px": [
+            1,
+            6,
+            122,
+            27
+          ],
+          "sha256": "2200c4aab014611e941cde268272bdce858d659a31bf7ac2cebf2cddb12b3e07"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_local_pivot": [
+            35,
+            225
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 125,
+          "integer_translation_px": [
+            -11,
+            -56
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 25015,
+          "alpha_threshold_pixels_discarded": 9891,
+          "source_hard_alpha_pixels": 15124,
+          "packed_opaque_pixel_count": 1574,
+          "opaque_bbox_px": [
+            0,
+            6,
+            122,
+            27
+          ],
+          "sha256": "2b7d16fa010fe2ddc40fca6a4b64e38966fbe8a1ff5b49aed3478470f6cc4e1d"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_local_pivot": [
+            32,
+            225
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 66,
+          "integer_translation_px": [
+            -10,
+            -56
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 22457,
+          "alpha_threshold_pixels_discarded": 9363,
+          "source_hard_alpha_pixels": 13094,
+          "packed_opaque_pixel_count": 1374,
+          "opaque_bbox_px": [
+            0,
+            6,
+            121,
+            27
+          ],
+          "sha256": "efbd3badd7d50288702a3dfa036a7751354a580dd5fdd482454999525f5f10c6"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_local_pivot": [
+            43,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 144,
+          "integer_translation_px": [
+            -14,
+            -55
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 20598,
+          "alpha_threshold_pixels_discarded": 8937,
+          "source_hard_alpha_pixels": 11661,
+          "packed_opaque_pixel_count": 1200,
+          "opaque_bbox_px": [
+            0,
+            7,
+            123,
+            25
+          ],
+          "sha256": "0fdde98e76d61e6765ec3d95f9add054f49f024f28b3ff58bf2118d4a48174be"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_local_pivot": [
+            39,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 262,
+          "integer_translation_px": [
+            -12,
+            -55
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 18996,
+          "alpha_threshold_pixels_discarded": 9949,
+          "source_hard_alpha_pixels": 9047,
+          "packed_opaque_pixel_count": 940,
+          "opaque_bbox_px": [
+            1,
+            7,
+            122,
+            25
+          ],
+          "sha256": "ee60ce7be0339a62ebcbc9811f2335eb0496428e75aa7397e51d86bf98c81fb7"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_local_pivot": [
+            35,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 254,
+          "integer_translation_px": [
+            -11,
+            -55
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 17053,
+          "alpha_threshold_pixels_discarded": 9594,
+          "source_hard_alpha_pixels": 7459,
+          "packed_opaque_pixel_count": 762,
+          "opaque_bbox_px": [
+            0,
+            7,
+            122,
+            25
+          ],
+          "sha256": "3964b9fbffc31643f45cc27afce7bc050b4810d4e1e191d07306cf0f25743c05"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_local_pivot": [
+            32,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 172,
+          "integer_translation_px": [
+            -10,
+            -55
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 16340,
+          "alpha_threshold_pixels_discarded": 8964,
+          "source_hard_alpha_pixels": 7376,
+          "packed_opaque_pixel_count": 752,
+          "opaque_bbox_px": [
+            0,
+            7,
+            121,
+            25
+          ],
+          "sha256": "a41ff2983697ed34a715f81d7053d58b0cba46857550dbdf183985f2b5ca8b6c"
+        }
+      ]
+    },
+    "vfx_reentry_triple": {
+      "source_sha256": "b27a5fca86b43f32be14105ab5692b6673832fc85c3155570c5004aa345ed72f",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.26,
+      "palette_sha256": "4f919cc03a71fb108719277a8d6407e38e96357a25712bebe02dfc58c5200c65",
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "transparent_grid_boundaries_after_alpha_threshold": true,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap cell extraction",
+        "hard alpha threshold 50 percent",
+        "uniform-scale nearest-neighbor resize",
+        "explicit integer pivot registration",
+        "24-color nearest palette remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes source pixel count; clipping zero is boundary retention, not one-to-one high-resolution pixel retention. Alpha below 128 is explicitly discarded and counted. No silhouettes are removed.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            500
+          ],
+          "source_local_pivot": [
+            224,
+            248
+          ],
+          "source_grid_edge_max_alpha": 81,
+          "source_grid_edge_subthreshold_count": 69,
+          "integer_translation_px": [
+            6,
+            0
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 96086,
+          "alpha_threshold_pixels_discarded": 61448,
+          "source_hard_alpha_pixels": 34638,
+          "packed_opaque_pixel_count": 2360,
+          "opaque_bbox_px": [
+            12,
+            12,
+            121,
+            118
+          ],
+          "sha256": "eb3d0cbf2636dc1687338fbdee0e6b01f37c8b9181a48189a002ebb8608cbf31"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            500
+          ],
+          "source_local_pivot": [
+            227,
+            250
+          ],
+          "source_grid_edge_max_alpha": 4,
+          "source_grid_edge_subthreshold_count": 108,
+          "integer_translation_px": [
+            5,
+            -1
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 68481,
+          "alpha_threshold_pixels_discarded": 45605,
+          "source_hard_alpha_pixels": 22876,
+          "packed_opaque_pixel_count": 1562,
+          "opaque_bbox_px": [
+            20,
+            24,
+            111,
+            104
+          ],
+          "sha256": "b14c70e85e54e30244c966155ed23a1458516e19350e5de4a0bbf001b5295d2c"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            500
+          ],
+          "source_local_pivot": [
+            226,
+            254
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 91,
+          "integer_translation_px": [
+            5,
+            -2
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 53316,
+          "alpha_threshold_pixels_discarded": 40669,
+          "source_hard_alpha_pixels": 12647,
+          "packed_opaque_pixel_count": 875,
+          "opaque_bbox_px": [
+            32,
+            35,
+            97,
+            94
+          ],
+          "sha256": "fcf7b781f1b7990df01c47cb03d7357c85b48684f032151240c3a599d6375f63"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            500
+          ],
+          "source_local_pivot": [
+            222,
+            256
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 105,
+          "integer_translation_px": [
+            6,
+            -3
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 34739,
+          "alpha_threshold_pixels_discarded": 27780,
+          "source_hard_alpha_pixels": 6959,
+          "packed_opaque_pixel_count": 481,
+          "opaque_bbox_px": [
+            37,
+            40,
+            89,
+            85
+          ],
+          "sha256": "4203922b96f49ffa94c3cdd5ca9b57ff458c400efab6b06f2d83be9294d40a4b"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            500,
+            444,
+            887
+          ],
+          "source_local_pivot": [
+            223,
+            178
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 57,
+          "integer_translation_px": [
+            6,
+            18
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 28400,
+          "alpha_threshold_pixels_discarded": 19705,
+          "source_hard_alpha_pixels": 8695,
+          "packed_opaque_pixel_count": 596,
+          "opaque_bbox_px": [
+            41,
+            38,
+            91,
+            88
+          ],
+          "sha256": "92972150113576bbad6326ee428b4491148ad1740eb85e8e156ade66112f7800"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            500,
+            887,
+            887
+          ],
+          "source_local_pivot": [
+            226,
+            178
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 62,
+          "integer_translation_px": [
+            5,
+            18
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 22724,
+          "alpha_threshold_pixels_discarded": 17525,
+          "source_hard_alpha_pixels": 5199,
+          "packed_opaque_pixel_count": 364,
+          "opaque_bbox_px": [
+            44,
+            45,
+            84,
+            82
+          ],
+          "sha256": "b9a4fd11ff417d4aeec03d19f1f486a9e7e0935bda4fa69fa87a8bbdcbb31ca3"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            500,
+            1330,
+            887
+          ],
+          "source_local_pivot": [
+            226,
+            181
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 79,
+          "integer_translation_px": [
+            5,
+            17
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 20668,
+          "alpha_threshold_pixels_discarded": 16886,
+          "source_hard_alpha_pixels": 3782,
+          "packed_opaque_pixel_count": 266,
+          "opaque_bbox_px": [
+            48,
+            47,
+            80,
+            78
+          ],
+          "sha256": "5d467123d59b739b2faf4e38aedaa15b100d59971a589b0e94e57b60ef63c126"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            500,
+            1774,
+            887
+          ],
+          "source_local_pivot": [
+            225,
+            182
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 93,
+          "integer_translation_px": [
+            6,
+            17
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 15856,
+          "alpha_threshold_pixels_discarded": 13390,
+          "source_hard_alpha_pixels": 2466,
+          "packed_opaque_pixel_count": 170,
+          "opaque_bbox_px": [
+            51,
+            51,
+            76,
+            74
+          ],
+          "sha256": "ed0ed9f26bafc26df7eaa27c50cf33b3520d7172af5c4b8a7d003ffceae19eb2"
+        }
+      ]
+    },
+    "vfx_ally_arrival_cut": {
+      "source_sha256": "baab61dfd3e135a974b2421e3c80026a8b7c01a38f1d0d4714d636c6dafdb5f7",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.16,
+      "palette_sha256": "4f919cc03a71fb108719277a8d6407e38e96357a25712bebe02dfc58c5200c65",
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "transparent_grid_boundaries_after_alpha_threshold": true,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap cell extraction",
+        "hard alpha threshold 50 percent",
+        "uniform-scale nearest-neighbor resize",
+        "explicit integer pivot registration",
+        "24-color nearest palette remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes source pixel count; clipping zero is boundary retention, not one-to-one high-resolution pixel retention. Alpha below 128 is explicitly discarded and counted. No silhouettes are removed.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_local_pivot": [
+            395,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 12,
+          "integer_translation_px": [
+            1,
+            27
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 63862,
+          "alpha_threshold_pixels_discarded": 27587,
+          "source_hard_alpha_pixels": 36275,
+          "packed_opaque_pixel_count": 931,
+          "opaque_bbox_px": [
+            10,
+            35,
+            65,
+            92
+          ],
+          "sha256": "072c032e33e476cb13328d686038d16c53e585a7909f4a906221c5d60f7256a9"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_local_pivot": [
+            375,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 82,
+          "integer_translation_px": [
+            4,
+            27
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 52741,
+          "alpha_threshold_pixels_discarded": 25435,
+          "source_hard_alpha_pixels": 27306,
+          "packed_opaque_pixel_count": 703,
+          "opaque_bbox_px": [
+            14,
+            38,
+            65,
+            88
+          ],
+          "sha256": "4d85e6d0c081a8727dac7963d0ce9140b10d0a2f62d578284f53012d0cf51bd5"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_local_pivot": [
+            363,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 37,
+          "integer_translation_px": [
+            6,
+            27
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 43577,
+          "alpha_threshold_pixels_discarded": 22308,
+          "source_hard_alpha_pixels": 21269,
+          "packed_opaque_pixel_count": 540,
+          "opaque_bbox_px": [
+            20,
+            42,
+            65,
+            86
+          ],
+          "sha256": "1393cef64eae3a064b3f6766c7e9b9a4fb1069c8047f80b60a75b1abd3d65ae3"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_local_pivot": [
+            347,
+            230
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 27,
+          "integer_translation_px": [
+            8,
+            27
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 32218,
+          "alpha_threshold_pixels_discarded": 17340,
+          "source_hard_alpha_pixels": 14878,
+          "packed_opaque_pixel_count": 378,
+          "opaque_bbox_px": [
+            23,
+            44,
+            64,
+            85
+          ],
+          "sha256": "50b48a06c51c9b1a5c264d9dd7f69927a1b089e6c87009f8b6da3d6265d0407f"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_local_pivot": [
+            337,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 88,
+          "integer_translation_px": [
+            10,
+            28
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 28222,
+          "alpha_threshold_pixels_discarded": 15069,
+          "source_hard_alpha_pixels": 13153,
+          "packed_opaque_pixel_count": 335,
+          "opaque_bbox_px": [
+            27,
+            44,
+            65,
+            81
+          ],
+          "sha256": "872adc4ed6ef5a366d7fdd090f5cebf4b3489e939e4cd543c1187ab62e5247e0"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_local_pivot": [
+            324,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 90,
+          "integer_translation_px": [
+            12,
+            28
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 24680,
+          "alpha_threshold_pixels_discarded": 15551,
+          "source_hard_alpha_pixels": 9129,
+          "packed_opaque_pixel_count": 225,
+          "opaque_bbox_px": [
+            34,
+            48,
+            65,
+            78
+          ],
+          "sha256": "dca17614b5dcc274af9f9d22f9d53172dfa3eed237fd7e1b69f52fc2b8ad89ac"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_local_pivot": [
+            316,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 43,
+          "integer_translation_px": [
+            13,
+            28
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 19022,
+          "alpha_threshold_pixels_discarded": 12281,
+          "source_hard_alpha_pixels": 6741,
+          "packed_opaque_pixel_count": 174,
+          "opaque_bbox_px": [
+            36,
+            50,
+            65,
+            76
+          ],
+          "sha256": "c4967017e8603d7044c7eb266eeba9ce6460150634d5aaf1b1af3eb29ef7207f"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_local_pivot": [
+            308,
+            222
+          ],
+          "source_grid_edge_max_alpha": 1,
+          "source_grid_edge_subthreshold_count": 67,
+          "integer_translation_px": [
+            15,
+            28
+          ],
+          "opaque_pixels_clipped": 0,
+          "source_nonzero_alpha_pixels": 14872,
+          "alpha_threshold_pixels_discarded": 10430,
+          "source_hard_alpha_pixels": 4442,
+          "packed_opaque_pixel_count": 113,
+          "opaque_bbox_px": [
+            43,
+            53,
+            65,
+            74
+          ],
+          "sha256": "d3e5907ea76d4f1581527dc36f5eb883a85b0b5c72f64025c06e966126cacf67"
+        }
+      ]
+    }
+  }
+}

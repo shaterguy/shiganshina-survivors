@@ -1,0 +1,52 @@
+{
+  "generation_method": "built-in image_gen.imagegen",
+  "transparent_background": true,
+  "source_images_are_untouched": true,
+  "assets": {
+    "vfx_dash_cross_tip": {
+      "original_generation_file": "/workspace/scratch/94c3b29a9648/generated_images/exec-0b07e813-2878-46f3-815c-50dbacef2367.png",
+      "archived_source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_cross_tip-generation-v1.png",
+      "source_sha256": "03f674a8f9d5bdf0c57f8faf732cdb64e1194c6da19e45e1dea9ce363daf5e99",
+      "prompt_sha256": "52a878f384e0b231b99f76c3ec6b2693de18c967cfd4b16ca8bfc90f37caaba2",
+      "prompt_key": "vfx_dash_cross_tip",
+      "source_copy_byte_identity": "MATCHED",
+      "atlas_sha256": "9fb80cbd31ba872a03c125095401311a435fbb2057ba631c0dfdd16128d550b9"
+    },
+    "vfx_ally_gas_swoop": {
+      "original_generation_file": "/workspace/scratch/94c3b29a9648/generated_images/exec-99d288b1-3147-46af-8d36-c79a4390408e.png",
+      "archived_source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_gas_swoop-generation-v1.png",
+      "source_sha256": "ef9232177ef73200c7a87f9dcea12751b0371fbe1d0620409910a624d3178ffe",
+      "prompt_sha256": "6f506554853fc167936180b54488eb4cebe8e1c7022b39fd9bb2ebe8146d8d9f",
+      "prompt_key": "vfx_ally_gas_swoop",
+      "source_copy_byte_identity": "MATCHED",
+      "atlas_sha256": "544abe2cd5c3a0a2ba61d9a785eae248b27e398117e0bdf293b98d5c3d92b016"
+    },
+    "vfx_dash_compressed_gas": {
+      "original_generation_file": "/workspace/scratch/94c3b29a9648/generated_images/exec-7cd31549-a2e6-483f-8b25-0ffd86964f44.png",
+      "archived_source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_dash_compressed_gas-generation-v1.png",
+      "source_sha256": "03158c890789447628842a1688cf17c065839f04107d415f0ab4bf9fa7147d01",
+      "prompt_sha256": "719e077538c8c983045f90772d2eff87579c52ecbb346e0194175cced2478ea5",
+      "prompt_key": "vfx_dash_compressed_gas",
+      "source_copy_byte_identity": "MATCHED",
+      "atlas_sha256": "2b98594b8ad7b2c01ffd020e0074399bccc0bb7a794b17222f126a446070c394"
+    },
+    "vfx_reentry_triple": {
+      "original_generation_file": "/workspace/scratch/94c3b29a9648/generated_images/exec-3d286020-5e83-47ac-b985-a7268b556b29.png",
+      "archived_source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_reentry_triple-generation-v1.png",
+      "source_sha256": "b27a5fca86b43f32be14105ab5692b6673832fc85c3155570c5004aa345ed72f",
+      "prompt_sha256": "0493e75a3c9a5b6440a5b5bbcf6a5387da2b0fa977763f2a61a55f87a2d2c764",
+      "prompt_key": "vfx_reentry_triple",
+      "source_copy_byte_identity": "MATCHED",
+      "atlas_sha256": "28cf33307a7caf4832e8b10bc17484336706d6f003de006bc5bdaefa329ebd4b"
+    },
+    "vfx_ally_arrival_cut": {
+      "original_generation_file": "/workspace/scratch/94c3b29a9648/generated_images/exec-ecd75af7-a2a8-4bdc-9549-0c150d1d0c99.png",
+      "archived_source_path": "assets/art/effects/vfx_remaining_v1/source/vfx_ally_arrival_cut-generation-v1.png",
+      "source_sha256": "baab61dfd3e135a974b2421e3c80026a8b7c01a38f1d0d4714d636c6dafdb5f7",
+      "prompt_sha256": "04ab38883c29a33fba02f83a3ed1a0a0b817ececef7a24e0264ad97048619855",
+      "prompt_key": "vfx_ally_arrival_cut",
+      "source_copy_byte_identity": "MATCHED",
+      "atlas_sha256": "78f9027c998f35a827475a0dfc7355bbc17795a22c4b8e9c388adf601ccdec40"
+    }
+  }
+}

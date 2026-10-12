@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "scope": "Five isolated candidate rasters only; no runtime, native render or final-art approval",
+  "checks": [
+    {
+      "art_id": "vfx_ally_arrival_cut",
+      "atlas_sha256": "78f9027c998f35a827475a0dfc7355bbc17795a22c4b8e9c388adf601ccdec40",
+      "source_sha256": "baab61dfd3e135a974b2421e3c80026a8b7c01a38f1d0d4714d636c6dafdb5f7",
+      "visible_palette_colors": 9,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "nonblank_unique_frames": 8,
+      "bounds_and_pivot_contract": "PASS",
+      "source_sha": "PASS",
+      "atlas_and_all_frames_reproduce_byte_identically": "PASS",
+      "opaque_clipping_pixels": 0,
+      "geometry_mask_pixels_removed": 0
+    },
+    {
+      "art_id": "vfx_ally_gas_swoop",
+      "atlas_sha256": "544abe2cd5c3a0a2ba61d9a785eae248b27e398117e0bdf293b98d5c3d92b016",
+      "source_sha256": "ef9232177ef73200c7a87f9dcea12751b0371fbe1d0620409910a624d3178ffe",
+      "visible_palette_colors": 9,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "nonblank_unique_frames": 8,
+      "bounds_and_pivot_contract": "PASS",
+      "source_sha": "PASS",
+      "atlas_and_all_frames_reproduce_byte_identically": "PASS",
+      "opaque_clipping_pixels": 0,
+      "geometry_mask_pixels_removed": 0
+    },
+    {
+      "art_id": "vfx_dash_compressed_gas",
+      "atlas_sha256": "2b98594b8ad7b2c01ffd020e0074399bccc0bb7a794b17222f126a446070c394",
+      "source_sha256": "03158c890789447628842a1688cf17c065839f04107d415f0ab4bf9fa7147d01",
+      "visible_palette_colors": 9,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "nonblank_unique_frames": 8,
+      "bounds_and_pivot_contract": "PASS",
+      "source_sha": "PASS",
+      "atlas_and_all_frames_reproduce_byte_identically": "PASS",
+      "opaque_clipping_pixels": 0,
+      "geometry_mask_pixels_removed": 0
+    },
+    {
+      "art_id": "vfx_dash_cross_tip",
+      "atlas_sha256": "9fb80cbd31ba872a03c125095401311a435fbb2057ba631c0dfdd16128d550b9",
+      "source_sha256": "03f674a8f9d5bdf0c57f8faf732cdb64e1194c6da19e45e1dea9ce363daf5e99",
+      "visible_palette_colors": 6,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "nonblank_unique_frames": 8,
+      "bounds_and_pivot_contract": "PASS",
+      "source_sha": "PASS",
+      "atlas_and_all_frames_reproduce_byte_identically": "PASS",
+      "opaque_clipping_pixels": 0,
+      "geometry_mask_pixels_removed": 0
+    },
+    {
+      "art_id": "vfx_reentry_triple",
+      "atlas_sha256": "28cf33307a7caf4832e8b10bc17484336706d6f003de006bc5bdaefa329ebd4b",
+      "source_sha256": "b27a5fca86b43f32be14105ab5692b6673832fc85c3155570c5004aa345ed72f",
+      "visible_palette_colors": 9,
+      "alpha_values": [
+        0,
+        255
+      ],
+      "nonblank_unique_frames": 8,
+      "bounds_and_pivot_contract": "PASS",
+      "source_sha": "PASS",
+      "atlas_and_all_frames_reproduce_byte_identically": "PASS",
+      "opaque_clipping_pixels": 0,
+      "geometry_mask_pixels_removed": 0
+    }
+  ],
+  "python": "3.12.14",
+  "pillow": "12.3.0",
+  "imagemagick": "Version: ImageMagick 7.1.1-43 Q16 x86_64 22550 https://imagemagick.org",
+  "packer_sha256": "f7605e3b6a82e2df29cb5ee6f53da0a429ac6eb202b78fec38b625d75c4afcd4",
+  "settings_sha256": "9e597846836c3d0dd0aa828fe0e85c559c575c502ade205e14eac442afcb5559",
+  "contract_sha256": "1cb083d31053d71098eb3ff382cd86dc1a368e046404d8cfa1570406f2a52daf"
+}

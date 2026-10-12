@@ -39,6 +39,13 @@ func consume(events: Array[Dictionary], snapshot: Dictionary) -> void:
 	_prune(int(snapshot.get("active_tick",0)),snapshot)
 	var ordered := events.duplicate()
 	ordered.sort_custom(func(a,b): return _sequence(a) < _sequence(b))
+	# A targeted triple is hit feedback, not a player-centered range disk.
+	# Resolve only this successful batch's positive damage receipt, including kills.
+	var reentry_contacts: Dictionary = {}
+	for event in ordered:
+		var hit: Dictionary = event.get("payload",{})
+		if event.get("type") == "damage" and hit.get("source_id") == "reentry_combo" and float(hit.get("amount",0.0)) > 0.0 and hit.has("position") and _sequence(event) > _event_seq and str(event.get("event_id","")).begins_with(_run_id+":"):
+			reentry_contacts[str(hit.get("attack_id",""))] = hit
 	for event in ordered:
 		var seq := _sequence(event)
 		if seq <= _event_seq or not str(event.get("event_id","")).begins_with(_run_id+":"): continue
@@ -46,7 +53,7 @@ func consume(events: Array[Dictionary], snapshot: Dictionary) -> void:
 		var payload: Dictionary = event.get("payload",{})
 		var tick := int(event.get("tick",snapshot.get("active_tick",0)))
 		match str(event.get("type","")):
-			"player_attack": _attack(payload,tick,snapshot)
+			"player_attack": _attack(payload,tick,snapshot,reentry_contacts.get(str(payload.get("attack_id","")),{}))
 			"projectile_impact": _projectile_impact(payload,tick,snapshot)
 			"damage": _damage(payload,tick)
 	_enforce_capacity(int(snapshot.get("active_tick",0)))
@@ -74,7 +81,7 @@ func present(snapshot: Dictionary) -> Array[Dictionary]:
 			effect.geometry.origin = _array(effect.origin)
 			effect.direction = _vec(effect.flight_start).direction_to(_vec(effect.flight_target))
 		var target_id = effect.geometry.get("target_id",null)
-		if target_id != null and effect.get("base_item_id","") != "chain_lightning":
+		if target_id != null and effect.get("base_item_id","") != "chain_lightning" and not effect.has("contact_position"):
 			var target := _target(snapshot,target_id)
 			# Only the core's explicit live target address supplies an actual hook.
 			if not target.is_empty(): effect.geometry.wire_anchor = target.position.duplicate()
@@ -87,6 +94,7 @@ func rebase(offset: Vector2, origin_revision: int) -> void:
 	for effect in _effects:
 		if effect.coordinate_space == "world":
 			effect.origin = _vec(effect.origin)-offset
+			if effect.has("contact_position"): effect.contact_position = _vec(effect.contact_position)-offset
 			for key in ["origin","position","wire_anchor","anchor"]:
 				if effect.geometry.has(key): effect.geometry[key] = _array(_vec(effect.geometry[key])-offset)
 			for key in ["flight_start","flight_target"]:
@@ -107,7 +115,7 @@ func _sync_run(snapshot: Dictionary, restoring: bool) -> void:
 		var world: Dictionary = snapshot.get("world",{})
 		_origin_revision = int(world.get("origin_revision",snapshot.get("origin_revision",0)))
 		_origin_initialized = true
-func _attack(payload: Dictionary, tick: int, snapshot: Dictionary) -> void:
+func _attack(payload: Dictionary, tick: int, snapshot: Dictionary, contact: Dictionary = {}) -> void:
 	var phase := str(payload.get("phase",""))
 	var base := str(payload.get("base_item_id",""))
 	var evo := str(payload.get("evolution_id",""))
@@ -118,6 +126,7 @@ func _attack(payload: Dictionary, tick: int, snapshot: Dictionary) -> void:
 		_schedule_crossfire(payload,snapshot)
 		return
 	if phase != "executed": return
+	if base == "reentry_combo" and (contact.is_empty() or str(contact.get("target_id","")) != str(geometry.get("target_id",""))): return
 	var attack_id := str(payload.get("attack_id",""))
 	_remove_attack_role(attack_id,"aim")
 	_remove_attack_role(attack_id,"projectile")
@@ -129,6 +138,7 @@ func _attack(payload: Dictionary, tick: int, snapshot: Dictionary) -> void:
 		_diagnostic("missing_recipe:"+base+"|"+evo+"|"+recipe_phase)
 		return
 	var effect := _make_effect(recipe,payload,tick)
+	if base == "reentry_combo": effect.contact_position = _vec(contact.position)
 	effect.intensity_tier = _level_tier(int(payload.cast_level)) if payload.has("cast_level") else _tier(snapshot,base)
 	if recipe_phase == "projectile":
 		effect.projectile_id = geometry.get("projectile_id",-1)

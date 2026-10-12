@@ -127,6 +127,10 @@
               "reduce_mode": "preserve",
               "render_pass": "world"
             }
+          ],
+          "presentation_size_px": [
+            36,
+            36
           ]
         }
       }
