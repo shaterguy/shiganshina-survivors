@@ -746,10 +746,7 @@ func _advance_enemy_action(state: Dictionary, entity: Dictionary, events: Array[
 	if entity.action_state == "move":
 		if profile.kind != "none" and tick >= int(entity.next_action_tick) and position.distance_to(player) <= float(profile.trigger_range) and _start_enemy_action(state,entity,profile,events):
 			return
-		var direction := _direction_world(state,position,player,float(entity.radius),str(entity.id),movement_targets)
-		entity.velocity = _array(direction*float(entity.speed))
-		entity.position = _array(_move_world(state,position,_vec(entity.velocity)/TICKS_PER_SECOND,float(entity.radius)))
-		if not direction.is_zero_approx(): entity.facing = _array(direction)
+		_move_pursuing_enemy(state,entity,movement_targets)
 		return
 	if entity.action_state == "windup" and tick >= int(entity.action_ends_tick):
 		var action := "airborne" if entity.attack_kind == "leap" else "attack"
@@ -2029,7 +2026,31 @@ func _movement_target(state: Dictionary, target: Vector2, radius: float, cache: 
 	else:
 		cache.clear()
 	return result
-func _direction_world(state: Dictionary, point: Vector2, target: Vector2, radius: float, actor_id: String, movement_targets: Variant = null) -> Vector2:
+# Ordinary city pursuit may retain its saved velocity for at
+# most two ticks. This changes AI trajectories; it is not an equivalent cache.
+# No helper-local steering history participates in saved-state reconstruction.
+func _move_pursuing_enemy(state: Dictionary, entity: Dictionary, movement_targets: Variant = null) -> void:
+	var position := _vec(entity.position)
+	var target := _vec(state.player.position)
+	var speed := float(entity.speed)
+	var previous := _vec(entity.velocity)
+	var steering := {}
+	var tick := int(state.active_tick)
+	if state.has("world") and state.world.stage == "city" and entity.get("boss_id","") == "" and entity.enemy_id != FINAL_ENEMY_ID and entity.action_state == "move" and tick > int(entity.action_started_tick)+1 and speed > 0.0 and not previous.is_zero_approx() and absf(previous.length()-speed) <= 0.001 and (tick+str(entity.id).hash())%3 != 0:
+		steering = {"velocity":previous,"speed":speed}
+	var direction := _direction_world(state,position,target,float(entity.radius),str(entity.id),movement_targets,steering)
+	var velocity: Vector2 = previous if steering.get("reused",false) else direction*speed
+	var next := _move_world(state,position,velocity/TICKS_PER_SECOND,float(entity.radius))
+	if steering.get("reused",false) and next.distance_to(position+velocity/TICKS_PER_SECOND) > 0.00001 and _streamed.query_status().get("ok",false):
+		# Axis movement may shorten a clear diagonal sweep. Retry from the same
+		# original position and commit only the final authoritative movement.
+		direction = _direction_world(state,position,target,float(entity.radius),str(entity.id),movement_targets)
+		velocity = direction*speed
+		next = _move_world(state,position,velocity/TICKS_PER_SECOND,float(entity.radius))
+	entity.velocity = _array(velocity)
+	entity.position = _array(next)
+	if not direction.is_zero_approx(): entity.facing = _array(direction)
+func _direction_world(state: Dictionary, point: Vector2, target: Vector2, radius: float, actor_id: String, movement_targets: Variant = null, steering: Dictionary = {}) -> Vector2:
 	if not state.has("world") or state.world.stage == "dock": return _world.direction(point,target,radius,_finite_geometry(state))
 	var legal_target := _movement_target(state,target,radius,movement_targets)
 	if not is_finite(legal_target.x):
@@ -2043,6 +2064,12 @@ func _direction_world(state: Dictionary, point: Vector2, target: Vector2, radius
 	var direct: Dictionary = _streamed.sweep(point,legal_target-point,radius)
 	if not direct.get("ok",false): return Vector2.ZERO
 	if float(direct.fraction) == 1.0: return point.direction_to(legal_target)
+	if not steering.is_empty():
+		var continued: Dictionary = _streamed.sweep(point,steering.velocity/TICKS_PER_SECOND,radius)
+		if not continued.get("ok",false): return Vector2.ZERO
+		if float(continued.fraction) == 1.0:
+			steering.reused = true
+			return steering.velocity/float(steering.speed)
 	var result: Dictionary = _streamed.direction(point,legal_target,radius,int(state.active_tick),actor_id)
 	if not result.get("deferred",false): _tick_navigation.route_queries += 1
 	if result.get("blocked",false):
@@ -2117,10 +2144,7 @@ func _advance_role_attack(state: Dictionary, entity: Dictionary, _events: Array[
 			return
 	entity.role_wait_since = -1
 	entity.role_retry_tick = 0
-	var direction := _direction_world(state,position,player,float(entity.radius),str(entity.id),movement_targets)
-	entity.velocity = _array(direction*float(entity.speed))
-	entity.position = _array(_move_world(state,position,_vec(entity.velocity)/TICKS_PER_SECOND,float(entity.radius)))
-	if not direction.is_zero_approx(): entity.facing = _array(direction)
+	_move_pursuing_enemy(state,entity,movement_targets)
 func _admit_role_attacks(state: Dictionary, events: Array[Dictionary]) -> void:
 	if not _role_error.is_empty() or state.phase != "survival": return
 	var eligible: Array[Dictionary] = []
