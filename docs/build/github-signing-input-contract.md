@@ -1,7 +1,8 @@
 # GitHub DEV signing input contract
 
-This is a local candidate for signing an already built APK. It is not a
-configured or executed GitHub workflow. Builds, gameplay tests, and resource
+This is the dev4 contract for signing the already verified local APK. A
+main-only workflow candidate is prepared separately; actual remote execution
+and its selected certificate remain unverified until runner results return. Builds, gameplay tests, and resource
 validation remain local. GitHub performs only signing and directly related
 input, package, signature, and output integrity checks.
 
@@ -34,17 +35,20 @@ key recovery, or exporting a key to the local build environment. The repository
 is public, regardless of any old document calling it private.
 
 The new path requires `--github-new-dev --development-validation` and the
-separate, reviewed public file `docs/build/github-dev-signer-public.json`.
+separate public file `docs/build/github-dev-signer-public.json`, prepared in
+the approved runner from the selected registered signing Secret.
 The `.example.json` file is intentionally incomplete and is never loaded by
 the signer. Do not put secret values in either file.
 
 The public identity contains the exact repository, stable identity ID, package,
-JKS or PKCS12 key type, key alias, and SHA-256 of the selected public DER certificate. The
-fingerprint is established independently for the intended GitHub signing
-identity before signing. Do not learn an arbitrary certificate during signing
-and automatically accept it. `EXPECTED_CERT_SHA256` and `KEY_ALIAS`, if supplied,
-must agree with the reviewed public record. The new path never falls back to the
-historical certificate, key alias, or missing metadata.
+JKS or PKCS12 key type, key alias, and SHA-256 of the selected public DER
+certificate. The approved runner inspects only public certificate/alias/type
+metadata from the user-selected registered Secret and requires a unique private
+key entry. It does not retrieve private-key material through `getKey`/`getEntry`.
+The helper verifies that the signing input certificate and signed APK certificate
+match this selected identity. `EXPECTED_CERT_SHA256` and `KEY_ALIAS`, if supplied,
+must agree with that public record. No historical certificate or alias is used
+as a fallback or as a pin for this new package.
 
 `GITHUB_ACTIONS=true` and the exact repository name are required as accidental
 local-execution guards. They are not authentication or an authorization boundary;
@@ -64,8 +68,9 @@ or caller-provided script should receive signing secrets.
    recompute it without invoking Godot. Required sources include runtime code,
    scenes, data, manifest-selected assets, font inputs, the narrow armored
    registration/17-part bundle, and the matching validator/export tools.
-   The source commit also pins signing code, public identity and toolchain;
-   these are not all covered by the staged-source fingerprint.
+   The source commit also pins signing code, the public-identity contract and
+   toolchain; these are not all covered by the staged-source fingerprint. The
+   measured runner identity is returned as public signing evidence.
 3. For the full template-revalidation path, the pinned Godot Android debug template: `android_debug-4.6.3.apk`,
    124546428 bytes, SHA-256
    `5cd4cfc1a8fc23ed45be5f0a36a6cc279d15b50a40c6ef69c89276895441cd1d`.
@@ -84,10 +89,12 @@ does not claim native GPU/art approval or a remote repeat of local tests.
 
 ## Credential boundary
 
-The repository is public at audited main commit
-`31a097f032a49375467197705883287167a91aad`, whose tree has no workflow.
-Configured GitHub secret names and values remain UNKNOWN. The environment
-names below are an interface, not a claim that matching Secrets exist:
+The renamed repository `shaterguy/wings-of-humanity` is public. The user reports
+that both existing key/password GitHub Secrets are registered; the workflow
+keeps those Secret names. Their values are not read or copied into this local
+build workspace. Actual runner decoding, key type/alias/public-certificate
+measurement, and signing are still pending. These process variables are file
+interfaces to the already selected Secrets:
 
 - `KEYSTORE_PATH`: runner-local JKS or PKCS12 file supplied by approved GitHub custody.
 - `KEYSTORE_PASSWORD_FILE`: runner-local password file.
@@ -100,24 +107,22 @@ Password values must not be passed as plaintext environment variables,
 arguments, repository content, artifacts, or logs. Never put the keystore or
 password files into the public repository or a source/artifact bundle.
 
-One unresolved credential/setup action remains: confirm the intended existing
-GitHub signing-secret mapping and its public certificate/alias; if that identity
-is not configured, obtain the required action-time approval for new persistent
-credential setup. The user enters/transmits any private key or password through
-the approved secure handoff, never chat or this local workspace, before the
-public pin is finalized. No existing secret is asserted missing, and this task
-does not create, inspect, transmit, or configure keys, passwords, tokens, or
-persistent access.
+No new key registration, credential retrieval, or setup approval is a
+prerequisite introduced by this contract. The existing approved Secrets are
+used only in the bounded runner signing process. A runtime failure is reported
+as its actual decoding/format/entry/signing blocker, without assuming that a
+Secret is missing or requesting the same registration again. Local development
+does not read, create, configure, or export keys, passwords, or persistent access.
 
 ## Signing and return checks
 
-After independent review and input/credential setup, the future signing call is
+After independent review and exact source/input preservation, the signing call is
 `python tools/build/sign_android.py --github-new-dev --development-validation
---input <approved-unsigned.apk> --output <new-signed.apk> --template <pinned-template.apk>
+--verified-input-only --input <approved-unsigned.apk> --output <new-signed.apk>
 --expected-input-sha256 <local-report-sha256>
 --expected-source-sha256 <local-report-source_sha256>`.
 
-The signer checks approved input/source hashes and package/template integrity,
+The signer checks approved input/source hashes and package integrity,
 exports only the public certificate for a pre-sign fingerprint match, aligns,
 signs, then requires exactly one matching APK certificate. It rechecks archive
 and alignment, confirms the unsigned input did not change, and writes a new APK
@@ -125,14 +130,13 @@ plus its adjacent `.apk.signing.json` receipt. New-policy receipts include the
 policy, identity ID, repository, source/template/input/output hashes, public
 certificate fingerprint, package/version and unchanged development markers.
 
-The future workflow must consume the fixed trusted source and approved input
-hashes, expose credentials only to the signing process, and return only the
-signed APK and receipt through an approved usable channel. Verify returned APK
-bytes/hash/certificate before delivery. Artifact storage availability and the
-transfer path are not established here; no artifact upload quota is assumed.
-No workflow was drafted because secret mapping and input/output transport are
-unresolved. No Actions run, signing, remote publication, or final delivery has
-occurred in this candidate.
+The main-only workflow candidate consumes fixed trusted source and approved
+input hashes, exposes credentials only to its bounded public-identity inspection
+and signing steps, and returns the signed APK plus public receipts through the
+reviewed delivery route. Verify returned APK bytes/hash/certificate before
+delivery. Its exact draft-release asset IDs and remote source commit are
+finalized by release operations. No actual Actions signing success or final
+delivery is claimed by these local tests.
 
 ## Reuse the locally verified unsigned input without a template download
 
