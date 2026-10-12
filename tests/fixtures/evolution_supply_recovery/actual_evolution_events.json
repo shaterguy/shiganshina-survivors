@@ -1,0 +1,13 @@
+[
+  {
+    "event_id": "0123456789abcdef0123456789abcdef:1:6",
+    "payload": {
+      "item_id": "blade_slash",
+      "kind": "evolution",
+      "offer_id": "0123456789abcdef0123456789abcdef:1:offer:1",
+      "option_id": "evolution:evo_wing_cut"
+    },
+    "tick": 18001,
+    "type": "upgrade_applied"
+  }
+]

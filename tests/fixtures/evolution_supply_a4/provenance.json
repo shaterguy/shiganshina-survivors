@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "origin_class": "NEW",
+  "created_utc": "2026-10-10",
+  "content_revision": "ch01.3-rebuild.5-preparation97",
+  "claim": "R0a JSON shape, semantic identity, deep-copy and hand-computed examples only. Not recovered originals; not real Core/GameSave/streamed validity.",
+  "fixture_content_fingerprint": "fb21f8b7e4d23cf0b8d5f6da29eedf5c8a56dc19a044a47316fc345400d18c46",
+  "fingerprint_basis_file": "content_identity_basis.json",
+  "fingerprint_scope": "Contract-only reference data, NOT the production full-content manifest. Rebind at R1.",
+  "engine": "4.6.3-stable (official)",
+  "baseline_derivation": {
+    "source": "remote-head-31a097f/game/core/run_simulation.gd",
+    "source_sha256": "1a429b64371fe1da0d04b9d984c17e926bc5b591c44358747d38e146db12886b",
+    "command": "godot --headless --path /tmp/shigan-r0-baseline-20261010 --script derive.gd (with writable XDG directories)",
+    "input_chapter": "Historical manifest copied in scratch; content_revision explicitly ch01.1 for a bounded nonstreamed baseline DTO; seed42.",
+    "transformations": [
+      "schema1 -> schema2 and new content revision",
+      "new identity/config/progression/evolution/attack/supply fields",
+      "standard doctrine HP100 and base/move speed150",
+      "rules slots4/4 and fixture-only content fingerprint",
+      "world omitted intentionally: nonstreamed contract case, not a streamed snapshot",
+      "Current fixture revision advanced to ch01.3-rebuild.2 for explicit physical final actor semantics; contract-only scope retained."
+    ]
+  },
+  "helper_provenance": {
+    "source": "transcript-reconstruction/reviewed-growth-ui/evolution_supply_fixture.gd.txt",
+    "class": "complete transcript-backed helper with NEW explicit case routing and attack record accessor",
+    "compatibility_aliases": {
+      "game_save initial": "empty",
+      "progression last_slot_warning": "blocked"
+    },
+    "test_only_validation": "shape fake only; no production import permitted",
+    "source_sha256": "9f0e9d4259b51b02ed50077e898c7972eac8156dc1449941d06907bcacd17682"
+  },
+  "cases": {
+    "run": [
+      "initial"
+    ],
+    "game_save": [
+      "empty",
+      "started"
+    ],
+    "progression": [
+      "missing",
+      "blocked",
+      "ready",
+      "evolved"
+    ],
+    "supply": [
+      "affordable",
+      "insufficient",
+      "owned",
+      "full"
+    ],
+    "attacks": [
+      "blade",
+      "wing_cut",
+      "crossfire"
+    ]
+  },
+  "known_scope_limits": [
+    "No streamed world fixture or real validator acceptance.",
+    "Progression and shop cases are rendering DTOs, not full snapshots/economy authorities.",
+    "blocked is a legal fourth-slot choice with a future blocking warning; current target remains collecting.",
+    "Four progression source offers are authored independent authority samples, not real generated offers.",
+    "No archived checkpoint migration schema fixture until E and I review.",
+    "No projectile case until C2; projectile record schema is frozen in contract doc."
+  ],
+  "files": {
+    "attack_events.json": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a",
+    "content_identity_basis.json": "fb21f8b7e4d23cf0b8d5f6da29eedf5c8a56dc19a044a47316fc345400d18c46",
+    "game_save_v2.json": "21d11f71a399e98ca1efc6697ecce5b1fd0e5e310b84d528f8d5df6c6549a6db",
+    "progression_source_offers.json": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a",
+    "progression_views.json": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309",
+    "run_v2.json": "6c3bab47b8f360d0d7d498abbf112aeda23fd1939a6e000ead66544eb01112db",
+    "supply_views.json": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+  },
+  "a4_derivation": {
+    "source_fixture_directory": "tests/fixtures/evolution_supply",
+    "source_provenance_sha256": "7dfe0690a10ff5f00a299eb153632890c9db025e153718f65e4a59db590ccc96",
+    "changes": [
+      "NEW .5 test identity and current definition source hashes",
+      "new contract-only basis fingerprint in run and started checkpoint"
+    ],
+    "scope": "Not recovered originals; not real Core validity; prior fixture bytes remain unchanged."
+  }
+}

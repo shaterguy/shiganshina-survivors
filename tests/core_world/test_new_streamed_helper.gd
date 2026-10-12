@@ -1,0 +1,193 @@
+extends RefCounted
+# NEW independent adapter tests; not recovered historical Core acceptance.
+const F = preload("res://tests/core_world/new_streamed_helper_fixture.gd")
+const PATH := "res://game/core/streamed_run_world.gd"
+func run(t) -> void:
+	t.check(FileAccess.file_exists(PATH),"NEW streamed helper exists before city activation")
+	if not FileAccess.file_exists(PATH): return
+	var script = load(PATH)
+	t.check(script != null and script.can_instantiate(),"NEW streamed helper loads")
+	if script == null or not script.can_instantiate(): return
+	var helper = script.new(F.definitions())
+	t.check(helper.valid(),"NEW definitions instantiate exact world modules")
+	if not helper.valid(): return
+	_validation(t,helper)
+	_readiness_and_queries(t,helper)
+	_rebase(t,helper)
+	_destruction(t,helper)
+	_evacuation(t,helper)
+	_receipts(t,helper)
+	_bounded_cache(t,helper)
+func _validation(t,h) -> void:
+	var state := F.state(h)
+	t.check(h.validate_world(state).ok,"explicit NEW city world schema validates")
+	var before := state.duplicate(true)
+	t.check(h.requirements(state).ok and state == before,"requirements preserve all caller state")
+	var bad := state.duplicate(true)
+	bad.world.schema_version = 2
+	t.check(h.validate_world(bad).get("error_code") == "invalid_snapshot","known world-v2 requires its explicit dormant payload")
+	bad.world.dormant = {"entities":[],"drops":[]}
+	t.check(h.validate_world(bad).get("ok",false),"known world-v2 accepts its bounded dormant payload")
+	bad.world.schema_version = 3
+	t.check(h.validate_world(bad).get("error_code") == "unsupported_schema","future world schema stays unsupported_schema")
+	bad = state.duplicate(true); bad.world.delta_root.format_revision = 2
+	t.check(h.validate_world(bad).get("error_code") == "unsupported_schema","future exact page root schema stays unsupported_schema")
+	for key in ["generator_revision","template_revision","content_fingerprint"]:
+		bad = state.duplicate(true); bad.world[key] = "unknown"
+		t.check(h.validate_world(bad).get("error_code") == "content_mismatch","unknown world identity stays content_mismatch: "+key)
+	bad = state.duplicate(true); bad.world.origin_chunk = ["01","0"]
+	t.check(not h.validate_world(bad).ok,"noncanonical infinite address is rejected")
+	bad = state.duplicate(true); bad.world.world_revision = 0.25
+	t.check(not h.validate_world(bad).ok,"fractional world revision is rejected")
+	bad = state.duplicate(true); bad.world.extra = true
+	t.check(not h.validate_world(bad).ok,"unknown world authority field fails closed")
+	bad = state.duplicate(true); bad.world.stage = "future"
+	t.check(h.validate_world(bad).get("error_code") == "content_mismatch","unknown stage is incompatible, never city fallback")
+	bad = state.duplicate(true); bad.player.position = [NAN,0]
+	t.check(not h.requirements(bad).ok,"nonfinite readiness input fails before geometry calls")
+func _readiness_and_queries(t,h) -> void:
+	var state := F.state(h)
+	var needed: Dictionary = h.requirements(state)
+	t.check(needed.ok and needed.chunks.size() <= 49,"readiness requests bounded city coverage")
+	var missing: Dictionary = h.prepare(state,{})
+	t.check(not missing.ok and missing.error_code == "world_not_ready" and not missing.missing_delta_keys.is_empty(),"absent hydration never becomes empty city")
+	var before := state.duplicate(true)
+	t.check(h.prepare(state,F.hydration(needed)).ok and state == before,"prepare derives cache without adopting world state")
+	t.check(h.readiness(state).ok,"prepared world and matching state are ready")
+	var view: Dictionary = h.render_view(state)
+	var props := 0
+	for chunk in view.chunks: props += chunk.props.size()
+	t.check(props > 32,"city keeps all resident props instead of applying finite-world obstacle cap")
+	var move: Dictionary = h.move(Vector2(384,384),Vector2(10,0),8)
+	t.check(move.ok and move.position == Vector2(394,384),"player move uses recovered city collision")
+	var route: Dictionary = h.direction(Vector2(384,384),Vector2(1152,384),32,0)
+	t.check(route.ok and route.length >= 768,"largest actor gets connected cross-chunk route")
+	var blocked_prop: Dictionary = {}
+	for chunk in view.chunks:
+		if chunk.chunk == ["0","0"]:
+			for prop in chunk.props:
+				if prop.collision_mask != 0: blocked_prop = prop; break
+	t.check(not blocked_prop.is_empty(),"test uses actual generated solid footprint")
+	if not blocked_prop.is_empty():
+		var box: Rect2 = blocked_prop.ground_footprint
+		var start := Vector2(box.position.x-64,box.get_center().y)
+		var sweep: Dictionary = h.sweep(start,Vector2(box.size.x+128,0),8)
+		t.check(sweep.ok and sweep.fraction < 1 and not sweep.hit_prop_id.is_empty(),"swept actor cannot tunnel through ground footprint")
+		var cover: Dictionary = h.cover_query(start,Vector2(box.end.x+64,start.y),0,8)
+		t.check(cover.ok and cover.fraction < 1,"projectile cover matches physical building")
+	var old_view: Dictionary = h.render_view(state)
+	var late: Dictionary = h.sweep(Vector2(384,384),Vector2(5000,0),8)
+	t.check(not late.ok and late.error_code == "world_not_ready","late uncovered query is failure, never clamped success")
+	t.check(state == before and h.render_view(state) == old_view,"late query does not mutate live state or resident geometry")
+	var invalid: Dictionary = h.move(Vector2.ZERO,Vector2.ONE,33)
+	t.check(not invalid.ok and invalid.error_code == "unsupported_radius","unsupported footprint does not masquerade as blocked movement")
+	var malformed := F.hydration(needed); malformed[malformed.keys()[0]] = "bad"
+	t.check(not h.prepare(state,malformed).ok and h.render_view(state) == old_view,"failed candidate preparation preserves previous cache")
+	var far := state.duplicate(true); far.entities = [{"position":[10000,384],"radius":18,"speed":50}]
+	t.check(not h.requirements(far).ok,"far active actor requires explicit retirement policy, never disappearing")
+func _rebase(t,h) -> void:
+	var state := F.state(h)
+	state.world.origin_chunk = ["9007199254740993","-9007199254740993"]
+	state.player.position = [-0.25,384.0]
+	var record := {"position":[10,20],"previous_position":[9,19],"origin":[30,40],"target":[50,60],"locked_origin":[70,80],"locked_target":[90,100],"landing_target":[110,120],"velocity":[3,4],"direction":[0,1],"geometry":{"origin":[130,140],"position":[150,160],"target":[170,180],"center":[190,200],"direction":[1,0]}}
+	for collection in ["entities","projectiles","drops","telegraphs","player_attack_instances","enemy_attack_instances"]: state[collection] = [record.duplicate(true)]
+	var command := {"kind":"spawn_enemy","origin_revision":0,"payload":{"position":[100,200],"direction":[1,0]}}
+	var before := state.duplicate(true)
+	var result: Dictionary = h.rebase_proposal(state,[command])
+	t.check(result.ok and state == before and command.origin_revision == 0,"rebase only proposes private state and command copies")
+	if not result.ok: return
+	t.check(result.state.world.origin_chunk == ["9007199254740992","-9007199254740993"] and result.state.player.position == [767.75,384.0],"negative floor rebase preserves int64 addresses beyond JSON exact integer range")
+	t.check(result.state.world.origin_revision == 1 and result.offset == [-768.0,0.0],"rebase increments exactly one origin revision")
+	for collection in ["entities","projectiles","drops","telegraphs","player_attack_instances","enemy_attack_instances"]:
+		for key in ["position","previous_position","origin","target","locked_origin","locked_target","landing_target"]:
+			t.check(result.state[collection][0][key] == [float(record[key][0])+768.0,float(record[key][1])],"rebase translates explicit position once: "+collection+"/"+key)
+		t.check(result.state[collection][0].velocity == [3,4] and result.state[collection][0].direction == [0,1] and result.state[collection][0].geometry.direction == [1,0],"rebase preserves vectors: "+collection)
+		for key in ["position","origin","target","center"]:
+			t.check(result.state[collection][0].geometry[key] == [float(record.geometry[key][0])+768.0,float(record.geometry[key][1])],"rebase translates nested geometry: "+collection+"/"+key)
+	t.check(result.commands[0].payload.position == [868.0,200.0] and result.commands[0].origin_revision == 1,"current spatial commands shift with state")
+	var again: Dictionary = h.rebase_proposal(result.state,result.commands)
+	t.check(again.ok and not again.changed and again.state == result.state,"same position cannot rebase twice")
+	var stale: Dictionary = h.rebase_proposal(result.state,[command])
+	t.check(not stale.ok and stale.error_code == "stale_origin_revision","old spatial origin cannot silently teleport")
+	var endpoint := F.state(h); endpoint.world.origin_chunk = ["9223372036854775807","0"]; endpoint.player.position = [768,384]
+	t.check(h.rebase_proposal(endpoint).get("error_code") == "address_overflow","integer address overflow fails without wrap")
+func _destruction(t,h) -> void:
+	var state := F.state(h)
+	h.prepare(state,F.hydration(h.requirements(state)))
+	var target := {}
+	for chunk in h.render_view(state).chunks:
+		if chunk.chunk == ["0","0"]:
+			for prop in chunk.props:
+				if prop.destructible: target = prop; break
+	t.check(not target.is_empty(),"destruction uses a real generated breakable prop")
+	if target.is_empty(): return
+	var attack := {"kind":"structure_strike","source_team":"titan","attack_instance_id":"structure:1","target_prop_id":target.prop_id,"hit_target_ids":[],"active_from_tick":10,"expires_tick":12,"structure_damage":target.hp}
+	var contact := {"prop_id":target.prop_id,"reached":true,"tick":10,"fraction":0.5}
+	var before := state.duplicate(true)
+	var proposal: Dictionary = h.destruction_proposal(state,attack,contact)
+	t.check(proposal.ok and state == before and attack.hit_target_ids.is_empty(),"structure resolution proposes without mutating world or hit ledger")
+	if not proposal.ok: return
+	t.check(proposal.world.world_revision == 1 and proposal.world.dirty_chunks.size() == 1 and proposal.event.type == "structure_destroyed","one admitted hit creates canonical dirty delta and collapse event")
+	t.check(h.render_view(state).chunks.size() > 0,"unadopted destruction leaves existing runtime usable")
+	var candidate := state.duplicate(true); candidate.world = proposal.world
+	t.check(h.prepare(candidate,F.hydration(h.requirements(candidate))).ok,"C-owned candidate can prepare collapsed geometry")
+	var query: Dictionary = h.props_query(target.ground_footprint)
+	var ruined := {}
+	for prop in query.props:
+		if prop.prop_id == target.prop_id: ruined = prop
+	# A zero-area ruin need not overlap query; inspect resident render data too.
+	for chunk in h.render_view(candidate).chunks:
+		for prop in chunk.props:
+			if prop.prop_id == target.prop_id: ruined = prop
+	t.check(ruined.get("destroyed",false) and ruined.get("collision_mask",-1) == 0,"adopted canonical delta opens collision and cover")
+	var duplicate: Dictionary = h.destruction_proposal(candidate,attack,contact)
+	t.check(not duplicate.ok,"collapse cannot be applied or rewarded twice")
+	attack.hit_target_ids.append(target.prop_id)
+	t.check(not h.destruction_proposal(candidate,attack,contact).ok,"recorded hit remains nonrepeatable")
+func _evacuation(t,h) -> void:
+	var state := F.state(h)
+	state.phase = "evacuation"; state.active_tick = 108000; state.survival_tick = 108000; state.final_started_tick = 108000
+	h.prepare(state,F.hydration(h.requirements(state)))
+	var passage: Dictionary = h.passage_proposal(state)
+	t.check(passage.ok and state.world.evacuation.is_empty(),"passage selection returns independent persistent candidate")
+	if not passage.ok: return
+	state.world = passage.world
+	h.prepare(state,F.hydration(h.requirements(state)))
+	var command := {"command_id":"dock:1","kind":"dock_transition","origin_revision":0,"payload":{"passage_id":state.world.evacuation.passage_id}}
+	var before := state.duplicate(true)
+	var transition: Dictionary = h.dock_transition_proposal(state,command,F.dock())
+	t.check(transition.ok and state == before,"dock transition proposes without live mutation")
+	if not transition.ok: return
+	t.check(transition.candidate_world.stage == "dock" and transition.candidate_world.origin_revision == 1,"dock scene and origin change atomically")
+	var dock_state := state.duplicate(true); dock_state.world = transition.candidate_world; dock_state.player.position = [0,0]
+	t.check(h.validate_world(dock_state).ok and h.requirements(dock_state).chunks.is_empty(),"dock has validated world state and no city hydration demand")
+	t.check(not h.escape_status(dock_state,F.dock()).win,"early dock arrival does not reset or bypass evacuation timer")
+	dock_state.active_tick += 4500
+	t.check(not h.escape_status(dock_state,F.dock()).win,"75 active seconds alone does not win outside physical exit")
+	dock_state.player.position = [0,350]
+	t.check(h.escape_status(dock_state,F.dock()).win,"alive dock player wins only with time plus physical escape")
+	dock_state.player.hp = 0
+	t.check(not h.escape_status(dock_state,F.dock()).win,"death dominates same-tick physical escape")
+	dock_state.player.hp = 100
+	var repeat: Dictionary = h.dock_transition_proposal(dock_state,command,F.dock())
+	t.check(repeat.ok and repeat.idempotent,"same completed transition is idempotent across changed origin")
+	state.player.position = [384,500]
+	t.check(not h.dock_transition_proposal(state,command,F.dock()).ok,"passage transition requires physical overlap")
+func _receipts(t,h) -> void:
+	var world: Dictionary = h.initial_world(F.FINGERPRINT)
+	world.world_revision = 1
+	world.dirty_chunks = [{"chunk":["0","0"],"props":[{"slot_id":"x","hp":0,"destroyed":true}]}]
+	var receipt := {"base_root":world.delta_root.duplicate(true),"candidate_root":world.delta_root.duplicate(true),"world_revision":1,"changes_digest":F.Codec.changes_digest(world.dirty_chunks).hash}
+	var before := world.duplicate(true)
+	var accepted: Dictionary = h.receipt_proposal(world,receipt)
+	t.check(accepted.ok and accepted.world.dirty_chunks.is_empty() and world == before,"receipt validation yields private world without acknowledging live geometry")
+	receipt.world_revision = 2
+	t.check(h.receipt_proposal(world,receipt).get("error_code") == "world_receipt_stale","stale receipt remains distinctly retryable conflict")
+func _bounded_cache(t,h) -> void:
+	var state := F.state(h)
+	for x in range(-8,9):
+		state.world.origin_chunk = [str(x),"0"]; state.world.origin_revision += 1
+		var needed: Dictionary = h.requirements(state)
+		t.check(h.prepare(state,F.hydration(needed)).ok,"successive origin prepare: "+str(x))
+		var diagnostics: Dictionary = h.status()
+		t.check(diagnostics.resident_chunks <= 49 and diagnostics.resident_hydration <= 49,"resident geometry and retained hydration stay bounded: "+str(x))

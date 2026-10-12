@@ -1,0 +1,610 @@
+{
+  "affordable": {
+    "view_revision": 1,
+    "store_revision": 7,
+    "balance": 40,
+    "items": [
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "포격 교리",
+        "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+        "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+        "item_id": "doctrine_artillery",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 0
+      },
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "기동 교리",
+        "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+        "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+        "item_id": "doctrine_mobile",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 0
+      },
+      {
+        "kind": "consumable",
+        "price": 15,
+        "max_owned": 9,
+        "name": "야전 붕대",
+        "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+        "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+        "item_id": "field_bandage",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 25
+      }
+    ],
+    "loadout": {
+      "doctrine_id": "doctrine_standard",
+      "target_evolution_id": "evo_wing_cut",
+      "supply_item_id": ""
+    },
+    "can_shop": true,
+    "lock_reason": "",
+    "legacy_checkpoint_present": false,
+    "loadout_options": {
+      "doctrines": [
+        {
+          "name": "표준 교리",
+          "description": "쌍검 Lv1, 기본 최대 체력 100, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "시작 패시브 없이 출격합니다.",
+          "id": "doctrine_standard",
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "기동 교리",
+          "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+          "id": "doctrine_mobile",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        },
+        {
+          "name": "포격 교리",
+          "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+          "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+          "id": "doctrine_artillery",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        }
+      ],
+      "targets": [
+        {
+          "name": "입체기동 연속참",
+          "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+          "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+          "id": "evo_wing_cut",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "교차 포격 지휘",
+          "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+          "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다.",
+          "id": "evo_crossfire",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "wall_cannon",
+              "name": "성벽 고정포 지원",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "fire_interval",
+              "name": "신속한 재장전",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        }
+      ],
+      "supplies": [
+        {
+          "id": "",
+          "name": "장착 안 함",
+          "description": "보급품을 소비하지 않습니다.",
+          "tradeoff_text": "",
+          "can_select": true,
+          "blocked_reason": "",
+          "owned": 0
+        },
+        {
+          "id": "field_bandage",
+          "name": "야전 붕대",
+          "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+          "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+          "can_select": false,
+          "blocked_reason": "not_owned",
+          "owned": 0
+        }
+      ]
+    },
+    "can_start": true,
+    "start_blocked_reason": ""
+  },
+  "insufficient": {
+    "view_revision": 2,
+    "store_revision": 7,
+    "balance": 39,
+    "items": [
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "포격 교리",
+        "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+        "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+        "item_id": "doctrine_artillery",
+        "owned": 0,
+        "can_purchase": false,
+        "blocked_reason": "insufficient_funds",
+        "balance_after": 39
+      },
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "기동 교리",
+        "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+        "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+        "item_id": "doctrine_mobile",
+        "owned": 0,
+        "can_purchase": false,
+        "blocked_reason": "insufficient_funds",
+        "balance_after": 39
+      },
+      {
+        "kind": "consumable",
+        "price": 15,
+        "max_owned": 9,
+        "name": "야전 붕대",
+        "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+        "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+        "item_id": "field_bandage",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 24
+      }
+    ],
+    "loadout": {
+      "doctrine_id": "doctrine_standard",
+      "target_evolution_id": "evo_wing_cut",
+      "supply_item_id": ""
+    },
+    "can_shop": true,
+    "lock_reason": "",
+    "legacy_checkpoint_present": false,
+    "loadout_options": {
+      "doctrines": [
+        {
+          "name": "표준 교리",
+          "description": "쌍검 Lv1, 기본 최대 체력 100, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "시작 패시브 없이 출격합니다.",
+          "id": "doctrine_standard",
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "기동 교리",
+          "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+          "id": "doctrine_mobile",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        },
+        {
+          "name": "포격 교리",
+          "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+          "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+          "id": "doctrine_artillery",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        }
+      ],
+      "targets": [
+        {
+          "name": "입체기동 연속참",
+          "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+          "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+          "id": "evo_wing_cut",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "교차 포격 지휘",
+          "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+          "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다.",
+          "id": "evo_crossfire",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "wall_cannon",
+              "name": "성벽 고정포 지원",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "fire_interval",
+              "name": "신속한 재장전",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        }
+      ],
+      "supplies": [
+        {
+          "id": "",
+          "name": "장착 안 함",
+          "description": "보급품을 소비하지 않습니다.",
+          "tradeoff_text": "",
+          "can_select": true,
+          "blocked_reason": "",
+          "owned": 0
+        },
+        {
+          "id": "field_bandage",
+          "name": "야전 붕대",
+          "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+          "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+          "can_select": false,
+          "blocked_reason": "not_owned",
+          "owned": 0
+        }
+      ]
+    },
+    "can_start": true,
+    "start_blocked_reason": ""
+  },
+  "owned": {
+    "view_revision": 3,
+    "store_revision": 7,
+    "balance": 40,
+    "items": [
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "포격 교리",
+        "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+        "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+        "item_id": "doctrine_artillery",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 0
+      },
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "기동 교리",
+        "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+        "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+        "item_id": "doctrine_mobile",
+        "owned": 1,
+        "can_purchase": false,
+        "blocked_reason": "already_owned",
+        "balance_after": 40
+      },
+      {
+        "kind": "consumable",
+        "price": 15,
+        "max_owned": 9,
+        "name": "야전 붕대",
+        "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+        "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+        "item_id": "field_bandage",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 25
+      }
+    ],
+    "loadout": {
+      "doctrine_id": "doctrine_standard",
+      "target_evolution_id": "evo_wing_cut",
+      "supply_item_id": ""
+    },
+    "can_shop": true,
+    "lock_reason": "",
+    "legacy_checkpoint_present": false,
+    "loadout_options": {
+      "doctrines": [
+        {
+          "name": "표준 교리",
+          "description": "쌍검 Lv1, 기본 최대 체력 100, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "시작 패시브 없이 출격합니다.",
+          "id": "doctrine_standard",
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "기동 교리",
+          "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+          "id": "doctrine_mobile",
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "포격 교리",
+          "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+          "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+          "id": "doctrine_artillery",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        }
+      ],
+      "targets": [
+        {
+          "name": "입체기동 연속참",
+          "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+          "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+          "id": "evo_wing_cut",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "교차 포격 지휘",
+          "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+          "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다.",
+          "id": "evo_crossfire",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "wall_cannon",
+              "name": "성벽 고정포 지원",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "fire_interval",
+              "name": "신속한 재장전",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        }
+      ],
+      "supplies": [
+        {
+          "id": "",
+          "name": "장착 안 함",
+          "description": "보급품을 소비하지 않습니다.",
+          "tradeoff_text": "",
+          "can_select": true,
+          "blocked_reason": "",
+          "owned": 0
+        },
+        {
+          "id": "field_bandage",
+          "name": "야전 붕대",
+          "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+          "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+          "can_select": false,
+          "blocked_reason": "not_owned",
+          "owned": 0
+        }
+      ]
+    },
+    "can_start": true,
+    "start_blocked_reason": ""
+  },
+  "full": {
+    "view_revision": 4,
+    "store_revision": 7,
+    "balance": 40,
+    "items": [
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "포격 교리",
+        "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+        "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+        "item_id": "doctrine_artillery",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 0
+      },
+      {
+        "kind": "doctrine",
+        "price": 40,
+        "max_owned": 1,
+        "name": "기동 교리",
+        "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+        "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+        "item_id": "doctrine_mobile",
+        "owned": 0,
+        "can_purchase": true,
+        "blocked_reason": "",
+        "balance_after": 0
+      },
+      {
+        "kind": "consumable",
+        "price": 15,
+        "max_owned": 9,
+        "name": "야전 붕대",
+        "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+        "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+        "item_id": "field_bandage",
+        "owned": 9,
+        "can_purchase": false,
+        "blocked_reason": "inventory_full",
+        "balance_after": 40
+      }
+    ],
+    "loadout": {
+      "doctrine_id": "doctrine_standard",
+      "target_evolution_id": "evo_wing_cut",
+      "supply_item_id": ""
+    },
+    "can_shop": true,
+    "lock_reason": "",
+    "legacy_checkpoint_present": false,
+    "loadout_options": {
+      "doctrines": [
+        {
+          "name": "표준 교리",
+          "description": "쌍검 Lv1, 기본 최대 체력 100, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "시작 패시브 없이 출격합니다.",
+          "id": "doctrine_standard",
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "기동 교리",
+          "description": "쌍검 Lv1, 가벼운 발걸음 Lv1, 기본 체력 85, 기본 이동 속도 150으로 시작합니다.",
+          "tradeoff_text": "기본 최대 체력 15를 포기합니다.",
+          "id": "doctrine_mobile",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        },
+        {
+          "name": "포격 교리",
+          "description": "성벽 포격 Lv1, 신속한 재장전 Lv1, 기본 체력 100, 기본 이동 속도 135로 시작합니다.",
+          "tradeoff_text": "기본 쌍검과 기본 이동 속도 10%를 포기합니다.",
+          "id": "doctrine_artillery",
+          "can_select": false,
+          "blocked_reason": "not_owned"
+        }
+      ],
+      "targets": [
+        {
+          "name": "입체기동 연속참",
+          "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+          "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+          "id": "evo_wing_cut",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        },
+        {
+          "name": "교차 포격 지휘",
+          "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+          "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다.",
+          "id": "evo_crossfire",
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "wall_cannon",
+              "name": "성벽 고정포 지원",
+              "required": 5
+            },
+            {
+              "kind": "passive",
+              "item_id": "fire_interval",
+              "name": "신속한 재장전",
+              "required": 3
+            }
+          ],
+          "seal_cost": 1,
+          "can_select": true,
+          "blocked_reason": ""
+        }
+      ],
+      "supplies": [
+        {
+          "id": "",
+          "name": "장착 안 함",
+          "description": "보급품을 소비하지 않습니다.",
+          "tradeoff_text": "",
+          "can_select": true,
+          "blocked_reason": "",
+          "owned": 0
+        },
+        {
+          "id": "field_bandage",
+          "name": "야전 붕대",
+          "description": "피해 처리 뒤 생존 중 HP가 30% 이하이면 HP 25를 한 번 회복합니다. 최대 체력을 넘지 않습니다.",
+          "tradeoff_text": "출격 시 1개 소비하며 사용하지 않아도 반환되지 않습니다. 사망을 되돌리지 않습니다.",
+          "can_select": true,
+          "blocked_reason": "",
+          "owned": 9
+        }
+      ]
+    },
+    "can_start": true,
+    "start_blocked_reason": ""
+  }
+}

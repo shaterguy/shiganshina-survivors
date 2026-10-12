@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tools/qa/recovery_ui_visual.gd" id="1_recovery"]
+
+[node name="RecoveryVisualQA" type="Node"]
+script = ExtResource("1_recovery")
+qa_save_directory = "/workspace/scratch/94c3b29a9648/game-recovery-20261010-1153/rebuild-plan/ui-recovery-evidence/visual-runtime/data/godot/app_userdata/진격의 거인- 인류의 날개/saves"

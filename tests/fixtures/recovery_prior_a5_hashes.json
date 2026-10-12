@@ -1,0 +1,17 @@
+{
+  "tests/fixtures/c4/finite_chapter_definition_a4.json": "c2cf03c8016c5d86161640167d2b6bbd1c99ddf13f11536f62378022a95b12a4",
+  "tests/armored_contact_input/fixtures/preparation97-core.gd.txt": "713c951a0e31b3907b0c9bf2f5e5fd2d44bbd68c2f3318a11708f6eacd342d8b",
+  "tests/fixtures/evolution_supply_a4/run_v2.json": "6c3bab47b8f360d0d7d498abbf112aeda23fd1939a6e000ead66544eb01112db",
+  "tests/fixtures/evolution_supply_a4/progression_source_offers.json": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a",
+  "tests/fixtures/evolution_supply_a4/content_identity_basis.json": "fb21f8b7e4d23cf0b8d5f6da29eedf5c8a56dc19a044a47316fc345400d18c46",
+  "tests/fixtures/evolution_supply_a4/game_save_v2.json": "21d11f71a399e98ca1efc6697ecce5b1fd0e5e310b84d528f8d5df6c6549a6db",
+  "tests/fixtures/evolution_supply_a4/supply_views.json": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b",
+  "tests/fixtures/evolution_supply_a4/provenance.json": "1e7fa03cdc5937b111251f3a6d0455554902973298c39d3e10606cc8a056b291",
+  "tests/fixtures/evolution_supply_a4/attack_events.json": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a",
+  "tests/fixtures/evolution_supply_a4/progression_views.json": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309",
+  "tests/fixtures/recovery_previous_a5/city/saves/game_save.json": "d9dc01237953a02b7aa4e14978ff55a070662e0df81faef5a495ffea247bd559",
+  "tests/fixtures/recovery_previous_a5/city/saves/game_save.json.bak": "343737e19528419a02d042404b933eed2916fc1307d8871f44a35538efb87a88",
+  "tests/fixtures/recovery_previous_a5/city/saves/world/pages/e6/e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28.json": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28",
+  "tests/fixtures/recovery_previous_a5/finite/saves/game_save.json": "ad89138b9e5208d8269c8dc88ebb52943b39299d3e955844fbe6a5dc8abab25b",
+  "tests/fixtures/recovery_previous_a5/finite/saves/game_save.json.bak": "96967c24c25bc727ee85697b19ce76da1c469a09c1824c3ee016460e8429d003"
+}

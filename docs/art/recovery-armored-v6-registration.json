@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "asset_id": "armored_titan",
+  "metadata_identity": "new_reconstructed_registration_not_historical_manifest",
+  "historical_manifest_recovered": false,
+  "artifact_role": "staged_registration_candidate_for_new_development",
+  "target_manifest": "assets/manifest.json",
+  "allowed_manifest_pointer": "/assets/armored_titan",
+  "baseline_manifest_sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24",
+  "protected_manifest_semantic_sha256": "7d94da39bb6e96bcf895f3a65b79a6cd16d1bfc3f8ba7c4eef9fbe87c77566b9",
+  "baseline_armored_entry": {
+    "path": "res://assets/art/characters/armored_titan_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 768,
+    "height": 768,
+    "cell_w": 192,
+    "cell_h": 256,
+    "columns": 4,
+    "anchor_px": [
+      96,
+      256
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "entry": {
+        "frames": [
+          9,
+          10
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "retreat": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": true
+      }
+    },
+    "sha256": "62100919eb6496fb16e7a63286a392a1cc85e56a65d3260bcaecf0293b6067ee",
+    "art_revision": 2,
+    "review_status": "visual_reviewed_revision_2",
+    "defeatable": false,
+    "export_blocked": false,
+    "provenance": {
+      "art_revision": 2,
+      "supersedes_path": "res://assets/art/characters/armored_titan.png",
+      "supersedes_sha256": "a9cb923ed843d76318fa88be49f8098e492f8fb9ca70982de7d2df40d3727b33",
+      "correction_date_utc": "2026-10-10",
+      "reference": "https://shingeki.tv/season1/yougo/",
+      "review": "Original v2 source and packed frames visually inspected; integration approved stable-ID publication."
+    }
+  },
+  "candidate_entry": {
+    "path": "res://assets/art/characters/armored_titan_v6_elbow.png",
+    "kind": "sprite",
+    "source_method": "Byte-exact deterministic recovery of the corrected Armored v6 walk PNG from preserved rig inputs; reconstructed development registration. No newly generated artwork or altered PNG pixels.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 1536,
+    "height": 2560,
+    "cell_w": 192,
+    "cell_h": 256,
+    "columns": 8,
+    "anchor_px": [
+      96,
+      256
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75
+        ],
+        "fps": 64,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "entry": {
+        "frames": [
+          9,
+          10
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "retreat": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": true
+      }
+    },
+    "sha256": "e3b3fe2008cb4db79e8df72bf670dc6c87e37c81c055c85a1546fc47dc7ea427",
+    "art_revision": 6,
+    "review_status": "recovered_v6_development_candidate_not_final_approval",
+    "defeatable": false,
+    "export_blocked": false,
+    "provenance": {
+      "art_revision": 6,
+      "supersedes_path": "res://assets/art/characters/armored_titan_v2.png",
+      "supersedes_sha256": "62100919eb6496fb16e7a63286a392a1cc85e56a65d3260bcaecf0293b6067ee",
+      "registration_date_utc": "2026-10-10",
+      "metadata_identity": "new_reconstructed_registration_not_historical_manifest",
+      "recovered_png_sha256": "e3b3fe2008cb4db79e8df72bf670dc6c87e37c81c055c85a1546fc47dc7ea427",
+      "recovery_bundle": "recovery/reviewed-art-rebuild/armored-v6-exact-recovery",
+      "recovery_contract": "docs/art/recovery-armored-v6-registration.json",
+      "review": "docs/art/recovery-armored-v6-review.json; candidate view is required before development registration; no release approval.",
+      "scope": "Corrected 64-frame WALK only. The latest run/shoulder-charge atlas and AI are not supplied."
+    },
+    "gait": {
+      "cycle_distance_px": 123.333333333333,
+      "reference_fps": 64,
+      "frame_count": 64,
+      "cycle_distance_space": "native_asset_pixels_before_runtime_scale",
+      "locomotion": "walk",
+      "runtime_phase_source": "observed_grounded_travel_distance"
+    }
+  },
+  "move_frame_rgba_sha256": [
+    "ed4b031cbe2dc43eddbc32db6ea008f682f8c88e60698f1887fda94bbf7ed1a8",
+    "8dcca4019516909813e99ace894915d9ff8ef4a663e8c3db5fe8704ffaa199fb",
+    "6a028bf866147ecdff6318053680ff8351d2bc239de2c8fbb4426c2c404b52f6",
+    "8074c4959c97674383cdbfb452ff04c320d38d73b50df82faabe0b6a421d9f32",
+    "3cf7643cd7172196143509f2fdcc14501419156d1d34d04492190110ce5760b3",
+    "eeb9a7173e00b1558139364c25518ed0ae643cf1167c8c53f86ad7b142422466",
+    "7098e573d1086eaeaf1353d565f7a2563c223cfca39ffe38507f4645c33beb95",
+    "00fc4306f1d0cb84d24d73360d3c4d5e46b017fd5d44bff99a8f896e6913882a",
+    "80ebb6c05f2c30e1ea473b9837a7455d21ed4f3e4ce7e9073897da3fe6fd4772",
+    "7ffff9b33028be7f084293dd2a4eef2a10466a55d9c6afe9cf3468bb817ebf18",
+    "1312d30e35ee509b7ac65a25f56606f4a6776e25676ae454ef3e70853f0f4a22",
+    "a3fbf001216912e530289694539481f44a48846c23cf1da05f9ba0cc0666e9bf",
+    "5136e3a0084ce912f853b4f5a32d419435921abfbe3e9c49c69a09c4e069d119",
+    "b80d38cc73371ebaef61bf418db621e4fe895b696c21c2bea2c9fb92dcf71f19",
+    "302f5a7ddc702404397e7a25ed9081422b2e23e56f851df242bc772d352e65f1",
+    "60d47760c7b2e8d726fedf70ee60f450c3139ab9f14981b02e1850b16af09655",
+    "ca3ba8dd0043a9486afd8cf98fc6c00ee3a15c5104c39a33a97a7a3275ac841b",
+    "e927e181ef68069424eaef91bbb8df7c96771fd5a7f44a9589c42e7825dc77a4",
+    "94383df5c465badbc1e6de35d0c49cdc9cd696da0be602d438ce5ca7e4286637",
+    "da3a1c2f3059ec56f6e2cef3f28b8a38570417d0f13b1f1e96069951f2116757",
+    "649f21bf5b826bea9fe5f69faddd091e94400806745bf83a157798192386f3c3",
+    "d959982d536870442a9a5d2d5b2094373defb1bb8e0917b5af57e41e436976fe",
+    "2887587673b03bedec1686a2cceda9e31a64395568457d4529818a52cb2edf38",
+    "a8ad5def49d0b89adfea7c97032a98c52a20b344bdc1365cc9b0e660dbf55cd3",
+    "dd52e3024534fe8a830b588c89c8b2eb420113b6f7eaf031d4a99d0734ea51f3",
+    "8c6fe741078ad3a4c0cf7cc9038fd4e704cd30e9afc8951697031f4235d7a0f3",
+    "1dd959228d91d8b72875216692a1bb52a0c5e36584510c648301af0feb4f0f79",
+    "96cd90ce5f72e0806ef8565b5aec454bb6cc8e14c02d008d3d6f10c605dd700b",
+    "5d6e98127ef45521b8465851c1760d57a1b00b4c6011007cbc1ce2ba45c755d2",
+    "e4371229041414269644c91830497fe695790999d93add1a78ce2aaa0b3566eb",
+    "a6599afc34a442ba41505c288ee6364f852131dc694de5b98ced41fd1bfe5706",
+    "102cdadf773f5c8fee143f5ccea91086a0653325c4973dd1c15091f545cb14f5",
+    "84d6d7ae9895ce637f3c52683b44f5fa8b23fc2956252eefd38c345674b6f22f",
+    "3a68ef8763be5cc41b063351ff390f48469c899a61c06cb19d3d868fee4282a5",
+    "69db8f01f163af9c8d639657adcee7764f30787d0b0d16969b8256dc5ecfb407",
+    "3a06f93876378c4660e9187ef8e94bfc854c24663f2c7c88a3377fb352914f9c",
+    "93c892c1edc2eaab441c1b85661f26caeff33d7a96a14212c1b064087c22aaf7",
+    "af1c3fea92ca04de1d48b9cd3423d3c1d97fecc7a4a89fda1c28f873e4a0d295",
+    "51f9272fecba6d439e224c30b2654107706dce5fa15b7e735ce7a038173273d3",
+    "db16a33aa59f1d01cf6f90a2704ff20fa4ec698a2d8654ec56c4f540f14d9aae",
+    "8700852fb1d4d5a84a3bef6af58877656ff14411d3661e95414dbd5a89707bc5",
+    "8d24c2fa01326fa2ffc938c02ee532a2891adfb1f2d661e25ff3782d71f978e4",
+    "9d5dc531be66b84b5e9960962b315b4f6aa1318cbe989edd2d4a9bf537ae67b4",
+    "d23dd49e1b39e8b71704480f48adc93f7983597b59425c377026d4d25cf03356",
+    "da3c7cb887e8f372ae1fd853ae93125fab8138315bf3a31bd4b032a5a0986c24",
+    "04f291dd1472b3e04330031a278455ec8e3e4e80ca844604f6d4481b72074363",
+    "8f87f2669780c9fd5760b5333fda4e7dc17e6668d9457e77b26466961a81703e",
+    "e6ab6379574ca6e9b43489c3f515d7e6d49f9d425cfb29897ede301446de950d",
+    "a6b0b96214212f868b79e52b05a7e7d85930f3c6c44341a782bf6f0061d61cd2",
+    "8ab3248f40ca6863212598b5f312a73fa8c34fe5c030ec281d7b733a8af8e6ef",
+    "b1a65d765a63028ea5f1278dec8a0f94f5c93a3f2a5afdf0be8826a3dfe38d47",
+    "2fbb1c2c53fa7cc82dbc0006bc672759944c7992190d6194ff6ff2ebb902e804",
+    "2e3b0d038a4e09f353d83d043825eed781eb655cd6516e08128629d334296b2f",
+    "8a8df2dba0609d952030132f0c2c3c422a9ed82cbc3053f02d05ead2007cd351",
+    "014a2b0a844ab30b74fd070c2b6dcbea4511d759c3d10863384e66dcdd08cbbc",
+    "417a766eb6f390bad8832079bcc69c6b8d9995e75689874525fd21b2797b40a0",
+    "30bee70cca58d7b1cf917a2c47120489ec996974732d9e63c9c7fece4d72c93e",
+    "12a2996f57ad1b32e728b76665d9e7d3bc290d2e63a1303cd6da79aa549bff8a",
+    "d4eff6c858a1b6add49fed429b1e34de04bc3cc4a8b6f30a372e73eb44c79af4",
+    "b7a6cbd7ff46232178eae0d36df73998cb9ff992348a9acd2cbc5e1211b4ca0a",
+    "fa5a4c70025a4ac348074422d4211bb2f08c8b6c5e43c9871c7d47273d1c8c4d",
+    "8d9bb12ff0b16b2d25dbf8f93df4f8866b15708360ef5aedca4b92741daa6b46",
+    "ee662f6663d6ba3b8fd2d27def0cec208f432ba5f03a305a8c6790de8e3d3fb8",
+    "7df2702ebdf428f273149d25a94e8baaf62de8583672b8c01424a9f00ec0a6e0"
+  ],
+  "preserved_original_cells": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "unreferenced_padding_frames": [
+    76,
+    77,
+    78,
+    79
+  ],
+  "source_bundle_verification": {
+    "indexed_files_verified": 101,
+    "existing_verifier_checks": 53,
+    "rerender_performed": false,
+    "verification_mode": "existing verify_recovery.py executed in isolated temporary copy; authoritative bundle untouched",
+    "verifier_sha256": "58177da46e4902b30b3366b143a8abac676eb18cdcaa741c219b8280f5bb50f0"
+  },
+  "execution": {
+    "requested_reasoning_effort": "xhigh",
+    "actual_model": "not_exposed_unverified"
+  },
+  "guarded_merge_requirements": [
+    "Require parent actual-view evidence tied to the exact PNG hash.",
+    "Re-read current manifest; abort if original Armored entry or protected semantic digest changed.",
+    "Replace only /assets/armored_titan from candidate_entry; preserve all other JSON values.",
+    "Keep the five canon export blocks and final_export_allowed=false.",
+    "Do not execute the historical publisher or treat WALK as run/charge completion."
+  ]
+}

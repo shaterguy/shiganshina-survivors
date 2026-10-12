@@ -1,0 +1,47 @@
+class_name WorldCheckpointAdapter
+extends RefCounted
+const Codec = preload("res://game/world/world_delta_codec.gd")
+const Disk = preload("res://game/persistence/world_delta_store.gd")
+var _store
+var _requirements: Callable
+var _core_restore: Callable
+func _init(store, requirements: Callable, core_restore: Callable) -> void:
+	_store = store
+	_requirements = requirements
+	_core_restore = core_restore
+func validate_checkpoint(snapshot: Dictionary, scope = null, context: Dictionary = {}, envelope: Dictionary = {}) -> Dictionary:
+	if not _requirements.is_valid() or not _core_restore.is_valid(): return Codec.fail("invalid_snapshot")
+	var requirements = _requirements.call(snapshot.duplicate(true))
+	if not requirements is Dictionary: return Codec.fail("invalid_snapshot")
+	if requirements.get("ok") != true: return requirements
+	if not requirements.get("chunks") is Array or requirements.chunks.size() > 64 or not snapshot.get("world") is Dictionary: return Codec.fail("invalid_snapshot")
+	var world: Dictionary = snapshot.world
+	if not world.get("dirty_chunks") is Array or not world.dirty_chunks.is_empty() or not world.get("delta_root") is Dictionary: return Codec.fail("invalid_snapshot")
+	var root: Dictionary = world.delta_root
+	var valid := Codec.valid_root(root)
+	if not valid.ok: return valid
+	# Real storage and its subclasses cannot inherit proof from an earlier
+	# checkpoint. Opaque injected stores retain their verify/hydrate contract.
+	if _store is Disk: _store.begin_verified_read()
+	var verified: Dictionary = _store.verify_root(root)
+	if not verified.ok: return verified
+	var hydrated: Dictionary = _store.hydrate(root,requirements.chunks)
+	if not hydrated.ok: return hydrated
+	var restored: Variant
+	if scope != null and _store.get_script() == Disk:
+		restored = scope.restore(snapshot,hydrated.deltas,_store._closure_manifest,context,envelope)
+	else:
+		restored = _core_restore.call(snapshot.duplicate(true),hydrated.deltas.duplicate(true))
+	if not restored is Dictionary or (restored.get("ok") == true and not restored.get("state") is Dictionary): return Codec.fail("invalid_snapshot")
+	return restored
+static func accept_receipt(world: Dictionary, receipt: Dictionary) -> Dictionary:
+	if not world.get("delta_root") is Dictionary or not world.get("dirty_chunks") is Array or not Codec.integer(world.get("world_revision")): return Codec.fail("world_receipt_invalid")
+	if not Codec.exact_keys(receipt,["base_root","candidate_root","world_revision","changes_digest"]) or not receipt.base_root is Dictionary or not receipt.candidate_root is Dictionary or not Codec.integer(receipt.world_revision) or not Codec.valid_hash(receipt.changes_digest): return Codec.fail("world_receipt_invalid")
+	if not Codec.valid_root(world.delta_root).ok or not Codec.valid_root(receipt.base_root).ok or not Codec.valid_root(receipt.candidate_root).ok: return Codec.fail("world_receipt_invalid")
+	var digest := Codec.changes_digest(world.dirty_chunks)
+	if not digest.ok: return digest
+	if world.world_revision != receipt.world_revision or world.delta_root.root_hash != receipt.base_root.root_hash or digest.hash != receipt.changes_digest: return Codec.fail("world_receipt_stale")
+	var candidate := world.duplicate(true)
+	candidate.delta_root = receipt.candidate_root.duplicate(true)
+	candidate.dirty_chunks = []
+	return {"ok":true,"world":candidate}

@@ -1,0 +1,274 @@
+[
+  {
+    "id": "earlier_right",
+    "direction": [
+      1.0,
+      0.0
+    ],
+    "root": [
+      -137.4237265586853,
+      0.0
+    ],
+    "player": [
+      120.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "charge07",
+    "intended_distance_to_contact": 25.423726558685303
+  },
+  {
+    "id": "current_right",
+    "direction": [
+      1.0,
+      0.0
+    ],
+    "root": [
+      -210.0,
+      0.0
+    ],
+    "player": [
+      160.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "contact00",
+    "intended_distance_to_contact": 98.0
+  },
+  {
+    "id": "later_right",
+    "direction": [
+      1.0,
+      0.0
+    ],
+    "root": [
+      -276.6948962211609,
+      0.0
+    ],
+    "player": [
+      120.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "charge40",
+    "intended_distance_to_contact": 164.6948962211609
+  },
+  {
+    "id": "no_contact_right",
+    "direction": [
+      1.0,
+      0.0
+    ],
+    "root": [
+      -410.0,
+      0.0
+    ],
+    "player": [
+      -100.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": false,
+    "metadata_reference_id": null,
+    "intended_distance_to_contact": 298.0
+  },
+  {
+    "id": "earlier_left",
+    "direction": [
+      -1.0,
+      0.0
+    ],
+    "root": [
+      137.4237265586853,
+      0.0
+    ],
+    "player": [
+      -120.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "charge07",
+    "intended_distance_to_contact": 25.423726558685303
+  },
+  {
+    "id": "current_left",
+    "direction": [
+      -1.0,
+      0.0
+    ],
+    "root": [
+      210.0,
+      0.0
+    ],
+    "player": [
+      -160.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "contact00",
+    "intended_distance_to_contact": 98.0
+  },
+  {
+    "id": "later_left",
+    "direction": [
+      -1.0,
+      0.0
+    ],
+    "root": [
+      276.6948962211609,
+      0.0
+    ],
+    "player": [
+      -120.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": true,
+    "metadata_reference_id": "charge40",
+    "intended_distance_to_contact": 164.6948962211609
+  },
+  {
+    "id": "no_contact_left",
+    "direction": [
+      -1.0,
+      0.0
+    ],
+    "root": [
+      410.0,
+      0.0
+    ],
+    "player": [
+      100.0,
+      0.0
+    ],
+    "geometry": {
+      "bounds": [
+        -2000.0,
+        -2000.0,
+        4000.0,
+        4000.0
+      ],
+      "obstacles": [
+        [
+          -40.0,
+          -400.0,
+          80.0,
+          800.0
+        ]
+      ]
+    },
+    "expected_contact": false,
+    "metadata_reference_id": null,
+    "intended_distance_to_contact": 298.0
+  }
+]

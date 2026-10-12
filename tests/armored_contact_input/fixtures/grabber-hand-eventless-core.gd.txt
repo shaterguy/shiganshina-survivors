@@ -1,0 +1,1817 @@
+class_name RunSimulation
+extends RefCounted
+const Contracts = preload("res://game/contracts/game_contracts.gd")
+const SpatialHash = preload("res://game/combat/spatial_hash.gd")
+const World = preload("res://game/combat/world_geometry.gd")
+const Geometry = preload("res://game/combat/attack_geometry.gd")
+const Behaviors = preload("res://game/combat/enemy_behaviors.gd")
+const Catalog = preload("res://game/progression/upgrade_catalog.gd")
+const Chapters = preload("res://game/director/chapter_catalog.gd")
+const Supplies = preload("res://game/economy/supply_catalog.gd")
+const Growth = preload("res://game/progression/growth_offer_service.gd")
+const Evolved = preload("res://game/combat/evolved_attack_resolver.gd")
+const Streamed = preload("res://game/core/streamed_run_world.gd")
+const Population = preload("res://game/core/city_population.gd")
+const WorldCodec = preload("res://game/world/world_delta_codec.gd")
+const ArmoredContact = preload("res://game/combat/armored_contact.gd")
+const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
+const FINAL_ENEMY_ID := "armored_titan"
+const FINAL_BOSS_ID := "ch01_final_armored"
+const FINAL_ACTOR_SPAWN_ID := "final:armored_actor"
+const MAX_COUNTER := 2147483647
+const REAL_BOSS_IDS := ["ch01_b05","ch01_b10","ch01_b15","ch01_b20","ch01_b25"]
+const TICKS_PER_SECOND := 60.0
+const FINAL_TICK := 108000
+const PAUSE_REASONS := ["user","upgrade","rotation","background","controller_lost","slow_frame"]
+const MAX_ENTITIES := 512
+const MAX_PROJECTILES := 256
+const MAX_DROPS := 256
+const COMMAND_HISTORY_COMPACT_AT := 1024
+const GAMEPLAY_PATHS := ["data/equipment.json","data/passives.json","data/evolutions.json","data/doctrines.json","data/supply_shop.json"]
+var _catalog: UpgradeCatalog
+var _supplies: SupplyCatalog
+var _evolved
+var _chapter_provider
+var _chapter: Dictionary = {}
+var _definition_hashes: Dictionary = {}
+var _gameplay_definitions: Dictionary = {}
+var _content_error := ""
+var _world_template
+var _streamed
+var _last_step_status: Dictionary = {"ok":true}
+var _tick_navigation: Dictionary = {}
+# Per-tick travelled shoulder segments; never saved or replayed after a pause.
+var _final_sweeps: Array[Dictionary] = []
+func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dictionary = {}) -> void:
+	_chapter_provider = Chapters.new() if chapter_provider == null else chapter_provider
+	var definitions := {}
+	for path in GAMEPLAY_PATHS:
+		var value: Variant
+		if not immutable_inputs.is_empty():
+			value = immutable_inputs.get(path,{}).duplicate(true)
+		else:
+			var file := FileAccess.open("res://"+path,FileAccess.READ)
+			if file == null or file.get_length() > Chapters.MAX_DEFINITION_BYTES:
+				_content_error = "content_mismatch"
+				continue
+			value = JSON.parse_string(file.get_as_text())
+		var digest := Chapters.new().definition_digest(value)
+		if not value is Dictionary or digest.is_empty():
+			_content_error = "content_mismatch"
+			continue
+		definitions[path] = value
+		_definition_hashes[path] = digest
+	_gameplay_definitions = definitions.duplicate(true)
+	_catalog = Catalog.new(definitions.get(GAMEPLAY_PATHS[0],{}),definitions.get(GAMEPLAY_PATHS[1],{}),definitions.get(GAMEPLAY_PATHS[2],{}))
+	if immutable_inputs.is_empty():
+		_supplies = Supplies.new(definitions.get(GAMEPLAY_PATHS[4],{}),definitions.get(GAMEPLAY_PATHS[3],{}))
+	else:
+		_supplies = Supplies.new(definitions.get(GAMEPLAY_PATHS[4],{}),definitions.get(GAMEPLAY_PATHS[3],{}),definitions.get(GAMEPLAY_PATHS[0],{}),definitions.get(GAMEPLAY_PATHS[1],{}))
+	_evolved = Evolved.new(_catalog)
+	var loaded := _load_provider_chapter()
+	if not loaded.get("ok",false):
+		_content_error = "content_mismatch"
+		return
+	_chapter = loaded.chapter.duplicate(true)
+	if _chapter.get("world_mode","") == "streamed_city":
+		var supplied = Streamed.new(_chapter.world_definitions) if world_helper == null else world_helper
+		if not _helper_matches(supplied,_chapter):
+			_content_error = "content_mismatch"
+			return
+		_world_template = supplied.fresh()
+		if not _helper_matches(_world_template,_chapter) or _world_template == supplied: _content_error = "content_mismatch"
+func _load_provider_chapter() -> Dictionary:
+	if not _chapter_provider is Object or not _chapter_provider.has_method("load_chapter"): return _failure("content_mismatch")
+	var result = _chapter_provider.load_chapter("chapter_01_shiganshina")
+	if not result is Dictionary or not result.get("ok") is bool or not result.ok or not result.get("chapter") is Dictionary: return _failure("content_mismatch")
+	var definition: Dictionary = result.chapter
+	if not Contracts.new()._json_safe(definition) or not definition.get("content_definition_hashes") is Dictionary or not WorldCodec.valid_hash(definition.get("content_fingerprint")): return _failure("content_mismatch")
+	for path in GAMEPLAY_PATHS:
+		if not _definition_hashes.has(path) or not definition.content_definition_hashes.get(path) is String or definition.content_definition_hashes[path] != _definition_hashes[path]: return _failure("content_mismatch")
+	if not definition.get("world_mode","") is String or not definition.get("world_mode","") in ["","finite_test","streamed_city"]: return _failure("content_mismatch")
+	if not _provider_shape_valid(definition): return _failure("content_mismatch")
+	return {"ok":true,"chapter":definition}
+func _provider_shape_valid(definition: Dictionary) -> bool:
+	if not definition.get("enemy_catalog") is Dictionary or not definition.get("world_geometry") is Dictionary: return false
+	# Reuse the chapter owner's existing manifest/reference validation rather
+	# than inventing a second doctrine/evolution/schedule rule set in Core.
+	var references := _gameplay_definitions.duplicate()
+	references["data/enemies.json"] = definition.enemy_catalog
+	if not Chapters.new()._chapter_valid(definition,references): return false
+	for id in definition.doctrine_ids:
+		var doctrine: Dictionary = _supplies.doctrine(id)
+		if doctrine.is_empty(): return false
+		for weapon in doctrine.initial_equipment:
+			if not weapon in definition.allowed_equipment_ids: return false
+	for id in definition.evolution_ids:
+		var recipe: Dictionary = _catalog.evolutions.definition(id)
+		if recipe.is_empty() or not recipe.base_item_id in definition.allowed_equipment_ids: return false
+	if not WorldCodec.valid_hash(definition.content_definition_hashes.get("data/enemies.json")) or Chapters.new().definition_digest(definition.enemy_catalog) != definition.content_definition_hashes["data/enemies.json"]: return false
+	for enemy in definition.enemy_catalog.values():
+		if not enemy is Dictionary: return false
+		for key in ["hp","radius"]:
+			if not Catalog.number_valid(enemy.get(key),0.0000001,10000000): return false
+		for key in ["speed","damage"]:
+			if not Catalog.number_valid(enemy.get(key),0,10000000): return false
+		if not Catalog.integer_valid(enemy.get("xp")): return false
+		for key in ["behavior","art_id"]:
+			if not enemy.get(key) is String or enemy[key].is_empty(): return false
+	if not Behaviors.final_definition_valid(definition.enemy_catalog.get(FINAL_ENEMY_ID)): return false
+	if definition.get("world_mode","") == "streamed_city":
+		if not definition.get("world_definitions") is Dictionary or not definition.get("authored_dock") is Dictionary or not definition.world_geometry.is_empty(): return false
+		return Streamed._dock_valid(definition.authored_dock)
+	return not definition.world_geometry.is_empty() and World.valid(definition.world_geometry) and World.walkable(_vec(definition.spawn_position),8.0,definition.world_geometry)
+func _current_chapter() -> Dictionary:
+	if not _content_error.is_empty(): return _failure(_content_error)
+	var current := _load_provider_chapter()
+	if not current.get("ok",false) or not _same_json(current.chapter,_chapter): return _failure("content_mismatch")
+	if _chapter.get("world_mode","") == "streamed_city" and not _helper_matches(_world_template,_chapter): return _failure("content_mismatch")
+	return current
+func _helper_matches(helper, chapter: Dictionary) -> bool:
+	return helper is Streamed and helper.valid() and _same_json(helper._definitions,chapter.world_definitions)
+var _spatial = SpatialHash.new()
+var _world = World.new()
+func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dictionary:
+	if not Catalog.integer_valid(seed): return _failure("invalid_run_config")
+	var current: Dictionary = _current_chapter()
+	if not current.get("ok",false): return current
+	if not Contracts.new()._json_safe(chapter) or not _same_json(chapter,current.chapter): return _failure("invalid_chapter")
+	if not _config_valid(run_config,current.chapter): return _failure("invalid_run_config")
+	if not _catalog.validate().is_empty() or not _supplies.validate().is_empty(): return _failure("invalid_item")
+	var doctrine: Dictionary = _supplies.doctrine(run_config.doctrine_id)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(seed)
+	var growth_rng := RandomNumberGenerator.new()
+	growth_rng.seed = (int(seed) ^ 0x5EED1203) & 0x7fffffff
+	var config := run_config.duplicate(true)
+	config.run_serial = int(config.run_serial)
+	var rules := _rules_for(current.chapter,doctrine)
+	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":"garrison_01","seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(doctrine.base_hp),"max_hp":float(doctrine.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
+	if current.chapter.get("world_mode","") == "streamed_city":
+		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
+		state.escape_zone = Streamed.CITY_INACTIVE_EXIT.duplicate()
+	if not _normalize_saved_numbers(state): return _failure("invalid_core_state")
+	return state
+func _config_valid(config: Dictionary, chapter: Dictionary) -> bool:
+	if config.size() != 5 or not config.has_all(["run_id","run_serial","doctrine_id","target_evolution_id","prepared_supply"]) or not Catalog.json_data_valid(config): return false
+	if not Growth._run_id_valid(config.run_id) or not Catalog.integer_valid(config.run_serial,1) or config.run_id.get_slice(":",1) != str(int(config.run_serial)): return false
+	for field in ["doctrine_id","target_evolution_id","prepared_supply"]:
+		if not config[field] is String: return false
+	if not config.doctrine_id in chapter.doctrine_ids or _supplies.doctrine(config.doctrine_id).is_empty(): return false
+	if not config.target_evolution_id in chapter.evolution_ids or _catalog.evolutions.definition(config.target_evolution_id).is_empty(): return false
+	return config.prepared_supply in ["","field_bandage"]
+func _rules_for(chapter: Dictionary, doctrine: Dictionary) -> Dictionary:
+	return {"world_geometry":World.canonical(chapter.world_geometry),"allowed_equipment_ids":chapter.allowed_equipment_ids.duplicate(),"enemy_catalog":chapter.enemy_catalog.duplicate(true),"move_speed":float(doctrine.base_move_speed),"pickup_radius":30.0,"evacuation_ticks":4500,"progression":_catalog.progression,"base_hp":float(doctrine.base_hp),"base_move_speed":float(doctrine.base_move_speed),"equipment_slots":4,"passive_slots":4,"content_fingerprint":chapter.content_fingerprint}
+func _same_json(left: Variant, right: Variant) -> bool:
+	# JSON integral floats and engine integers are the same semantic value.
+	# Exact numeric comparison retains authored tuning without tolerance widening.
+	if left is Dictionary and right is Dictionary:
+		if left.size() != right.size(): return false
+		for key in left:
+			if not right.has(key) or not _same_json(left[key],right[key]): return false
+		return true
+	if left is Array and right is Array:
+		if left.size() != right.size(): return false
+		for index in left.size():
+			if not _same_json(left[index],right[index]): return false
+		return true
+	if (left is int or left is float) and (right is int or right is float): return float(left) == float(right)
+	return typeof(left) == typeof(right) and left == right
+func _failure(code: String) -> Dictionary: return {"ok":false,"error_code":code}
+func step(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Array[Dictionary]:
+	# Transient geometry belongs only to this successfully accepted public step.
+	# Pauses and preflight/rebase refusals must not expose the preceding tick.
+	_final_sweeps.clear()
+	if commands.size() > 1024: return []
+	# Preserve the approved atomic incoming-ID exhaustion boundary even when an
+	# actor's own attack admission is deferred rather than partially scheduled.
+	for command in commands:
+		if command.get("kind") is String and command.kind in ["spawn_enemy","spawn_boss"] and command.get("payload") is Dictionary and _generated_identity_number(command.payload.get("entity_id")) >= MAX_COUNTER-1:
+			_last_step_status = _failure("counter_exhausted")
+			return []
+	if state.has("world"): return _step_streamed(state,move,commands)
+	# Counter exhaustion is exceptional. Keep the ordinary fixed tick allocation
+	# path lean, but stage a private transaction near any top-level high-water.
+	if _needs_counter_transaction(state,commands):
+		var candidate := state.duplicate(true)
+		var staged := _step_running(candidate,move,commands)
+		var earned: int = int(candidate.player.level)-int(state.player.level)+int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated)
+		if int(candidate.offer_seq)-int(state.offer_seq) != earned:
+			_final_sweeps.clear()
+			return []
+		var checked := restore(candidate)
+		if not checked.get("ok",false):
+			_final_sweeps.clear()
+			return []
+		state.clear()
+		state.merge(checked.state,true)
+		return staged
+	return _step_running(state,move,commands)
+func _needs_counter_transaction(state: Dictionary, commands: Array[Dictionary]) -> bool:
+	if state.reward_ids_claimed.size() >= 4096-256-5: return true
+	for field in ["active_tick","event_seq","next_entity_id","attack_seq","offer_seq","view_revision"]:
+		if int(state[field]) > MAX_COUNTER-65536: return true
+	if int(state.stats.kills) > MAX_COUNTER-65536 or int(state.player.level) > MAX_COUNTER-65536 or int(state.player.xp) > MAX_COUNTER-65536: return true
+	var possible_xp: int = int(state.player.xp)
+	for drop in state.drops: possible_xp += int(drop.xp)
+	if state.has("world") and state.world.get("schema_version") == 2:
+		for collection in ["entities","drops"]:
+			for entry in state.world.dormant[collection]: possible_xp += int(entry.record.xp)
+	for entity in state.entities:
+		possible_xp += int(entity.xp)
+		if int(entity.get("pattern_index",0)) > MAX_COUNTER-65536: return true
+	for command in commands:
+		if not command.get("kind") is String or not command.kind in ["spawn_enemy","spawn_boss"] or not command.get("payload") is Dictionary: continue
+		var incoming_id = command.payload.get("entity_id")
+		if _generated_identity_number(incoming_id) > MAX_COUNTER-65536: return true
+		var enemy_id = command.payload.get("enemy_id")
+		if enemy_id is String and state.rules.enemy_catalog.has(enemy_id): possible_xp += int(state.rules.enemy_catalog[enemy_id].xp)
+	return possible_xp > MAX_COUNTER-65536
+func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if state.phase in ["won","dead","abandoned"] or not state.pause_reasons.is_empty() or not state.upgrade_offer.is_empty(): return events
+	state.active_tick = int(state.active_tick)+1
+	_compact_command_history(state)
+	if state.phase == "survival": state.survival_tick = mini(FINAL_TICK,int(state.survival_tick)+1)
+	_final_sweeps.clear()
+	for command in commands: _apply_command(state,command,events)
+	if state.phase == "evacuation" and not FINAL_ACTOR_SPAWN_ID in state.command_ids_applied and (int(state.active_tick)-int(state.final_started_tick)) % 30 == 0:
+		_try_spawn_final_actor(state,events)
+	_move_player(state,move)
+	_move_enemies(state,events)
+	_spatial.rebuild(state.entities)
+	var boss_rewards: Array[Dictionary] = []
+	var existing_projectiles := {}
+	for projectile in state.projectiles: existing_projectiles[str(projectile.id)] = true
+	_auto_attack(state,events,boss_rewards)
+	_execute_player_attacks(state,events,boss_rewards)
+	_advance_projectiles(state,events,boss_rewards,existing_projectiles)
+	_remove_dead(state)
+	_attract_drops(state)
+	_collect_drops(state,events,boss_rewards.size())
+	for reward in boss_rewards: _claim_boss_reward(state,reward,events)
+	_player_damage(state,events)
+	if state.player.hp <= 0.0:
+		_end_run(state,"dead","damage",events)
+		return events
+	_use_prepared_supply(state,events)
+	_regenerate(state)
+	if state.phase == "evacuation":
+		if int(state.active_tick)-int(state.final_started_tick) >= int(state.rules.evacuation_ticks): state.evacuation_ready = true
+		if state.evacuation_ready and _inside_escape(state): _end_run(state,"won","evacuated",events)
+	if state.phase in ["survival","evacuation"]: _activate_next_offer(state,events)
+	return events
+func choose_upgrade(state: Dictionary, offer_id: String, option_id: String) -> Dictionary:
+	# Semantic operation is transactional: validation, application and FIFO promotion
+	# happen on one private candidate before the caller's authority is replaced.
+	var hydration: Dictionary = {}
+	if state.has("world"):
+		if _streamed == null or not _streamed.readiness(state).get("ok",false): return _failure("world_not_ready")
+		hydration = _streamed._hydration
+	var checked := restore(state,hydration)
+	if not checked.get("ok",false): return _failure("invalid_offer")
+	var candidate: Dictionary = checked.state
+	if not candidate.phase in ["survival","evacuation"] or candidate.upgrade_offer.is_empty() or candidate.upgrade_offer.offer_id != offer_id or "offer:"+offer_id in candidate.reward_ids_claimed: return _failure("invalid_offer")
+	var selected: Dictionary = {}
+	for option in candidate.upgrade_offer.options:
+		if option.option_id == option_id: selected = option
+	if selected.is_empty() or not _catalog.option_valid(candidate,selected): return _failure("invalid_option")
+	var events: Array[Dictionary] = []
+	if selected.kind == "evolution":
+		var recipe: Dictionary = _catalog.evolutions.definition(selected.evolution_id)
+		candidate.evolutions[selected.item_id] = selected.evolution_id
+		candidate.tactical_seals = int(candidate.tactical_seals)-int(recipe.seal_cost)
+	else:
+		var owned: Dictionary = candidate.equipment if selected.kind == "equipment" else candidate.passives
+		owned[selected.item_id] = int(selected.next_level)
+		if selected.kind == "passive" and selected.item_id == "max_health":
+			candidate.player.max_hp = _catalog.stat(candidate,"max_hp",float(candidate.rules.base_hp))
+			candidate.player.hp = minf(float(candidate.player.max_hp),float(candidate.player.hp)+float(_catalog.passives.max_health.increment))
+	_emit(candidate,events,"upgrade_applied",{"offer_id":offer_id,"option_id":option_id,"item_id":selected.item_id,"kind":selected.kind})
+	_claim_id(candidate.reward_ids_claimed,"offer:"+offer_id)
+	candidate.upgrade_offer = {}
+	candidate.pause_reasons.erase("upgrade")
+	candidate.view_revision = int(candidate.view_revision)+1
+	if not _activate_next_offer(candidate,events): return _failure("invalid_offer_queue")
+	var validated := restore(candidate,hydration)
+	if not validated.get("ok",false): return _failure("invalid_core_state")
+	candidate = validated.state
+	state.clear()
+	state.merge(candidate,true)
+	return {"ok":true,"events":events}
+func set_pause(state: Dictionary, reason: String, enabled: bool) -> void:
+	if not reason in PAUSE_REASONS or state.phase in ["won","dead","abandoned"]: return
+	if reason == "upgrade" and state.upgrade_offer.is_empty(): return
+	if enabled:
+		_claim_id(state.pause_reasons,reason)
+	elif reason != "upgrade" or state.upgrade_offer.is_empty():
+		state.pause_reasons.erase(reason)
+func set_offer_focus(state: Dictionary, option_id: String) -> void:
+	if state.upgrade_offer.is_empty() or state.phase in ["won","dead","abandoned"] or int(state.view_revision) >= MAX_COUNTER: return
+	for option in state.upgrade_offer.options:
+		if option.option_id == option_id:
+			if state.upgrade_offer.selected_option_id != option_id:
+				state.upgrade_offer.selected_option_id = option_id
+				state.view_revision = int(state.view_revision)+1
+			return
+func abandon_run(state: Dictionary) -> Array[Dictionary]:
+	var events: Array[Dictionary] = []
+	if state.phase in ["won","dead","abandoned"] or int(state.event_seq) >= MAX_COUNTER or int(state.view_revision) >= MAX_COUNTER: return events
+	_end_run(state,"abandoned","abandoned",events)
+	return events
+func snapshot(state: Dictionary) -> Dictionary:
+	return state.duplicate(true)
+func acknowledge_autosave_world(state: Dictionary, captured_snapshot: Dictionary, receipt: Dictionary, confirmed_world: Dictionary) -> Dictionary:
+	# Main-thread acknowledgment after exact durable confirmation.
+	# Never restore/adopt a worker Core or rewind any live gameplay field here.
+	if OS.get_thread_caller_id() != OS.get_main_thread_id(): return _failure("world_ack_wrong_thread")
+	if not _content_error.is_empty() or _chapter.get("world_mode") != "streamed_city": return _failure("content_mismatch")
+	if _streamed == null or _streamed.get_script() != Streamed or not _last_step_status.get("ok",false): return _failure("world_not_ready")
+	for value in [state,captured_snapshot]:
+		if not value.get("run_id") is String or not Growth._run_id_valid(value.run_id) or not Catalog.integer_valid(value.get("run_serial"),1): return _failure("world_ack_identity")
+		if value.run_id.get_slice(":",1) != str(int(value.run_serial)) or not Catalog.integer_valid(value.get("seed")) or not Catalog.integer_valid(value.get("active_tick")): return _failure("world_ack_identity")
+		if not value.get("run_config") is Dictionary or not _config_valid(value.run_config,_chapter): return _failure("world_ack_identity")
+		if value.run_config.run_id != value.run_id or value.run_config.run_serial != value.run_serial: return _failure("world_ack_identity")
+		if not value.get("rules") is Dictionary or not value.rules.get("content_fingerprint") is String or value.rules.content_fingerprint != _chapter.content_fingerprint: return _failure("content_mismatch")
+		if not value.get("chapter_id") is String or value.chapter_id != _chapter.chapter_id or not value.get("content_revision") is String or value.content_revision != CONTENT_REVISION: return _failure("content_mismatch")
+	for field in ["run_id","run_serial","seed","run_config","chapter_id","content_revision"]:
+		if not Streamed._same_json(state.get(field),captured_snapshot.get(field)): return _failure("world_ack_identity")
+	if state.active_tick < captured_snapshot.active_tick: return _failure("world_ack_stale")
+	# Bound hostile/cyclic packets before recursive world comparisons. No full
+	# actor snapshot validation, provider capture or filesystem access is needed.
+	if not Contracts.new()._json_safe([state.get("world"),captured_snapshot.get("world"),receipt,confirmed_world]): return _failure("world_ack_invalid")
+	return _streamed._acknowledge_autosave_world(state,captured_snapshot,receipt,confirmed_world)
+func restore(value: Dictionary, hydrated_deltas: Dictionary = {}) -> Dictionary:
+	# Validation never installs geometry on the live Core. Adoption is explicit.
+	return _restore_checked(value,hydrated_deltas)
+func prepare_world(state: Dictionary, verified_hydration: Dictionary, commands: Array = []) -> Dictionary:
+	var prepared := []
+	var checked := _restore_checked(state,verified_hydration,commands,prepared)
+	if not checked.get("ok",false): return checked
+	if prepared.is_empty(): return _failure("world_not_ready")
+	_streamed = prepared[0]
+	return {"ok":true}
+func world_status() -> Dictionary:
+	return {"ok":false,"error_code":"world_not_ready","resident_chunks":0} if _streamed == null else _streamed.status()
+func world_render_view(state: Dictionary) -> Dictionary:
+	# Explicit derived-data boundary. Call only when terrain/origin/coverage
+	# identity changes, not per actor/frame: helper localizes copied chunks.
+	if _streamed == null or not Streamed.enabled(state): return _failure("world_not_ready")
+	return _streamed.render_view(state)
+func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: Array = [], prepared: Array = []) -> Dictionary:
+	var errors: Array[String] = Contracts.new().validate_snapshot(value)
+	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
+	if value.content_revision != CONTENT_REVISION or value.chapter_id != "chapter_01_shiganshina" or value.character_id != "garrison_01": return _failure("content_mismatch")
+	var current: Dictionary = _current_chapter()
+	if not current.get("ok",false): return current
+	var city: bool = current.chapter.get("world_mode","") == "streamed_city"
+	if city != value.has("world"): return _failure("world_not_ready")
+	if not city and not hydrated_deltas.is_empty(): return _failure("invalid_hydration")
+	if not value.rules.get("content_fingerprint") is String or value.rules.content_fingerprint != current.chapter.content_fingerprint: return _failure("content_mismatch")
+	if not _config_valid(value.run_config,current.chapter) or value.run_config.run_id != value.run_id or value.run_config.run_serial != value.run_serial: return _failure("invalid_run_config")
+	var doctrine: Dictionary = _supplies.doctrine(value.run_config.doctrine_id)
+	if not _same_json(value.rules,_rules_for(current.chapter,doctrine)): return _failure("invalid_core_state")
+	var restored: Dictionary = value.duplicate(true)
+	if not _normalize_saved_numbers(restored): return _failure("invalid_core_state")
+	if not _catalog.evolutions.progression_state_valid(restored) or not _v2_relationships_valid(restored,current.chapter): return _failure("invalid_core_state")
+	var validation_helper
+	if city:
+		var world_check := Streamed.validate_world(restored)
+		if not world_check.get("ok",false): return world_check
+		var dormant: Dictionary = restored.world.get("dormant",{})
+		restored.world = Chapters.new()._canonical_numbers(restored.world)
+		# Dormant bodies/drops retain Core's vector and scalar normalization,
+		# rather than becoming generic integer-valued world-definition data.
+		if int(restored.world.schema_version) == 2: restored.world.dormant = dormant
+		if restored.world.stage == "dock" and not _same_json(restored.world.escape_rect,current.chapter.authored_dock.escape_rect): return _failure("invalid_core_state")
+		validation_helper = _world_template.fresh()
+		if not _helper_matches(validation_helper,current.chapter) or validation_helper == _world_template or validation_helper == _streamed: return _failure("content_mismatch")
+		var ready: Dictionary = validation_helper.prepare(restored,hydrated_deltas,commands)
+		if not ready.get("ok",false): return ready
+	if not _core_payload_valid(restored,current.chapter,validation_helper):
+		if validation_helper != null and not validation_helper.query_status().get("ok",false): return validation_helper.query_status()
+		return _failure("invalid_core_state")
+	for key in ["id","position","velocity","facing","radius","hp","max_hp","invulnerable_until","xp","level","attack_ready_ticks"]:
+		if not restored.player.has(key): return _failure("invalid_player")
+	if not restored.player.id is String or restored.player.id != "player" or not _position_valid(restored.player.velocity) or not _position_valid(restored.player.facing) or not is_equal_approx(_vec(restored.player.facing).length_squared(),1.0): return _failure("invalid_player")
+	if restored.player.radius != 8 or restored.player.max_hp != _catalog.stat(restored,"max_hp",float(restored.rules.base_hp)) or restored.player.hp > restored.player.max_hp or restored.player.level < 1: return _failure("invalid_player")
+	for reason in restored.pause_reasons:
+		if not reason in PAUSE_REASONS: return _failure("invalid_pause_reason")
+	if not _offer_valid(restored,restored.upgrade_offer,true): return _failure("invalid_offer")
+	if not restored.upgrade_offer.is_empty():
+		# Identity/levels/focus were validated unchanged above. Reconstruct only
+		# deterministic decoration scalar types from the pinned catalog, no RNG.
+		var options: Array[Dictionary] = []
+		for option in restored.upgrade_offer.options: options.append(_catalog.decorate_option(restored,option))
+		restored.upgrade_offer.options = options
+	for descriptor in restored.pending_offers:
+		if not descriptor is Dictionary or not Growth.new(_catalog)._descriptor_valid(restored,descriptor): return _failure("invalid_offer_queue")
+	if not _offer_queue_ids_valid(restored): return _failure("invalid_offer_queue")
+	_canonicalize_saved_vectors(restored)
+	if validation_helper != null:
+		var status: Dictionary = validation_helper.query_status()
+		if not status.get("ok",false): return status
+		prepared.append(validation_helper)
+	return {"ok":true,"state":restored}
+func _v2_relationships_valid(state: Dictionary, chapter: Dictionary) -> bool:
+	var expected_exit: Array = chapter.escape_zone
+	if chapter.get("world_mode","") == "streamed_city":
+		if not state.get("world") is Dictionary or not state.world.get("stage") is String: return false
+		expected_exit = Streamed.CITY_INACTIVE_EXIT if state.world.stage == "city" else chapter.authored_dock.escape_rect
+	if not _same_json(state.escape_zone,expected_exit) or not state.supply_used is bool or (state.run_config.prepared_supply == "" and state.supply_used): return false
+	if not Catalog.integer_valid(state.stats.get("minibosses_defeated"),0,5): return false
+	var boss_rewards := 0
+	for id in state.reward_ids_claimed:
+		if not id is String: return false
+		if id.begins_with("boss:"):
+			var boss: String = id.trim_prefix("boss:")
+			if not boss in REAL_BOSS_IDS or not boss in state.boss_ids_fired: return false
+			boss_rewards += 1
+	for id in state.boss_ids_fired:
+		if id == "ch01_final_armored":
+			if state.survival_tick != FINAL_TICK: return false
+		elif not id in REAL_BOSS_IDS or state.survival_tick < (REAL_BOSS_IDS.find(id)+1)*18000: return false
+	if boss_rewards != state.stats.minibosses_defeated or boss_rewards != int(state.tactical_seals)+state.evolutions.size(): return false
+	if not Catalog.integer_valid(state.player.get("level"),1) or int(state.offer_seq) > int(state.player.level)-1+boss_rewards: return false
+	if not Catalog.integer_valid(state.stats.get("kills")) or state.stats.kills < boss_rewards: return false
+	if not _number_valid(state.player.get("hp")): return false
+	if state.phase == "dead" and state.player.hp != 0: return false
+	if state.phase in ["survival","evacuation","won"] and not _number_valid(state.player.get("hp"),0.0000001): return false
+	# Nonempty attack schedules acquire their exact validation in the next C2 tranche.
+	if not _evolved.validate_records(state) or not state.enemy_attack_instances.is_empty() or not state.evolution_runtime.is_empty(): return false
+	return true
+# Old production commands have durable monotonic owners already in RunState.
+# Batch collection bounds work and preserves opaque historical IDs unchanged.
+# Do not call this during restore: duplicate/corrupt ledger validation must run
+# before any cleanup, and hydration must reproduce the saved authority exactly.
+func _compact_command_history(state: Dictionary) -> void:
+	if state.command_ids_applied.size() <= COMMAND_HISTORY_COMPACT_AT: return
+	var owners := {}
+	for entity in state.entities:
+		var identity := _generated_identity_number(entity.id)
+		if identity > 0: owners[identity] = int(entity.get("pattern_index",0))
+	if state.has("world") and state.world.get("schema_version") == 2:
+		for entry in state.world.dormant.entities:
+			var identity := _generated_identity_number(entry.record.id)
+			if identity > 0: owners[identity] = int(entry.record.get("pattern_index",0))
+	var retained := []
+	for command_id in state.command_ids_applied:
+		var director_tick := _director_spawn_tick(command_id)
+		if director_tick >= 0 and director_tick < int(state.active_tick): continue
+		var pieces: PackedStringArray = command_id.split(":")
+		if pieces.size() == 3 and pieces[0] in ["behavior","final-impact"]:
+			var identity := _generated_identity_number(pieces[1])
+			var pattern := _generated_identity_number(pieces[2])
+			if identity > 0 and identity < int(state.next_entity_id) and pattern > 0:
+				# Keep current markers even in move/recover, and keep future
+				# claimed IDs so a hostile/corrupt preclaim is never forgiven.
+				if not owners.has(identity) or pattern < int(owners[identity]): continue
+		retained.append(command_id)
+	state.command_ids_applied = retained
+func _action_history_owner(command_id: String) -> int:
+	var pieces: PackedStringArray = command_id.split(":")
+	if pieces.size() != 3 or not pieces[0] in ["behavior","final-impact"] or _generated_identity_number(pieces[2]) == 0: return 0
+	return _generated_identity_number(pieces[1])
+func _director_spawn_tick(command_id: String) -> int:
+	var pieces: PackedStringArray = command_id.split("_")
+	if pieces.size() != 3 or pieces[0] != "enemy": return -1
+	var tick := _generated_identity_number(pieces[1])
+	if tick == 0 or not pieces[2].is_valid_int(): return -1
+	var index: int = pieces[2].to_int()
+	if index < 0 or index > 1023 or pieces[2] != str(index): return -1
+	return tick
+func _apply_command(state: Dictionary, command: Dictionary, events: Array[Dictionary], internal_behavior: bool = false) -> void:
+	var spatial: bool = state.has("world") and Streamed.spatial_command(command)
+	if command.size() != (4 if spatial else 3) or not command.has_all(["command_id","kind","payload"]) or not Catalog.json_data_valid(command): return
+	if spatial and (not WorldCodec.integer(command.get("origin_revision")) or command.origin_revision > WorldCodec.MAX_JSON_INTEGER or command.origin_revision != state.world.origin_revision): return
+	if not command.command_id is String or command.command_id.is_empty() or command.command_id.length() > 128 or not command.kind is String or not command.payload is Dictionary: return
+	var command_id := str(command.command_id)
+	# Reserved lifecycle IDs cannot be submitted as opaque external commands.
+	if _action_history_owner(command_id) > 0:
+		if not internal_behavior or command.kind != "telegraph_attack" or command.payload.get("behavior_attack") != true: return
+	var director_tick := _director_spawn_tick(command_id)
+	if director_tick >= 0:
+		if command.kind != "spawn_enemy" or director_tick != int(state.active_tick) or not Catalog.integer_valid(command.payload.get("spawned_tick"),director_tick,director_tick) or _generated_identity_number(command.payload.get("entity_id")) == 0: return
+	if state.command_ids_applied.size() >= 16384: return
+	if command_id in state.command_ids_applied: return
+	var payload: Dictionary = command.payload
+	var applied := false
+	match str(command.kind):
+		"spawn_enemy", "spawn_boss":
+			applied = _spawn(state,payload,str(command.kind)=="spawn_boss",events)
+		"telegraph_attack":
+			if _hazard_valid(payload) and state.telegraphs.size() < (512 if state.has("world") else 1024) and int(state.active_tick)+int(payload.warning_ticks)+int(payload.active_ticks) <= MAX_COUNTER and (internal_behavior or not payload.has("behavior_attack")):
+				var hazard: Dictionary = payload.duplicate(true)
+				hazard.origin = _array(_vec(payload.origin))
+				if payload.has("direction"): hazard.direction = _array(_vec(payload.direction))
+				hazard.id = _new_id(state)
+				hazard.created_tick = int(state.active_tick)
+				hazard.active_from_tick = int(state.active_tick)+int(payload.warning_ticks)
+				hazard.expires_tick = int(hazard.active_from_tick)+int(payload.active_ticks)
+				state.telegraphs.append(hazard)
+				applied = true
+		"begin_evacuation":
+			if state.phase == "survival" and int(state.survival_tick) >= FINAL_TICK and payload.get("boss_id") is String and payload.boss_id == "ch01_final_armored" and _same_json(payload.get("escape_zone"),state.escape_zone) and Catalog.integer_valid(payload.get("evacuation_ticks"),4500,4500):
+				state.phase = "evacuation"
+				state.survival_tick = FINAL_TICK
+				state.final_started_tick = int(state.active_tick)
+				state.evacuation_ready = false
+				state.escape_zone = payload.escape_zone.map(func(value): return float(value))
+				var phase_payload := {"phase":"evacuation"}
+				if state.has("world") and state.world.get("schema_version") == 2:
+					var cleared := {"dormant_entities":state.world.dormant.entities.size(),"dormant_drops":state.world.dormant.drops.size(),"dormant_xp":0}
+					for entry in state.world.dormant.drops: cleared.dormant_xp += int(entry.record.xp)
+					phase_payload.population_cleared = cleared
+					state.world = state.world.duplicate(true)
+					state.world.dormant = {"entities":[],"drops":[]}
+				state.entities.clear()
+				state.drops.clear()
+				state.projectiles.clear()
+				state.telegraphs.clear()
+				state.player_attack_instances.clear()
+				state.enemy_attack_instances.clear()
+				_claim_id(state.boss_ids_fired,"ch01_final_armored")
+				_emit(state,events,"phase_changed",phase_payload)
+				applied = true
+		"evacuation_ready":
+			if state.phase == "evacuation" and int(state.active_tick)-int(state.final_started_tick) >= int(state.rules.evacuation_ticks):
+				state.evacuation_ready = true
+				applied = true
+	if applied: _claim_id(state.command_ids_applied,command_id)
+func _spawn(state: Dictionary, payload: Dictionary, boss: bool, events: Array[Dictionary], final_actor: bool = false) -> bool:
+	if state.phase != ("evacuation" if final_actor else "survival") or not _id_valid(payload.get("entity_id")) or not payload.get("enemy_id") is String or not _position_valid(payload.get("position",[])): return false
+	var entity_id: Variant = payload.entity_id if payload.entity_id is String else int(payload.entity_id)
+	# The allocator is also the tombstone for retired generated identities.
+	var allocated_id := _generated_identity_number(entity_id)
+	if allocated_id > 0 and allocated_id < int(state.next_entity_id): return false
+	var enemy_id := str(payload.enemy_id)
+	if not state.rules.enemy_catalog.has(enemy_id): return false
+	if final_actor:
+		if enemy_id != FINAL_ENEMY_ID or payload.get("boss_id") != FINAL_BOSS_ID or FINAL_ACTOR_SPAWN_ID in state.command_ids_applied: return false
+	elif enemy_id == FINAL_ENEMY_ID: return false
+	if not boss and (enemy_id.begins_with("boss_") or not Catalog.integer_valid(payload.get("spawned_tick",state.active_tick),0,int(state.active_tick)) or not str(payload.get("boss_id","")).is_empty()): return false
+	if boss and not final_actor:
+		if not payload.get("boss_id") is String or not payload.boss_id in REAL_BOSS_IDS or payload.boss_id in state.boss_ids_fired: return false
+		if not Catalog.integer_valid(payload.get("scheduled_tick")): return false
+		var current: Dictionary = {"ok":not _chapter.is_empty(),"chapter":_chapter}
+		if not current.get("ok",false): return false
+		var authored: Dictionary = current.chapter.boss_schedule[REAL_BOSS_IDS.find(payload.boss_id)]
+		if enemy_id != authored.enemy_id or int(payload.scheduled_tick) != int(authored.tick) or state.survival_tick < authored.tick: return false
+	for collection in ["entities","projectiles","drops","telegraphs"]:
+		for record in state[collection]:
+			if str(record.id) == str(entity_id): return false
+	var dormant_bodies := 0
+	if state.has("world") and state.world.get("schema_version") == 2:
+		dormant_bodies = state.world.dormant.entities.size()
+		for collection in ["entities","drops"]:
+			for entry in state.world.dormant[collection]:
+				if str(entry.record.id) == str(entity_id): return false
+	if state.entities.size()+dormant_bodies >= MAX_ENTITIES: return false
+	var definition: Dictionary = state.rules.enemy_catalog[enemy_id]
+	var spawn := _spawn_position(state,_vec(payload.position),float(definition.radius))
+	if not is_finite(spawn.x) or not is_finite(spawn.y) or not _walkable_world(state,spawn,float(definition.radius)): return false
+	var entity := {"id":entity_id,"entity_id":entity_id,"enemy_id":enemy_id,"position":_array(spawn),"velocity":[0.0,0.0],"hp":float(definition.hp),"max_hp":float(definition.hp),"speed":float(definition.speed),"radius":float(definition.radius),"damage":float(definition.get("damage",definition.get("contact_damage",0.0))),"xp":int(definition.xp),"behavior":definition.get("behavior","chase"),"art_id":definition.get("art_id","titan_basic"),"spawned_tick":int(payload.get("scheduled_tick",payload.get("spawned_tick",state.active_tick))),"boss_id":payload.get("boss_id","")}
+	state.entities.append(entity)
+	var reserved_id := _generated_identity_number(entity_id)
+	if reserved_id > 0: state.next_entity_id = maxi(int(state.next_entity_id),reserved_id+1)
+	if boss:
+		_claim_id(state.boss_ids_fired,str(payload.boss_id))
+		_emit(state,events,"boss_spawned",{"boss_id":payload.boss_id,"entity_id":entity_id,"enemy_id":enemy_id})
+	return true
+func _try_spawn_final_actor(state: Dictionary, events: Array[Dictionary]) -> void:
+	if not state.rules.enemy_catalog.has(FINAL_ENEMY_ID): return
+	var radius := float(state.rules.enemy_catalog[FINAL_ENEMY_ID].radius)
+	var player := _vec(state.player.position)
+	# Exactly 24 verified candidates near the evacuation approach. No invented
+	# walkability, population parking, identity consumption, or simulation pause.
+	for distance in [260.0,320.0,380.0]:
+		for index in 8:
+			var point: Vector2 = player+Vector2.UP.rotated(TAU*index/8.0)*distance
+			if not _walkable_world(state,point,radius): continue
+			var ready := _final_contact_ready(state,point,point.direction_to(player),state.rules.enemy_catalog[FINAL_ENEMY_ID].action_profile,_streamed)
+			if not ready.get("ok",false) or not ready.clear: continue
+			var payload := {"entity_id":int(state.next_entity_id),"enemy_id":FINAL_ENEMY_ID,"boss_id":FINAL_BOSS_ID,"position":_array(point),"scheduled_tick":int(state.final_started_tick)}
+			if _spawn(state,payload,true,events,true):
+				_claim_id(state.command_ids_applied,FINAL_ACTOR_SPAWN_ID)
+				return
+	_emit(state,events,"final_actor_spawn_deferred",{"reason":"no_legal_space","retry_tick":int(state.active_tick)+30})
+func _spawn_position(state: Dictionary, requested: Vector2, radius: float) -> Vector2:
+	var world: Dictionary = _finite_geometry(state)
+	if _walkable_world(state,requested,radius): return requested
+	var player := _vec(state.player.position)
+	var minimum := maxf(radius+float(state.player.radius)+16.0,minf(128.0,requested.distance_to(player)))
+	var nearest := _nearest_world(state,requested,radius)
+	if _walkable_world(state,nearest,radius) and nearest.distance_to(player) >= minimum: return nearest
+	# Clamping an outward spawn beside a wall must not drop a new body onto the
+	# player. Search the same ring in fixed angular order, with no RNG draws.
+	var ring := maxf(160.0,requested.distance_to(player))
+	var angle := (requested-player).angle()
+	var best := Vector2(INF,INF)
+	var cost := INF
+	for index in 16:
+		var candidate := _nearest_world(state,player+Vector2.from_angle(angle+TAU*index/16.0)*ring,radius)
+		var distance := candidate.distance_squared_to(requested)
+		if _walkable_world(state,candidate,radius) and candidate.distance_to(player) >= minimum and distance < cost:
+			best = candidate
+			cost = distance
+	return best
+func _move_player(state: Dictionary, input: Vector2) -> void:
+	var move := input.limit_length(1.0) if is_finite(input.x) and is_finite(input.y) else Vector2.ZERO
+	var speed := float(state.rules.move_speed)*_catalog.stat(state,"move_multiplier",1.0)
+	var velocity := move*speed
+	var position := _move_world(state,_vec(state.player.position),velocity/TICKS_PER_SECOND,float(state.player.radius))
+	state.player.position = _array(position)
+	state.player.velocity = _array(velocity)
+	if not move.is_zero_approx(): state.player.facing = _array(move.normalized())
+func _move_enemies(state: Dictionary, events: Array[Dictionary]) -> void:
+	# Successful target clearances belong only to this movement batch.
+	var movement_targets := {}
+	for entity in state.entities:
+		if not entity.has("action_state"): _initialize_action(state,entity)
+		_advance_enemy_action(state,entity,events,movement_targets)
+		# NEW derived inactive anchors: the move branch reads position/player;
+		# _start_enemy_action overwrites both anchors before using an attack.
+		# Never rewrite windup, airborne, attack or recovery geometry.
+		if state.has("world") and state.world.stage == "city" and entity.action_state == "move":
+			entity.locked_origin = entity.position.duplicate()
+			entity.locked_target = state.player.position.duplicate()
+func _initialize_action(state: Dictionary, entity: Dictionary) -> void:
+	var direction := _vec(entity.position).direction_to(_vec(state.player.position))
+	if direction.is_zero_approx(): direction = Vector2.RIGHT
+	entity.facing = _array(direction)
+	entity.action_state = "move"
+	entity.action_started_tick = int(state.active_tick)
+	entity.action_ends_tick = int(state.active_tick)
+	entity.next_action_tick = int(state.active_tick)
+	entity.pattern_index = 0
+	entity.attack_kind = "none"
+	entity.locked_origin = entity.position.duplicate()
+	entity.locked_direction = _array(direction)
+	entity.locked_target = state.player.position.duplicate()
+func _advance_enemy_action(state: Dictionary, entity: Dictionary, events: Array[Dictionary], movement_targets: Variant = null) -> void:
+	var profile: Dictionary = Behaviors.profile(entity,state.rules.enemy_catalog)
+	var tick := int(state.active_tick)
+	var player := _vec(state.player.position)
+	var position := _vec(entity.position)
+	if entity.action_state == "move":
+		if profile.kind != "none" and tick >= int(entity.next_action_tick) and position.distance_to(player) <= float(profile.trigger_range) and _start_enemy_action(state,entity,profile,events):
+			return
+		var direction := _direction_world(state,position,player,float(entity.radius),str(entity.id),movement_targets)
+		entity.velocity = _array(direction*float(entity.speed))
+		entity.position = _array(_move_world(state,position,_vec(entity.velocity)/TICKS_PER_SECOND,float(entity.radius)))
+		if not direction.is_zero_approx(): entity.facing = _array(direction)
+		return
+	if entity.action_state == "windup" and tick >= int(entity.action_ends_tick):
+		var action := "airborne" if entity.attack_kind == "leap" else "attack"
+		var duration := int(profile.airborne_ticks) if action == "airborne" else int(profile.active_ticks)
+		_set_action(entity,action,tick,duration)
+	if entity.action_state == "airborne":
+		if tick >= int(entity.action_ends_tick):
+			entity.position = entity.locked_target.duplicate()
+			_set_action(entity,"attack",tick,int(profile.active_ticks))
+		else:
+			var weight := float(tick-int(entity.action_started_tick))/float(profile.airborne_ticks)
+			var next_position := _vec(entity.locked_origin).lerp(_vec(entity.locked_target),weight)
+			entity.velocity = _array((next_position-_vec(entity.position))*TICKS_PER_SECOND)
+			entity.position = _array(next_position)
+			return
+	if entity.enemy_id == FINAL_ENEMY_ID and entity.action_state in ["attack","brake","recover"]:
+		_advance_final_charge(state,entity,profile,events)
+		return
+	if entity.action_state == "attack":
+		if tick >= int(entity.action_ends_tick):
+			_set_action(entity,"recover",tick,int(profile.recovery_ticks))
+		elif entity.attack_kind in ["charge","grab"]:
+			entity.velocity = _array(_vec(entity.locked_direction)*float(profile.rush_speed))
+			entity.position = _array(_move_world(state,_vec(entity.position),_vec(entity.velocity)/TICKS_PER_SECOND,float(entity.radius),true))
+			return
+	if entity.action_state == "recover" and tick >= int(entity.action_ends_tick):
+		_set_action(entity,"move",tick,0)
+		entity.next_action_tick = tick+int(profile.cooldown_ticks)
+	entity.velocity = [0.0,0.0]
+func _advance_final_charge(state: Dictionary, entity: Dictionary, profile: Dictionary, events: Array[Dictionary]) -> void:
+	var tick := int(state.active_tick)
+	if entity.action_state == "attack":
+		if tick >= int(entity.action_ends_tick):
+			_stop_final_charge(state,entity,profile)
+		else:
+			var previous := _vec(entity.position)
+			var direction := _vec(entity.locked_direction)
+			var speed := _final_charge_speed(profile,tick-int(entity.action_started_tick))
+			var delta := direction*speed/TICKS_PER_SECOND
+			var sweep := _final_contact_sweep(state,previous,delta,direction,profile,_streamed)
+			if not sweep.get("ok",false): return
+			var position: Vector2 = sweep.position
+			entity.position = _array(position)
+			entity.velocity = _array((position-previous)*TICKS_PER_SECOND)
+			var shoulder := previous+direction*float(profile.shoulder_forward)
+			_final_sweeps.append({"source_id":str(entity.id),"shape":"line","origin":_array(shoulder),"direction":entity.locked_direction.duplicate(),"length":previous.distance_to(position),"width":float(profile.shoulder_radius)*2.0,"damage":float(entity.damage),"tick":tick,"pattern_index":int(entity.pattern_index),"contact":sweep.contact.duplicate(true)})
+			if sweep.stopped:
+				_stop_final_charge(state,entity,profile)
+				if not str(sweep.contact.get("prop_id","")).is_empty(): _strike_final_structure(state,entity,profile,sweep.contact,events)
+			return
+	if entity.action_state == "brake" and tick >= int(entity.action_ends_tick): _set_action(entity,"recover",tick,int(profile.recovery_ticks))
+	if entity.action_state == "recover" and tick >= int(entity.action_ends_tick):
+		_set_action(entity,"move",tick,0)
+		entity.next_action_tick = tick+int(profile.cooldown_ticks)
+	entity.velocity = [0.0,0.0]
+func _strike_final_structure(state: Dictionary, entity: Dictionary, profile: Dictionary, contact: Dictionary, events: Array[Dictionary]) -> void:
+	if contact.get("shape","") != "shoulder_circle" or not contact.get("point") is Vector2: return
+	var prop_id: String = contact.prop_id
+	var attack_id := "final-impact:%s:%d"%[str(entity.id),int(entity.pattern_index)]
+	if attack_id in state.command_ids_applied: return
+	var actor := {"source_team":"titan","structure_capable":true,"cancelled":false,"position":_array(contact.point)}
+	var rules := {"warning_ticks":int(profile.warning_ticks),"recovery_ticks":int(profile.brake_ticks)+int(profile.recovery_ticks),"structure_damage":int(profile.structure_damage),"structure_reach":int(profile.structure_reach),"structure_admission_interval_ticks":int(profile.structure_admission_interval_ticks),"max_structure_attacks":int(profile.max_structure_attacks)}
+	var budget := {"remaining_strong_slots":1,"in_flight":0,"next_admit_tick":int(state.world.next_structure_strike_tick)}
+	var admitted: Dictionary = _streamed.structure_candidate_proposal(state,actor,prop_id,rules,budget)
+	if not admitted.get("ok",false):
+		if not admitted.get("error_code","") in ["not_destructible","structure_budget","out_of_reach"]: _streamed._query_result(admitted)
+		_emit(state,events,"final_structure_stopped",{"entity_id":entity.id,"prop_id":prop_id,"reason":admitted.get("error_code","")})
+		return
+	# Admission reserves the existing global structural budget. This impact is
+	# the already-warned physical shoulder action, not a second future attack.
+	# Its single reached prop and current active tick bound damage exactly.
+	var attack := {"kind":"structure_strike","source_team":"titan","cancelled":false,"attack_instance_id":attack_id,"target_prop_id":prop_id,"hit_target_ids":[],"active_from_tick":int(state.active_tick),"expires_tick":int(state.active_tick),"structure_damage":int(profile.structure_damage)}
+	var reached := {"prop_id":prop_id,"reached":true,"tick":int(state.active_tick),"fraction":float(contact.fraction)}
+	var proposal: Dictionary = _streamed.destruction_proposal(state,attack,reached)
+	if not proposal.get("ok",false):
+		_streamed._query_result(proposal)
+		return
+	var next_world: Dictionary = proposal.world
+	next_world.next_structure_strike_tick = admitted.world.next_structure_strike_tick
+	# A fresh geometry helper must not erase an earlier failure in this tick.
+	# Leave the failed batch attached so the outer transaction rolls back.
+	if not _streamed.query_status().get("ok",false): return
+	state.world = next_world
+	var next = _streamed.fresh()
+	var ready: Dictionary = next.prepare(state,_streamed._hydration)
+	if not ready.get("ok",false):
+		_streamed._query_result(ready)
+		return
+	_streamed = next
+	_claim_id(state.command_ids_applied,attack_id)
+	var payload: Dictionary = proposal.event.duplicate(true)
+	var type: String = payload.type
+	payload.erase("type")
+	payload.position = entity.position.duplicate()
+	_emit(state,events,type,payload)
+func _final_contact_shapes(state: Dictionary, origin: Vector2, end: Vector2, radius: float, helper, finite_override: Dictionary = {}) -> Dictionary:
+	var shapes := []
+	if finite_override.is_empty() and state.has("world") and state.world.stage == "city":
+		if helper == null: return _failure("world_not_ready")
+		var query: Dictionary = helper.props_query(Streamed.segment_rect(origin,end,radius))
+		if not query.get("ok",false): return query
+		for prop in query.props:
+			if (int(prop.collision_mask)&3) != 0: shapes.append({"id":prop.prop_id,"prop_id":prop.prop_id,"rect":prop.ground_footprint})
+		return {"ok":true,"shapes":shapes,"bounds":null}
+	var world := finite_override if not finite_override.is_empty() else _finite_geometry(state)
+	if world.is_empty(): return {"ok":true,"shapes":[],"bounds":null}
+	for index in world.obstacles.size(): shapes.append({"id":"finite:%d"%index,"rect":World._rect(world.obstacles[index])})
+	return {"ok":true,"shapes":shapes,"bounds":World._rect(world.bounds)}
+func _final_contact_ready(state: Dictionary, root: Vector2, direction: Vector2, profile: Dictionary, helper, finite_override: Dictionary = {}) -> Dictionary:
+	# Non-damaging space for the baked warning pose, including its connector.
+	# Only admission/restore/spawn/handoff use this; actual contact stays below.
+	var preparation := root+direction*float(profile.preparation_forward)
+	var shapes := _final_contact_shapes(state,root,preparation,float(profile.shoulder_radius),helper,finite_override)
+	if not shapes.get("ok",false): return shapes
+	return {"ok":true,"clear":ArmoredContact.clear(root,preparation,float(profile.shoulder_radius),shapes.shapes,shapes.bounds)}
+func _final_contact_sweep(state: Dictionary, root: Vector2, delta: Vector2, direction: Vector2, profile: Dictionary, helper, finite_override: Dictionary = {}) -> Dictionary:
+	var body: Dictionary
+	if finite_override.is_empty() and state.has("world") and state.world.stage == "city":
+		if helper == null: return _failure("world_not_ready")
+		body = helper.sweep(root,delta,32.0)
+	else:
+		var world := finite_override if not finite_override.is_empty() else _finite_geometry(state)
+		body = {"ok":true,"position":World.sweep(root,delta,32.0,world),"fraction":World._travel_fraction(root,delta,32.0,world)}
+	if not body.get("ok",false): return body
+	var shoulder := root+direction*float(profile.shoulder_forward)
+	var shapes := _final_contact_shapes(state,shoulder,shoulder+delta,float(profile.shoulder_radius),helper,finite_override)
+	if not shapes.get("ok",false): return shapes
+	var probe := ArmoredContact.trace(shoulder,delta,float(profile.shoulder_radius),shapes.shapes,shapes.bounds)
+	return ArmoredContact.combine(root,delta,body,probe)
+func _final_charge_speed(profile: Dictionary, age: int) -> float:
+	return lerpf(float(profile.rush_start_speed),float(profile.rush_speed),float(age)/maxf(1.0,float(profile.active_ticks)-1.0))
+func _stop_final_charge(state: Dictionary, entity: Dictionary, profile: Dictionary) -> void:
+	# A new stationary action anchors the already-swept stop, including impacts.
+	# Existing saved position, locked origin and phase clocks fully describe it.
+	entity.locked_origin = entity.position.duplicate()
+	_set_action(entity,"brake",int(state.active_tick),int(profile.brake_ticks))
+	state.telegraphs = state.telegraphs.filter(func(h): return not (h.get("behavior_attack",false) and str(h.source_id) == str(entity.id)))
+func _final_actor_record(state: Dictionary) -> Dictionary:
+	var result := {}
+	for entity in state.get("entities",[]):
+		if entity.get("enemy_id") != FINAL_ENEMY_ID: continue
+		if not result.is_empty(): return {}
+		result = {"entity":entity,"parked":false}
+	if state.get("world") is Dictionary and state.world.get("schema_version") == 2:
+		for entry in state.world.dormant.entities:
+			if entry.record.get("enemy_id") != FINAL_ENEMY_ID: continue
+			if not result.is_empty(): return {}
+			result = {"entity":entry.record,"parked":true}
+	return result
+func final_actor_transition_ready(state: Dictionary) -> bool:
+	if state.get("phase") != "evacuation": return false
+	var record := _final_actor_record(state)
+	if record.is_empty() or record.entity.get("boss_id") != FINAL_BOSS_ID: return false
+	if record.parked or record.entity.get("action_state") == "move": return Population.quiescent(state,record.entity)
+	return record.entity.get("action_state") in ["windup","brake","recover"]
+func final_actor_handoff(state: Dictionary, dock_definition: Dictionary) -> Dictionary:
+	# Pure scenario DTO. The caller appends these copies to its private atomic
+	# scene/save candidate only after retiring ordinary city actors and attacks.
+	if not final_actor_transition_ready(state): return _failure("final_actor_busy")
+	if not state.get("world") is Dictionary or state.world.get("stage") != "city" or _streamed == null: return _failure("world_not_ready")
+	if not _same_json(dock_definition,_chapter.get("authored_dock",{})) or not Streamed._dock_valid(dock_definition) or not _position_valid(dock_definition.get("final_actor_entry_position")): return _failure("invalid_dock_definition")
+	var record := _final_actor_record(state)
+	var original: Dictionary = record.entity
+	if not _entity_definition_valid(state,original,_chapter) or not _behavior_state_valid(state,original,_streamed): return _failure("invalid_core_state")
+	var anchor := _vec(dock_definition.final_actor_entry_position)
+	var player := _vec(dock_definition.entry_position)
+	var geometry: Dictionary = dock_definition.geometry
+	var radius := float(original.radius)
+	if not World.walkable(anchor,radius,geometry) or not World.walkable(player,float(state.player.radius),geometry) or anchor.distance_to(player) <= radius+float(state.player.radius): return _failure("blocked_final_entry")
+	var profile: Dictionary = Behaviors.profile(original,state.rules.enemy_catalog)
+	# Only a live warning owns an activated probe and immutable heading.
+	# Move/parked/brake/recover are non-damaging; their old axis is inactive.
+	# The next ordinary warning must pass full preflight at its actual heading.
+	if original.action_state == "windup":
+		var first_delta := _vec(original.locked_direction)*_final_charge_speed(profile,0)/TICKS_PER_SECOND
+		var ready := _final_contact_ready(state,anchor,_vec(original.locked_direction),profile,null,geometry)
+		if not ready.get("ok",false) or not ready.clear: return _failure("blocked_final_entry")
+		var next := _final_contact_sweep(state,anchor,first_delta,_vec(original.locked_direction),profile,null,geometry)
+		var shoulder := anchor+_vec(original.locked_direction)*float(profile.shoulder_forward)
+		var sweep := {"shape":"line","origin":_array(shoulder),"direction":original.locked_direction,"length":first_delta.length(),"width":float(profile.shoulder_radius)*2.0}
+		if not next.get("ok",false) or next.stopped or Geometry.overlaps(sweep,player,float(state.player.radius)): return _failure("blocked_final_entry")
+	var exit_rect: Array = dock_definition.escape_rect
+	var exit_point := Vector2(float(exit_rect[0])+float(exit_rect[2])*0.5,float(exit_rect[1])+float(exit_rect[3])*0.5)
+	if World.sweep(player,exit_point-player,float(state.player.radius),geometry).distance_to(exit_point) > 0.001: return _failure("blocked_escape_route")
+	var entity: Dictionary = original.duplicate(true)
+	var offset := anchor-_vec(original.position)
+	entity.position = _array(anchor)
+	entity.locked_origin = _array(_vec(original.locked_origin)+offset)
+	entity.locked_target = _array(_vec(original.locked_target)+offset)
+	if original.action_state == "move":
+		# Move has no remaining attack phase. Its old inactive anchors are not
+		# scenery/targets in the dock; the next real tick begins a fresh warning.
+		entity.locked_origin = entity.position.duplicate()
+		entity.locked_target = _array(player)
+	entity.velocity = [0.0,0.0]
+	var carried := []
+	for hazard in state.telegraphs:
+		if not hazard.get("behavior_attack",false) or str(hazard.source_id) != str(entity.id): continue
+		var copy: Dictionary = hazard.duplicate(true)
+		copy.origin = _array(_vec(copy.origin)+offset)
+		carried.append(copy)
+	return {"ok":true,"entity":entity,"telegraphs":carried}
+func _set_action(entity: Dictionary, action: String, tick: int, duration: int) -> void:
+	entity.action_state = action
+	entity.action_started_tick = tick
+	entity.action_ends_tick = tick+duration
+	entity.velocity = [0.0,0.0]
+func _start_enemy_action(state: Dictionary, entity: Dictionary, profile: Dictionary, events: Array[Dictionary]) -> bool:
+	# Reserve the command/hazard identity before mutating the actor windup.
+	# Capacity refusal defers this action while ordinary chase can continue.
+	var hazard_limit := 512 if state.has("world") else 1024
+	var behavior_command_id := "behavior:%s:%d"%[str(entity.id),int(entity.pattern_index)+1]
+	var identity_unavailable: bool = behavior_command_id.length() > 128 or behavior_command_id in state.command_ids_applied
+	if identity_unavailable or state.command_ids_applied.size() >= 16384 or state.telegraphs.size() >= hazard_limit or int(state.next_entity_id) >= MAX_COUNTER or int(entity.pattern_index) >= MAX_COUNTER:
+		if state.has("world"):
+			_tick_navigation.deferred_attacks += 1
+			_tick_navigation.actors.append({"entity_id":str(entity.id),"reason":"attack_admission_identity" if identity_unavailable else "attack_admission_capacity"})
+		return false
+	var target := _nearest_world(state,_vec(state.player.position),float(entity.radius)) if profile.kind == "leap" else _vec(state.player.position)
+	if not is_finite(target.x) or not is_finite(target.y): return false
+	var direction := _vec(entity.position).direction_to(target)
+	if direction.is_zero_approx(): direction = _vec(entity.facing)
+	if entity.enemy_id == FINAL_ENEMY_ID:
+		var ready := _final_contact_ready(state,_vec(entity.position),direction,profile,_streamed)
+		if not ready.get("ok",false) or not ready.clear: return false
+	entity.attack_kind = profile.kind
+	entity.pattern_index = int(entity.pattern_index)+1
+	entity.locked_origin = entity.position.duplicate()
+	entity.locked_direction = _array(direction)
+	entity.locked_target = _array(target)
+	entity.facing = _array(direction)
+	_set_action(entity,"windup",int(state.active_tick),int(profile.warning_ticks))
+	var leap: bool = profile.kind == "leap"
+	var shape := "circle" if profile.kind in ["slam","leap"] else ("sector" if profile.kind == "sweep" else "line")
+	var warning := int(profile.warning_ticks)+int(profile.get("airborne_ticks",0))
+	var payload := {"source_id":str(entity.id),"shape":shape,"origin":entity.locked_target.duplicate() if leap else entity.locked_origin.duplicate(),"direction":entity.locked_direction.duplicate(),"radius":float(profile.get("radius",1.0)),"length":float(profile.get("length",1.0)),"width":maxf(float(profile.get("width",1.0)),float(entity.radius)*2.0),"arc_degrees":float(profile.get("arc_degrees",90.0)),"warning_ticks":warning,"active_ticks":int(profile.active_ticks),"damage":float(entity.damage),"behavior_attack":true}
+	var command := {"command_id":behavior_command_id,"kind":"telegraph_attack","payload":payload}
+	if state.has("world"): command.origin_revision = state.world.origin_revision
+	_apply_command(state,command,events,true)
+	return true
+func _auto_attack(state: Dictionary, events: Array[Dictionary], _boss_rewards: Array[Dictionary]) -> void:
+	var item_ids: Array[String] = []
+	for key in state.equipment: item_ids.append(str(key))
+	item_ids.sort()
+	var projectile_reservations: int = state.projectiles.size()
+	for original_id in item_ids:
+		var item_id: String = str(original_id)
+		if int(state.player.attack_ready_ticks.get(item_id,0)) > int(state.active_tick) or state.attack_seq >= MAX_COUNTER: continue
+		var definition: Dictionary = _catalog.equipment[item_id]
+		var stats: Dictionary = _catalog.weapon_stats(state,item_id,int(state.equipment[item_id]))
+		var evolution: String = state.evolutions.get(item_id,"")
+		var detail: Dictionary = _catalog.evolutions.evaluate(state,evolution) if not evolution.is_empty() else {}
+		if not evolution.is_empty() and detail.get("status") != "evolved": continue
+		var radius: float = stats.range if evolution.is_empty() else detail.effect_delta.get("acquisition_range",detail.effect_delta.radius)
+		var targets: Array[int] = _spatial.query(_vec(state.player.position),radius+48.0)
+		var target_index := -1
+		var nearest := radius+48.0
+		for index in targets:
+			var entity: Dictionary = state.entities[index]
+			if entity.hp <= 0.0: continue
+			var distance := _vec(entity.position).distance_to(_vec(state.player.position))
+			if distance <= radius+float(entity.radius) and distance < nearest:
+				var mask := 16 if evolution == "evo_crossfire" else (8 if definition.mode == "projectile" else 4)
+				if not _cover_clear(state,_vec(state.player.position),_vec(entity.position),0,mask): continue
+				nearest = distance
+				target_index = index
+		if target_index < 0: continue
+		var direction := _vec(state.player.position).direction_to(_vec(state.entities[target_index].position))
+		if direction.is_zero_approx(): direction = _vec(state.player.facing)
+		var count := 1 if evolution.is_empty() else 2
+		if state.player_attack_instances.size()+count > 64: continue
+		if evolution.is_empty() and definition.mode == "projectile" and projectile_reservations >= MAX_PROJECTILES: continue
+		var cast_id: String = state.run_id+":attack:"+str(int(state.attack_seq)+1)
+		var records: Array = []
+		var cooldown: int = int(stats.cooldown_ticks)
+		if not evolution.is_empty():
+			var proposal: Dictionary = _evolved.reserve(state,item_id,_vec(state.entities[target_index].position),direction,cast_id)
+			if not proposal.get("ok",false): continue
+			records = proposal.records
+			cooldown = int(proposal.cooldown_ticks)
+		else:
+			var shape: String = "circle" if definition.mode == "combo" else definition.mode
+			var record := {"attack_id":cast_id+":0","cast_id":cast_id,"base_item_id":item_id,"evolution_id":"","attack_started_tick":int(state.active_tick),"execute_tick":int(state.active_tick),"stage_index":0,"stage_count":1,"origin_binding":"fixed","origin":state.player.position.duplicate(),"direction":_array(direction),"shape":shape,"radius":radius,"arc_degrees":float(stats.get("arc_degrees",360.0)),"damage":float(stats.damage),"hit_entity_ids":[],"pose_tag":"artillery_command" if item_id == "wall_cannon" else item_id}
+			if definition.mode == "line": record.merge({"length":radius,"width":float(stats.width)})
+			if definition.mode == "combo":
+				record.damage *= int(definition.hits)
+				record.target_id = str(state.entities[target_index].id)
+			if definition.mode == "projectile": record.merge({"radius":4.0,"range":radius+48.0,"projectile_speed":float(stats.projectile_speed),"splash_radius":float(stats.splash_radius)},true)
+			records.append(record)
+		if int(state.active_tick)+cooldown > MAX_COUNTER: continue
+		if evolution.is_empty() and definition.mode == "projectile": projectile_reservations += 1
+		state.attack_seq = int(state.attack_seq)+1
+		state.player.attack_ready_ticks[item_id] = int(state.active_tick)+cooldown
+		for record in records:
+			state.player_attack_instances.append(record)
+			if not evolution.is_empty(): _emit(state,events,"player_attack",_attack_payload(record,"scheduled"))
+func _attack_payload(record: Dictionary, phase: String) -> Dictionary:
+	var result := record.duplicate(true)
+	result.phase = phase
+	var geometry := {"shape":record.shape,"origin":record.origin.duplicate(),"direction":record.direction.duplicate(),"radius":float(record.radius),"arc_degrees":float(record.arc_degrees)}
+	for field in ["length","width","projectile_id","target_id"]:
+		if record.has(field): geometry[field] = record[field]
+	result.geometry = geometry
+	return result
+func _execute_player_attacks(state: Dictionary, events: Array[Dictionary], boss_rewards: Array[Dictionary]) -> void:
+	state.player_attack_instances.sort_custom(func(a,b): return int(a.execute_tick) < int(b.execute_tick) if a.execute_tick != b.execute_tick else str(a.attack_id) < str(b.attack_id))
+	var pending: Array = []
+	for saved in state.player_attack_instances:
+		if int(saved.execute_tick) > int(state.active_tick):
+			pending.append(saved)
+			continue
+		var record: Dictionary = saved.duplicate(true)
+		if record.origin_binding == "player": record.origin = state.player.position.duplicate()
+		if record.shape == "projectile":
+			var id := _new_id(state)
+			record.projectile_id = id
+			state.projectiles.append({"id":id,"item_id":record.base_item_id,"attack_id":record.attack_id,"cast_id":record.cast_id,"position":record.origin.duplicate(),"velocity":_array(_vec(record.direction)*float(record.projectile_speed)),"damage":float(record.damage),"splash_radius":float(record.splash_radius),"remaining_distance":float(record.range),"radius":float(record.radius)})
+		_emit(state,events,"player_attack",_attack_payload(record,"executed"))
+		if record.shape == "projectile": continue
+		var radius: float = maxf(float(record.radius),float(record.get("length",0.0)))+48.0
+		for index in _spatial.query(_vec(record.origin),radius):
+			var entity: Dictionary = state.entities[index]
+			var id := str(entity.id)
+			if entity.hp <= 0.0 or id in record.hit_entity_ids: continue
+			if record.has("target_id") and record.target_id != id: continue
+			if Geometry.overlaps(record,_vec(entity.position),float(entity.radius)) and _cover_clear(state,_vec(record.origin),_vec(entity.position),0,16 if record.evolution_id == "evo_crossfire" else 4):
+				record.hit_entity_ids.append(id)
+				_hit_entity(state,entity,float(record.damage),record.base_item_id,events,boss_rewards,record.attack_id)
+	state.player_attack_instances = pending
+func _advance_projectiles(state: Dictionary, events: Array[Dictionary], boss_rewards: Array[Dictionary], existing: Dictionary) -> void:
+	var kept: Array = []
+	for projectile in state.projectiles:
+		if not existing.has(str(projectile.id)):
+			kept.append(projectile)
+			continue
+		var previous := _vec(projectile.position)
+		var displacement := _vec(projectile.velocity)/TICKS_PER_SECOND
+		var cover := _cover_world(state,previous,previous+displacement,float(projectile.radius),8)
+		var blocked: bool = cover.get("ok",false) and float(cover.get("fraction",1.0)) < 1.0
+		var travel: Vector2 = displacement*float(cover.get("fraction",0.0))
+		projectile.position = _array(previous+travel)
+		projectile.remaining_distance = float(projectile.remaining_distance)-displacement.length()
+		var hit := false
+		var segment := {"shape":"line","origin":_array(previous),"direction":_array(displacement.normalized()),"length":travel.length(),"width":float(projectile.radius)*2.0}
+		for index in _spatial.query(previous,displacement.length()+48.0):
+			var entity: Dictionary = state.entities[index]
+			if entity.hp <= 0.0 or not Geometry.overlaps(segment,_vec(entity.position),float(entity.radius)): continue
+			hit = true
+			var impact := _vec(entity.position)
+			_emit(state,events,"projectile_impact",{"projectile_id":projectile.id,"attack_id":projectile.attack_id,"base_item_id":projectile.item_id,"position":_array(impact),"radius":projectile.splash_radius})
+			if float(projectile.splash_radius) > 0.0:
+				for splash_index in _spatial.query(impact,float(projectile.splash_radius)+48.0):
+					var splash_target: Dictionary = state.entities[splash_index]
+					if _vec(splash_target.position).distance_to(impact) <= float(projectile.splash_radius)+float(splash_target.radius) and _cover_clear(state,impact,_vec(splash_target.position),0,4):
+						_hit_entity(state,splash_target,float(projectile.damage),str(projectile.item_id),events,boss_rewards,str(projectile.attack_id))
+			else: _hit_entity(state,entity,float(projectile.damage),str(projectile.item_id),events,boss_rewards,str(projectile.attack_id))
+			break
+		if blocked and not hit:
+			_emit(state,events,"projectile_impact",{"projectile_id":projectile.id,"attack_id":projectile.attack_id,"base_item_id":projectile.item_id,"position":projectile.position.duplicate(),"radius":projectile.splash_radius})
+		if not hit and not blocked and projectile.remaining_distance > 0.0: kept.append(projectile)
+	state.projectiles = kept
+func _hit_entity(state: Dictionary, entity: Dictionary, damage: float, source: String, events: Array[Dictionary], boss_rewards: Array[Dictionary], attack_id: String = "") -> void:
+	if entity.hp <= 0.0: return
+	if entity.enemy_id == FINAL_ENEMY_ID:
+		_emit(state,events,"armor_blocked",{"target_id":entity.id,"source_id":source,"attack_id":attack_id,"base_item_id":source,"amount":0.0})
+		return
+	var amount := minf(float(entity.hp),damage)
+	entity.hp = maxf(0.0,float(entity.hp)-damage)
+	state.stats.damage_dealt = float(state.stats.damage_dealt)+amount
+	_emit(state,events,"damage",{"target_id":entity.id,"source_id":source,"amount":amount,"hp":entity.hp,"attack_id":attack_id,"base_item_id":source})
+	if entity.hp > 0.0: return
+	state.stats.kills = int(state.stats.kills)+1
+	_add_drop(state,entity.position,int(entity.xp))
+	if not str(entity.boss_id).is_empty(): boss_rewards.append({"boss_id":entity.boss_id,"entity_id":entity.id})
+func _remove_dead(state: Dictionary) -> void:
+	var alive: Array = []
+	var defeated: Array[String] = []
+	for entity in state.entities:
+		if entity.hp > 0.0: alive.append(entity)
+		else: defeated.append(str(entity.id))
+	state.entities = alive
+	if not defeated.is_empty():
+		var remaining: Array = []
+		for hazard in state.telegraphs:
+			if hazard.get("behavior_attack",false) and str(hazard.source_id) in defeated: continue
+			remaining.append(hazard)
+		state.telegraphs = remaining
+func _add_drop(state: Dictionary, position: Array, xp: int) -> void:
+	if xp <= 0: return
+	if state.has("world") and state.world.get("schema_version") == 2:
+		var target := Population.drop_target(state,position)
+		if not target.get("ok",false):
+			_streamed._query_result(target)
+			return
+		if target.kind == "append": state.drops.append({"id":_new_id(state),"position":position.duplicate(),"xp":xp})
+		elif target.kind == "active": state.drops[target.index].xp = int(state.drops[target.index].xp)+xp
+		else:
+			# Tick candidates normally share world authority. Detach before mutation;
+			# dormant data is deliberately absent from derived terrain identity.
+			state.world = state.world.duplicate(true)
+			state.world.dormant.drops[target.index].record.xp = int(state.world.dormant.drops[target.index].record.xp)+xp
+		return
+	var point := _vec(position)
+	var cell := Vector2i(floor(point.x/16.0),floor(point.y/16.0))
+	for drop in state.drops:
+		var existing := _vec(drop.position)
+		if Vector2i(floor(existing.x/16.0),floor(existing.y/16.0)) == cell:
+			drop.xp = int(drop.xp)+xp
+			return
+	if state.drops.size() >= MAX_DROPS:
+		var nearest: Dictionary = state.drops[0]
+		var best_distance := point.distance_squared_to(_vec(nearest.position))
+		for drop in state.drops:
+			var distance := point.distance_squared_to(_vec(drop.position))
+			if distance < best_distance:
+				nearest = drop
+				best_distance = distance
+		nearest.xp = int(nearest.xp)+xp
+		return
+	state.drops.append({"id":_new_id(state),"position":position.duplicate(),"xp":xp})
+func _collect_drops(state: Dictionary, events: Array[Dictionary], reserved_boss_offers: int = 0) -> void:
+	var pickup := _catalog.stat(state,"pickup_radius",float(state.rules.pickup_radius))
+	var drop_grid = SpatialHash.new()
+	drop_grid.rebuild(state.drops)
+	var collected: Array[int] = []
+	var xp := 0
+	for index in drop_grid.query(_vec(state.player.position),pickup):
+		var drop: Dictionary = state.drops[index]
+		if _vec(drop.position).distance_to(_vec(state.player.position)) <= pickup:
+			collected.append(index)
+			xp += int(drop.xp)
+	collected.reverse()
+	for index in collected: state.drops.remove_at(index)
+	if xp > 0:
+		state.player.xp = int(state.player.xp)+xp
+		_emit(state,events,"xp_gained",{"amount":xp,"xp":state.player.xp})
+	# Bound work and preserve unprocessed XP when many thresholds arrive together.
+	# The next unpaused tick resumes after the current descriptor batch resolves.
+	while state.pending_offers.size() < 256-reserved_boss_offers and int(state.offer_seq) < MAX_COUNTER and int(state.player.level) < MAX_COUNTER and int(state.player.xp) >= Catalog.xp_to_next(int(state.player.level),state.rules.progression):
+		state.player.xp = int(state.player.xp)-Catalog.xp_to_next(int(state.player.level),state.rules.progression)
+		state.player.level = int(state.player.level)+1
+		_queue_offer(state,"level")
+func _claim_boss_reward(state: Dictionary, reward: Dictionary, events: Array[Dictionary]) -> void:
+	var boss: String = str(reward.get("boss_id",""))
+	var reward_id := "boss:"+boss
+	if not boss in REAL_BOSS_IDS or not boss in state.boss_ids_fired or reward_id in state.reward_ids_claimed: return
+	if int(state.stats.minibosses_defeated) >= 5: return
+	_claim_id(state.reward_ids_claimed,reward_id)
+	state.stats.minibosses_defeated = int(state.stats.minibosses_defeated)+1
+	state.tactical_seals = int(state.tactical_seals)+1
+	state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.25)
+	_emit(state,events,"boss_defeated",reward.duplicate(true))
+	_queue_offer(state,"boss")
+func _queue_offer(state: Dictionary, source: String) -> void:
+	if int(state.offer_seq) >= MAX_COUNTER or state.pending_offers.size() >= 256: return
+	state.offer_seq = int(state.offer_seq)+1
+	state.pending_offers.append({"offer_id":state.run_id+":offer:"+str(int(state.offer_seq)),"source":source,"level_ordinal":int(state.player.level)})
+func _activate_next_offer(state: Dictionary, events: Array[Dictionary]) -> bool:
+	if not state.upgrade_offer.is_empty() or not state.phase in ["survival","evacuation"]: return true
+	while not state.pending_offers.is_empty():
+		var descriptor: Dictionary = state.pending_offers[0]
+		var result: Dictionary = Growth.new(_catalog).materialize(state,descriptor)
+		if not result.get("ok",false): return false
+		state.pending_offers.pop_front()
+		state.progression_rng_state = result.next_rng_state
+		state.view_revision = int(state.view_revision)+1
+		if result.offer.is_empty():
+			state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.10)
+			_claim_id(state.reward_ids_claimed,"offer:"+descriptor.offer_id)
+			continue
+		state.upgrade_offer = result.offer
+		_claim_id(state.pause_reasons,"upgrade")
+		_emit(state,events,"upgrade_opened",state.upgrade_offer.duplicate(true))
+		return true
+	state.pause_reasons.erase("upgrade")
+	return true
+func _player_damage(state: Dictionary, events: Array[Dictionary]) -> void:
+	var kept: Array = []
+	for hazard in state.telegraphs:
+		if int(state.active_tick) >= int(hazard.expires_tick): continue
+		kept.append(hazard)
+		var final_warning := false
+		for entity in state.entities:
+			if entity.enemy_id == FINAL_ENEMY_ID and str(entity.id) == str(hazard.source_id): final_warning = true; break
+		if final_warning: continue
+		if int(state.active_tick) >= int(hazard.active_from_tick) and Geometry.overlaps(hazard,_vec(state.player.position),float(state.player.radius)) and _cover_clear(state,_vec(hazard.origin),_vec(state.player.position),0,4):
+			_damage_player(state,float(hazard.damage),str(hazard.source_id),events)
+	state.telegraphs = kept
+	for sweep in _final_sweeps:
+		if Geometry.overlaps(sweep,_vec(state.player.position),float(state.player.radius)) and _cover_clear(state,_vec(sweep.origin),_vec(state.player.position),0,4):
+			_damage_player(state,float(sweep.damage),str(sweep.source_id),events)
+	for entity in state.entities:
+		if entity.enemy_id == FINAL_ENEMY_ID and entity.get("action_state","move") in ["attack","brake","recover"]: continue
+		if entity.get("action_state","move") in ["windup","airborne","recover"]: continue
+		if _vec(entity.position).distance_to(_vec(state.player.position)) <= float(entity.radius)+float(state.player.radius):
+			_damage_player(state,float(entity.damage),str(entity.id),events)
+func _damage_player(state: Dictionary, damage: float, source: String, events: Array[Dictionary]) -> void:
+	if state.player.hp <= 0.0 or int(state.active_tick) < int(state.player.invulnerable_until): return
+	var amount := maxf(1.0,damage-_catalog.stat(state,"armor",0.0))
+	amount = minf(float(state.player.hp),amount)
+	state.player.hp = maxf(0.0,float(state.player.hp)-amount)
+	state.player.invulnerable_until = int(state.active_tick)+30
+	_emit(state,events,"damage",{"target_id":"player","source_id":source,"amount":amount,"hp":state.player.hp})
+func _use_prepared_supply(state: Dictionary, events: Array[Dictionary]) -> void:
+	if state.supply_used or state.run_config.prepared_supply != "field_bandage" or state.player.hp <= 0: return
+	var item: Dictionary = _supplies.item("field_bandage")
+	var params: Dictionary = item.effect_params
+	if float(state.player.hp) > float(state.player.max_hp)*float(params.threshold_ratio): return
+	var amount := minf(float(params.heal),float(state.player.max_hp)-float(state.player.hp))
+	state.supply_used = true
+	state.player.hp = float(state.player.hp)+amount
+	_emit(state,events,"supply_used",{"run_id":state.run_id,"item_id":"field_bandage","healed_amount":amount,"remaining":0})
+func _regenerate(state: Dictionary) -> void:
+	state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+_catalog.stat(state,"regen_per_second",0.0)/TICKS_PER_SECOND)
+func _inside_escape(state: Dictionary) -> bool:
+	if state.has("world") and state.world.stage != "dock": return false
+	var zone: Array = state.escape_zone
+	return Rect2(float(zone[0]),float(zone[1]),float(zone[2]),float(zone[3])).has_point(_vec(state.player.position))
+func _end_run(state: Dictionary, result: String, reason: String, events: Array[Dictionary]) -> void:
+	if state.phase in ["won","dead","abandoned"]: return
+	state.phase = result
+	state.upgrade_offer = {}
+	state.pending_offers.clear()
+	state.pause_reasons.erase("upgrade")
+	state.view_revision = int(state.view_revision)+1
+	_emit(state,events,"run_ended",{"result":result,"reason":reason,"clear_reward":1 if result == "won" else 0,"chapter_id":state.chapter_id})
+func _emit(state: Dictionary, events: Array[Dictionary], type: String, payload: Dictionary) -> void:
+	state.event_seq = int(state.event_seq)+1
+	events.append({"event_id":state.run_id+":"+str(int(state.event_seq)),"type":type,"tick":int(state.active_tick),"payload":payload})
+func _claim_id(ids: Array, id: String) -> void:
+	if not id in ids:
+		ids.append(id)
+		ids.sort()
+func _new_id(state: Dictionary) -> int:
+	var id := int(state.next_entity_id)
+	state.next_entity_id = id+1
+	return id
+func _position_valid(value: Variant) -> bool:
+	# All saved local vectors must survive real_t float32 conversion as finite.
+	return value is Array and value.size() == 2 and Catalog.number_valid(value[0],-10000000.0,10000000.0) and Catalog.number_valid(value[1],-10000000.0,10000000.0)
+func _rect_valid(value: Variant) -> bool:
+	return value is Array and value.size() == 4 and _position_valid([value[0],value[1]]) and _position_valid([value[2],value[3]]) and float(value[2]) > 0.0 and float(value[3]) > 0.0
+func _hazard_valid(payload: Dictionary) -> bool:
+	if not _id_valid(payload.get("source_id",null)) or not _position_valid(payload.get("origin",[])) or not payload.get("shape","") in ["circle","sector","line"]: return false
+	if not _integer_valid(payload.get("warning_ticks",null)) or not _integer_valid(payload.get("active_ticks",null),1) or not _number_valid(payload.get("damage",null)): return false
+	if payload.shape in ["circle","sector"] and (not _number_valid(payload.get("radius",null)) or float(payload.radius) <= 0.0): return false
+	if payload.shape in ["sector","line"] and not _position_valid(payload.get("direction",[])): return false
+	if payload.shape == "line" and (not _number_valid(payload.get("length",null)) or not _number_valid(payload.get("width",null)) or float(payload.length) <= 0.0 or float(payload.width) <= 0.0): return false
+	if payload.shape == "sector" and (not _number_valid(payload.get("arc_degrees",90.0)) or float(payload.get("arc_degrees",90.0)) > 360.0): return false
+	return true
+func _offer_valid(state: Dictionary, offer: Dictionary, applicable: bool) -> bool:
+	if offer.is_empty(): return true
+	if offer.size() != 5 or not offer.has_all(["offer_id","source","level_ordinal","options","selected_option_id"]) or not Catalog.json_data_valid(offer): return false
+	if not offer.options is Array or offer.options.is_empty() or offer.options.size() > 3 or not offer.selected_option_id is String: return false
+	var descriptor := {"offer_id":offer.offer_id,"source":offer.source,"level_ordinal":offer.level_ordinal}
+	if not Growth.new(_catalog)._descriptor_valid(state,descriptor) or (offer.source == "level" and offer.level_ordinal < 2): return false
+	var ids := {}
+	for option in offer.options:
+		if not option is Dictionary or not _catalog.option_well_formed(state,option) or (applicable and not _catalog.option_valid(state,option)): return false
+		if ids.has(option.option_id) or not _same_decoration(option,_catalog.decorate_option(state,option)): return false
+		ids[option.option_id] = true
+	return ids.has(offer.selected_option_id)
+func _same_decoration(saved: Dictionary, derived: Dictionary) -> bool:
+	# Derived UI arithmetic may round by one double ULP in Godot's own JSON
+	# parser. Compare the serializer/parser's canonical representation, while
+	# immutable rules and choice identities retain their separate strict checks.
+	var saved_json = JSON.parse_string(JSON.stringify(saved,"",true,true))
+	var derived_json = JSON.parse_string(JSON.stringify(derived,"",true,true))
+	return _same_json(saved_json,derived_json)
+func _vec(value: Array) -> Vector2:
+	return Vector2(float(value[0]),float(value[1]))
+func _array(value: Vector2) -> Array:
+	return [value.x,value.y]
+
+func _normalize_saved_numbers(value: Variant, parent_key := "") -> bool:
+	# JSON reads every numeric literal as a float. Restore schema integers so
+	# canonical replay equality and typed clocks survive a disk roundtrip.
+	if value is Dictionary:
+		for key in value.keys():
+			if key is StringName:
+				var child = value[key]
+				value.erase(key)
+				value[str(key)] = child
+			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks"] or key in ["schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
+				var number: float = value[key]
+				if not is_finite(number) or number != floor(number) or number < (-1.0 if key == "final_started_tick" else 0.0) or number > MAX_COUNTER: return false
+				value[key] = int(number)
+			elif not _normalize_saved_numbers(value[key],str(key)): return false
+	elif value is Array:
+		for child in value:
+			if not _normalize_saved_numbers(child,parent_key): return false
+	return true
+
+func _attract_drops(state: Dictionary) -> void:
+	var pickup := _catalog.stat(state,"pickup_radius",float(state.rules.pickup_radius))
+	var player := _vec(state.player.position)
+	for drop in state.drops:
+		var point := _vec(drop.position)
+		if point.distance_to(player) <= pickup*3.0:
+			drop.position = _array(point.move_toward(player,240.0/TICKS_PER_SECOND))
+func _number_valid(value: Variant, minimum := 0.0) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value) >= minimum
+func _integer_valid(value: Variant, minimum := 0) -> bool:
+	return _number_valid(value,float(minimum)) and float(value) == floor(float(value)) and float(value) <= MAX_COUNTER
+func _generated_identity_number(value: Variant) -> int:
+	# Restore uniqueness uses str(id), so canonical decimal String IDs reserve
+	# the same allocator range as numeric IDs without changing their saved type.
+	if Catalog.integer_valid(value,1,MAX_COUNTER): return int(value)
+	if value is String and value.length() <= 10 and value.is_valid_int():
+		var number: int = value.to_int()
+		if number >= 1 and number <= MAX_COUNTER and value == str(number): return number
+	return 0
+func _id_valid(value: Variant) -> bool:
+	return (value is String and not value.is_empty()) or _integer_valid(value,1)
+func _string_set_valid(value: Array) -> bool:
+	var seen: Array = []
+	for id in value:
+		if not id is String or id.is_empty() or id in seen: return false
+		seen.append(id)
+	return true
+func _core_payload_valid(value: Dictionary, chapter: Dictionary = {}, validation_helper = null) -> bool:
+	if chapter.is_empty():
+		var current: Dictionary = {"ok":not _chapter.is_empty(),"chapter":_chapter}
+		if not current.get("ok",false): return false
+		chapter = current.chapter
+	for key in ["schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq"]:
+		if not _integer_valid(value.get(key,null)): return false
+	if int(value.seed) > 0x7fffffff or not _integer_valid(value.get("final_started_tick",null),-1): return false
+	if not value.get("evacuation_ready",null) is bool: return false
+	if not _rect_valid(value.get("escape_zone",null)) and not (value.has("world") and Streamed.inactive_city_exit(value.get("escape_zone"))): return false
+	for key in ["boss_ids_fired","reward_ids_claimed","command_ids_applied","pause_reasons"]:
+		if not _string_set_valid(value[key]): return false
+	var player: Dictionary = value.player
+	for key in ["hp","max_hp","radius"]:
+		if not _number_valid(player.get(key,null)): return false
+	for key in ["invulnerable_until","xp","level"]:
+		if not _integer_valid(player.get(key,null)): return false
+	if not player.get("attack_ready_ticks",null) is Dictionary: return false
+	for item_id in player.attack_ready_ticks:
+		if not _catalog.equipment.has(item_id) or not _integer_valid(player.attack_ready_ticks[item_id]): return false
+	if not value.get("rules",null) is Dictionary: return false
+	var rules: Dictionary = value.rules
+	var world = rules.get("world_geometry",{})
+	if not World.valid(world) or (value.content_revision == "ch01.2" and world.is_empty()): return false
+	if not _position_valid(player.get("position")) or not _validation_walkable(value,_vec(player.position),float(player.radius),validation_helper): return false
+	if not rules.get("allowed_equipment_ids",null) is Array or not _string_set_valid(rules.allowed_equipment_ids): return false
+	for item_id in rules.allowed_equipment_ids:
+		if not _catalog.equipment.has(item_id): return false
+	for item_id in value.equipment:
+		if not item_id in rules.allowed_equipment_ids: return false
+	for kind in ["equipment","passives"]:
+		for item_id in value[kind]:
+			if not _integer_valid(value[kind][item_id],1): return false
+	if not _number_valid(rules.get("move_speed",null)) or not _number_valid(rules.get("pickup_radius",null)) or not _integer_valid(rules.get("evacuation_ticks",null),1) or int(rules.evacuation_ticks) != 4500: return false
+	if not rules.get("progression",null) is Dictionary or not _integer_valid(rules.progression.get("base_xp",null),1) or not _integer_valid(rules.progression.get("xp_per_level",null)): return false
+	if not rules.get("enemy_catalog",null) is Dictionary: return false
+	for enemy_id in rules.enemy_catalog:
+		var definition = rules.enemy_catalog[enemy_id]
+		if not definition is Dictionary: return false
+		for key in ["hp","speed","radius"]:
+			if not _number_valid(definition.get(key,null)): return false
+		if not _number_valid(definition.get("damage",definition.get("contact_damage",null))) or not _integer_valid(definition.get("xp",null)): return false
+	for key in ["kills","minibosses_defeated"]:
+		if not _integer_valid(value.stats.get(key,null)): return false
+	if not _number_valid(value.stats.get("damage_dealt",null)): return false
+	var seen: Array = []
+	var seen_bosses := {}
+	var population := {"ok":true,"retire":[],"park_entities":[]}
+	if value.has("world") and value.world.stage == "city": population = Population.plan(value)
+	if not population.get("ok",false): return false
+	var dormant: Dictionary = value.world.dormant if value.has("world") and value.world.get("schema_version") == 2 else {"entities":[],"drops":[]}
+	if value.entities.size()+dormant.entities.size() > MAX_ENTITIES or value.drops.size()+dormant.drops.size() > MAX_DROPS: return false
+	var projectile_casts := {}
+	for attack in value.player_attack_instances: projectile_casts[attack.cast_id] = true
+	for collection in ["entities","projectiles","drops","telegraphs"]:
+		var records: Array = value[collection].duplicate()
+		if collection in ["entities","drops"]:
+			for entry in dormant[collection]: records.append(entry.record)
+		for index in records.size():
+			var record = records[index]
+			var parked: bool = index >= value[collection].size()
+			if not record is Dictionary or not _id_valid(record.get("id",null)) or str(record.id) in seen: return false
+			seen.append(str(record.id))
+			var numeric_identity := _generated_identity_number(record.id)
+			if numeric_identity >= int(value.next_entity_id) or (not record.id is String and numeric_identity == 0): return false
+			if collection != "telegraphs" and not _position_valid(record.get("position",null)): return false
+			if collection == "entities":
+				for key in ["hp","max_hp","speed","radius","damage"]:
+					if not _number_valid(record.get(key,null)): return false
+				if not _integer_valid(record.get("xp",null)) or not _integer_valid(record.get("spawned_tick",null)) or not _position_valid(record.get("velocity",null)): return false
+				if not record.get("boss_id",null) is String or not record.get("enemy_id",null) is String or not rules.enemy_catalog.has(record.enemy_id): return false
+				if not _entity_definition_valid(value,record,chapter) or not _behavior_state_valid(value,record,validation_helper): return false
+				if not record.boss_id.is_empty():
+					if seen_bosses.has(record.boss_id): return false
+					seen_bosses[record.boss_id] = true
+				if parked and (record.boss_id.is_empty() or not Population.quiescent(value,record)): return false
+				var suspended: bool = parked or index in population.retire or index in population.park_entities
+				if not suspended and record.get("action_state","") != "airborne" and not _validation_walkable(value,_vec(record.position),float(record.radius),validation_helper): return false
+			elif collection == "projectiles":
+				if not _projectile_valid(value,record) or projectile_casts.has(record.cast_id): return false
+				projectile_casts[record.cast_id] = true
+			elif collection == "drops":
+				if not _integer_valid(record.get("xp",null),1): return false
+			elif collection == "telegraphs":
+				if not _hazard_valid(record): return false
+				for key in ["created_tick","active_from_tick","expires_tick"]:
+					if not _integer_valid(record.get(key,null)): return false
+				if int(record.active_from_tick) != int(record.created_tick)+int(record.warning_ticks) or int(record.expires_tick) != int(record.active_from_tick)+int(record.active_ticks): return false
+	return _run_relationships_valid(value) and _owned_behavior_hazards_valid(value)
+func _entity_definition_valid(state: Dictionary, record: Dictionary, chapter: Dictionary) -> bool:
+	if not _same_json(record.get("entity_id"),record.id): return false
+	var definition: Dictionary = state.rules.enemy_catalog[record.enemy_id]
+	for pair in [["max_hp","hp"],["speed","speed"],["radius","radius"],["damage","damage"],["xp","xp"],["behavior","behavior"],["art_id","art_id"]]:
+		if not _same_json(record.get(pair[0]),definition.get(pair[1])): return false
+	if record.hp <= 0 or record.hp > record.max_hp or record.spawned_tick > state.active_tick: return false
+	if record.enemy_id == FINAL_ENEMY_ID:
+		return record.boss_id == FINAL_BOSS_ID and FINAL_BOSS_ID in state.boss_ids_fired and record.spawned_tick == state.final_started_tick and record.hp == record.max_hp and record.xp == 0 and FINAL_ACTOR_SPAWN_ID in state.command_ids_applied
+	if record.boss_id.is_empty(): return record.enemy_id in chapter.enemy_ids
+	if not record.boss_id in REAL_BOSS_IDS or not record.boss_id in state.boss_ids_fired or "boss:"+record.boss_id in state.reward_ids_claimed: return false
+	var authored: Dictionary = chapter.boss_schedule[REAL_BOSS_IDS.find(record.boss_id)]
+	return record.enemy_id == authored.enemy_id and record.spawned_tick == authored.tick and state.survival_tick >= authored.tick
+func _projectile_valid(state: Dictionary, record: Dictionary) -> bool:
+	var fields := ["id","item_id","attack_id","cast_id","position","velocity","damage","splash_radius","remaining_distance","radius"]
+	if record.size() != fields.size() or not record.has_all(fields): return false
+	if not Catalog.integer_valid(record.id,1,int(state.next_entity_id)-1) or not record.item_id is String or not state.equipment.has(record.item_id): return false
+	if not record.cast_id is String or not record.attack_id is String or not Evolved._cast_id_valid(state,record.cast_id) or record.attack_id != record.cast_id+":0": return false
+	var definition: Dictionary = _catalog.equipment.get(record.item_id,{})
+	if definition.get("mode") != "projectile" or not Catalog.number_valid(record.radius,4.0,4.0) or not _position_valid(record.velocity): return false
+	if absf(_vec(record.velocity).length()-float(definition.projectile_speed)) > 0.001: return false
+	if not Catalog.number_valid(record.remaining_distance,0.0000001,10000000) or not Catalog.number_valid(record.damage,0,10000000) or not Catalog.number_valid(record.splash_radius,0,10000000): return false
+	# A flying projectile retains the joint weapon-level/damage/range snapshot
+	# from any already-earned build, including before the weapon evolved.
+	var damage_increment: float = _catalog.passives.damage.increment
+	var range_increment: float = _catalog.passives.attack_range.increment
+	for level in range(1,int(state.equipment[record.item_id])+1):
+		var base_damage := float(definition.damage)+(level-1)*float(definition.damage_per_level)
+		var possible_damage := false
+		for damage_level in range(int(state.passives.get("damage",0))+1):
+			if absf(float(record.damage)-base_damage*(1.0+damage_increment*damage_level)) <= 0.000001: possible_damage = true
+		if not possible_damage: continue
+		for range_level in range(int(state.passives.get("attack_range",0))+1):
+			var scale := 1.0+range_increment*range_level
+			var splash := float(definition.splash_radius)*scale
+			var reach := (float(definition.range)+(level-1)*float(definition.range_per_level))*scale+48.0
+			if absf(float(record.splash_radius)-splash) <= 0.000001 and float(record.remaining_distance) <= reach+0.000001: return true
+	return false
+func _run_relationships_valid(value: Dictionary) -> bool:
+	if int(value.active_tick) < int(value.survival_tick): return false
+	if value.phase in ["dead","won","abandoned"] and (not value.upgrade_offer.is_empty() or not value.pending_offers.is_empty() or "upgrade" in value.pause_reasons): return false
+	if (not value.upgrade_offer.is_empty()) != ("upgrade" in value.pause_reasons): return false
+	if value.upgrade_offer.is_empty() and not value.pending_offers.is_empty(): return false
+	var final_count := 0
+	for entity in value.entities:
+		if entity.enemy_id == FINAL_ENEMY_ID: final_count += 1
+	if value.get("world") is Dictionary and value.world.get("schema_version") == 2:
+		for entry in value.world.dormant.entities:
+			if entry.record.enemy_id == FINAL_ENEMY_ID: final_count += 1
+	if final_count != (1 if FINAL_ACTOR_SPAWN_ID in value.command_ids_applied else 0): return false
+	var started := int(value.final_started_tick)
+	if started == -1:
+		return value.phase in ["survival","dead","abandoned"] and not value.evacuation_ready
+	if started < FINAL_TICK or started > int(value.active_tick) or int(value.survival_tick) != FINAL_TICK or value.phase == "survival": return false
+	if not "ch01_final_armored" in value.boss_ids_fired: return false
+	var elapsed := int(value.active_tick)-started
+	if value.evacuation_ready and elapsed < int(value.rules.evacuation_ticks): return false
+	if value.phase == "won" and (not value.evacuation_ready or elapsed < int(value.rules.evacuation_ticks) or not _inside_escape(value)): return false
+	return true
+
+func _offer_queue_ids_valid(state: Dictionary) -> bool:
+	var ids := {}
+	var prefix: String = state.run_id+":offer:"
+	for reward in state.reward_ids_claimed:
+		if reward.begins_with("boss:"): continue
+		if not reward.begins_with("offer:"+prefix): return false
+		var id: String = reward.trim_prefix("offer:")
+		var serial: String = id.trim_prefix(prefix)
+		if not serial.is_valid_int() or str(serial.to_int()) != serial or not Catalog.integer_valid(serial.to_int(),1,int(state.offer_seq)): return false
+		ids[id] = true
+	var offers: Array = state.pending_offers.duplicate()
+	if not state.upgrade_offer.is_empty(): offers.push_front(state.upgrade_offer)
+	var previous := 0
+	var previous_level := 1
+	var level_ordinals := {}
+	var boss_descriptors := 0
+	for offer in offers:
+		var id: String = offer.offer_id
+		var serial: int = id.trim_prefix(prefix).to_int()
+		if ids.has(id) or serial <= previous or offer.level_ordinal < previous_level or (offer.source == "level" and offer.level_ordinal < 2): return false
+		if offer.source == "level":
+			if level_ordinals.has(int(offer.level_ordinal)): return false
+			level_ordinals[int(offer.level_ordinal)] = true
+		else: boss_descriptors += 1
+		previous = serial
+		previous_level = int(offer.level_ordinal)
+		ids[id] = true
+	return boss_descriptors <= int(state.stats.minibosses_defeated)
+func _behavior_state_valid(state: Dictionary, entity: Dictionary, validation_helper = null) -> bool:
+	var required := ["action_state","action_started_tick","action_ends_tick","next_action_tick","pattern_index","attack_kind","locked_origin","locked_direction","locked_target","facing"]
+	var present := false
+	for key in required:
+		if entity.has(key): present = true
+	if not present: return entity.enemy_id != FINAL_ENEMY_ID # The explicit final profile always owns an FSM.
+	for key in required:
+		if not entity.has(key): return false
+	if not entity.action_state in (["move","windup","attack","brake","recover"] if entity.enemy_id == FINAL_ENEMY_ID else ["move","windup","attack","recover","airborne"]) or not entity.attack_kind in ["none","charge","slam","sweep","grab","leap"]: return false
+	for key in ["action_started_tick","action_ends_tick","next_action_tick","pattern_index"]:
+		if not _integer_valid(entity[key]): return false
+	if int(entity.action_started_tick) > int(state.active_tick) or int(entity.action_ends_tick) < int(entity.action_started_tick): return false
+	for key in ["locked_origin","locked_direction","locked_target","facing"]:
+		if not _position_valid(entity[key]): return false
+	if not is_equal_approx(_vec(entity.locked_direction).length_squared(),1.0) or not is_equal_approx(_vec(entity.facing).length_squared(),1.0): return false
+	if entity.has("art_id") and not entity.art_id is String: return false
+	if entity.action_state == "move": return true
+	var profile: Dictionary = Behaviors.profile(entity,state.rules.enemy_catalog)
+	if entity.attack_kind != profile.kind or entity.attack_kind == "none" or int(entity.pattern_index) < 1 or int(entity.action_ends_tick) <= int(state.active_tick): return false
+	var duration_key: String = {"windup":"warning_ticks","airborne":"airborne_ticks","attack":"active_ticks","brake":"brake_ticks","recover":"recovery_ticks"}[entity.action_state]
+	if not profile.has(duration_key) or int(entity.action_ends_tick)-int(entity.action_started_tick) != int(profile[duration_key]): return false
+	if entity.action_state == "airborne" and entity.attack_kind != "leap": return false
+	if not "behavior:%s:%d"%[str(entity.id),int(entity.pattern_index)] in state.command_ids_applied: return false
+	if not _validation_walkable(state,_vec(entity.locked_origin),float(entity.radius),validation_helper): return false
+	if entity.attack_kind == "leap" and not _validation_walkable(state,_vec(entity.locked_target),float(entity.radius),validation_helper): return false
+	if entity.enemy_id == FINAL_ENEMY_ID and entity.action_state in ["windup","attack"]:
+		var ready := _final_contact_ready(state,_vec(entity.locked_origin),_vec(entity.locked_direction),profile,validation_helper)
+		if not ready.get("ok",false) or not ready.clear: return false
+	if not _action_motion_valid(state,entity,profile,validation_helper): return false
+	if entity.action_state in ["windup","airborne","attack"]:
+		var found := false
+		for hazard in state.telegraphs:
+			if hazard is Dictionary and hazard.get("source_id",null) == str(entity.id) and hazard.get("behavior_attack",false) == true and _behavior_hazard_matches(entity,profile,hazard):
+				found = true
+		if not found: return false
+	return true
+
+func _behavior_hazard_matches(entity: Dictionary, profile: Dictionary, hazard: Dictionary) -> bool:
+	if not _hazard_valid(hazard): return false
+	for key in ["created_tick","active_from_tick","expires_tick"]:
+		if not _integer_valid(hazard.get(key,null)): return false
+	var warning := int(profile.warning_ticks)+int(profile.get("airborne_ticks",0))
+	if int(hazard.warning_ticks) != warning or int(hazard.active_ticks) != int(profile.active_ticks) or float(hazard.damage) != float(entity.damage): return false
+	var created := int(entity.action_started_tick)
+	if entity.action_state == "airborne": created -= int(profile.warning_ticks)
+	elif entity.action_state == "attack": created -= warning
+	if int(hazard.created_tick) != created or int(hazard.active_from_tick) != created+warning: return false
+	var origin := _vec(entity.locked_target) if entity.attack_kind == "leap" else _vec(entity.locked_origin)
+	if not _vec(hazard.origin).is_equal_approx(origin) or not _vec(hazard.get("direction",[0.0,0.0])).is_equal_approx(_vec(entity.locked_direction)): return false
+	var shape := "circle" if entity.attack_kind in ["slam","leap"] else ("sector" if entity.attack_kind == "sweep" else "line")
+	if hazard.shape != shape: return false
+	if shape in ["circle","sector"] and not is_equal_approx(float(hazard.radius),float(profile.radius)): return false
+	if shape == "sector" and not is_equal_approx(float(hazard.get("arc_degrees",90.0)),float(profile.arc_degrees)): return false
+	if shape == "line" and (not is_equal_approx(float(hazard.length),float(profile.length)) or not is_equal_approx(float(hazard.width),maxf(float(profile.width),float(entity.radius)*2.0))): return false
+	return true
+
+func _action_motion_pose(state: Dictionary, entity: Dictionary, profile: Dictionary, validation_helper = null, detailed: bool = false) -> Dictionary:
+	var contacts := []
+	var sweep_steps := 0
+	var position := _vec(entity.locked_origin)
+	var velocity := Vector2.ZERO
+	var age := int(state.active_tick)-int(entity.action_started_tick)
+	if entity.enemy_id == FINAL_ENEMY_ID and entity.action_state in ["brake","recover"]:
+		return {"ok":true,"position":position,"velocity":velocity,"contacts":contacts,"sweep_steps":0}
+	if entity.action_state == "airborne":
+		var duration := float(profile.airborne_ticks)
+		var origin := _vec(entity.locked_origin)
+		var target := _vec(entity.locked_target)
+		position = origin.lerp(target,float(age)/duration)
+		var previous := origin.lerp(target,float(maxi(0,age-1))/duration)
+		velocity = (position-previous)*TICKS_PER_SECOND
+	elif entity.action_state in ["attack","recover"]:
+		if entity.attack_kind in ["charge","grab"]:
+			var rush := _vec(entity.locked_direction)*float(profile.rush_speed)
+			var step_delta := rush/TICKS_PER_SECOND
+			var steps := age+1 if entity.action_state == "attack" else int(profile.active_ticks)
+			# Match the engine's real_t rounding at every physical step rather
+			# than comparing against a numerically different closed-form sum.
+			for index in steps:
+				if entity.enemy_id == FINAL_ENEMY_ID:
+					rush = _vec(entity.locked_direction)*_final_charge_speed(profile,index)
+					step_delta = rush/TICKS_PER_SECOND
+				if entity.enemy_id == FINAL_ENEMY_ID:
+					var combined := _final_contact_sweep(state,position,step_delta,_vec(entity.locked_direction),profile,validation_helper)
+					if not combined.get("ok",false): return combined
+					# Live final contact enters brake immediately, including fraction1.
+					# A saved attack cannot replay through that already-ended phase.
+					if combined.stopped: return _failure("invalid_final_attack_phase")
+					if detailed:
+						sweep_steps += 1
+						if combined.stopped: contacts.append({"step":index,"shape_id":combined.contact.get("shape_id",""),"kind":"shoulder" if not combined.contact.is_empty() else "body"})
+					position = combined.position
+				elif state.has("world") and state.world.stage == "city":
+					if validation_helper == null: return _failure("world_not_ready")
+					var swept: Dictionary = validation_helper.sweep(position,step_delta,float(entity.radius))
+					if not swept.get("ok",false): return swept
+					if detailed:
+						sweep_steps += 1
+						if float(swept.fraction) < 1.0: contacts.append({"step":index,"prop_id":swept.hit_prop_id})
+					position = swept.position
+				else: position = World.sweep(position,step_delta,float(entity.radius),_finite_geometry(state))
+			if entity.action_state == "attack": velocity = rush
+		elif entity.attack_kind == "leap": position = _vec(entity.locked_target)
+	return {"ok":true,"position":position,"velocity":velocity,"contacts":contacts,"sweep_steps":sweep_steps}
+func _action_motion_valid(state: Dictionary, entity: Dictionary, profile: Dictionary, validation_helper = null) -> bool:
+	return _motion_pose_matches(entity,_action_motion_pose(state,entity,profile,validation_helper))
+func _motion_pose_matches(entity: Dictionary, pose: Dictionary) -> bool:
+	# Absolute subpixel tolerances do not widen with world coordinates.
+	return pose.get("ok",false) and _vec(entity.position).distance_to(pose.position) <= 0.001 and _vec(entity.velocity).distance_to(pose.velocity) <= 0.01 and _vec(entity.facing).distance_to(_vec(entity.locked_direction)) <= 0.0001
+func _reconcile_rebased_motion(source: Dictionary, candidate: Dictionary, old_helper, next_helper) -> Dictionary:
+	var corrections := []
+	var by_id := {}
+	for entity in candidate.entities: by_id[str(entity.id)] = entity
+	for index in source.entities.size():
+		var original: Dictionary = source.entities[index]
+		if not original.get("action_state","") in ["airborne","attack","brake","recover"]: continue
+		if not by_id.has(str(original.id)): return _failure("invalid_core_state")
+		var entity: Dictionary = by_id[str(original.id)]
+		var profile: Dictionary = Behaviors.profile(original,source.rules.enemy_catalog)
+		var previous := _action_motion_pose(source,original,profile,old_helper,true)
+		if not previous.get("ok",false): return previous
+		if not _motion_pose_matches(original,previous): return _failure("invalid_core_state")
+		var next := _action_motion_pose(candidate,entity,profile,next_helper,true)
+		if not next.get("ok",false): return next
+		var from := _vec(entity.position)
+		var distance := from.distance_to(next.position)
+		var measured := {"entity_id":str(entity.id),"distance":distance,"limit":0.03125,"before":_array(from),"after":_array(next.position),"sweep_steps":next.sweep_steps,"old_contacts":previous.contacts,"new_contacts":next.contacts}
+		# Reconstruct only real_t integration roundoff. Never accept a larger
+		# motion discrepancy or a changed wall/contact sequence as a rebase.
+		if distance > 0.03125 or previous.contacts != next.contacts:
+			measured.merge({"ok":false,"error_code":"rebase_motion_discontinuity"})
+			return measured
+		if distance > 0 and entity.action_state != "airborne":
+			var correction: Dictionary = next_helper.sweep(from,next.position-from,float(entity.radius))
+			if not correction.get("ok",false): return correction
+			measured.correction_fraction = correction.fraction
+			if float(correction.fraction) != 1.0 or correction.position.distance_to(next.position) > 0.0001:
+				measured.merge({"ok":false,"error_code":"rebase_motion_contact_changed"})
+				return measured
+		entity.position = _array(next.position)
+		entity.velocity = _array(next.velocity)
+		if distance > 0: corrections.append(measured)
+	return {"ok":true,"corrections":corrections}
+func _owned_behavior_hazards_valid(state: Dictionary) -> bool:
+	var actors: Dictionary = {}
+	for entity in state.entities: actors[str(entity.id)] = entity
+	var sources: Array[String] = []
+	for hazard in state.telegraphs:
+		if hazard.has("behavior_attack") and not hazard.behavior_attack is bool: return false
+		if not hazard.get("behavior_attack",false): continue
+		var source: String = str(hazard.source_id)
+		if source in sources or not actors.has(source): return false
+		var actor: Dictionary = actors[source]
+		if actor.hp <= 0.0 or not actor.has("action_state") or not actor.action_state in ["windup","airborne","attack"]: return false
+		if not _behavior_hazard_matches(actor,Behaviors.profile(actor,state.rules.enemy_catalog),hazard): return false
+		sources.append(source)
+	return true
+func _canonicalize_saved_vectors(state: Dictionary) -> void:
+	# The inactive city exit and actual scene rectangles share one numeric form.
+	state.escape_zone = state.escape_zone.map(func(value): return float(value))
+	# Engine vectors are real_t float32 values widened into JSON-safe arrays.
+	# Reconstruct that representation after decimal parsing; even full-precision
+	# JSON can otherwise leave a double ULP on a widened float32 coordinate.
+	for key in ["position","velocity","facing"]:
+		state.player[key] = _array(_vec(state.player[key]))
+	for collection in ["entities","projectiles","drops"]:
+		var records: Array = state[collection].duplicate()
+		if state.has("world") and state.world.get("schema_version") == 2 and collection in ["entities","drops"]:
+			for entry in state.world.dormant[collection]: records.append(entry.record)
+		for record in records:
+			for key in ["position","velocity","facing","locked_origin","locked_direction","locked_target"]:
+				if record.has(key): record[key] = _array(_vec(record[key]))
+	for attack in state.player_attack_instances:
+		attack.origin = _array(_vec(attack.origin))
+		attack.direction = _array(_vec(attack.direction))
+	for hazard in state.telegraphs:
+		hazard.origin = _array(_vec(hazard.origin))
+		if hazard.has("direction"): hazard.direction = _array(_vec(hazard.direction))
+
+func _finite_geometry(state: Dictionary) -> Dictionary:
+	if state.has("world"):
+		if state.world.stage != "dock": return {}
+		return _chapter.authored_dock.geometry
+	return state.rules.get("world_geometry",{})
+func _validation_walkable(state: Dictionary, position: Vector2, radius: float, helper) -> bool:
+	if state.has("world") and state.world.stage == "city":
+		if helper == null: return false
+		var result: Dictionary = helper.walkable(position,radius)
+		return result.get("ok",false) and result.get("walkable",false)
+	return World.walkable(position,radius,_finite_geometry(state))
+
+# Streamed transaction: immutable rules/config/world and resident geometry are
+# shared. Only records/arrays actually written by this fixed tick are copied.
+# No per-tick restore, fresh helper, prepare or full-state recursive duplication.
+func _tick_candidate(state: Dictionary) -> Dictionary:
+	var candidate := state.duplicate()
+	candidate.player = state.player.duplicate()
+	candidate.player.attack_ready_ticks = state.player.attack_ready_ticks.duplicate()
+	candidate.stats = state.stats.duplicate()
+	for collection in ["entities","projectiles","drops"]:
+		var records := []
+		for record in state[collection]: records.append(record.duplicate())
+		candidate[collection] = records
+	for collection in ["telegraphs","player_attack_instances","enemy_attack_instances","boss_ids_fired","reward_ids_claimed","command_ids_applied","pause_reasons","pending_offers"]:
+		candidate[collection] = state[collection].duplicate()
+	return candidate
+func _step_streamed(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Array[Dictionary]:
+	if state.phase in ["won","dead","abandoned"] or not state.pause_reasons.is_empty() or not state.upgrade_offer.is_empty(): return []
+	if _streamed == null:
+		_last_step_status = _failure("world_not_ready")
+		return []
+	var ready: Dictionary = _streamed.begin_query_batch(state,commands)
+	if not ready.get("ok",false):
+		_last_step_status = ready
+		return []
+	var candidate := _tick_candidate(state)
+	var tick_commands: Array[Dictionary] = commands
+	var previous_helper = _streamed
+	var next_helper = _streamed
+	var rebase_motion := []
+	var population := Population.apply_to_candidate(candidate)
+	if not population.get("ok",false):
+		_last_step_status = population
+		return []
+	var rebased := false
+	# Population transitions and rebasing share one private fixed-tick candidate.
+	# Dormant world records keep their absolute address and are never rebased.
+	if candidate.world.stage == "city":
+		var normalized := Streamed.Address.normalize(candidate.world.origin_chunk,_vec(candidate.player.position))
+		if not normalized.get("ok",false):
+			_last_step_status = normalized
+			return []
+		if normalized.offset != Vector2.ZERO:
+			var proposal := Streamed.rebase_proposal(candidate,commands)
+			if not proposal.get("ok",false):
+				_last_step_status = proposal
+				return []
+			candidate = proposal.state
+			_canonicalize_saved_vectors(candidate)
+			tick_commands = []
+			tick_commands.assign(proposal.commands)
+			rebased = true
+	if rebased or not _streamed.matches(candidate):
+		next_helper = _streamed.fresh()
+		var prepared: Dictionary = next_helper.prepare(candidate,_streamed._hydration,tick_commands)
+		if not prepared.get("ok",false):
+			_last_step_status = prepared
+			return []
+	if rebased:
+		var reconciled := _reconcile_rebased_motion(state,candidate,_streamed,next_helper)
+		if not reconciled.get("ok",false):
+			_last_step_status = reconciled
+			return []
+		rebase_motion = reconciled.corrections
+	for id in population.get("woken_entities",[]):
+		for entity in candidate.entities:
+			if entity.id != id: continue
+			var legal: Dictionary = next_helper.walkable(_vec(entity.position),float(entity.radius))
+			if not legal.get("ok",false) or not legal.get("walkable",false):
+				_last_step_status = legal if not legal.get("ok",false) else {"ok":false,"error_code":"population_blocked","entity_id":str(id)}
+				return []
+	_streamed = next_helper
+	_tick_navigation = {"target_adjustments":0,"target_waits":0,"route_queries":0,"route_blocked":0,"route_deferred":0,"max_route_wait_ticks":0,"deferred_attacks":0,"actors":[]}
+	var events := _step_running(candidate,move,tick_commands)
+	var status: Dictionary = _streamed.query_status()
+	if not status.get("ok",false):
+		_final_sweeps.clear()
+		_streamed = previous_helper
+		_last_step_status = status
+		return []
+	if _needs_counter_transaction(state,commands):
+		var earned: int = int(candidate.player.level)-int(state.player.level)+int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated)
+		if int(candidate.offer_seq)-int(state.offer_seq) != earned:
+			_final_sweeps.clear()
+			_streamed = previous_helper
+			_last_step_status = _failure("counter_exhausted")
+			return []
+		var checked := restore(candidate,_streamed._hydration)
+		if not checked.get("ok",false):
+			_final_sweeps.clear()
+			_streamed = previous_helper
+			_last_step_status = checked
+			return []
+		candidate = checked.state
+	state.clear()
+	state.merge(candidate,true)
+	_last_step_status = {"ok":true,"navigation":_tick_navigation,"rebase_motion":rebase_motion,"population":population}
+	return events
+func step_status() -> Dictionary: return _last_step_status.duplicate(true)
+func _walkable_world(state: Dictionary, point: Vector2, radius: float) -> bool:
+	if not is_finite(point.x) or not is_finite(point.y): return false
+	if state.has("world") and state.world.stage == "city":
+		var result: Dictionary = _streamed.walkable(point,radius)
+		return result.get("ok",false) and result.get("walkable",false)
+	return World.walkable(point,radius,_finite_geometry(state))
+func _nearest_world(state: Dictionary, point: Vector2, radius: float) -> Vector2:
+	if not state.has("world") or state.world.stage == "dock": return World.nearest_walkable(point,radius,_finite_geometry(state))
+	if _walkable_world(state,point,radius): return point
+	for ring in [16.0,32.0,64.0,96.0]:
+		for index in 16:
+			var nearby: Vector2 = point+Vector2.from_angle(TAU*index/16.0)*ring
+			if _walkable_world(state,nearby,radius): return nearby
+	return Vector2(INF,INF)
+func _move_world(state: Dictionary, point: Vector2, delta: Vector2, radius: float, swept: bool = false) -> Vector2:
+	if state.has("world") and state.world.stage == "city":
+		var result: Dictionary = _streamed.sweep(point,delta,radius) if swept else _streamed.move(point,delta,radius)
+		return result.position if result.get("ok",false) else point
+	return World.sweep(point,delta,radius,_finite_geometry(state)) if swept else World.move(point,delta,radius,_finite_geometry(state))
+func _movement_target(state: Dictionary, target: Vector2, radius: float, cache: Variant) -> Vector2:
+	if cache == null: return _nearest_world(state,target,radius)
+	# Never reuse a success across a failed query, helper replacement, geometry
+	# change, rebase, tick or actor-count change. Exact target/radius are keys.
+	if _streamed._world == null or not _streamed.query_status().get("ok",false) or not is_finite(target.x) or not is_finite(target.y) or not is_finite(radius) or radius < 0 or radius > 32:
+		cache.clear()
+		return _nearest_world(state,target,radius)
+	var world = _streamed._world
+	var identity := [_streamed,world,world._world_revision,world._coverage_revision,int(state.active_tick),state.world.world_revision,state.world.origin_revision,state.world.origin_chunk[0],state.world.origin_chunk[1],state.entities.size()]
+	if cache.get("identity",[]) != identity:
+		cache.clear()
+		cache.identity = identity
+		cache.targets = {}
+	if cache.targets.has(target) and cache.targets[target].has(radius): return cache.targets[target][radius]
+	var result := _nearest_world(state,target,radius)
+	if is_finite(result.x) and is_finite(result.y) and _streamed.query_status().get("ok",false):
+		if not cache.targets.has(target): cache.targets[target] = {}
+		cache.targets[target][radius] = result
+	else:
+		cache.clear()
+	return result
+func _direction_world(state: Dictionary, point: Vector2, target: Vector2, radius: float, actor_id: String, movement_targets: Variant = null) -> Vector2:
+	if not state.has("world") or state.world.stage == "dock": return _world.direction(point,target,radius,_finite_geometry(state))
+	var legal_target := _movement_target(state,target,radius,movement_targets)
+	if not is_finite(legal_target.x):
+		if _streamed.query_status().get("ok",false):
+			_tick_navigation.target_waits += 1
+			_tick_navigation.actors.append({"entity_id":actor_id,"reason":"no_legal_target","radius":radius})
+		return Vector2.ZERO
+	if legal_target != target:
+		_tick_navigation.target_adjustments += 1
+		_tick_navigation.actors.append({"entity_id":actor_id,"reason":"target_clearance_adjusted","radius":radius,"target":_array(target),"legal_target":_array(legal_target)})
+	var direct: Dictionary = _streamed.sweep(point,legal_target-point,radius)
+	if not direct.get("ok",false): return Vector2.ZERO
+	if float(direct.fraction) == 1.0: return point.direction_to(legal_target)
+	var result: Dictionary = _streamed.direction(point,legal_target,radius,int(state.active_tick),actor_id)
+	if not result.get("deferred",false): _tick_navigation.route_queries += 1
+	if result.get("blocked",false):
+		_tick_navigation["route_deferred" if result.get("deferred",false) else "route_blocked"] += 1
+		_tick_navigation.max_route_wait_ticks = maxi(_tick_navigation.max_route_wait_ticks,int(result.wait_ticks))
+		_tick_navigation.actors.append({"entity_id":actor_id,"reason":"route_retry_cooldown" if result.get("deferred",false) else "route_blocked","wait_ticks":result.wait_ticks})
+	return result.direction if result.get("ok",false) else Vector2.ZERO
+func _cover_world(state: Dictionary, origin: Vector2, target: Vector2, radius: float, mask: int) -> Dictionary:
+	if not state.has("world"): return {"ok":true,"fraction":1.0}
+	if state.world.stage == "city": return _streamed.cover_query(origin,target,radius,mask)
+	if mask == 16: return {"ok":true,"fraction":1.0}
+	var destination := World.sweep(origin,target-origin,radius,_finite_geometry(state))
+	return {"ok":true,"fraction":1.0 if destination.distance_to(target) <= 0.001 else (destination.distance_to(origin)/origin.distance_to(target) if origin != target else 0.0)}
+func _cover_clear(state: Dictionary, origin: Vector2, target: Vector2, radius: float, mask: int) -> bool:
+	var result := _cover_world(state,origin,target,radius,mask)
+	return result.get("ok",false) and float(result.get("fraction",0.0)) == 1.0

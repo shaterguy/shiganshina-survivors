@@ -1,0 +1,162 @@
+extends RefCounted
+const F = preload("res://tests/world/fixtures/city_fixture.gd")
+const N = preload("res://game/world/city_navigation.gd")
+const O = preload("res://tests/direction_los_reuse/oracle_navigation.gd")
+const V = preload("res://game/world/streamed_navigation_view.gd")
+const Cached = preload("res://game/world/cached_streamed_world.gd")
+const Derived = preload("res://tests/direction_los_reuse/derived_navigation.gd")
+const Tracing = preload("res://tests/direction_los_reuse/tracing_stream.gd")
+const Opaque = preload("res://tests/review_smoothing_query_safety/opaque_view.gd")
+func run(t) -> void:
+ for cached in [false,true]:
+  _exact_keys(t,cached)
+  _failure_and_boundary(t,cached)
+  _lifecycle(t,cached)
+  _identity_and_changes(t,cached)
+ _custom_callbacks(t)
+ _parallel_worlds(t)
+func _world(cached: bool, chunks: Array = F.neighborhood()):
+ if not cached: return F.world(chunks)
+ var w = Cached.new(F.generator(),42)
+ w.prepare(chunks,[],F.hydration(chunks),["0","0"])
+ return w
+func _begin(nav) -> void:
+ # A test-only seam exercises the same exact scope used by public direction.
+ nav._direction_los = nav._direction_reuse_scope()
+func _q(world) -> int: return world.diagnostics().query_count
+func _same_diagnostics(t,a,b,label: String) -> void:
+ var da: Dictionary = a.diagnostics(); var db: Dictionary = b.diagnostics()
+ da.erase("query_count"); db.erase("query_count")
+ t.check(da == db,label+": all non-query-count world diagnostics equal")
+func _exact_keys(t,cached: bool) -> void:
+ var w = _world(cached); var v = V.new(w); var n = N.new(v)
+ var a := Vector2(384,384); var b := Vector2(640,384)
+ _begin(n)
+ t.check(not n._direction_los.is_empty(),"exact/cached world eligible")
+ t.check(n._visible(a,b,8),"clear authoritative result")
+ var q := _q(w)
+ t.check(n._visible(a,b,8) and _q(w) == q,"exact successful clear LOS reused")
+ n._visible(b,a,8)
+ t.check(_q(w) > q,"reverse segment never shares a key")
+ q = _q(w)
+ n._visible(a,Vector2(640.00006103515625,384),8)
+ t.check(_q(w) > q,"adjacent float32 endpoint is not rounded")
+ q = _q(w)
+ n._visible(a,b,8.0000000001)
+ t.check(_q(w) > q,"float64 radius is never truncated to Vector3 precision")
+ q = _q(w)
+ n._visible(a,b,8.0000000001)
+ t.check(_q(w) == q,"exact nonclass radius has its own reusable entry")
+ var start := Vector2(496,194); var target := Vector2(1152,384)
+ t.check(not n._visible(start,target,8),"successful obstructed sweep has false visibility")
+ q = _q(w)
+ t.check(not n._visible(start,target,8) and _q(w) == q,"successful blocked false is cached distinctly from failure")
+func _failure_and_boundary(t,cached: bool) -> void:
+ for endpoint in [Vector2(760.0001220703125,384),Vector2(1152,384),Vector2(100000,384),Vector2(INF,384),Vector2(NAN,384)]:
+  var a = _world(cached,[["0","0"]]); var b = _world(cached,[["0","0"]])
+  var va = V.new(a); var vb = V.new(b); var na = N.new(va); var nb = O.new(vb)
+  _begin(na)
+  for target in [Vector2(640,384),endpoint,Vector2(640,384),endpoint]:
+   t.check(na._visible(Vector2(384,384),target,8) == nb._visible(Vector2(384,384),target,8),"unsafe actual query remains authoritative")
+  t.check(na._direction_los.is_empty(),"failed query retires all earlier successes")
+  var sa: Dictionary = va.navigation_query_status(); var sb: Dictionary = vb.navigation_query_status()
+  # NaN does not equal itself: serialized shape still preserves the same failure.
+  t.check(JSON.stringify(sa) == JSON.stringify(sb) and not sa.ok,"first real failure remains sticky after later success")
+  t.check(_q(a) == _q(b),"failure sequence retains authoritative query count")
+  _same_diagnostics(t,a,b,"failed query")
+ for radius in [-1.0,33.0,NAN,INF]:
+  var w = _world(cached); var v = V.new(w); var n = N.new(v)
+  _begin(n)
+  t.check(not n._visible(Vector2(384,384),Vector2(640,384),radius),"invalid radius is authoritatively rejected")
+  t.check(n._direction_los.is_empty() and not v.navigation_query_status().ok,"invalid radius never stays reusable")
+ var a = _world(cached,[["-2","0"],["-1","0"],["0","0"]])
+ var b = _world(cached,[["-2","0"],["-1","0"],["0","0"]])
+ var va = V.new(a); var vb = V.new(b); var na = N.new(va); var nb = O.new(vb)
+ var points: Array = [Vector2(-1400,384),Vector2(760.0001220703125,384),Vector2(640,384)]
+ _begin(na)
+ t.check(not va.smoothing_queries_safe(Vector2(384,384),points,0,8),"768.0001220703125 half-open coverage remains unsafe")
+ t.check(na._smooth(Vector2(384,384),points,8) == nb._smooth(Vector2(384,384),points,8),"precision fallback preserves smoothing selection and order")
+ t.check(va.navigation_query_status() == vb.navigation_query_status() and not va.navigation_query_status().ok,"precision fallback observes missing coverage")
+ _same_diagnostics(t,a,b,"precision boundary")
+func _lifecycle(t,cached: bool) -> void:
+ var a = _world(cached); var b = _world(cached)
+ var va = V.new(a); var vb = V.new(b); var na = N.new(va); var nb = O.new(vb)
+ for tick in [0,0,1,12,2]:
+  t.check(na.direction(Vector2(496,194),Vector2(1152,384),8,tick) == nb.direction(Vector2(496,194),Vector2(1152,384),8,tick),"new direction/actor/tick preserves route")
+  t.check(na._direction_los.is_empty(),"direction return immediately drops its exact memo")
+  var q := _q(a)
+  na._visible(Vector2(384,384),Vector2(640,384),8)
+  na._visible(Vector2(384,384),Vector2(640,384),8)
+  t.check(_q(a)-q == 4,"private calls outside direction are not cached")
+ for radius in [-1.0,33.0,NAN,INF]:
+  na.direction(Vector2(384,384),Vector2(640,384),radius,20)
+  t.check(na._direction_los.is_empty(),"early unsupported-radius return retires scope")
+ for source in [Vector2(100,100),Vector2(5000,5000),Vector2(INF,0),Vector2(NAN,0)]:
+  na.direction(source,Vector2(640,384),8,20)
+  t.check(na._direction_los.is_empty(),"blocked/missing/invalid-position return retires scope")
+ va.begin_navigation_queries()
+ va.sweep(Vector2(384,384),Vector2(100000,0),8)
+ t.check(na._direction_reuse_scope().is_empty(),"preexisting sticky failure disables reuse")
+ va.begin_navigation_queries()
+ a.covered(Rect2(Vector2(5000,5000),Vector2.ONE))
+ t.check(na._direction_reuse_scope().is_empty(),"preexisting world last_error disables reuse")
+func _identity_and_changes(t,cached: bool) -> void:
+ var a = _world(cached); var b = _world(cached)
+ var va = V.new(a); var vb = V.new(b); var na = N.new(va); var nb = N.new(vb)
+ var start := Vector2(384,384); var target := Vector2(640,384)
+ _begin(na); na._visible(start,target,8)
+ _begin(nb); nb._visible(start,target,8)
+ t.check(na._direction_los.queries.size() == 1 and nb._direction_los.queries.size() == 1,"two active worlds own independent memos")
+ var qa := _q(a); var qb := _q(b)
+ na._visible(start,target,8); nb._visible(start,target,8)
+ t.check(_q(a) == qa and _q(b) == qb,"interleaved worlds reuse only their own exact observations")
+ na._world = vb
+ na._visible(start,target,8)
+ t.check(na._direction_los.is_empty() and _q(b) > qb,"different view identity retires scope")
+ na._world = va; _begin(na); na._visible(start,target,8)
+ va._world = b; qb = _q(b)
+ na._visible(start,target,8)
+ t.check(na._direction_los.is_empty() and _q(b) > qb,"different wrapped world identity retires scope")
+ va._world = a; _begin(na); na._visible(start,target,8)
+ var changes: Array = []
+ for prop in a.localized_chunk("0,0").props:
+  if prop.destructible: changes.append({"slot_id":prop.slot_id,"hp":0,"destroyed":true})
+ t.check(a.apply_props([{"chunk":["0","0"],"props":changes}],1).ok,"actual public geometry mutation")
+ qa = _q(a); na._visible(start,target,8)
+ t.check(na._direction_los.is_empty() and _q(a) > qa,"geometry revision retires in-scope observations")
+ _begin(na); na._visible(start,target,8)
+ t.check(a.prepare(F.neighborhood(),[],F.hydration(F.neighborhood()),["1","0"]).ok,"actual public origin rebase")
+ qa = _q(a); na._visible(start,target,8)
+ t.check(na._direction_los.is_empty() and _q(a) > qa,"coverage/origin revision retires in-scope observations")
+func _custom_callbacks(t) -> void:
+ for kind in ["stream","view","navigation"]:
+  var a = Tracing.new(F.generator(),42) if kind == "stream" else F.world(F.neighborhood())
+  var b = Tracing.new(F.generator(),42) if kind == "stream" else F.world(F.neighborhood())
+  if kind == "stream":
+   for w in [a,b]: w.prepare(F.neighborhood(),[],F.hydration(F.neighborhood()),["0","0"])
+  var va = Opaque.new(a) if kind == "view" else V.new(a)
+  var vb = Opaque.new(b) if kind == "view" else V.new(b)
+  var na = Derived.new(va) if kind == "navigation" else N.new(va)
+  var nb = O.new(vb)
+  t.check(na._direction_reuse_scope().is_empty(),"derived "+kind+" stays authoritative")
+  t.check(na.direction(Vector2(496,194),Vector2(1152,384),8,0) == nb.direction(Vector2(496,194),Vector2(1152,384),8,0),"derived "+kind+" route exact")
+  t.check(va.navigation_query_status() == vb.navigation_query_status(),"derived "+kind+" error status exact")
+  t.check(_q(a) == _q(b),"derived "+kind+" authoritative count exact")
+  if kind == "stream": t.check(a.calls == b.calls,"custom stream callbacks retain exact arguments and order")
+  if kind == "view": t.check(va.sweep_calls == vb.sweep_calls,"opaque view callbacks retain exact arguments and order")
+func _thread_routes(nav) -> Array:
+ var routes: Array = []
+ for tick in range(20):
+  routes.append(nav.direction(Vector2(496,194),Vector2(1152,384),8,tick))
+ return routes
+func _parallel_worlds(t) -> void:
+ var first = N.new(V.new(_world(false)))
+ var second = N.new(V.new(_world(true)))
+ var expected_first: Array = _thread_routes(O.new(V.new(_world(false))))
+ var expected_second: Array = _thread_routes(O.new(V.new(_world(true))))
+ var a := Thread.new(); var b := Thread.new()
+ t.check(a.start(_thread_routes.bind(first)) == OK,"first independent world starts on worker")
+ t.check(b.start(_thread_routes.bind(second)) == OK,"second independent world starts on worker")
+ t.check(a.wait_to_finish() == expected_first,"concurrent exact world preserves all routes")
+ t.check(b.wait_to_finish() == expected_second,"concurrent cached world preserves all routes")
+ t.check(first._direction_los.is_empty() and second._direction_los.is_empty(),"concurrent independent worlds each retire memo")

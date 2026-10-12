@@ -1,0 +1,492 @@
+{
+  "titan_basic": {
+    "path": "res://assets/art/characters/titan_basic_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 384,
+    "height": 432,
+    "cell_w": 96,
+    "cell_h": 144,
+    "columns": 4,
+    "anchor_px": [
+      48,
+      144
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "e7debeea18672d55cd938f213a7738eb93c2a89c9783a201b30421e4e466a62c",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review",
+    "frame_notes": {
+      "9": "Unused duplicate of kneeling frame10. Original generated falling pose rejected for cell boundary artifact."
+    }
+  },
+  "titan_brute": {
+    "path": "res://assets/art/characters/titan_brute_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 512,
+    "height": 528,
+    "cell_w": 128,
+    "cell_h": 176,
+    "columns": 4,
+    "anchor_px": [
+      64,
+      176
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          9,
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "d5dec1022d517c87070c6e240e2e9bce3f4173aa0c623469a46fd7949dc4e90e",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review"
+  },
+  "titan_grabber": {
+    "path": "res://assets/art/characters/titan_grabber_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 384,
+    "height": 432,
+    "cell_w": 96,
+    "cell_h": 144,
+    "columns": 4,
+    "anchor_px": [
+      48,
+      144
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          9,
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "7d9e477bf59d7d44ccc89e144a323b2439d22308ea31406699b85407531fad95",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review"
+  },
+  "boss_sweeper": {
+    "path": "res://assets/art/characters/boss_sweeper_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 576,
+    "height": 624,
+    "cell_w": 144,
+    "cell_h": 208,
+    "columns": 4,
+    "anchor_px": [
+      72,
+      208
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          9,
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "0b3bb1544525cf0a64aa6946aec1fb0a248e45fe81e1741a3b49b9cdb1e1c1e7",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review"
+  },
+  "boss_grabber": {
+    "path": "res://assets/art/characters/boss_grabber_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 512,
+    "height": 576,
+    "cell_w": 128,
+    "cell_h": 192,
+    "columns": 4,
+    "anchor_px": [
+      64,
+      192
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          9,
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "edd6c4222065ccf6a4138d2a9474fb6019e40aa53e2d8d29f1a6266f2492f0f5",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review"
+  },
+  "armored_titan": {
+    "path": "res://assets/art/characters/armored_titan_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit of the original sheet; canonical unclothed nonsexual adult Titan design correction; nearest-neighbor shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying setting belongs to its rights holders. Private fan prototype, no official affiliation.",
+    "width": 768,
+    "height": 768,
+    "cell_w": 192,
+    "cell_h": 256,
+    "columns": 4,
+    "anchor_px": [
+      96,
+      256
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "hit": {
+        "frames": [
+          5
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "windup": {
+        "frames": [
+          6
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          7,
+          8
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "entry": {
+        "frames": [
+          9,
+          10
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "retreat": {
+        "frames": [
+          10,
+          11
+        ],
+        "fps": 8,
+        "loop": true
+      }
+    },
+    "sha256": "62100919eb6496fb16e7a63286a392a1cc85e56a65d3260bcaecf0293b6067ee",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review",
+    "defeatable": false
+  },
+  "garrison_01": {
+    "path": "res://assets/art/characters/garrison_01_v2.png",
+    "kind": "sprite",
+    "source_method": "Original built-in image edit: Garrison two-rose patch, straight segmented blades and pre-timeskip ODM harness/hip gear correction; nearest-pixel shared-palette packing.",
+    "license_note": "Original generated fan-game artwork; underlying Attack on Titan setting belongs to its rights holders. Private fan prototype; no official affiliation.",
+    "width": 256,
+    "height": 256,
+    "cell_w": 64,
+    "cell_h": 64,
+    "columns": 4,
+    "anchor_px": [
+      32,
+      64
+    ],
+    "animations": {
+      "idle": {
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 8,
+        "loop": true
+      },
+      "move": {
+        "frames": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 10,
+        "loop": true
+      },
+      "windup": {
+        "frames": [
+          8,
+          9
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "attack": {
+        "frames": [
+          10,
+          11,
+          12
+        ],
+        "fps": 10,
+        "loop": false
+      },
+      "hit": {
+        "frames": [
+          13
+        ],
+        "fps": 8,
+        "loop": false
+      },
+      "death": {
+        "frames": [
+          14,
+          15
+        ],
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "sha256": "a9218ad43e13c02e83fc99982b1e8129c671200499c5948744ec17879732b34a",
+    "art_revision": 2,
+    "review_status": "candidate_pending_integrator_visual_review"
+  }
+}

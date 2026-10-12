@@ -1,0 +1,1593 @@
+{
+  "schema_version": 1,
+  "candidate_group": "vfx_rebuild_v1",
+  "source_status": "NEW",
+  "vfx_approved": false,
+  "filter": "nearest",
+  "mipmaps": false,
+  "frame_order": "row_major_zero_based",
+  "assets": {
+    "vfx_blade_crescent": {
+      "path": "res://assets/art/effects/vfx_rebuild_v1/vfx_blade_crescent-v3.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "082a7a0e7911f21e5984f8cfcdc2fd54904c75f453812676046f3a399af6b45d",
+      "source_path": "assets/art/effects/vfx_rebuild_v1/source/vfx_blade_crescent-generation-v3.png",
+      "source_sha256": "e2e4209fdb02fe000ae077a890913c7066a2f579f29e3b5b1e548777dc2f7324",
+      "preview_path": "assets/art/effects/vfx_rebuild_v1/previews/vfx_blade_crescent-nearest-2x.png",
+      "notes": "Silver-white 150-degree crescent; origin center, tip within unit radius; clear forward sector and blue-gray edge.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_spin_double_ring": {
+      "path": "res://assets/art/effects/vfx_rebuild_v1/vfx_spin_double_ring.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "cfd06726503b0f6cd538f735aed3e694fffb31762dbb14b59f32818301e623b3",
+      "source_path": "assets/art/effects/vfx_rebuild_v1/source/vfx_spin_double_ring-generation-v1.png",
+      "source_sha256": "07e873c4e39648f5667143ae1df0fd3fa86875865f8ad7e5950c442c37083a9c",
+      "preview_path": "assets/art/effects/vfx_rebuild_v1/previews/vfx_spin_double_ring-nearest-2x.png",
+      "notes": "Two opposed closing circular blade arcs, transparent center; genuinely different silhouette from front crescent.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_cannon_shell": {
+      "path": "res://assets/art/effects/vfx_rebuild_v1/vfx_cannon_shell.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "bcea8ee4899eb13c4935ccacef2799b0ec8fd7a90c2b502beee2bfbc77cd20e6",
+      "source_path": "assets/art/effects/vfx_rebuild_v1/source/vfx_cannon_shell-generation-v1.png",
+      "source_sha256": "c1a2575e79074b7b020cb6e93b611059cea21ad610bd2c832422f3e4340700dd",
+      "preview_path": "assets/art/effects/vfx_rebuild_v1/previews/vfx_cannon_shell-nearest-2x.png",
+      "notes": "Bright dense cannonball head and low smoke tail; actual core projectile position only.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_cannon_contact_blast": {
+      "path": "res://assets/art/effects/vfx_rebuild_v1/vfx_cannon_contact_blast.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "611c7e150d0e66f7fddd83895706b00eb419230178496ae668cfef285c13aaa5",
+      "source_path": "assets/art/effects/vfx_rebuild_v1/source/vfx_cannon_contact_blast-generation-v1.png",
+      "source_sha256": "245ef76643706a367a389b3ad834d320ed07ff4fd7132a65fc4507774008c48e",
+      "preview_path": "assets/art/effects/vfx_rebuild_v1/previews/vfx_cannon_contact_blast-nearest-2x.png",
+      "notes": "Brief central flash transitions to stone shards within actual splash disk.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    },
+    "vfx_cannon_dust_ring": {
+      "path": "res://assets/art/effects/vfx_rebuild_v1/vfx_cannon_dust_ring.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "d682a2ab0f1666b38286be950d7f9e7d41dbde10840f051812f74ef8bb20cc36",
+      "source_path": "assets/art/effects/vfx_rebuild_v1/source/vfx_cannon_dust_ring-generation-v1.png",
+      "source_sha256": "48fd8748ff2077779a03bbefa80e709690ba449d4aa518f7cc68ce89a6f23b39",
+      "preview_path": "assets/art/effects/vfx_rebuild_v1/previews/vfx_cannon_dust_ring-nearest-2x.png",
+      "notes": "Transparent-center dust ring constrained to actual splash radius.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW"
+    }
+  },
+  "packing_audit": {
+    "vfx_blade_crescent": {
+      "source_sha256": "e2e4209fdb02fe000ae077a890913c7066a2f579f29e3b5b1e548777dc2f7324",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.25,
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap crop",
+        "hard alpha 50%",
+        "nearest resize with one uniform scale",
+        "integer pivot translation",
+        "24-palette nearest remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes pixel count. Clipped-pixel zero refers to opaque coverage cut off by extraction/canvas boundaries, not one-to-one high-resolution pixel retention.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            555,
+            455
+          ],
+          "source_pivot": [
+            229.0,
+            222.0
+          ],
+          "integer_translation_px": [
+            7,
+            8
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            79,
+            15,
+            122,
+            113
+          ],
+          "opaque_pixel_count": 1422,
+          "max_radius_px": 57.0350769263968,
+          "angle_range_degrees": [
+            -70.86635679409451,
+            72.64597536373867
+          ],
+          "sha256": "bb846aae8fe8d1475e1c84606ccc13c1db4dcea4171c35ea4695996a0b80a95b"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            555,
+            0,
+            1000,
+            455
+          ],
+          "source_pivot": [
+            659.5,
+            222.0
+          ],
+          "integer_translation_px": [
+            38,
+            8
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            80,
+            15,
+            122,
+            113
+          ],
+          "opaque_pixel_count": 1461,
+          "max_radius_px": 57.0350769263968,
+          "angle_range_degrees": [
+            -70.86635679409451,
+            71.56505117707799
+          ],
+          "sha256": "4b5f2c487523ecf4df92081f65e48169ee2d2aa08bf6bcee1943a69dbc3dfacf"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            1000,
+            0,
+            1444,
+            455
+          ],
+          "source_pivot": [
+            1096.0,
+            222.0
+          ],
+          "integer_translation_px": [
+            40,
+            8
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            80,
+            15,
+            121,
+            113
+          ],
+          "opaque_pixel_count": 1348,
+          "max_radius_px": 57.0701322935211,
+          "angle_range_degrees": [
+            -70.86635679409451,
+            71.56505117707799
+          ],
+          "sha256": "354034a23e4a95cdb432ffc0e1e502d7acdbd057f29452474df9837067316ca3"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1444,
+            0,
+            1774,
+            455
+          ],
+          "source_pivot": [
+            1531.5,
+            222.0
+          ],
+          "integer_translation_px": [
+            42,
+            8
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            80,
+            15,
+            119,
+            113
+          ],
+          "opaque_pixel_count": 1119,
+          "max_radius_px": 56.32051136131489,
+          "angle_range_degrees": [
+            -70.86635679409451,
+            71.56505117707799
+          ],
+          "sha256": "962577dd452cafe19d177b045d05545f37a595b5bbba3f92b9d009059df4d9f2"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            455,
+            555,
+            887
+          ],
+          "source_pivot": [
+            222.0,
+            665.5
+          ],
+          "integer_translation_px": [
+            8,
+            11
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            79,
+            13,
+            119,
+            111
+          ],
+          "opaque_pixel_count": 1251,
+          "max_radius_px": 58.412327466040935,
+          "angle_range_degrees": [
+            -72.58202920779716,
+            71.93952806380082
+          ],
+          "sha256": "3af97967e25adc707e1d32a9faae14eea8d4b015b9bf7bdddca3de50dbe7e6d4"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            555,
+            455,
+            1000,
+            887
+          ],
+          "source_pivot": [
+            660.5,
+            665.5
+          ],
+          "integer_translation_px": [
+            38,
+            11
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            81,
+            14,
+            119,
+            111
+          ],
+          "opaque_pixel_count": 779,
+          "max_radius_px": 56.85068161420758,
+          "angle_range_degrees": [
+            -71.22196677755446,
+            69.71744091108339
+          ],
+          "sha256": "e8b31287f3fb1f29fe11555fb579055368ba395044ae05d24f141383ad12d8d4"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            1000,
+            455,
+            1444,
+            887
+          ],
+          "source_pivot": [
+            1100.0,
+            665.5
+          ],
+          "integer_translation_px": [
+            39,
+            11
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            79,
+            13,
+            116,
+            111
+          ],
+          "opaque_pixel_count": 490,
+          "max_radius_px": 55.44366510251645,
+          "angle_range_degrees": [
+            -72.58202920779716,
+            71.93952806380082
+          ],
+          "sha256": "5de13d3406c9997622f92ec760297ab40af9d7ba90995ac05910f46835dca7c2"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1444,
+            455,
+            1774,
+            887
+          ],
+          "source_pivot": [
+            1538.5,
+            665.5
+          ],
+          "integer_translation_px": [
+            40,
+            11
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            79,
+            13,
+            116,
+            111
+          ],
+          "opaque_pixel_count": 230,
+          "max_radius_px": 54.589376255824725,
+          "angle_range_degrees": [
+            -73.30075576600639,
+            71.56505117707799
+          ],
+          "sha256": "599f1f512c7a7f87e6a9117fd30058756adbd7e25d1da20f3f431ee95bb1dabc"
+        }
+      ]
+    },
+    "vfx_spin_double_ring": {
+      "source_sha256": "07e873c4e39648f5667143ae1df0fd3fa86875865f8ad7e5950c442c37083a9c",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.27,
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap crop",
+        "hard alpha 50%",
+        "nearest resize with one uniform scale",
+        "integer pivot translation",
+        "24-palette nearest remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes pixel count. Clipped-pixel zero refers to opaque coverage cut off by extraction/canvas boundaries, not one-to-one high-resolution pixel retention.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_pivot": [
+            221.75,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            13,
+            11,
+            115,
+            117
+          ],
+          "opaque_pixel_count": 4390,
+          "max_radius_px": 58.137767414994535,
+          "angle_range_degrees": [
+            -178.87669728592456,
+            180.0
+          ],
+          "sha256": "ce0e015adc553dfffa000bc42620011538fa139607ab03e045f8e75ed12f8e1d"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_pivot": [
+            665.25,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            13,
+            13,
+            115,
+            115
+          ],
+          "opaque_pixel_count": 3838,
+          "max_radius_px": 57.4543296888929,
+          "angle_range_degrees": [
+            -176.09950625761812,
+            180.0
+          ],
+          "sha256": "a55476393743831e6df47afa1783679e85822c9c7aed55344980e1584adb7b1f"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_pivot": [
+            1108.75,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            12,
+            14,
+            116,
+            114
+          ],
+          "opaque_pixel_count": 3254,
+          "max_radius_px": 56.938563381947034,
+          "angle_range_degrees": [
+            -178.87669728592456,
+            180.0
+          ],
+          "sha256": "4bba542aa4757dfb0a81c72f5c7bd2a5ed6b48f6a4b1150743a8c7127ec6694b"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_pivot": [
+            1552.25,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            16,
+            14,
+            114,
+            113
+          ],
+          "opaque_pixel_count": 2348,
+          "max_radius_px": 58.05170109479997,
+          "angle_range_degrees": [
+            -175.91438322002512,
+            173.21102542556122
+          ],
+          "sha256": "dce7aae76c72713c330096801fc210535c610a12d2b0259ef3908458ac0b6c06"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_pivot": [
+            221.75,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            15,
+            14,
+            113,
+            112
+          ],
+          "opaque_pixel_count": 2003,
+          "max_radius_px": 57.14017850864661,
+          "angle_range_degrees": [
+            -174.68545433005525,
+            177.51044707800085
+          ],
+          "sha256": "af2f85a6758ab3f9c78d2d3affd9d723f2e603d86cb14ba8ccfe6c73c510c20b"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_pivot": [
+            665.25,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            13,
+            12,
+            114,
+            113
+          ],
+          "opaque_pixel_count": 1325,
+          "max_radius_px": 52.03844732503075,
+          "angle_range_degrees": [
+            -177.3974377975002,
+            173.79655209830818
+          ],
+          "sha256": "8af1a1981f9255d308989dccdfd3eedc81e08c74cf332159ef17ecc6355fbaab"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_pivot": [
+            1108.75,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            15,
+            12,
+            114,
+            113
+          ],
+          "opaque_pixel_count": 700,
+          "max_radius_px": 53.150729063673246,
+          "angle_range_degrees": [
+            -178.7269699799433,
+            180.0
+          ],
+          "sha256": "f0f743127958430d440d9d7d9aa02ca74c651a6dc18990a3c76ea0cb7a74bbff"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_pivot": [
+            1552.25,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            16,
+            16,
+            110,
+            108
+          ],
+          "opaque_pixel_count": 228,
+          "max_radius_px": 48.83646178829912,
+          "angle_range_degrees": [
+            -174.8055710922652,
+            180.0
+          ],
+          "sha256": "956456f47ba710fa6932bfa335cce28670f8cce8b1e456b3177bbae8ea76b282"
+        }
+      ]
+    },
+    "vfx_cannon_shell": {
+      "source_sha256": "c1a2575e79074b7b020cb6e93b611059cea21ad610bd2c832422f3e4340700dd",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.057,
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap crop",
+        "hard alpha 50%",
+        "nearest resize with one uniform scale",
+        "integer pivot translation",
+        "24-palette nearest remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes pixel count. Clipped-pixel zero refers to opaque coverage cut off by extraction/canvas boundaries, not one-to-one high-resolution pixel retention.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_pivot": [
+            301.0,
+            240.0
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            3,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 95,
+          "max_radius_px": 13.341664064126334,
+          "angle_range_degrees": [
+            -175.6012946450045,
+            180.0
+          ],
+          "sha256": "199a37fb03c1e65518a824ce0650ee72e9e53b42aa52d7947e2d5d2ae2dd8306"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_pivot": [
+            744.5,
+            240.0
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            2,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 91,
+          "max_radius_px": 14.035668847618199,
+          "angle_range_degrees": [
+            -175.91438322002512,
+            180.0
+          ],
+          "sha256": "f123dce6c06f298cb22d8ed2fd32b114ece6afc1188d0dc39c88f2fda79798d6"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_pivot": [
+            1188.0,
+            240.0
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            4,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 90,
+          "max_radius_px": 12.36931687685298,
+          "angle_range_degrees": [
+            -174.8055710922652,
+            180.0
+          ],
+          "sha256": "66b9ceea4093a57bcb18561fa1df9a010bffbbb6cab0ca9e1acb339380571491"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_pivot": [
+            1631.5,
+            240.0
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            2,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 88,
+          "max_radius_px": 14.035668847618199,
+          "angle_range_degrees": [
+            -175.91438322002512,
+            180.0
+          ],
+          "sha256": "e11ff7a46bafffc718afd8e18277b8a21a9769a5fcf9a8a80ed72a47bc1ccdc8"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_pivot": [
+            301.0,
+            683.5
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            2,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 94,
+          "max_radius_px": 14.142135623730951,
+          "angle_range_degrees": [
+            -174.8055710922652,
+            180.0
+          ],
+          "sha256": "ba8bd70d3e354fd28b8a934152ab7bd65473cb39eddcec753c6c5803f3163f30"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_pivot": [
+            744.5,
+            683.5
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            2,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 88,
+          "max_radius_px": 14.142135623730951,
+          "angle_range_degrees": [
+            -174.8055710922652,
+            180.0
+          ],
+          "sha256": "cf8ac82ced9826bf388606ada3a6ce6fce7950dfc0725aad42ba2607f17d317f"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_pivot": [
+            1188.0,
+            683.5
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            4,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 88,
+          "max_radius_px": 12.165525060596439,
+          "angle_range_degrees": [
+            -175.2363583092738,
+            180.0
+          ],
+          "sha256": "ce6bd8468402f1df10de9a3331e90c5c2775329867d756f5a560737ca1a0ee2d"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_pivot": [
+            1631.5,
+            683.5
+          ],
+          "integer_translation_px": [
+            -1,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            4,
+            11,
+            20,
+            20
+          ],
+          "opaque_pixel_count": 83,
+          "max_radius_px": 12.0,
+          "angle_range_degrees": [
+            -174.8055710922652,
+            180.0
+          ],
+          "sha256": "ee0c3514599a522a380d6668481ada7c6647af111b5c9815e66f3dd949a938d6"
+        }
+      ]
+    },
+    "vfx_cannon_contact_blast": {
+      "source_sha256": "245ef76643706a367a389b3ad834d320ed07ff4fd7132a65fc4507774008c48e",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.265,
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap crop",
+        "hard alpha 50%",
+        "nearest resize with one uniform scale",
+        "integer pivot translation",
+        "24-palette nearest remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes pixel count. Clipped-pixel zero refers to opaque coverage cut off by extraction/canvas boundaries, not one-to-one high-resolution pixel retention.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_pivot": [
+            222.0,
+            236.0
+          ],
+          "integer_translation_px": [
+            5,
+            1
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            13,
+            10,
+            113,
+            106
+          ],
+          "opaque_pixel_count": 4357,
+          "max_radius_px": 56.61271941887264,
+          "angle_range_degrees": [
+            -178.53119928561418,
+            180.0
+          ],
+          "sha256": "78b34e9f0df8b4d071a7e3f11572b09be2edd41841d6cee9d02d0cfad9add799"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_pivot": [
+            665.5,
+            236.0
+          ],
+          "integer_translation_px": [
+            5,
+            1
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            17,
+            18,
+            108,
+            105
+          ],
+          "opaque_pixel_count": 3284,
+          "max_radius_px": 50.0,
+          "angle_range_degrees": [
+            -178.56790381583536,
+            180.0
+          ],
+          "sha256": "da6ac9ee44a42ff155e8c7d30e130355a2ce67bd19e12f17e5665d8b0c3cfa27"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_pivot": [
+            1109.0,
+            236.0
+          ],
+          "integer_translation_px": [
+            5,
+            1
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            18,
+            16,
+            112,
+            106
+          ],
+          "opaque_pixel_count": 2692,
+          "max_radius_px": 51.894122981316485,
+          "angle_range_degrees": [
+            -178.1523897340054,
+            180.0
+          ],
+          "sha256": "adb5fe31f894f47afe632b80fdbf78fa538e3af97ab84ce6f6d7688cacbd65f5"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_pivot": [
+            1552.5,
+            236.0
+          ],
+          "integer_translation_px": [
+            5,
+            1
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            24,
+            25,
+            104,
+            102
+          ],
+          "opaque_pixel_count": 1396,
+          "max_radius_px": 41.88078318274385,
+          "angle_range_degrees": [
+            -178.56790381583536,
+            180.0
+          ],
+          "sha256": "64f044570c8e3e5edf3360a6d9bd3b1cfa445e7690f60d8b8c4e7ea5accb0205"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_pivot": [
+            222.0,
+            679.5
+          ],
+          "integer_translation_px": [
+            5,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            23,
+            25,
+            103,
+            103
+          ],
+          "opaque_pixel_count": 1351,
+          "max_radius_px": 42.95346318982906,
+          "angle_range_degrees": [
+            -177.6140559696112,
+            180.0
+          ],
+          "sha256": "928a24d1161ebabff5b09c496b5d9d41b1afa9f4071e5c42378b7ee1dd505dd7"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_pivot": [
+            665.5,
+            679.5
+          ],
+          "integer_translation_px": [
+            5,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            25,
+            28,
+            101,
+            100
+          ],
+          "opaque_pixel_count": 705,
+          "max_radius_px": 41.72529209005013,
+          "angle_range_degrees": [
+            -173.15722658736905,
+            180.0
+          ],
+          "sha256": "0d4926191893f7336d090ee440ec253ea71db5e2c69c41b03759ba09855b5e70"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_pivot": [
+            1109.0,
+            679.5
+          ],
+          "integer_translation_px": [
+            5,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            31,
+            34,
+            98,
+            96
+          ],
+          "opaque_pixel_count": 374,
+          "max_radius_px": 34.785054261852174,
+          "angle_range_degrees": [
+            -177.51044707800085,
+            168.31063082456083
+          ],
+          "sha256": "47c30eed05cb1b69eb91ffb568ec94d4f22d985d058b3d7946fee9f38149df65"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_pivot": [
+            1552.5,
+            679.5
+          ],
+          "integer_translation_px": [
+            5,
+            2
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            32,
+            31,
+            97,
+            91
+          ],
+          "opaque_pixel_count": 89,
+          "max_radius_px": 36.05551275463989,
+          "angle_range_degrees": [
+            -157.16634582208246,
+            178.21008939175394
+          ],
+          "sha256": "a613be7c29467d3cc074ee386e789c861bdd3489aa4ade991ca9a3fdb43de945"
+        }
+      ]
+    },
+    "vfx_cannon_dust_ring": {
+      "source_sha256": "48fd8748ff2077779a03bbefa80e709690ba449d4aa518f7cc68ce89a6f23b39",
+      "source_dimensions": [
+        1774,
+        887
+      ],
+      "same_scale_all_frames": 0.27,
+      "opaque_pixels_clipped": 0,
+      "geometry_mask_pixels_removed": 0,
+      "operations": [
+        "lossless source archive",
+        "non-overlapping transparent-gap crop",
+        "hard alpha 50%",
+        "nearest resize with one uniform scale",
+        "integer pivot translation",
+        "24-palette nearest remap",
+        "row-major 4x2 atlas"
+      ],
+      "resampling_note": "Nearest downsampling changes pixel count. Clipped-pixel zero refers to opaque coverage cut off by extraction/canvas boundaries, not one-to-one high-resolution pixel retention.",
+      "frames": [
+        {
+          "frame": 0,
+          "source_crop": [
+            0,
+            0,
+            444,
+            444
+          ],
+          "source_pivot": [
+            221.75,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            10,
+            10,
+            119,
+            119
+          ],
+          "opaque_pixel_count": 5993,
+          "max_radius_px": 57.48912940721924,
+          "angle_range_degrees": [
+            -178.87669728592456,
+            180.0
+          ],
+          "sha256": "bdb77b9da793d2bed3c33d85bc53f9f5d8ee0380de8b66254af3839cfdbe8395"
+        },
+        {
+          "frame": 1,
+          "source_crop": [
+            444,
+            0,
+            887,
+            444
+          ],
+          "source_pivot": [
+            665.25,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            9,
+            10,
+            120,
+            119
+          ],
+          "opaque_pixel_count": 6018,
+          "max_radius_px": 60.207972893961475,
+          "angle_range_degrees": [
+            -178.91907581333933,
+            180.0
+          ],
+          "sha256": "dd63788c47da160477e704e2f38c384abc304a5c8e3a4cbc12ee2122c9192b94"
+        },
+        {
+          "frame": 2,
+          "source_crop": [
+            887,
+            0,
+            1330,
+            444
+          ],
+          "source_pivot": [
+            1108.75,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            9,
+            10,
+            116,
+            119
+          ],
+          "opaque_pixel_count": 4722,
+          "max_radius_px": 58.89821729050889,
+          "angle_range_degrees": [
+            -178.91907581333933,
+            180.0
+          ],
+          "sha256": "d3892dd5a0669d1293b5ebb8d005739e5c4ef50aae68766b5d6f453f3f55f3ca"
+        },
+        {
+          "frame": 3,
+          "source_crop": [
+            1330,
+            0,
+            1774,
+            444
+          ],
+          "source_pivot": [
+            1552.25,
+            221.75
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            8,
+            13,
+            116,
+            118
+          ],
+          "opaque_pixel_count": 2932,
+          "max_radius_px": 56.64803615307419,
+          "angle_range_degrees": [
+            -178.93908830973578,
+            180.0
+          ],
+          "sha256": "98ddbd196ceadbddb7bb5ffc3413ebc5b3ff9d77f5c9ca5dc742f8d1a3d7866c"
+        },
+        {
+          "frame": 4,
+          "source_crop": [
+            0,
+            444,
+            444,
+            887
+          ],
+          "source_pivot": [
+            221.75,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            12,
+            15,
+            117,
+            115
+          ],
+          "opaque_pixel_count": 2230,
+          "max_radius_px": 54.120236510939236,
+          "angle_range_degrees": [
+            -178.7269699799433,
+            180.0
+          ],
+          "sha256": "2ad36711f709d1ce06d5619d21196b8bb89963c698cc1b5b6fc77894ef9f1f71"
+        },
+        {
+          "frame": 5,
+          "source_crop": [
+            444,
+            444,
+            887,
+            887
+          ],
+          "source_pivot": [
+            665.25,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            15,
+            15,
+            116,
+            115
+          ],
+          "opaque_pixel_count": 1169,
+          "max_radius_px": 52.630789467763066,
+          "angle_range_degrees": [
+            -173.0470425318261,
+            175.71084667118097
+          ],
+          "sha256": "a8f1071f54cd9cc68adfc5921ae79c0334ffb8ecf98fb69dee8fead7a41eb8a5"
+        },
+        {
+          "frame": 6,
+          "source_crop": [
+            887,
+            444,
+            1330,
+            887
+          ],
+          "source_pivot": [
+            1108.75,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            12,
+            16,
+            115,
+            112
+          ],
+          "opaque_pixel_count": 659,
+          "max_radius_px": 52.952809179494906,
+          "angle_range_degrees": [
+            -172.03038960567864,
+            180.0
+          ],
+          "sha256": "21705092165e4e3cb36baa5059f0ac3ee78efe698ccfbfba6912ac000e87e0e6"
+        },
+        {
+          "frame": 7,
+          "source_crop": [
+            1330,
+            444,
+            1774,
+            887
+          ],
+          "source_pivot": [
+            1552.25,
+            665.25
+          ],
+          "integer_translation_px": [
+            4,
+            4
+          ],
+          "opaque_pixels_clipped": 0,
+          "opaque_bbox_px": [
+            15,
+            17,
+            111,
+            112
+          ],
+          "opaque_pixel_count": 231,
+          "max_radius_px": 49.25444142409901,
+          "angle_range_degrees": [
+            -165.96375653207352,
+            176.49646835521557
+          ],
+          "sha256": "9b0b92a7fb061ee26b51f7e2076d4b4fa6cb0c89be498fcbb3520294b1ffdf85"
+        }
+      ]
+    }
+  }
+}

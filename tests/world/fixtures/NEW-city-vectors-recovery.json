@@ -1,0 +1,275 @@
+{
+  "origin_class": "NEW_independent_reference_vectors",
+  "definition_revision": "NEW-city-districts-1",
+  "definition_sha256": "a87316c5ddd7343cbf2812106843e89dc2adad2eadea06e52cf845b9fa15398e",
+  "method": "Python hashlib.sha256 of documented city_v1|seed|x|y|domain UTF-8 bytes; first eight hexadecimal digits modulo four. Expected prop IDs independently assembled from authored slots. No Godot output used; not historical vectors.",
+  "vectors": [
+    {
+      "seed": 0,
+      "chunk": [
+        "0",
+        "0"
+      ],
+      "template_id": "new_garrison_battery",
+      "ground_variant": 2,
+      "decor_variant": 1,
+      "domain_sha256": {
+        "layout": "1f660141572fe2016595572539b7638848c7a41fa762e2c00d978a92c0415367",
+        "ground": "cf48bfae5c19b48d38d6d6656e88d22942a9df61ac5f6b3a69d169a667b06dc7",
+        "decor": "1bb64a1dbec003c6daebfd8f1b7a6e049000cb3362b474fe62bf4eb93db60bc4"
+      },
+      "prop_ids": [
+        "city:city_v1:0:0:battery_debris",
+        "city:city_v1:0:0:ne_cannon",
+        "city:city_v1:0:0:ne_redoubt",
+        "city:city_v1:0:0:nw_cannon",
+        "city:city_v1:0:0:nw_house",
+        "city:city_v1:0:0:se_cannon",
+        "city:city_v1:0:0:se_quarters",
+        "city:city_v1:0:0:sw_cannon",
+        "city:city_v1:0:0:sw_store"
+      ]
+    },
+    {
+      "seed": 1,
+      "chunk": [
+        "0",
+        "0"
+      ],
+      "template_id": "new_bakery_market",
+      "ground_variant": 2,
+      "decor_variant": 3,
+      "domain_sha256": {
+        "layout": "c4448040451dd226a2147f32bd1ff83a966c19ce908ac46811f4d027156631f6",
+        "ground": "98d064da0df3283e35617b3397bb470d7f325827b8ff444d9e568b52f4c0c5de",
+        "decor": "89f1cbfbf4eebc7d799c82dd51406cd312b031043407f89deebe5e6c266b5805"
+      },
+      "prop_ids": [
+        "city:city_v1:0:0:ne_debris",
+        "city:city_v1:0:0:ne_house",
+        "city:city_v1:0:0:nw_delivery",
+        "city:city_v1:0:0:nw_house",
+        "city:city_v1:0:0:se_debris",
+        "city:city_v1:0:0:se_house",
+        "city:city_v1:0:0:sw_bakery",
+        "city:city_v1:0:0:sw_delivery"
+      ]
+    },
+    {
+      "seed": 2,
+      "chunk": [
+        "0",
+        "0"
+      ],
+      "template_id": "new_supply_warehouses",
+      "ground_variant": 1,
+      "decor_variant": 3,
+      "domain_sha256": {
+        "layout": "1e43b206ff1b1c1bc54612c78c7505e8ef2acd67c5b2cb26e7e82d03fb006c87",
+        "ground": "a1fbc88128507a743f18af1a29b1d40ed95785ac1d85fa401307f2b0bbb21e7d",
+        "decor": "d29491a31eceed88a41926702fc60e84f318190052646c1ef83f5aa9f5620d03"
+      },
+      "prop_ids": [
+        "city:city_v1:0:0:ne_store",
+        "city:city_v1:0:0:ne_wagon",
+        "city:city_v1:0:0:nw_debris",
+        "city:city_v1:0:0:nw_house",
+        "city:city_v1:0:0:nw_wagon",
+        "city:city_v1:0:0:se_debris",
+        "city:city_v1:0:0:se_store",
+        "city:city_v1:0:0:se_wagon",
+        "city:city_v1:0:0:sw_store",
+        "city:city_v1:0:0:sw_wagon"
+      ]
+    },
+    {
+      "seed": 3,
+      "chunk": [
+        "0",
+        "0"
+      ],
+      "template_id": "new_garrison_battery",
+      "ground_variant": 0,
+      "decor_variant": 0,
+      "domain_sha256": {
+        "layout": "50be458d0636b5b233677f6c4b8fd539ad7452bb7d231bab6a30eda437c282e4",
+        "ground": "7b196c9cfd43f22e075d94adb9e7037ea92d62a8518c81c5c3955cf20146daa8",
+        "decor": "be623db85b40e41958aa990c7d8308bb032a799fc72fe6a6aadbaffdde237ab3"
+      },
+      "prop_ids": [
+        "city:city_v1:0:0:battery_debris",
+        "city:city_v1:0:0:ne_cannon",
+        "city:city_v1:0:0:ne_redoubt",
+        "city:city_v1:0:0:nw_cannon",
+        "city:city_v1:0:0:nw_house",
+        "city:city_v1:0:0:se_cannon",
+        "city:city_v1:0:0:se_quarters",
+        "city:city_v1:0:0:sw_cannon",
+        "city:city_v1:0:0:sw_store"
+      ]
+    },
+    {
+      "seed": 42,
+      "chunk": [
+        "0",
+        "0"
+      ],
+      "template_id": "new_supply_warehouses",
+      "ground_variant": 2,
+      "decor_variant": 2,
+      "domain_sha256": {
+        "layout": "602c26cea7859334918ed0d04ea8d1ee170388a2267b53549c34b7ac3a123bc0",
+        "ground": "a738389a341f081a2b014e999dc6717266aabe2d5606fc0cee5f9b6c54670c7b",
+        "decor": "acd15f824b1fd962c0ed949d3d24197fcac694a3364845337c31a6d055ae5fe2"
+      },
+      "prop_ids": [
+        "city:city_v1:0:0:ne_store",
+        "city:city_v1:0:0:ne_wagon",
+        "city:city_v1:0:0:nw_debris",
+        "city:city_v1:0:0:nw_house",
+        "city:city_v1:0:0:nw_wagon",
+        "city:city_v1:0:0:se_debris",
+        "city:city_v1:0:0:se_store",
+        "city:city_v1:0:0:se_wagon",
+        "city:city_v1:0:0:sw_store",
+        "city:city_v1:0:0:sw_wagon"
+      ]
+    },
+    {
+      "seed": 42,
+      "chunk": [
+        "-1",
+        "-1"
+      ],
+      "template_id": "new_breach_refuge",
+      "ground_variant": 1,
+      "decor_variant": 3,
+      "domain_sha256": {
+        "layout": "5500606f00367b98805c251d37519e9b4906f19b7844364c277acc93add73581",
+        "ground": "ab08d1351bc113a8c66c37259cb96b2525a37934b487d0751a0754d85ec8bb7d",
+        "decor": "bd9e9e9fa363473e6a8cf429f746b56f8a48a3d773f48859b0ef26edc159edee"
+      },
+      "prop_ids": [
+        "city:city_v1:-1:-1:ne_debris",
+        "city:city_v1:-1:-1:ne_house",
+        "city:city_v1:-1:-1:ne_refuge",
+        "city:city_v1:-1:-1:nw_debris",
+        "city:city_v1:-1:-1:nw_refuge",
+        "city:city_v1:-1:-1:nw_ruin",
+        "city:city_v1:-1:-1:se_bakery",
+        "city:city_v1:-1:-1:se_debris",
+        "city:city_v1:-1:-1:sw_cannon",
+        "city:city_v1:-1:-1:sw_ruin"
+      ]
+    },
+    {
+      "seed": 42,
+      "chunk": [
+        "1",
+        "-1"
+      ],
+      "template_id": "new_supply_warehouses",
+      "ground_variant": 0,
+      "decor_variant": 2,
+      "domain_sha256": {
+        "layout": "26132816a60014b58cf62291aeacf42742360eaa8083fed2baf32add83d77d05",
+        "ground": "d2f869f41b04d3c6d1cceb3055bb1946fb6f559056e93c1f7dde24da1341293f",
+        "decor": "0e35a22ea332663bd153d1d004e6315a886a658b80bfbd736574bafb9cd89bd9"
+      },
+      "prop_ids": [
+        "city:city_v1:1:-1:ne_store",
+        "city:city_v1:1:-1:ne_wagon",
+        "city:city_v1:1:-1:nw_debris",
+        "city:city_v1:1:-1:nw_house",
+        "city:city_v1:1:-1:nw_wagon",
+        "city:city_v1:1:-1:se_debris",
+        "city:city_v1:1:-1:se_store",
+        "city:city_v1:1:-1:se_wagon",
+        "city:city_v1:1:-1:sw_store",
+        "city:city_v1:1:-1:sw_wagon"
+      ]
+    },
+    {
+      "seed": 73,
+      "chunk": [
+        "-7",
+        "11"
+      ],
+      "template_id": "new_supply_warehouses",
+      "ground_variant": 1,
+      "decor_variant": 0,
+      "domain_sha256": {
+        "layout": "5b7b962adf432298e2ce7b09c528dd3acc6d088f54a7398a0f5d2dcbd34c05a7",
+        "ground": "c7c52f110d847fa55f844f8e05927e31fb3b85433e5c206e0966f2e37b3e957e",
+        "decor": "c02cf4d443bd53fb434c26ab0dfdcd5b8adb5c835ae4030bf22a80ea4cf094a6"
+      },
+      "prop_ids": [
+        "city:city_v1:-7:11:ne_store",
+        "city:city_v1:-7:11:ne_wagon",
+        "city:city_v1:-7:11:nw_debris",
+        "city:city_v1:-7:11:nw_house",
+        "city:city_v1:-7:11:nw_wagon",
+        "city:city_v1:-7:11:se_debris",
+        "city:city_v1:-7:11:se_store",
+        "city:city_v1:-7:11:se_wagon",
+        "city:city_v1:-7:11:sw_store",
+        "city:city_v1:-7:11:sw_wagon"
+      ]
+    },
+    {
+      "seed": 2147483647,
+      "chunk": [
+        "9007199254740993",
+        "-9007199254740993"
+      ],
+      "template_id": "new_garrison_battery",
+      "ground_variant": 1,
+      "decor_variant": 1,
+      "domain_sha256": {
+        "layout": "991c7aed8953454c0b9233e5e7ce4002bd7b5d6e3fb80ed7e3d220e23b213084",
+        "ground": "9c02b67dc95eaaad45beca49a3fd5eda432cf818b7da6112c902dfafa2f24275",
+        "decor": "f38731899f4c10d708adaa30aa715ce6d96310a33808a28bcf75e1e2d7a52eb2"
+      },
+      "prop_ids": [
+        "city:city_v1:9007199254740993:-9007199254740993:battery_debris",
+        "city:city_v1:9007199254740993:-9007199254740993:ne_cannon",
+        "city:city_v1:9007199254740993:-9007199254740993:ne_redoubt",
+        "city:city_v1:9007199254740993:-9007199254740993:nw_cannon",
+        "city:city_v1:9007199254740993:-9007199254740993:nw_house",
+        "city:city_v1:9007199254740993:-9007199254740993:se_cannon",
+        "city:city_v1:9007199254740993:-9007199254740993:se_quarters",
+        "city:city_v1:9007199254740993:-9007199254740993:sw_cannon",
+        "city:city_v1:9007199254740993:-9007199254740993:sw_store"
+      ]
+    },
+    {
+      "seed": 11,
+      "chunk": [
+        "9223372036854775807",
+        "-9223372036854775808"
+      ],
+      "template_id": "new_bakery_market",
+      "ground_variant": 0,
+      "decor_variant": 0,
+      "domain_sha256": {
+        "layout": "d6f5df60f3ae01721237063a0629a420b096952420d6ace187c6d195aaad5f9c",
+        "ground": "7fc0e1688db93263544ec647d9e74876ae077618dcfd19a01705c3665bbe41b9",
+        "decor": "72aee45c21c275aaaeff75d3dec41a8f769fd78166775ce2cd7e2100dcd00918"
+      },
+      "prop_ids": [
+        "city:city_v1:9223372036854775807:-9223372036854775808:ne_debris",
+        "city:city_v1:9223372036854775807:-9223372036854775808:ne_house",
+        "city:city_v1:9223372036854775807:-9223372036854775808:nw_delivery",
+        "city:city_v1:9223372036854775807:-9223372036854775808:nw_house",
+        "city:city_v1:9223372036854775807:-9223372036854775808:se_debris",
+        "city:city_v1:9223372036854775807:-9223372036854775808:se_house",
+        "city:city_v1:9223372036854775807:-9223372036854775808:sw_bakery",
+        "city:city_v1:9223372036854775807:-9223372036854775808:sw_delivery"
+      ]
+    }
+  ],
+  "recovery_identity_derivation": {
+    "prior_fixture_sha256": "7d0ffdab0e1330d9fdb3e2ffc7cc880baec8c963ddec901a17a3be9112bc16d2",
+    "change": "definition_sha256 only; content revision changed, authored templates and all independently computed vector values unchanged"
+  }
+}

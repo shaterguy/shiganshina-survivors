@@ -1,0 +1,12 @@
+{
+  "revision": "ch01.3-rebuild.6-harmless-recovery",
+  "city_source": "/workspace/scratch/94c3b29a9648/game-recovery-20261010-1153/recovery/source23-runtime-composition/evidence/main-final/data/godot/app_userdata/\uc9c4\uaca9\uc758 \uac70\uc778- \uc778\ub958\uc758 \ub0a0\uac1c/independent_main_final_10_119352/saves",
+  "finite_producer_core_sha256": "73671fa8c6e23c52695e1f483412aea4099026f8e5590e565352dacac974e348",
+  "files": {
+    "city/saves/game_save.json": "3402ca0766aea0e1375f1e13f7fe3a65aedd0233314a4c2e764ec09c1bd76816",
+    "city/saves/game_save.json.bak": "10b264c140043ede92def9151424f5306d3643f10fd87838cadedfcab879bb30",
+    "city/saves/world/pages/e6/e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28.json": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28",
+    "finite/saves/game_save.json": "59540844f10fffbbe84b2a47d098dba64e393e0837976d9d8346e0088ded01c6",
+    "finite/saves/game_save.json.bak": "84b4e713ec1301a07d9cb8d9cdd36e2d9e9b4b52f6ef832c9d3be8bc94076cc4"
+  }
+}

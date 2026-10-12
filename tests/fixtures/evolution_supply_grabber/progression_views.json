@@ -1,0 +1,872 @@
+{
+  "missing": {
+    "view_revision": 1,
+    "slots": {
+      "equipment": {
+        "used": 1,
+        "max": 4
+      },
+      "passive": {
+        "used": 1,
+        "max": 4
+      }
+    },
+    "target": {
+      "evolution_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "name": "입체기동 연속참",
+      "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+      "status": "collecting",
+      "can_evolve": false,
+      "requirements": [
+        {
+          "kind": "equipment",
+          "item_id": "blade_slash",
+          "name": "쌍검 전방 베기",
+          "current": 4,
+          "required": 5,
+          "met": false,
+          "blocked_reason": "weapon_level"
+        },
+        {
+          "kind": "passive",
+          "item_id": "movement",
+          "name": "가벼운 발걸음",
+          "current": 2,
+          "required": 3,
+          "met": false,
+          "blocked_reason": "passive_level"
+        },
+        {
+          "kind": "seal",
+          "item_id": "tactical_seal",
+          "name": "전술 개조권",
+          "current": 0,
+          "required": 1,
+          "met": false,
+          "blocked_reason": "seal_required"
+        }
+      ],
+      "effect_delta": {
+        "stages": 2,
+        "stage_damage": [
+          27,
+          36
+        ],
+        "stage_delays": [
+          0,
+          12
+        ],
+        "radius": 88,
+        "arc_degrees": 110,
+        "cooldown_ticks": 48
+      },
+      "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+    },
+    "evolutions": [
+      {
+        "evolution_id": "evo_wing_cut",
+        "base_item_id": "blade_slash",
+        "name": "입체기동 연속참",
+        "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "blade_slash",
+            "name": "쌍검 전방 베기",
+            "current": 4,
+            "required": 5,
+            "met": false,
+            "blocked_reason": "weapon_level"
+          },
+          {
+            "kind": "passive",
+            "item_id": "movement",
+            "name": "가벼운 발걸음",
+            "current": 2,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "passive_level"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 0,
+            "required": 1,
+            "met": false,
+            "blocked_reason": "seal_required"
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            27,
+            36
+          ],
+          "stage_delays": [
+            0,
+            12
+          ],
+          "radius": 88,
+          "arc_degrees": 110,
+          "cooldown_ticks": 48
+        },
+        "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+      },
+      {
+        "evolution_id": "evo_crossfire",
+        "base_item_id": "wall_cannon",
+        "name": "교차 포격 지휘",
+        "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "wall_cannon",
+            "name": "성벽 고정포 지원",
+            "current": 0,
+            "required": 5,
+            "met": false,
+            "blocked_reason": "missing_weapon"
+          },
+          {
+            "kind": "passive",
+            "item_id": "fire_interval",
+            "name": "신속한 재장전",
+            "current": 0,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "missing_passive"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 0,
+            "required": 1,
+            "met": false,
+            "blocked_reason": "seal_required"
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            44.8,
+            44.8
+          ],
+          "stage_delays": [
+            36,
+            66
+          ],
+          "radius": 56,
+          "cooldown_ticks": 168,
+          "acquisition_range": 456,
+          "point_offset": 24
+        },
+        "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다."
+      }
+    ],
+    "active_offer": {
+      "offer_id": "0123456789abcdef0123456789abcdef:1:offer:1",
+      "source": "level",
+      "level_ordinal": 2,
+      "options": [
+        {
+          "option_id": "equipment:blade_slash",
+          "item_id": "blade_slash",
+          "kind": "equipment",
+          "name": "쌍검 전방 베기",
+          "level": 4,
+          "next_level": 5,
+          "description": "쌍검 피해 30 → 36",
+          "effect_delta": {
+            "damage_before": 30,
+            "damage_after": 36,
+            "cooldown_ticks_before": 39,
+            "cooldown_ticks_after": 36,
+            "range_before": 72,
+            "range_after": 78
+          },
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "current": 4,
+              "required": 5,
+              "met": false,
+              "blocked_reason": "weapon_level"
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "current": 2,
+              "required": 3,
+              "met": false,
+              "blocked_reason": "passive_level"
+            },
+            {
+              "kind": "seal",
+              "item_id": "tactical_seal",
+              "name": "전술 개조권",
+              "current": 0,
+              "required": 1,
+              "met": false,
+              "blocked_reason": "seal_required"
+            }
+          ],
+          "can_select": true,
+          "blocked_reason": "",
+          "slot_warning": "",
+          "tradeoff_text": ""
+        }
+      ],
+      "selected_option_id": "equipment:blade_slash"
+    }
+  },
+  "blocked": {
+    "view_revision": 2,
+    "slots": {
+      "equipment": {
+        "used": 1,
+        "max": 4
+      },
+      "passive": {
+        "used": 3,
+        "max": 4
+      }
+    },
+    "target": {
+      "evolution_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "name": "입체기동 연속참",
+      "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+      "status": "collecting",
+      "can_evolve": false,
+      "requirements": [
+        {
+          "kind": "equipment",
+          "item_id": "blade_slash",
+          "name": "쌍검 전방 베기",
+          "current": 5,
+          "required": 5,
+          "met": true,
+          "blocked_reason": ""
+        },
+        {
+          "kind": "passive",
+          "item_id": "movement",
+          "name": "가벼운 발걸음",
+          "current": 0,
+          "required": 3,
+          "met": false,
+          "blocked_reason": "missing_passive"
+        },
+        {
+          "kind": "seal",
+          "item_id": "tactical_seal",
+          "name": "전술 개조권",
+          "current": 1,
+          "required": 1,
+          "met": true,
+          "blocked_reason": ""
+        }
+      ],
+      "effect_delta": {
+        "stages": 2,
+        "stage_damage": [
+          27,
+          36
+        ],
+        "stage_delays": [
+          0,
+          12
+        ],
+        "radius": 88,
+        "arc_degrees": 110,
+        "cooldown_ticks": 48
+      },
+      "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+    },
+    "evolutions": [
+      {
+        "evolution_id": "evo_wing_cut",
+        "base_item_id": "blade_slash",
+        "name": "입체기동 연속참",
+        "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "blade_slash",
+            "name": "쌍검 전방 베기",
+            "current": 5,
+            "required": 5,
+            "met": true,
+            "blocked_reason": ""
+          },
+          {
+            "kind": "passive",
+            "item_id": "movement",
+            "name": "가벼운 발걸음",
+            "current": 0,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "missing_passive"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 1,
+            "required": 1,
+            "met": true,
+            "blocked_reason": ""
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            27,
+            36
+          ],
+          "stage_delays": [
+            0,
+            12
+          ],
+          "radius": 88,
+          "arc_degrees": 110,
+          "cooldown_ticks": 48
+        },
+        "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+      },
+      {
+        "evolution_id": "evo_crossfire",
+        "base_item_id": "wall_cannon",
+        "name": "교차 포격 지휘",
+        "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "wall_cannon",
+            "name": "성벽 고정포 지원",
+            "current": 0,
+            "required": 5,
+            "met": false,
+            "blocked_reason": "missing_weapon"
+          },
+          {
+            "kind": "passive",
+            "item_id": "fire_interval",
+            "name": "신속한 재장전",
+            "current": 0,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "missing_passive"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 1,
+            "required": 1,
+            "met": true,
+            "blocked_reason": ""
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            44.8,
+            44.8
+          ],
+          "stage_delays": [
+            36,
+            66
+          ],
+          "radius": 56,
+          "cooldown_ticks": 168,
+          "acquisition_range": 456,
+          "point_offset": 24
+        },
+        "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다."
+      }
+    ],
+    "active_offer": {
+      "offer_id": "0123456789abcdef0123456789abcdef:1:offer:2",
+      "source": "level",
+      "level_ordinal": 4,
+      "options": [
+        {
+          "option_id": "passive:armor",
+          "item_id": "armor",
+          "kind": "passive",
+          "name": "방어 자세",
+          "level": 0,
+          "next_level": 1,
+          "description": "받는 피해 2 감소",
+          "effect_delta": {
+            "stat": "armor",
+            "before": 0,
+            "after": 2
+          },
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "current": 5,
+              "required": 5,
+              "met": true,
+              "blocked_reason": ""
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "current": 0,
+              "required": 3,
+              "met": false,
+              "blocked_reason": "missing_passive"
+            },
+            {
+              "kind": "seal",
+              "item_id": "tactical_seal",
+              "name": "전술 개조권",
+              "current": 1,
+              "required": 1,
+              "met": true,
+              "blocked_reason": ""
+            }
+          ],
+          "can_select": true,
+          "blocked_reason": "",
+          "slot_warning": "이 선택으로 목표 진화의 필수 기술을 새로 배울 수 없습니다",
+          "tradeoff_text": "마지막 패시브 슬롯을 사용하므로 아직 없는 가벼운 발걸음을 얻을 수 없습니다."
+        }
+      ],
+      "selected_option_id": "passive:armor"
+    }
+  },
+  "ready": {
+    "view_revision": 3,
+    "slots": {
+      "equipment": {
+        "used": 1,
+        "max": 4
+      },
+      "passive": {
+        "used": 1,
+        "max": 4
+      }
+    },
+    "target": {
+      "evolution_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "name": "입체기동 연속참",
+      "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+      "status": "ready",
+      "can_evolve": true,
+      "requirements": [
+        {
+          "kind": "equipment",
+          "item_id": "blade_slash",
+          "name": "쌍검 전방 베기",
+          "current": 5,
+          "required": 5,
+          "met": true,
+          "blocked_reason": ""
+        },
+        {
+          "kind": "passive",
+          "item_id": "movement",
+          "name": "가벼운 발걸음",
+          "current": 3,
+          "required": 3,
+          "met": true,
+          "blocked_reason": ""
+        },
+        {
+          "kind": "seal",
+          "item_id": "tactical_seal",
+          "name": "전술 개조권",
+          "current": 1,
+          "required": 1,
+          "met": true,
+          "blocked_reason": ""
+        }
+      ],
+      "effect_delta": {
+        "stages": 2,
+        "stage_damage": [
+          27,
+          36
+        ],
+        "stage_delays": [
+          0,
+          12
+        ],
+        "radius": 88,
+        "arc_degrees": 110,
+        "cooldown_ticks": 48
+      },
+      "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+    },
+    "evolutions": [
+      {
+        "evolution_id": "evo_wing_cut",
+        "base_item_id": "blade_slash",
+        "name": "입체기동 연속참",
+        "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+        "status": "ready",
+        "can_evolve": true,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "blade_slash",
+            "name": "쌍검 전방 베기",
+            "current": 5,
+            "required": 5,
+            "met": true,
+            "blocked_reason": ""
+          },
+          {
+            "kind": "passive",
+            "item_id": "movement",
+            "name": "가벼운 발걸음",
+            "current": 3,
+            "required": 3,
+            "met": true,
+            "blocked_reason": ""
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 1,
+            "required": 1,
+            "met": true,
+            "blocked_reason": ""
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            27,
+            36
+          ],
+          "stage_delays": [
+            0,
+            12
+          ],
+          "radius": 88,
+          "arc_degrees": 110,
+          "cooldown_ticks": 48
+        },
+        "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+      },
+      {
+        "evolution_id": "evo_crossfire",
+        "base_item_id": "wall_cannon",
+        "name": "교차 포격 지휘",
+        "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "wall_cannon",
+            "name": "성벽 고정포 지원",
+            "current": 0,
+            "required": 5,
+            "met": false,
+            "blocked_reason": "missing_weapon"
+          },
+          {
+            "kind": "passive",
+            "item_id": "fire_interval",
+            "name": "신속한 재장전",
+            "current": 0,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "missing_passive"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 1,
+            "required": 1,
+            "met": true,
+            "blocked_reason": ""
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            44.8,
+            44.8
+          ],
+          "stage_delays": [
+            36,
+            66
+          ],
+          "radius": 56,
+          "cooldown_ticks": 168,
+          "acquisition_range": 456,
+          "point_offset": 24
+        },
+        "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다."
+      }
+    ],
+    "active_offer": {
+      "offer_id": "0123456789abcdef0123456789abcdef:1:offer:3",
+      "source": "level",
+      "level_ordinal": 6,
+      "options": [
+        {
+          "evolution_id": "evo_wing_cut",
+          "base_item_id": "blade_slash",
+          "name": "입체기동 연속참",
+          "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+          "status": "ready",
+          "can_evolve": true,
+          "requirements": [
+            {
+              "kind": "equipment",
+              "item_id": "blade_slash",
+              "name": "쌍검 전방 베기",
+              "current": 5,
+              "required": 5,
+              "met": true,
+              "blocked_reason": ""
+            },
+            {
+              "kind": "passive",
+              "item_id": "movement",
+              "name": "가벼운 발걸음",
+              "current": 3,
+              "required": 3,
+              "met": true,
+              "blocked_reason": ""
+            },
+            {
+              "kind": "seal",
+              "item_id": "tactical_seal",
+              "name": "전술 개조권",
+              "current": 1,
+              "required": 1,
+              "met": true,
+              "blocked_reason": ""
+            }
+          ],
+          "effect_delta": {
+            "stages": 2,
+            "stage_damage": [
+              27,
+              36
+            ],
+            "stage_delays": [
+              0,
+              12
+            ],
+            "radius": 88,
+            "arc_degrees": 110,
+            "cooldown_ticks": 48
+          },
+          "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+          "option_id": "evolution:evo_wing_cut",
+          "item_id": "blade_slash",
+          "kind": "evolution",
+          "level": 5,
+          "next_level": 5,
+          "can_select": true,
+          "blocked_reason": "",
+          "slot_warning": ""
+        }
+      ],
+      "selected_option_id": "evolution:evo_wing_cut"
+    }
+  },
+  "evolved": {
+    "view_revision": 4,
+    "slots": {
+      "equipment": {
+        "used": 1,
+        "max": 4
+      },
+      "passive": {
+        "used": 1,
+        "max": 4
+      }
+    },
+    "target": {
+      "evolution_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "name": "입체기동 연속참",
+      "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+      "status": "evolved",
+      "can_evolve": false,
+      "requirements": [
+        {
+          "kind": "equipment",
+          "item_id": "blade_slash",
+          "name": "쌍검 전방 베기",
+          "current": 5,
+          "required": 5,
+          "met": true,
+          "blocked_reason": ""
+        },
+        {
+          "kind": "passive",
+          "item_id": "movement",
+          "name": "가벼운 발걸음",
+          "current": 3,
+          "required": 3,
+          "met": true,
+          "blocked_reason": ""
+        },
+        {
+          "kind": "seal",
+          "item_id": "tactical_seal",
+          "name": "전술 개조권",
+          "current": 0,
+          "required": 1,
+          "met": false,
+          "blocked_reason": "seal_required"
+        }
+      ],
+      "effect_delta": {
+        "stages": 2,
+        "stage_damage": [
+          27,
+          36
+        ],
+        "stage_delays": [
+          0,
+          12
+        ],
+        "radius": 88,
+        "arc_degrees": 110,
+        "cooldown_ticks": 48
+      },
+      "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+    },
+    "evolutions": [
+      {
+        "evolution_id": "evo_wing_cut",
+        "base_item_id": "blade_slash",
+        "name": "입체기동 연속참",
+        "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+        "status": "evolved",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "blade_slash",
+            "name": "쌍검 전방 베기",
+            "current": 5,
+            "required": 5,
+            "met": true,
+            "blocked_reason": ""
+          },
+          {
+            "kind": "passive",
+            "item_id": "movement",
+            "name": "가벼운 발걸음",
+            "current": 3,
+            "required": 3,
+            "met": true,
+            "blocked_reason": ""
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 0,
+            "required": 1,
+            "met": false,
+            "blocked_reason": "seal_required"
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            27,
+            36
+          ],
+          "stage_delays": [
+            0,
+            12
+          ],
+          "radius": 88,
+          "arc_degrees": 110,
+          "cooldown_ticks": 48
+        },
+        "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다."
+      },
+      {
+        "evolution_id": "evo_crossfire",
+        "base_item_id": "wall_cannon",
+        "name": "교차 포격 지휘",
+        "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+        "status": "collecting",
+        "can_evolve": false,
+        "requirements": [
+          {
+            "kind": "equipment",
+            "item_id": "wall_cannon",
+            "name": "성벽 고정포 지원",
+            "current": 0,
+            "required": 5,
+            "met": false,
+            "blocked_reason": "missing_weapon"
+          },
+          {
+            "kind": "passive",
+            "item_id": "fire_interval",
+            "name": "신속한 재장전",
+            "current": 0,
+            "required": 3,
+            "met": false,
+            "blocked_reason": "missing_passive"
+          },
+          {
+            "kind": "seal",
+            "item_id": "tactical_seal",
+            "name": "전술 개조권",
+            "current": 0,
+            "required": 1,
+            "met": false,
+            "blocked_reason": "seal_required"
+          }
+        ],
+        "effect_delta": {
+          "stages": 2,
+          "stage_damage": [
+            44.8,
+            44.8
+          ],
+          "stage_delays": [
+            36,
+            66
+          ],
+          "radius": 56,
+          "cooldown_ticks": 168,
+          "acquisition_range": 456,
+          "point_offset": 24
+        },
+        "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다."
+      }
+    ],
+    "active_offer": {}
+  }
+}

@@ -1,0 +1,816 @@
+{
+  "schema_version": 1,
+  "pool_defaults": {
+    "effect_capacity": 96,
+    "trail_capacity": 32,
+    "explosion_capacity": 8
+  },
+  "crossfire_lead_ticks": 18,
+  "recipes": [
+    {
+      "recipe_id": "blade_slash",
+      "base_item_id": "blade_slash",
+      "evolution_id": "",
+      "visual_identity": "forward_crescent",
+      "phases": {
+        "cast": {
+          "recipe_id": "blade_slash.cast",
+          "role": "cast",
+          "art_id": "vfx_blade_crescent",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "sector",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_blade_crescent",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "spin_slash",
+      "base_item_id": "spin_slash",
+      "evolution_id": "",
+      "visual_identity": "opposed_double_ring",
+      "phases": {
+        "cast": {
+          "recipe_id": "spin_slash.cast",
+          "role": "cast",
+          "art_id": "vfx_spin_double_ring",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 14,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_spin_double_ring",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "odm_dash",
+      "base_item_id": "odm_dash",
+      "evolution_id": "",
+      "visual_identity": "taut_axis_gas_cross",
+      "phases": {
+        "cast": {
+          "recipe_id": "odm_dash.cast",
+          "role": "cast",
+          "art_id": "vfx_dash_compressed_gas",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_dash_compressed_gas",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_dash_cross_tip",
+              "component": "tip",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "reentry_combo",
+      "base_item_id": "reentry_combo",
+      "evolution_id": "",
+      "visual_identity": "simultaneous_three_angles",
+      "phases": {
+        "cast": {
+          "recipe_id": "reentry_combo.cast",
+          "role": "cast",
+          "art_id": "vfx_reentry_triple",
+          "anchor_policy": "target_ground",
+          "render_pass": "world",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "targeted",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_reentry_triple",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "wall_cannon",
+      "base_item_id": "wall_cannon",
+      "evolution_id": "",
+      "visual_identity": "shell_flash_dust_stone",
+      "phases": {
+        "cast": {
+          "recipe_id": "wall_cannon.cast",
+          "role": "projectile",
+          "art_id": "vfx_cannon_shell",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_cannon_shell",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "projectile": {
+          "recipe_id": "wall_cannon.projectile",
+          "role": "projectile",
+          "art_id": "vfx_cannon_shell",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_cannon_shell",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "impact": {
+          "recipe_id": "wall_cannon.impact",
+          "role": "impact",
+          "art_id": "vfx_cannon_contact_blast",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 18,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_cannon_contact_blast",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            },
+            {
+              "art_id": "vfx_cannon_dust_ring",
+              "component": "dust",
+              "reduce_mode": "omit",
+              "render_pass": "ground"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "ally_cover",
+      "base_item_id": "ally_cover",
+      "evolution_id": "",
+      "visual_identity": "slender_support_arrival",
+      "phases": {
+        "cast": {
+          "recipe_id": "ally_cover.cast",
+          "role": "projectile",
+          "art_id": "vfx_ally_gas_swoop",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_gas_swoop",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "projectile": {
+          "recipe_id": "ally_cover.projectile",
+          "role": "projectile",
+          "art_id": "vfx_ally_gas_swoop",
+          "anchor_policy": "projectile",
+          "render_pass": "world",
+          "duration_ticks": 120,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "projectile",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_gas_swoop",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wire_taut",
+              "component": "wire",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ],
+          "animation_duration_ticks": 120,
+          "animation_clock": "active_tick",
+          "animation_loop": true
+        },
+        "impact": {
+          "recipe_id": "ally_cover.impact",
+          "role": "impact",
+          "art_id": "vfx_ally_arrival_cut",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 10,
+          "contact_tick_policy": "projectile_impact",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_arrival_cut",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "evolution_id": "evo_wing_cut",
+      "visual_identity": "two_curvatures_twelve_ticks",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_wing_cut.cast",
+          "role": "cast",
+          "art_id": "vfx_wing_first_arc",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 12,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "sector",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_wing_first_arc",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            },
+            {
+              "art_id": "vfx_wing_second_arc",
+              "component": "stage_second",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_crossfire",
+      "base_item_id": "wall_cannon",
+      "evolution_id": "evo_crossfire",
+      "visual_identity": "two_locked_aim_falling_shells",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_crossfire.cast",
+          "role": "impact",
+          "art_id": "vfx_crossfire_contact_blast",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 18,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_crossfire_contact_blast",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        },
+        "aim": {
+          "recipe_id": "evo_crossfire.aim",
+          "role": "aim",
+          "art_id": "vfx_crossfire_ally_aim",
+          "anchor_policy": "world",
+          "render_pass": "ground",
+          "duration_ticks": 66,
+          "contact_tick_policy": "none",
+          "shape_binding": "circle",
+          "priority": 95,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_crossfire_ally_aim",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "ground"
+            }
+          ]
+        },
+        "projectile": {
+          "recipe_id": "evo_crossfire.projectile",
+          "role": "projectile",
+          "art_id": "vfx_crossfire_falling_shell",
+          "anchor_policy": "world",
+          "render_pass": "world",
+          "duration_ticks": 18,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 95,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_crossfire_falling_shell",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "world"
+            }
+          ]
+        },
+        "impact": {
+          "recipe_id": "evo_crossfire.impact",
+          "role": "impact",
+          "art_id": "vfx_crossfire_contact_blast",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 18,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_crossfire_contact_blast",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "art_requirements": [
+    {
+      "art_id": "vfx_blade_crescent",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Silver-white 150-degree crescent; origin center, tip within unit radius; clear forward sector and blue-gray edge."
+    },
+    {
+      "art_id": "vfx_spin_double_ring",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Two opposed closing circular blade arcs, transparent center; genuinely different silhouette from front crescent."
+    },
+    {
+      "art_id": "vfx_dash_compressed_gas",
+      "cell_px": [
+        128,
+        32
+      ],
+      "pivot_px": [
+        0,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Compressed gas tail following +X attack line, exact length/width from geometry."
+    },
+    {
+      "art_id": "vfx_wire_taut",
+      "cell_px": [
+        128,
+        32
+      ],
+      "pivot_px": [
+        0,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        15,
+        128,
+        2
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": ""
+    },
+    {
+      "art_id": "vfx_dash_cross_tip",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Crossed blade tip at exact line endpoint; no actor movement."
+    },
+    {
+      "art_id": "vfx_reentry_triple",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Three distinct angled blade contacts in same frame. No invented stagger for simultaneous core hit."
+    },
+    {
+      "art_id": "vfx_cannon_shell",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Bright dense cannonball head and low smoke tail; actual core projectile position only."
+    },
+    {
+      "art_id": "vfx_cannon_contact_blast",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Brief central flash transitions to stone shards within actual splash disk."
+    },
+    {
+      "art_id": "vfx_cannon_dust_ring",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Transparent-center dust ring constrained to actual splash radius."
+    },
+    {
+      "art_id": "vfx_ally_gas_swoop",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Slender gas-backed support silhouette, visually distinct from cannonball. Follow actual projectile, curve is inside sprite only."
+    },
+    {
+      "art_id": "vfx_ally_arrival_cut",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Arrival blade contact, never cannon explosion; zero splash uses small contact footprint."
+    },
+    {
+      "art_id": "vfx_wing_first_arc",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": ""
+    },
+    {
+      "art_id": "vfx_wing_second_arc",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Second different-curvature 110-degree arc; stage_index=1 replaces first, current player origin and locked direction."
+    },
+    {
+      "art_id": "vfx_crossfire_ally_aim",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Pale ally segmented ring with paired inward chevrons. No red fill or enemy-danger triangle vocabulary. Locked core disk radius."
+    },
+    {
+      "art_id": "vfx_crossfire_falling_shell",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Distinct descending cannonball, lead=min(18, execute-start) ticks; stops at execute. Upper-stage visibility is visual only."
+    },
+    {
+      "art_id": "vfx_crossfire_contact_blast",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Paired-command blast silhouette distinct from base cannon; actual locked disk radius, flash then dust/shards."
+    },
+    {
+      "art_id": "vfx_hit_spark",
+      "cell_px": [
+        32,
+        32
+      ],
+      "pivot_px": [
+        16,
+        16
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster, vfx_approved=true, exact sha256",
+      "notes": "Small target-only hit spark; damage events never synthesize casts or cannon blasts."
+    }
+  ]
+}

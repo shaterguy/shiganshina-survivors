@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "asset_id": "armored_titan",
+  "asset_sha256": "e3b3fe2008cb4db79e8df72bf670dc6c87e37c81c055c85a1546fc47dc7ea427",
+  "runtime_integrated": true,
+  "release_approval": false,
+  "run_charge_art_complete": false,
+  "run_charge_ai_complete": false,
+  "actual_candidate_view": {
+    "status": "reviewed_for_development_registration",
+    "asset_sha256": "e3b3fe2008cb4db79e8df72bf670dc6c87e37c81c055c85a1546fc47dc7ea427",
+    "review_date_utc": "2026-10-10",
+    "reviewer": "integration parent actual-view review",
+    "environment": "own-cloud candidate viewer using the real WorldView frame selector",
+    "evidence": [
+      {
+        "path": "recovery/armored-viewer-armorView1615shot-1.jpg",
+        "bytes": 51150,
+        "sha256": "65fd928abf71d299d23e491c1feb6336515ea4bab68606e5be3b3189a8680a82"
+      },
+      {
+        "path": "recovery/armored-viewer-armorTravelA-1.jpg",
+        "bytes": 52035,
+        "sha256": "2aa99390ac0601e26a501cb921243e0c055be197537e95f192ea57b9d3788f26"
+      },
+      {
+        "path": "recovery/armored-viewer-armorTravelIdle-1.jpg",
+        "bytes": 50463,
+        "sha256": "d1f392e5362afdfbc0af73b1e6fe5580dd8336c5be8111feaf07265c0513c78d"
+      },
+      {
+        "path": "recovery/armored-viewer-armorTravelIdle-2.jpg",
+        "bytes": 61298,
+        "sha256": "2e2f850fac96ab3786a772850ca5c3478210a0dae9a5dcc2d86f4186f849d87e"
+      },
+      {
+        "path": "recovery/armored-viewer-armorAttackHit-1.jpg",
+        "bytes": 57366,
+        "sha256": "627e5df6948d56ce41f0cea4334eff8fb8c3fe9eae30b3456292c3934c7acff1"
+      },
+      {
+        "path": "recovery/armored-viewer-armorAttackHit-2.jpg",
+        "bytes": 55444,
+        "sha256": "a44e0165f2581bcdf200cfd25705b2962ff28a1e9dc7f46a9dd5e68b48c77681"
+      }
+    ],
+    "observed": [
+      "Both facing directions",
+      "Fixed-ground travel samples",
+      "Idle, attack and hit transitions"
+    ],
+    "decision": "Candidate-level development registration approved; final visual polish not approved.",
+    "remaining_visual_issue": "Broad front-three-quarter idle and attack poses switch to a thinner profile walk projection; the projection discontinuity remains.",
+    "display_geometry": {
+      "actual_window_px": [
+        800,
+        450
+      ],
+      "fitted_logical_view_px": [
+        800,
+        540
+      ],
+      "viewer_internal_scale": 1.5,
+      "observable_screen_scale": 1.25
+    },
+    "not_established": [
+      "Android or device QA",
+      "Continuous-video gait fluidity",
+      "Final polish or release approval"
+    ]
+  },
+  "automated_scope": "Pixel/hash identity, cells, palette, animation meaning and guarded single-entry registration. Separate actual-view evidence supports candidate-level development registration only.",
+  "remaining": [
+    "Front-three-quarter idle/attack to thinner profile walk projection discontinuity.",
+    "Separate runtime gameplay and Android QA.",
+    "Continuous-video gait fluidity remains unverified.",
+    "Missing shoulder-charge/run art and AI remain separate unfinished work."
+  ],
+  "final_visual_polish_approval": false,
+  "runtime_registration": {
+    "date_utc": "2026-10-10",
+    "scope": "development candidate only",
+    "manifest_pointer": "/assets/armored_titan",
+    "before_manifest_sha256": "cf3183c45f389ba00387c78ca0084924947a358d5e8ff1b5f1993e48318dde24",
+    "after_manifest_sha256": "ed61d573f0dabb32688818f36d3107f594ba17af5b08899328d00205dd9b7581",
+    "all_other_manifest_bytes_preserved": true,
+    "protected_manifest_semantic_sha256": "7d94da39bb6e96bcf895f3a65b79a6cd16d1bfc3f8ba7c4eef9fbe87c77566b9",
+    "five_canon_blocks_preserved": true,
+    "final_export_allowed": false
+  }
+}

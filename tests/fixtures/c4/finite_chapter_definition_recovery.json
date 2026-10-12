@@ -1,0 +1,323 @@
+{
+  "allowed_equipment_ids": [
+    "blade_slash",
+    "spin_slash",
+    "odm_dash",
+    "reentry_combo",
+    "wall_cannon",
+    "ally_cover"
+  ],
+  "boss_schedule": [
+    {
+      "boss_id": "ch01_b05",
+      "enemy_id": "boss_charger",
+      "tick": 18000.0
+    },
+    {
+      "boss_id": "ch01_b10",
+      "enemy_id": "boss_sweeper",
+      "tick": 36000.0
+    },
+    {
+      "boss_id": "ch01_b15",
+      "enemy_id": "boss_leaper",
+      "tick": 54000.0
+    },
+    {
+      "boss_id": "ch01_b20",
+      "enemy_id": "boss_grabber",
+      "tick": 72000.0
+    },
+    {
+      "boss_id": "ch01_b25",
+      "enemy_id": "boss_abnormal",
+      "tick": 90000.0
+    }
+  ],
+  "chapter_id": "chapter_01_shiganshina",
+  "character_availability": [
+    {
+      "character_id": "garrison_01",
+      "unlock_condition": "default"
+    }
+  ],
+  "clear_rule": "evacuate_then_exit",
+  "content_definition_hashes": {
+    "chapters/chapter_01/city_templates.json": "685d7ff707371d08b5e455842e0641bed18c36a959ddf592506ad2fa4df7960c",
+    "chapters/chapter_01/manifest.json": "49a9cefe73d966a7c7eb66e05bf21009116a5648ef0c15796960a314e3d24e23",
+    "chapters/chapter_01/map.json": "c889642c924f9c453bf5716f32b967862b92f9348aa460e4b82209b19c5fb09b",
+    "data/doctrines.json": "0ce1cf19c7a3e7b59b54af4d3b8fc98ccca3fbdd6678126ec336f6ea0f0922c3",
+    "data/enemies.json": "b02e8950c8ed5d619f6cced242f65d571f532d175ea26dc53356e3630634502b",
+    "data/enemy_roles_ch01_3.json": "fe8e34f7d46e5423fe5dd9c649941f81bdde6a803e80439ea51f536fa561aad4",
+    "data/equipment.json": "e0a37c2ba025e892f7cd08107b57fafd8240cb5cd5d0d711e2900540a8e88c58",
+    "data/evolutions.json": "5dfb8269e15c5b1bd5de490d1e42098b86b56a73d5c5e3b8f78d54ec32a5fd93",
+    "data/passives.json": "a848a56ca13613dc4de004dc462b809f099c2ed5cc367b47a581c3325b95f309",
+    "data/supply_shop.json": "f9c9095fa86373716640efba6050fe82c2049874a8c861286b14e24c6664b7eb",
+    "data/world_props.json": "f6b05bdba14a30f994a7d0ba0143046add9a3b7ed4aca3336538efb8abaad8f0"
+  },
+  "content_fingerprint": "deab53af9fff4da9ab31ebd2c0611686dc9e449370dc8a17f93b94ba8782c294",
+  "content_identity_kind": "production_definitions",
+  "content_revision": "ch01.3-rebuild.6-harmless-recovery",
+  "display_name": "시간시나구 탈출",
+  "doctrine_ids": [
+    "doctrine_standard",
+    "doctrine_mobile",
+    "doctrine_artillery"
+  ],
+  "enemy_catalog": {
+    "armored_titan": {
+      "action_profile": {
+        "active_ticks": 60.0,
+        "brake_ticks": 18.0,
+        "cooldown_ticks": 30.0,
+        "kind": "charge",
+        "length": 310.0,
+        "max_structure_attacks": 1.0,
+        "preparation_forward": 81.0,
+        "recovery_ticks": 90.0,
+        "rush_speed": 360.0,
+        "rush_start_speed": 180.0,
+        "shoulder_forward": 56.0,
+        "shoulder_radius": 16.0,
+        "structure_admission_interval_ticks": 180.0,
+        "structure_damage": 3.0,
+        "structure_reach": 33.0,
+        "trigger_range": 420.0,
+        "warning_ticks": 72.0,
+        "width": 64.0
+      },
+      "art_id": "armored_titan",
+      "behavior": "final_armored",
+      "damage": 30.0,
+      "hp": 1000000.0,
+      "name": "갑옷 거인",
+      "radius": 32.0,
+      "speed": 150.0,
+      "xp": 0.0
+    },
+    "boss_abnormal": {
+      "art_id": "boss_abnormal",
+      "behavior": "combo",
+      "damage": 35.0,
+      "hp": 4200.0,
+      "name": "퇴각로의 기행종",
+      "radius": 32.0,
+      "speed": 28.0,
+      "xp": 180.0
+    },
+    "boss_charger": {
+      "art_id": "boss_charger",
+      "behavior": "charge",
+      "damage": 24.0,
+      "hp": 1000.0,
+      "name": "돌진 기행종",
+      "radius": 28.0,
+      "speed": 22.0,
+      "xp": 80.0
+    },
+    "boss_grabber": {
+      "art_id": "boss_grabber",
+      "behavior": "grab",
+      "damage": 33.0,
+      "hp": 3400.0,
+      "name": "대피로의 강적",
+      "radius": 30.0,
+      "speed": 24.0,
+      "xp": 150.0
+    },
+    "boss_leaper": {
+      "art_id": "boss_leaper",
+      "behavior": "leap",
+      "damage": 30.0,
+      "hp": 2600.0,
+      "name": "도약 기행종",
+      "radius": 28.0,
+      "speed": 24.0,
+      "xp": 120.0
+    },
+    "boss_sweeper": {
+      "art_id": "boss_sweeper",
+      "behavior": "sweep",
+      "damage": 27.0,
+      "hp": 1800.0,
+      "name": "광장의 강적",
+      "radius": 30.0,
+      "speed": 20.0,
+      "xp": 100.0
+    },
+    "brute": {
+      "art_id": "titan_brute",
+      "behavior": "brute",
+      "damage": 17.0,
+      "hp": 100.0,
+      "name": "대형 거인",
+      "radius": 24.0,
+      "speed": 17.0,
+      "xp": 10.0
+    },
+    "grabber": {
+      "art_id": "titan_grabber",
+      "behavior": "grab",
+      "damage": 12.0,
+      "hp": 58.0,
+      "name": "붙잡는 거인",
+      "radius": 20.0,
+      "speed": 30.0,
+      "xp": 8.0
+    },
+    "runner": {
+      "art_id": "titan_runner",
+      "behavior": "runner",
+      "damage": 7.0,
+      "hp": 24.0,
+      "name": "빠른 거인",
+      "radius": 16.0,
+      "speed": 43.0,
+      "xp": 5.0
+    },
+    "sweeper": {
+      "art_id": "titan_sweeper",
+      "behavior": "sweep",
+      "damage": 13.0,
+      "hp": 65.0,
+      "name": "팔을 휘두르는 거인",
+      "radius": 20.0,
+      "speed": 24.0,
+      "xp": 8.0
+    },
+    "walker": {
+      "art_id": "titan_basic",
+      "behavior": "chase",
+      "damage": 9.0,
+      "hp": 32.0,
+      "name": "거인",
+      "radius": 18.0,
+      "speed": 23.0,
+      "xp": 4.0
+    }
+  },
+  "enemy_ids": [
+    "walker",
+    "runner",
+    "brute",
+    "sweeper",
+    "grabber"
+  ],
+  "escape_zone": [
+    -56.0,
+    320.0,
+    112.0,
+    80.0
+  ],
+  "evacuation_ticks": 4500.0,
+  "evolution_ids": [
+    "evo_wing_cut",
+    "evo_crossfire"
+  ],
+  "map_id": "shiganshina_streets",
+  "next_unlocks": [],
+  "spawn_position": [
+    0.0,
+    0.0
+  ],
+  "story_events": [
+    {
+      "text": "845년, 시간시나구. 성벽이 무너졌다. 주민의 대피로를 지켜라.",
+      "tick": 0.0
+    },
+    {
+      "text": "갑옷 거인이 접근한다. 마지막 주민이 배에 오를 때까지 버텨라.",
+      "tick": 108000.0
+    }
+  ],
+  "story_year": 845.0,
+  "wave_schedule": [
+    {
+      "count": 1.0,
+      "interval": 120.0,
+      "tick": 0.0
+    },
+    {
+      "count": 2.0,
+      "interval": 90.0,
+      "tick": 7200.0
+    },
+    {
+      "count": 3.0,
+      "interval": 75.0,
+      "tick": 18000.0
+    },
+    {
+      "count": 4.0,
+      "interval": 60.0,
+      "tick": 36000.0
+    },
+    {
+      "count": 5.0,
+      "interval": 48.0,
+      "tick": 54000.0
+    },
+    {
+      "count": 6.0,
+      "interval": 36.0,
+      "tick": 72000.0
+    },
+    {
+      "count": 7.0,
+      "interval": 30.0,
+      "tick": 90000.0
+    }
+  ],
+  "world_geometry": {
+    "bounds": [
+      -640.0,
+      -300.0,
+      1280.0,
+      716.0
+    ],
+    "obstacles": [
+      [
+        -470.0,
+        -228.0,
+        100.0,
+        48.0
+      ],
+      [
+        -470.0,
+        22.0,
+        100.0,
+        48.0
+      ],
+      [
+        -470.0,
+        262.0,
+        100.0,
+        48.0
+      ],
+      [
+        370.0,
+        -228.0,
+        100.0,
+        48.0
+      ],
+      [
+        370.0,
+        22.0,
+        100.0,
+        48.0
+      ],
+      [
+        370.0,
+        262.0,
+        100.0,
+        48.0
+      ],
+      [
+        -270.0,
+        -270.0,
+        100.0,
+        40.0
+      ]
+    ]
+  }
+}

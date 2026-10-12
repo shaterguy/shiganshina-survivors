@@ -1,0 +1,74 @@
+extends RefCounted
+const Chapters = preload("res://game/director/chapter_catalog.gd")
+const ID := "chapter_01_shiganshina"
+
+func run(t) -> void:
+	var catalog = Chapters.new()
+	var loaded: Dictionary = catalog.load_chapter(ID)
+	t.check(loaded.get("ok",false),"current chapter loads")
+	t.check(loaded.get("chapter",{}).get("content_revision") == "ch01.3-rebuild.7-grabber-hand","chapter uses NEW content revision")
+	t.check(loaded.get("chapter",{}).get("content_identity_kind") == "production_definitions","chapter identifies actual definition fingerprint basis")
+	t.check(loaded.get("chapter",{}).get("content_fingerprint","").length() == 64,"chapter carries definition fingerprint")
+	t.check(catalog.has_method("definition_paths") and catalog.has_method("from_definitions"),"chapter has bounded injectable definition boundary")
+	if not catalog.has_method("from_definitions"): return
+	var definitions := {}
+	for path in catalog.definition_paths():
+		definitions[path] = JSON.parse_string(FileAccess.get_file_as_string("res://"+path))
+	var original := definitions.duplicate(true)
+	var rebuilt: Dictionary = catalog.from_definitions(ID,definitions)
+	t.check(rebuilt.get("ok",false) and rebuilt.chapter.content_fingerprint == loaded.chapter.content_fingerprint,"actual load and injected actual definitions agree")
+	t.check(definitions == original,"chapter assembly does not mutate definitions")
+	var reordered := {}
+	var keys: Array = definitions.keys(); keys.reverse()
+	for key in keys: reordered[key] = definitions[key].duplicate(true)
+	t.check(catalog.from_definitions(ID,reordered).chapter.content_fingerprint == loaded.chapter.content_fingerprint,"definition dictionary insertion order does not affect identity")
+	t.check(catalog.from_definitions(ID,_reverse_keys(definitions)).chapter.content_fingerprint == loaded.chapter.content_fingerprint,"nested key insertion order does not affect identity")
+	var arrays_changed := definitions.duplicate(true)
+	arrays_changed["chapters/chapter_01/manifest.json"].allowed_equipment_ids.reverse()
+	t.check(catalog.from_definitions(ID,arrays_changed).chapter.content_fingerprint != loaded.chapter.content_fingerprint,"array order remains content-significant")
+	t.check(catalog.has_method("definition_digest"),"canonical digest has independently testable boundary")
+	if catalog.has_method("definition_digest"):
+		# Independently calculated from the literal UTF-8 text (Python hashlib),
+		# not from the implementation's load/from_definitions agreement.
+		var small := {"title":"x","ordered":[1,2],"nested":{"z":0.25,"a":2},"count":1}
+		var expected := "5345b67399180a9baa0d5c21bde398ca90ae2f4376971a513a9ced3d984187d7"
+		t.check(catalog.definition_digest(small) == expected,"canonical digest matches independent literal SHA-256")
+		var floats := {"count":1.0,"nested":{"a":2.0,"z":0.25},"ordered":[1.0,2.0],"title":"x"}
+		t.check(catalog.definition_digest(floats) == expected,"integral float and integer injection share canonical identity")
+		t.check(catalog.definition_digest(JSON.parse_string('{"count":1,"nested":{"a":2,"z":0.25},"ordered":[1,2],"title":"x"}')) == expected,"JSON-loaded numeric values match independent identity")
+		t.check(catalog.definition_digest({"bad":NAN}).is_empty(),"invalid values have no digest")
+	var changed := definitions.duplicate(true)
+	changed["data/enemies.json"].walker.hp += 1
+	t.check(catalog.from_definitions(ID,changed).chapter.content_fingerprint != loaded.chapter.content_fingerprint,"combat definition change changes fingerprint")
+	changed = definitions.duplicate(true)
+	changed["chapters/chapter_01/city_templates.json"].templates[0].template_id += "_changed"
+	t.check(catalog.from_definitions(ID,changed).chapter.content_fingerprint != loaded.chapter.content_fingerprint,"city definition change changes fingerprint")
+	rebuilt.chapter.enemy_catalog.walker.hp = -1
+	t.check(definitions == original,"returned enemy definitions are private copies")
+	for invalid in [null,[],"845",{}]:
+		changed = definitions.duplicate(true)
+		changed["chapters/chapter_01/manifest.json"].story_year = invalid
+		t.check(not catalog.from_definitions(ID,changed).get("ok",false),"hostile story year fails closed")
+	changed = definitions.duplicate(true); changed.erase("data/equipment.json")
+	t.check(not catalog.from_definitions(ID,changed).get("ok",false),"missing definition fails closed")
+	changed = definitions.duplicate(true); changed["data/enemies.json"].walker.hp = NAN
+	t.check(not catalog.from_definitions(ID,changed).get("ok",false),"nonfinite definition fails closed")
+	changed = definitions.duplicate(true); changed["data/enemies.json"].walker.extra = RefCounted.new()
+	t.check(not catalog.from_definitions(ID,changed).get("ok",false),"object in definitions fails closed")
+	changed = definitions.duplicate(true); changed["chapters/chapter_01/manifest.json"].allowed_equipment_ids.append("future_thunder_spear")
+	t.check(not catalog.from_definitions(ID,changed).get("ok",false),"unknown out-of-era equipment is rejected")
+	changed = definitions.duplicate(true); changed["chapters/chapter_01/manifest.json"].boss_schedule[1].boss_id = "ch01_b05"
+	t.check(not catalog.from_definitions(ID,changed).get("ok",false),"duplicate boss identity is rejected")
+	t.check(catalog.load_chapter("future_chapter").get("error_code") == "unknown_chapter","unimplemented chapter is not silently selected")
+
+func _reverse_keys(value: Variant) -> Variant:
+	if value is Dictionary:
+		var result := {}
+		var keys: Array = value.keys(); keys.reverse()
+		for key in keys: result[key] = _reverse_keys(value[key])
+		return result
+	if value is Array:
+		var result := []
+		for item in value: result.append(_reverse_keys(item))
+		return result
+	return value

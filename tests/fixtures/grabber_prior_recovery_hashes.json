@@ -1,0 +1,14 @@
+{
+  "tests/fixtures/c4/finite_chapter_definition_recovery.json": "8dd75d58a60af7571f2efa908131bda42ca0418790c84063166f99edab9943a7",
+  "tests/fixtures/evolution_supply_recovery/actual_evolution_chosen.json": "245ae98d2c3d8fcb6cfcafa034e8e8cd54fd5031832a1c58d9bb5710dd9c0622",
+  "tests/fixtures/evolution_supply_recovery/actual_evolution_events.json": "4c9510c5ae3cac34c33e253187fc47e2a1440f33c5410e43235c997739315ed5",
+  "tests/fixtures/evolution_supply_recovery/actual_evolution_ready.json": "2992feb45f6d3759bbbc4b9ed894c9a5a4481aaa5cb1b79538ec76749c302e7d",
+  "tests/fixtures/evolution_supply_recovery/attack_events.json": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a",
+  "tests/fixtures/evolution_supply_recovery/content_identity_basis.json": "e5ce2a07bd8f13325aee33f5f3ac23b26165e9f4dd0dc56ca694de571c9e0f2c",
+  "tests/fixtures/evolution_supply_recovery/game_save_v2.json": "2d77c6f34b49de994cfc296b7a6baad94b9111c89fa08ae0d37314eb0537d72e",
+  "tests/fixtures/evolution_supply_recovery/progression_source_offers.json": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a",
+  "tests/fixtures/evolution_supply_recovery/progression_views.json": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309",
+  "tests/fixtures/evolution_supply_recovery/provenance.json": "eef223fcf58d9f93afa8b9aba8d2c2f8ac5c6b8cf66b0bdf2210cf977b98a2f8",
+  "tests/fixtures/evolution_supply_recovery/run_v2.json": "b1cc1a0848d07ba16747ad18d0ab8d4628bf95b92e5b6f8ebd1037b60a26b57b",
+  "tests/fixtures/evolution_supply_recovery/supply_views.json": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+}

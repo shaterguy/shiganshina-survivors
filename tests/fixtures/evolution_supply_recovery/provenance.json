@@ -1,0 +1,31 @@
+{
+  "arrangement": "Evolution prerequisite weapon/passive levels are test-only; real authored boss kill, reward, choice and restore paths execute.",
+  "claim": "New initial/evolution runs from actual .6 Core and initial authorities committed by real Store. Not recovered originals. Copied rendering DTOs remain illustrative, not real Core action traces.",
+  "content_revision": "ch01.3-rebuild.6-harmless-recovery",
+  "copied_unchanged_dtos": [
+    "attack_events.json",
+    "progression_source_offers.json",
+    "progression_views.json",
+    "supply_views.json"
+  ],
+  "core_sha256": "73671fa8c6e23c52695e1f483412aea4099026f8e5590e565352dacac974e348",
+  "engine": "4.6.3-stable (official)",
+  "files": {
+    "actual_evolution_chosen.json": "245ae98d2c3d8fcb6cfcafa034e8e8cd54fd5031832a1c58d9bb5710dd9c0622",
+    "actual_evolution_events.json": "4c9510c5ae3cac34c33e253187fc47e2a1440f33c5410e43235c997739315ed5",
+    "actual_evolution_ready.json": "2992feb45f6d3759bbbc4b9ed894c9a5a4481aaa5cb1b79538ec76749c302e7d",
+    "attack_events.json": "1949b5d31965ac610ab8960c3fd886414e1bb00c159d7d7834c1c097ac65a08a",
+    "content_identity_basis.json": "e5ce2a07bd8f13325aee33f5f3ac23b26165e9f4dd0dc56ca694de571c9e0f2c",
+    "game_save_v2.json": "2d77c6f34b49de994cfc296b7a6baad94b9111c89fa08ae0d37314eb0537d72e",
+    "progression_source_offers.json": "02980e614f4df27a7c5be605003fb365e317b8aee24ef1256b77e9d32aac473a",
+    "progression_views.json": "e188243d35260399db8722f961d955b306f3d2783324e42ab479e9400e4fa309",
+    "run_v2.json": "b1cc1a0848d07ba16747ad18d0ab8d4628bf95b92e5b6f8ebd1037b60a26b57b",
+    "supply_views.json": "ecd6d12326cf6c37e4ba76fde7f7bfaf4282146a654d83f4e75502806802527b"
+  },
+  "fingerprint_basis_file": "content_identity_basis.json",
+  "fingerprint_scope": "Canonical digest of actual exported catalog bound by existing finite_test Provider; no legacy run relabeling.",
+  "fixture_content_fingerprint": "8611490ac2135fb33d4cf6c9ff59ab4e4ef2a3a9e56e697ecd4f03c122d240cf",
+  "origin_class": "NEW",
+  "production_fingerprint": "deab53af9fff4da9ab31ebd2c0611686dc9e449370dc8a17f93b94ba8782c294",
+  "schema_version": 1
+}

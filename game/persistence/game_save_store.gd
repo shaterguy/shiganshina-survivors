@@ -1,0 +1,583 @@
+class_name GameSaveStore
+extends RefCounted
+const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const Service = preload("res://game/economy/supply_service.gd")
+const Legacy = preload("res://game/persistence/save_store.gd")
+const Migrations = preload("res://game/persistence/save_migrations.gd")
+const MAX_BYTES := 16*1024*1024
+# Initial guards finish with both authority names, after every legacy read hook.
+const INITIAL_SOURCE_NAMES := ["profile.json","profile.json.bak","checkpoint.json","checkpoint.json.bak","game_save.json","game_save.json.bak"]
+static var _commit_mutex: Mutex = Mutex.new()
+var _directory: String
+var _contracts
+var _fault_injector: Callable
+var _validation_scope = null
+func _init(directory: String, checkpoint_validator: Callable, fault_injector: Callable = Callable(), existing_contracts = null) -> void:
+	_directory = directory
+	_contracts = Contracts.new(checkpoint_validator) if existing_contracts == null else existing_contracts
+	_fault_injector = fault_injector
+func read_game_scoped(scope) -> Dictionary:
+	if scope == null or get_script() != load("res://game/persistence/game_save_store.gd"): return read_game()
+	return _scoped_view(scope).read_game()
+func read_game() -> Dictionary:
+	# Existing-authority observation only. Never initialize or migrate a career.
+	_commit_mutex.lock()
+	var result := _load_authority()
+	_commit_mutex.unlock()
+	return result
+func _scoped_view(scope):
+	var view = get_script().new(_directory,_contracts._validator,_fault_injector,_contracts)
+	view._validation_scope = scope
+	return view
+func _scope_context(slot: String, path: String = "", sha: String = "") -> Dictionary:
+	return {"slot":slot,"directory":_directory,"path":path,"sha256":sha}
+func load_game() -> Dictionary:
+	_commit_mutex.lock()
+	var result := _load_authority()
+	if not result.ok and result.error_code == "not_found": result = _migrate_first_load()
+	_commit_mutex.unlock()
+	return result
+func initialize_game(observed_files: Variant, career_id: Variant) -> Dictionary:
+	# Only this entry point binds initial creation to a previously observed source.
+	# The old public load_game contract remains available to its existing callers.
+	if not observed_files is Dictionary or not _contracts._career_valid(career_id): return _fail("invalid_game_save")
+	for name in observed_files:
+		if not name is String or not name in INITIAL_SOURCE_NAMES or name.begins_with("game_save."): return _fail("invalid_game_save")
+		var info: Variant = observed_files[name]
+		if not info is Dictionary or not info.get("readable") is bool or info.readable != true or not _contracts.hash_valid(info.get("sha256")): return _fail("invalid_game_save")
+	_commit_mutex.lock()
+	var result := _initialize_locked(observed_files.duplicate(true),career_id)
+	_commit_mutex.unlock()
+	return result
+func _initialize_locked(observed_files: Dictionary, career_id: String) -> Dictionary:
+	var current := _load_authority()
+	if current.ok:
+		# Reconstruct the entire deterministic initial candidate, never accept a
+		# career ID alone as proof that an uncertain request was committed.
+		var prepared := _prepare_initial_migration(observed_files,career_id,true)
+		if not prepared.ok: return prepared
+		var canonical: Dictionary = _contracts.normalize(prepared.game_save)
+		canonical.store_revision = 1
+		var expected_hash := JSON.stringify(canonical,"",true,true).sha256_text()
+		if current.get("recovered",false) or current.get("source_sha256","") != expected_hash or not _same(current.game_save,canonical): return _fail("stale_revision")
+		current.already_applied = true
+		return current
+	if current.error_code != "not_found": return current
+	return _migrate_first_load(observed_files,career_id)
+func _verify_initial_sources(observed_files: Dictionary, ignore_confirmed_primary: bool = false) -> Dictionary:
+	for name in INITIAL_SOURCE_NAMES:
+		if ignore_confirmed_primary and name == "game_save.json": continue
+		var path := _directory.path_join(name)
+		if FileAccess.file_exists(path) != observed_files.has(name): return _fail("stale_revision")
+		if not observed_files.has(name): continue
+		var fresh := _read_json(path)
+		if fresh.get("error_code") == "read_failed": return fresh
+		# Legacy checkpoint bytes can be opaque JSON-invalid evidence. The raw
+		# bounded reader's hash, not today's checkpoint parser, binds that source.
+		if fresh.get("source_sha256","") != observed_files[name].sha256: return _fail("stale_revision")
+	return {"ok":true}
+func _prepare_initial_migration(observed_files: Dictionary, career_id: String, ignore_confirmed_primary: bool = false) -> Dictionary:
+	var checked := _verify_initial_sources(observed_files,ignore_confirmed_primary)
+	if not checked.ok: return checked
+	if not observed_files.is_empty() and not (observed_files.has("profile.json") or observed_files.has("profile.json.bak")): return _fail("invalid_profile")
+	var legacy := _load_legacy_profile()
+	if not legacy.ok: return legacy
+	checked = _verify_initial_sources(observed_files,ignore_confirmed_primary)
+	if not checked.ok: return checked
+	return Migrations.new().from_v1(legacy.profile,observed_files.has("checkpoint.json") or observed_files.has("checkpoint.json.bak"),career_id)
+func _migrate_first_load(initial_guard: Variant = null, initial_career_id: String = "") -> Dictionary:
+	# Called only when both v2 authority and backup are absent. Failed temps are not authority.
+	var had_profile := FileAccess.file_exists(_directory.path_join("profile.json")) or FileAccess.file_exists(_directory.path_join("profile.json.bak"))
+	var had_checkpoint := FileAccess.file_exists(_directory.path_join("checkpoint.json")) or FileAccess.file_exists(_directory.path_join("checkpoint.json.bak"))
+	var career_id := initial_career_id if initial_guard is Dictionary else Crypto.new().generate_random_bytes(16).hex_encode()
+	var migration: Dictionary
+	if initial_guard is Dictionary:
+		migration = _prepare_initial_migration(initial_guard,career_id)
+	else:
+		var legacy: Dictionary = _load_legacy_profile()
+		if not legacy.ok: return legacy
+		migration = Migrations.new().from_v1(legacy.profile,had_checkpoint,career_id)
+	if not migration.ok: return migration
+	var committed := _commit_locked(migration.game_save,0,true,initial_guard)
+	if not committed.ok:
+		if initial_guard is Dictionary and committed.error_code == "commit_outcome_unknown":
+			var canonical: Dictionary = _contracts.normalize(migration.game_save)
+			canonical.store_revision = 1
+			committed.pending_initialization_candidate = canonical
+			committed.pending_initialization_sha256 = JSON.stringify(canonical,"",true,true).sha256_text()
+		return committed
+	committed.merge({"recovered":false,"migrated":had_profile or had_checkpoint,"notice_code":"legacy_checkpoint_preserved" if had_checkpoint else ""})
+	return committed
+func commit_game_scoped(candidate: Variant, expected_revision: Variant, scope) -> Dictionary:
+	if scope == null or get_script() != load("res://game/persistence/game_save_store.gd"): return commit_game(candidate,expected_revision)
+	return _scoped_view(scope).commit_game(candidate,expected_revision)
+func commit_game(candidate: Variant, expected_revision: Variant) -> Dictionary:
+	if not candidate is Dictionary: return _fail("invalid_game_save")
+	if not _contracts.counter(expected_revision): return _fail("stale_revision")
+	expected_revision = int(expected_revision)
+	_commit_mutex.lock()
+	var result := _commit_locked(candidate,expected_revision)
+	_commit_mutex.unlock()
+	return result
+func _commit_locked(candidate: Dictionary, expected_revision: int, allow_initial: bool = false, initial_guard: Variant = null) -> Dictionary:
+	var errors: Array[String] = _contracts.validate(candidate,_validation_scope,_scope_context("B"))
+	if not errors.is_empty(): return {"ok":false,"error_code":errors[0],"errors":errors}
+	if candidate.store_revision != expected_revision: return _fail("stale_revision")
+	if expected_revision >= 2147483647: return _fail("counter_exhausted")
+	var current := _load_authority()
+	if not current.ok and current.error_code != "not_found": return current
+	if not current.ok and not allow_initial: return _fail("not_found")
+	if (current.ok and current.game_save.store_revision != expected_revision) or (not current.ok and expected_revision != 0): return _fail("stale_revision")
+	var canonical: Dictionary = _contracts.normalize(candidate,_validation_scope,_scope_context("B"))
+	if canonical.is_empty(): return _fail("invalid_game_save")
+	if current.ok and not _transition_valid(current.game_save,canonical): return _fail("invalid_game_save")
+	canonical.store_revision = expected_revision+1
+	return _write_verified(canonical,current,"",initial_guard)
+func _write_verified(canonical: Dictionary, current: Dictionary, recovery_hash: String = "", initial_guard: Variant = null) -> Dictionary:
+	var serialized := JSON.stringify(canonical,"",true,true)
+	if serialized.to_utf8_buffer().size() > MAX_BYTES: return _fail("invalid_game_save")
+	if DirAccess.make_dir_recursive_absolute(_directory) != OK: return _fail("write_failed")
+	var path := _directory.path_join("game_save.json")
+	var temp := path+".tmp"
+	if _fault("write") != OK: return _fail("write_failed")
+	var file := FileAccess.open(temp,FileAccess.WRITE)
+	if file == null: return _fail("write_failed")
+	file.store_string(serialized)
+	if file.get_error() != OK:
+		file.close()
+		return _fail("write_failed")
+	if _fault("flush") != OK:
+		file.close()
+		return _fail("write_failed")
+	file.flush()
+	var write_error := file.get_error()
+	file.close()
+	if write_error != OK: return _fail("write_failed")
+	if _fault("verify") != OK: return _fail("verify_failed")
+	var verified := _read(temp)
+	if not verified.ok or not _same(verified.game_save,canonical): return _fail("verify_failed")
+	var primary := _read(path) if recovery_hash.is_empty() else _read_json(path)
+	if not recovery_hash.is_empty():
+		if not primary.ok: return primary
+		if primary.source_sha256 != recovery_hash: return _fail("stale_revision")
+		# The exact old authority is verified in its archive. Keep original backup untouched.
+	else:
+		if not primary.ok and _preservation_barrier(primary): return primary
+		if primary.ok and (not current.ok or not _same(primary.game_save,current.game_save)): return _fail("stale_revision")
+		if not primary.ok and current.ok and not current.get("recovered",false): return _fail("stale_revision")
+		if primary.ok:
+			if _fault("backup") != OK: return _fail("backup_failed")
+			var backup_temp := path+".bak.tmp"
+			if DirAccess.copy_absolute(path,backup_temp) != OK: return _fail("backup_failed")
+			var backup_check := _read(backup_temp)
+			if not backup_check.ok or not _same(backup_check.game_save,primary.game_save): return _fail("backup_failed")
+			if DirAccess.rename_absolute(backup_temp,path+".bak") != OK: return _fail("backup_failed")
+		elif FileAccess.file_exists(path):
+			# Preserve corrupt bytes as evidence; never use them to replace a valid backup.
+			var preserved := path+".corrupt."+str(Time.get_ticks_usec())
+			if DirAccess.copy_absolute(path,preserved) != OK: return _fail("backup_failed")
+	if _fault("replace") != OK: return _fail("replace_failed")
+	if not recovery_hash.is_empty():
+		var preservation := _verify_archive(current.recovery_source,recovery_hash)
+		if not preservation.ok: return preservation
+	if initial_guard is Dictionary:
+		var initial_sources := _verify_initial_sources(initial_guard)
+		if not initial_sources.ok: return initial_sources
+	# Source reads must precede the final authority fence: they can yield to a
+	# read hook, and must never reopen a checked primary/backup overwrite window.
+	var last_source := _read_json(path)
+	if not last_source.ok and _preservation_barrier(last_source): return last_source
+	if last_source.get("source_sha256","") != primary.get("source_sha256","") or (last_source.get("error_code") == "not_found") != (primary.get("error_code") == "not_found"): return _fail("stale_revision")
+	if current.get("recovered",false):
+		var last_backup := _read_json(path+".bak")
+		if not last_backup.ok and _preservation_barrier(last_backup): return last_backup
+		if not last_backup.ok or last_backup.get("source_sha256","").is_empty() or last_backup.source_sha256 != current.get("source_sha256",""): return _fail("stale_revision")
+	if _validation_scope != null and _validation_scope.final_fence_enabled:
+		if current.get("ok",false):
+			var old_check: Array[String] = _contracts.validate(current.game_save,_validation_scope,_scope_context("A",path+".bak" if current.get("recovered",false) else path,current.get("source_sha256","")))
+			if not old_check.is_empty(): return _fail(old_check[0])
+		var final_check: Array[String] = _contracts.validate(canonical,_validation_scope,_scope_context("B"))
+		if not final_check.is_empty(): return _fail(final_check[0])
+	# On app-private Android/POSIX storage, same-directory rename is the atomic boundary.
+	if DirAccess.rename_absolute(temp,path) != OK: return _fail("replace_failed")
+	if _fault("after_replace_before_return") != OK or _fault("readback_after_replace") != OK: return _fail("commit_outcome_unknown")
+	var reread := _read(path)
+	if not reread.ok or not _same(reread.game_save,canonical): return _fail("commit_outcome_unknown")
+	return {"ok":true,"game_save":reread.game_save}
+func _load_authority() -> Dictionary:
+	var path := _directory.path_join("game_save.json")
+	var primary := _read(path)
+	if primary.ok:
+		primary.merge({"recovered":false,"migrated":false,"notice_code":"legacy_checkpoint_preserved" if primary.game_save.legacy_checkpoint_present else ""})
+		return primary
+	if _preservation_barrier(primary): return primary
+	var backup := _read(path+".bak")
+	if backup.ok:
+		backup.merge({"recovered":true,"migrated":false,"notice_code":"recovered_previous_save"})
+		return backup
+	if _preservation_barrier(backup): return backup
+	return primary if primary.error_code != "not_found" else backup
+func _read(path: String) -> Dictionary:
+	var raw := _read_json(path)
+	if not raw.ok: return raw
+	# An unknown checkpoint schema/content remains a compatibility barrier even
+	# when its future extension cannot pass today's deep JSON/shape contract.
+	var compatibility := _schema_barrier(raw.value)
+	if not compatibility.is_empty():
+		compatibility.source_sha256 = raw.source_sha256
+		return compatibility
+	var economy: Array[String] = _contracts.validate_economy(raw.value)
+	if not economy.is_empty(): return {"ok":false,"error_code":economy[0],"errors":economy,"scope":"authority","source_sha256":raw.source_sha256}
+	# Reuse only the successful restore belonging to this one freshly parsed
+	# value. Every later file read still revalidates its bytes and world closure.
+	var checked: Dictionary = _contracts.validate_and_normalize(raw.value,_validation_scope,_scope_context("read",path,raw.source_sha256))
+	if not checked.ok: return {"ok":false,"error_code":checked.error_code,"errors":checked.errors,"scope":"checkpoint","source_sha256":raw.source_sha256}
+	return {"ok":true,"game_save":checked.game_save,"source_sha256":raw.source_sha256}
+func _read_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path): return _fail("not_found")
+	var stage := "read_backup" if path.ends_with(".bak") else ("read_primary" if path.get_file() == "game_save.json" else "read_file")
+	if _fault(stage) != OK: return _fail("read_failed")
+	var file := FileAccess.open(path,FileAccess.READ)
+	if file == null: return _fail("read_failed")
+	var length := file.get_length()
+	if length > MAX_BYTES:
+		file.close()
+		return {"ok":false,"error_code":"read_failed","scope":"authority","diagnostics":{"reason":"oversize"}}
+	var bytes := file.get_buffer(length)
+	var read_error := file.get_error()
+	file.close()
+	if bytes.size() != length or not read_error in [OK,ERR_FILE_EOF]: return _fail("read_failed")
+	var digest := HashingContext.new()
+	digest.start(HashingContext.HASH_SHA256)
+	digest.update(bytes)
+	var hash := digest.finish().hex_encode()
+	var parser := JSON.new()
+	if parser.parse(bytes.get_string_from_utf8()) != OK or not parser.data is Dictionary: return {"ok":false,"error_code":"invalid_game_save","scope":"authority","source_sha256":hash}
+	return {"ok":true,"value":parser.data,"source_sha256":hash}
+func _load_legacy_profile() -> Dictionary:
+	var path := _directory.path_join("profile.json")
+	var primary := _read_legacy_profile(path)
+	if primary.ok: return primary
+	if primary.error_code in ["unsupported_schema","read_failed"]: return primary
+	var backup := _read_legacy_profile(path+".bak")
+	if backup.ok: return backup
+	if primary.error_code == "not_found" and backup.error_code == "not_found":
+		return {"ok":true,"profile":{"schema_version":1,"settings":{"deadzone":0.20,"audio_master":0.8,"screen_shake":0.4,"reduce_effects":false},"cleared_chapter_ids":[],"unlocked_character_ids":["garrison_01"],"best_runs":{}}}
+	return primary if primary.error_code != "not_found" else backup
+func _read_legacy_profile(path: String) -> Dictionary:
+	var raw := _read_json(path)
+	if not raw.ok: return raw
+	if not _contracts.counter(raw.value.get("schema_version")) or raw.value.schema_version != 1: return {"ok":false,"error_code":"unsupported_schema","scope":"authority"}
+	# The pure migration validator validates old profile data without adopting or writing it.
+	var checked: Dictionary = Migrations.new().from_v1(raw.value,false,"00000000000000000000000000000000")
+	if not checked.get("ok",false): return checked
+	return {"ok":true,"profile":raw.value.duplicate(true)}
+func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
+	if current.career_id != candidate.career_id or current.legacy_checkpoint_present != candidate.legacy_checkpoint_present: return false
+	var expected := current.duplicate(true)
+	var service = Service.new(Callable())
+	var operation := "checkpoint"
+	if candidate.settled_through_serial != current.settled_through_serial:
+		operation = "settlement"
+		if not candidate.checkpoint is Dictionary: return false
+		var settled: Dictionary = service.prepare_settlement(current,candidate.checkpoint)
+		if not settled.ok or settled.get("already_applied",false): return false
+		expected = settled.candidate
+	elif candidate.next_run_serial != current.next_run_serial:
+		operation = "start"
+		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
+		var config: Dictionary = candidate.checkpoint.run_config
+		var loadout: Dictionary = current.profile.loadout
+		if config.doctrine_id != loadout.doctrine_id or config.target_evolution_id != loadout.target_evolution_id or config.prepared_supply != loadout.supply_item_id or candidate.checkpoint.run_serial != current.next_run_serial or candidate.checkpoint.supply_used: return false
+		expected.next_run_serial += 1
+		if config.prepared_supply != "":
+			if expected.profile.consumables.field_bandage < 1: return false
+			expected.profile.consumables.field_bandage -= 1
+	elif not _same(candidate.purchase_receipts,current.purchase_receipts):
+		operation = "purchase"
+		if candidate.purchase_receipts.is_empty(): return false
+		var receipt: Dictionary = candidate.purchase_receipts.back()
+		var purchased: Dictionary = service.prepare_purchase(current,receipt.item_id,receipt.request_id,int(current.store_revision))
+		if not purchased.ok or purchased.get("already_applied",false): return false
+		expected = purchased.candidate
+	if not _same(_economy(candidate),_economy(expected)): return false
+	if operation != "start":
+		if (current.checkpoint == null) != (candidate.checkpoint == null): return false
+		if current.checkpoint is Dictionary:
+			for key in ["run_id","run_serial","run_config","seed","chapter_id","content_revision"]:
+				if not _same(candidate.checkpoint.get(key),current.checkpoint.get(key)): return false
+			if current.checkpoint.phase in ["won","dead","abandoned"] and not _same(candidate.checkpoint,current.checkpoint): return false
+	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
+	return true
+func _economy(save: Dictionary) -> Dictionary:
+	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
+func _same(a: Variant, b: Variant) -> bool:
+	# Parse both sides so JSON-integer floats and in-memory ints compare equivalently.
+	return JSON.parse_string(JSON.stringify(a,"",true,true)) == JSON.parse_string(JSON.stringify(b,"",true,true))
+func _fail(code: String) -> Dictionary:
+	return {"ok":false,"error_code":code}
+
+func _fault(stage: String) -> int:
+	return int(_fault_injector.call(stage)) if _fault_injector.is_valid() else OK
+
+func inspect_known_locations_scoped(app_data_root: Variant, scope) -> Dictionary:
+	if scope == null or get_script() != load("res://game/persistence/game_save_store.gd"): return inspect_known_locations(app_data_root)
+	return _scoped_view(scope).inspect_known_locations(app_data_root)
+func inspect_known_locations(app_data_root: Variant) -> Dictionary:
+	# Read-only: exactly two locations and six known filenames, no directory enumeration.
+	if not app_data_root is String or app_data_root.is_empty(): return _fail("invalid_game_save")
+	var canonical := _inspect_location(app_data_root.path_join("saves"),"canonical")
+	var alternate := _inspect_location(app_data_root,"alternate")
+	for entry in [[canonical,app_data_root.path_join("saves")],[alternate,app_data_root]]:
+		if not _location_sources_match(entry[1],entry[0].files):
+			entry[0].status = "unreadable"
+			entry[0].summary = {}
+			entry[0].error_code = "read_failed"
+	var result := {"ok":true,"decision":"continue_canonical","requires_choice":false,"duplicate_copy":false,"locations":[canonical,alternate]}
+	if canonical.status == "unreadable" or alternate.status == "unreadable":
+		result.decision = "blocked" if canonical.get("diagnostics",{}).get("reason") == "oversize" or alternate.get("diagnostics",{}).get("reason") == "oversize" else "retry_read"
+	elif alternate.status != "absent":
+		if canonical.status == "supported_authority" and alternate.status == "supported_authority" and _exact_alternate_copy(canonical.files,alternate.files):
+			result.duplicate_copy = true
+		else:
+			result.decision = "choose_lineage"
+			result.requires_choice = true
+	elif not canonical.status in ["absent","supported_authority","supported_legacy"]:
+		result.decision = "blocked"
+	result.inspection_id = _text_hash(JSON.stringify(result.locations,"",true,true))
+	return result
+func _inspect_location(directory: String, location_id: String) -> Dictionary:
+	var result := {"location_id":location_id,"status":"absent","files":{},"summary":{}}
+	var reader = get_script().new(directory,_contracts._validator,_fault_injector)
+	reader._validation_scope = _validation_scope
+	var unreadable := false
+	for name in ["game_save.json","game_save.json.bak","profile.json","profile.json.bak","checkpoint.json","checkpoint.json.bak"]:
+		var path := directory.path_join(name)
+		if not FileAccess.file_exists(path): continue
+		var observed: Dictionary = reader._read_json(path)
+		var info := {"sha256":observed.get("source_sha256",""),"readable":observed.get("error_code") != "read_failed"}
+		result.files[name] = info
+		if observed.get("diagnostics",{}).get("reason") == "oversize": result.diagnostics = {"reason":"oversize"}
+		if not info.readable: unreadable = true
+	if unreadable:
+		result.status = "unreadable"
+		return result
+	if result.files.is_empty(): return result
+	if result.files.has("game_save.json") or result.files.has("game_save.json.bak"):
+		var authority: Dictionary = reader._load_authority()
+		if authority.get("ok") == true:
+			result.status = "supported_authority"
+			var save: Dictionary = authority.game_save
+			result.summary = {"career_id":save.career_id,"store_revision":int(save.store_revision),"next_run_serial":int(save.next_run_serial),"supply_credits":int(save.profile.supply_credits),"recovered":authority.get("recovered",false)}
+		else:
+			result.status = _location_failure_status(authority)
+			result.error_code = authority.get("error_code","invalid_game_save")
+			result.scope = authority.get("scope","authority")
+		return result
+	var legacy: Dictionary = reader._load_legacy_profile()
+	if legacy.get("ok") == true:
+		result.status = "supported_legacy"
+		result.summary = {"has_legacy_profile":result.files.has("profile.json") or result.files.has("profile.json.bak"),"cleared_chapter_count":legacy.profile.cleared_chapter_ids.size(),"unlocked_character_count":legacy.profile.unlocked_character_ids.size(),"legacy_checkpoint_present":result.files.has("checkpoint.json") or result.files.has("checkpoint.json.bak")}
+	else:
+		result.status = _location_failure_status(legacy)
+		result.error_code = legacy.get("error_code","invalid_profile")
+	return result
+func _location_failure_status(result: Dictionary) -> String:
+	var code: String = str(result.get("error_code","invalid_game_save"))
+	if code == "read_failed" or code.begins_with("world_read"): return "unreadable"
+	if code in ["unsupported_schema","content_mismatch"]:
+		return "checkpoint_incompatible" if result.get("scope") == "checkpoint" else "whole_authority_unsupported"
+	return "corrupt"
+func _exact_alternate_copy(canonical: Dictionary, alternate: Dictionary) -> bool:
+	# Every alternate known file must be a byte-identical existing canonical file.
+	if alternate.is_empty(): return false
+	for name in alternate:
+		if not canonical.has(name) or not alternate[name].readable or alternate[name].sha256.is_empty() or alternate[name].sha256 != canonical[name].sha256: return false
+	return true
+func _text_hash(value: String) -> String:
+	return value.sha256_text()
+
+func _location_sources_match(directory: String, observed_files: Dictionary) -> bool:
+	var reader = get_script().new(directory,_contracts._validator,_fault_injector)
+	reader._validation_scope = _validation_scope
+	for name in ["game_save.json","game_save.json.bak","profile.json","profile.json.bak","checkpoint.json","checkpoint.json.bak"]:
+		var path := directory.path_join(name)
+		if FileAccess.file_exists(path) != observed_files.has(name): return false
+		if not observed_files.has(name): continue
+		var fresh: Dictionary = reader._read_json(path)
+		if fresh.get("error_code") == "read_failed" or fresh.get("source_sha256","") != observed_files[name].sha256: return false
+	return true
+
+func _schema_barrier(value: Dictionary) -> Dictionary:
+	if _contracts.version_number(value.get("schema_version")) and value.schema_version != 2: return {"ok":false,"error_code":"unsupported_schema","scope":"authority"}
+	if value.get("profile") is Dictionary and _contracts.version_number(value.profile.get("schema_version")) and value.profile.schema_version != 2: return {"ok":false,"error_code":"unsupported_schema","scope":"authority"}
+	if value.get("checkpoint") is Dictionary:
+		var state: Dictionary = value.checkpoint
+		if _contracts.version_number(state.get("schema_version")) and state.schema_version != 2: return {"ok":false,"error_code":"unsupported_schema","scope":"checkpoint"}
+		if state.get("content_revision") is String and state.content_revision != Contracts.CONTENT_REVISION: return {"ok":false,"error_code":"content_mismatch","scope":"checkpoint"}
+	return {}
+func _preservation_barrier(result: Dictionary) -> bool:
+	var code: String = str(result.get("error_code",""))
+	return code in ["unsupported_schema","content_mismatch","read_failed"] or (code.begins_with("world_") and code != "world_hash_mismatch")
+
+func inspect_checkpoint_recovery() -> Dictionary:
+	_commit_mutex.lock()
+	var source := _recovery_source()
+	_commit_mutex.unlock()
+	if source.get("ok") != true: return source
+	var save: Dictionary = source.value
+	return {"ok":true,"recovery_offer":{"source_sha256":source.source_sha256,"career_id":save.career_id,"store_revision":int(save.store_revision),"next_run_serial":int(save.next_run_serial),"preserved_run_serial":int(save.checkpoint.run_serial),"supply_credits":int(save.profile.supply_credits),"loadout":save.profile.loadout.duplicate(true),"compatibility_reason":source.compatibility_reason}}
+func _recovery_source() -> Dictionary:
+	var raw := _read_json(_directory.path_join("game_save.json"))
+	if raw.get("ok") != true: return raw
+	var errors: Array[String] = _contracts.validate_recovery_source(raw.value)
+	if not errors.is_empty(): return {"ok":false,"error_code":errors[0],"scope":"authority"}
+	var full_errors: Array[String] = _contracts.validate(raw.value)
+	if full_errors.is_empty(): return _fail("invalid_snapshot")
+	if not full_errors[0] in ["unsupported_schema","content_mismatch"]: return {"ok":false,"error_code":full_errors[0],"scope":"checkpoint"}
+	raw.compatibility_reason = full_errors[0]
+	return raw
+func preserve_checkpoint_authority(source_sha256: Variant, expected_revision: Variant) -> Dictionary:
+	if not _contracts.hash_valid(source_sha256) or not _contracts.counter(expected_revision): return _fail("invalid_game_save")
+	_commit_mutex.lock()
+	var result := _preserve_locked(source_sha256,int(expected_revision))
+	_commit_mutex.unlock()
+	return result
+func _preserve_locked(source_hash: String, revision: int) -> Dictionary:
+	var source := _recovery_source()
+	if source.get("ok") != true: return source
+	if source.source_sha256 != source_hash or source.value.store_revision != revision: return _fail("stale_revision")
+	var raw := _read_bytes(_directory.path_join("game_save.json"),"archive_source_read")
+	if not raw.ok: return raw
+	if _bytes_hash(raw.bytes) != source_hash: return _fail("stale_revision")
+	var archive_path := _archive_path(source_hash)
+	var preserved := _write_once_verified(archive_path,raw.bytes,"archive")
+	if not preserved.ok: return preserved
+	var pins := _archive_pins(source.value,source_hash)
+	var pins_bytes := JSON.stringify(pins,"",true,true).to_utf8_buffer()
+	preserved = _write_once_verified(archive_path.trim_suffix(".json")+".pins.json",pins_bytes,"archive_pins")
+	if not preserved.ok: return preserved
+	# Reread both source and archive after preservation; never return mixed identities.
+	var current := _read_json(_directory.path_join("game_save.json"))
+	if current.get("ok") != true: return current
+	if current.source_sha256 != source_hash: return _fail("stale_revision")
+	var verified := _verify_archive(source.value,source_hash)
+	if not verified.ok: return verified
+	return {"ok":true,"source":source.value.duplicate(true),"archive_receipt":{"source_sha256":source_hash,"source_store_revision":revision,"preserved_run_serial":int(source.value.checkpoint.run_serial),"pins_sha256":_bytes_hash(pins_bytes)}}
+func _archive_path(source_hash: String) -> String:
+	return _directory.path_join("archives").path_join(source_hash+".json")
+func _archive_pins(source: Dictionary, source_hash: String) -> Dictionary:
+	var roots := []
+	var world = source.checkpoint.get("world")
+	if world is Dictionary and world.get("delta_root") is Dictionary: roots.append(world.delta_root.duplicate(true))
+	# An opaque/future world format cannot be traversed safely: conservatively pin
+	# all of this lineage's world storage. Any future GC must honor this manifest.
+	return {"source_sha256":source_hash,"world_roots":roots,"pins_all_world_storage":world != null,"world_storage_directory":"world","retention":"permanent"}
+func _verify_archive(source: Dictionary, source_hash: String) -> Dictionary:
+	var raw := _read_bytes(_archive_path(source_hash),"archive_readback")
+	if not raw.ok: return raw
+	if _bytes_hash(raw.bytes) != source_hash: return _fail("verify_failed")
+	var expected := JSON.stringify(_archive_pins(source,source_hash),"",true,true).to_utf8_buffer()
+	var pins := _read_bytes(_archive_path(source_hash).trim_suffix(".json")+".pins.json","archive_pins_readback")
+	if not pins.ok: return pins
+	if pins.bytes != expected: return _fail("verify_failed")
+	return {"ok":true}
+func _read_bytes(path: String, stage: String) -> Dictionary:
+	if _fault(stage) != OK: return _fail("read_failed")
+	if not FileAccess.file_exists(path): return _fail("not_found")
+	var file := FileAccess.open(path,FileAccess.READ)
+	if file == null: return _fail("read_failed")
+	var length := file.get_length()
+	if length > MAX_BYTES:
+		file.close()
+		return _fail("read_failed")
+	var bytes := file.get_buffer(length)
+	var code := file.get_error()
+	file.close()
+	if bytes.size() != length or not code in [OK,ERR_FILE_EOF]: return _fail("read_failed")
+	return {"ok":true,"bytes":bytes}
+func _write_once_verified(path: String, bytes: PackedByteArray, stage: String) -> Dictionary:
+	if FileAccess.file_exists(path):
+		var existing := _read_bytes(path,stage+"_readback")
+		if not existing.ok: return existing
+		return {"ok":true} if existing.bytes == bytes else _fail("verify_failed")
+	if _fault(stage+"_write") != OK or DirAccess.make_dir_recursive_absolute(path.get_base_dir()) != OK: return _fail("write_failed")
+	var temp := path+".tmp"
+	var file := FileAccess.open(temp,FileAccess.WRITE)
+	if file == null: return _fail("write_failed")
+	file.store_buffer(bytes)
+	if _fault(stage+"_flush") != OK or file.get_error() != OK:
+		file.close()
+		return _fail("write_failed")
+	file.flush()
+	var code := file.get_error()
+	file.close()
+	if code != OK: return _fail("write_failed")
+	var verified := _read_bytes(temp,stage+"_readback")
+	if not verified.ok: return verified
+	if verified.bytes != bytes: return _fail("verify_failed")
+	if _fault(stage+"_replace") != OK: return _fail("replace_failed")
+	# Never replace existing nonmatching content-addressed evidence.
+	if FileAccess.file_exists(path):
+		var existing := _read_bytes(path,stage+"_readback")
+		return {"ok":true} if existing.get("ok") == true and existing.bytes == bytes else _fail("verify_failed")
+	if DirAccess.rename_absolute(temp,path) != OK: return _fail("replace_failed")
+	verified = _read_bytes(path,stage+"_readback")
+	if not verified.ok: return verified
+	return {"ok":true} if verified.bytes == bytes else _fail("verify_failed")
+func _bytes_hash(bytes: PackedByteArray) -> String:
+	var context := HashingContext.new()
+	context.start(HashingContext.HASH_SHA256)
+	context.update(bytes)
+	return context.finish().hex_encode()
+func commit_preserved_run_start(candidate: Variant, source_sha256: Variant, request_id: Variant, expected_revision: Variant) -> Dictionary:
+	if not candidate is Dictionary or not _contracts.hash_valid(source_sha256) or not request_id is String or not _contracts.counter(expected_revision): return _fail("invalid_game_save")
+	_commit_mutex.lock()
+	var result := _commit_preserved_locked(candidate,source_sha256,request_id,int(expected_revision))
+	_commit_mutex.unlock()
+	return result
+func _commit_preserved_locked(candidate: Dictionary, source_hash: String, request_id: String, revision: int) -> Dictionary:
+	var errors: Array[String] = _contracts.validate(candidate,_validation_scope,_scope_context("B"))
+	if not errors.is_empty(): return {"ok":false,"error_code":errors[0],"errors":errors}
+	if not candidate.get("checkpoint_recovery_receipt") is Dictionary: return _fail("invalid_game_save")
+	var receipt: Dictionary = candidate.checkpoint_recovery_receipt
+	if receipt.request_id != request_id or receipt.source_sha256 != source_hash or receipt.source_store_revision != revision or candidate.store_revision != revision: return _fail("request_conflict")
+	var state: Dictionary = candidate.checkpoint
+	var service = Service.new(Callable())
+	var payload := service._recovery_payload_hash(candidate.career_id,source_hash,revision,int(receipt.replacement_run_serial),{"chapter_id":state.chapter_id,"content_revision":state.content_revision},int(state.seed),candidate.profile.loadout)
+	if receipt.payload_sha256 != payload: return _fail("request_conflict")
+	var current := _read(_directory.path_join("game_save.json"))
+	if current.get("ok") == true:
+		var prior = current.game_save.get("checkpoint_recovery_receipt")
+		if prior is Dictionary and _same(prior,receipt): return {"ok":true,"already_applied":true,"receipt":prior.duplicate(true),"game_save":current.game_save.duplicate(true)}
+		return _fail("stale_revision")
+	if _preservation_barrier(current) and current.get("error_code") not in ["unsupported_schema","content_mismatch"]: return current
+	var source := _recovery_source()
+	if source.get("ok") != true: return source
+	if source.source_sha256 != source_hash or source.value.store_revision != revision: return _fail("stale_revision")
+	if revision >= 2147483647 or source.value.next_run_serial >= 2147483647: return _fail("counter_exhausted")
+	var archived := _verify_archive(source.value,source_hash)
+	if not archived.ok: return archived
+	if not _recovery_transition_valid(source.value,candidate): return _fail("invalid_game_save")
+	var canonical: Dictionary = _contracts.normalize(candidate,_validation_scope,_scope_context("B"))
+	if canonical.is_empty(): return _fail("invalid_game_save")
+	canonical.store_revision = revision+1
+	return _write_verified(canonical,{"recovery_source":source.value},source_hash)
+func _recovery_transition_valid(source: Dictionary, candidate: Dictionary) -> bool:
+	var receipt: Dictionary = candidate.checkpoint_recovery_receipt
+	if receipt.preserved_run_serial != source.checkpoint.run_serial or receipt.replacement_run_serial != source.next_run_serial or candidate.next_run_serial != source.next_run_serial+1: return false
+	var state: Dictionary = candidate.checkpoint
+	if state.run_serial != source.next_run_serial or state.phase != "survival" or state.supply_used: return false
+	if not _contracts.counter(state.get("active_tick")) or state.active_tick != 0 or not _contracts.counter(state.get("survival_tick")) or state.survival_tick != 0: return false
+	var selection: Dictionary = candidate.profile.loadout
+	var service = Service.new(Callable())
+	if not service._loadout_valid(source.profile,selection): return false
+	var config: Dictionary = state.run_config
+	if config.doctrine_id != selection.doctrine_id or config.target_evolution_id != selection.target_evolution_id or config.prepared_supply != selection.supply_item_id: return false
+	var expected: Dictionary = source.duplicate(true)
+	expected.profile.loadout = selection.duplicate(true)
+	if selection.supply_item_id != "": expected.profile.consumables.field_bandage -= 1
+	expected.next_run_serial += 1
+	expected.checkpoint = state.duplicate(true)
+	expected.checkpoint_recovery_receipt = receipt.duplicate(true)
+	return _same(expected,candidate)
