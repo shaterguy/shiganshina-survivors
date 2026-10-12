@@ -1,5 +1,6 @@
 class_name SupplyCatalog
 extends RefCounted
+const Characters = preload("res://game/progression/character_catalog.gd")
 # NEW E1 implementation. Definitions are NEW tuning candidates, not recovered bytes.
 # No GameSave dependency: this catalog can be used by its validator without a cycle.
 const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
@@ -169,8 +170,10 @@ func permanent_levels_valid(value: Variant) -> bool:
 		if not (level is int or level is float) or not is_finite(float(level)) or level < 0 or level != floor(level) or level > _items[id].max_owned: return false
 	return true
 func run_upgrade_config_valid(config: Dictionary) -> bool:
-	if not config.has("permanent_upgrades"): return config.size() == 5
-	return config.size() == 6 and permanent_levels_valid(config.permanent_upgrades)
+	var character_fields := 1 if config.has("character_id") else 0
+	if character_fields and not Characters.new().runtime_available(config.character_id): return false
+	if not config.has("permanent_upgrades"): return config.size() == 5+character_fields
+	return config.size() == 6+character_fields and permanent_levels_valid(config.permanent_upgrades)
 func permanent_levels(profile: Dictionary) -> Dictionary:
 	var value: Variant = profile.get("permanent_upgrades",{})
 	return value.duplicate(true) if permanent_levels_valid(value) else {}

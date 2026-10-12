@@ -1,5 +1,6 @@
 class_name RunSimulation
 extends RefCounted
+const Characters = preload("res://game/progression/character_catalog.gd")
 const Contracts = preload("res://game/contracts/game_contracts.gd")
 const SpatialHash = preload("res://game/combat/spatial_hash.gd")
 const World = preload("res://game/combat/world_geometry.gd")
@@ -161,7 +162,7 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	var config := run_config.duplicate(true)
 	config.run_serial = int(config.run_serial)
 	var rules := _rules_for(current.chapter,doctrine,config)
-	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":"garrison_01","seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
+	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":config.get("character_id",Characters.DEFAULT_CHARACTER),"seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
 		state.escape_zone = Streamed.CITY_INACTIVE_EXIT.duplicate()
@@ -177,6 +178,11 @@ func _config_valid(config: Dictionary, chapter: Dictionary) -> bool:
 	return config.prepared_supply in ["","field_bandage"]
 func _rules_for(chapter: Dictionary, doctrine: Dictionary, config: Dictionary = {}) -> Dictionary:
 	var rules := {"world_geometry":World.canonical(chapter.world_geometry),"allowed_equipment_ids":chapter.allowed_equipment_ids.duplicate(),"enemy_catalog":chapter.enemy_catalog.duplicate(true),"move_speed":float(doctrine.base_move_speed),"pickup_radius":30.0,"evacuation_ticks":4500,"progression":_catalog.progression,"base_hp":float(doctrine.base_hp),"base_move_speed":float(doctrine.base_move_speed),"equipment_slots":4,"passive_slots":4,"content_fingerprint":chapter.content_fingerprint}
+	if config.get("character_id",Characters.DEFAULT_CHARACTER) != Characters.DEFAULT_CHARACTER:
+		var traits := Characters.new().run_traits(config.character_id)
+		rules.move_speed *= float(traits.move_speed_multiplier)
+		rules.base_move_speed *= float(traits.move_speed_multiplier)
+		rules.character_blade_cooldown_multiplier = float(traits.blade_cooldown_multiplier)
 	if config.has("permanent_upgrades"):
 		var levels: Dictionary = config.permanent_upgrades
 		rules.base_hp += _supplies.permanent_bonus(levels,"max_hp")
@@ -417,13 +423,14 @@ func world_render_view(state: Dictionary) -> Dictionary:
 func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: Array = [], prepared: Array = []) -> Dictionary:
 	var errors: Array[String] = Contracts.new().validate_snapshot(value)
 	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
-	if value.content_revision != CONTENT_REVISION or value.chapter_id != "chapter_01_shiganshina" or value.character_id != "garrison_01": return _failure("content_mismatch")
+	if value.content_revision != CONTENT_REVISION or value.chapter_id != "chapter_01_shiganshina" or not Characters.new().runtime_available(value.character_id): return _failure("content_mismatch")
 	var current: Dictionary = _current_chapter()
 	if not current.get("ok",false): return current
 	var city: bool = current.chapter.get("world_mode","") == "streamed_city"
 	if city != value.has("world"): return _failure("world_not_ready")
 	if not city and not hydrated_deltas.is_empty(): return _failure("invalid_hydration")
 	if not value.rules.get("content_fingerprint") is String or value.rules.content_fingerprint != current.chapter.content_fingerprint: return _failure("content_mismatch")
+	if value.character_id != value.run_config.get("character_id",Characters.DEFAULT_CHARACTER): return _failure("invalid_run_config")
 	if not _config_valid(value.run_config,current.chapter) or value.run_config.run_id != value.run_id or value.run_config.run_serial != value.run_serial: return _failure("invalid_run_config")
 	var doctrine: Dictionary = _supplies.doctrine(value.run_config.doctrine_id)
 	if not _same_json(value.rules,_rules_for(current.chapter,doctrine,value.run_config)): return _failure("invalid_core_state")

@@ -40,7 +40,7 @@ func _profile_valid(profile: Dictionary) -> bool:
 		if not _unique_ids(profile.get(field)): return false
 	# These fields never existed in v1. Do not erase claimed existing economics
 	# in a mislabeled profile by silently replacing them with a fresh balance.
-	for field in ["supply_credits","owned_doctrine_ids","consumables","loadout","permanent_upgrades"]:
+	for field in ["supply_credits","owned_doctrine_ids","consumables","loadout","permanent_upgrades","selected_character_id"]:
 		if profile.has(field): return false
 	var settings: Dictionary = profile.settings
 	for key in ["deadzone","audio_master","screen_shake"]:

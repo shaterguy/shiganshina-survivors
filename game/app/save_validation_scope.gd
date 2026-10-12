@@ -57,7 +57,7 @@ func restore(snapshot: Dictionary, hydration: Dictionary, manifest: String, cont
 	# Match the original Core error precedence before any provider capture.
 	var errors: Array[String] = Core.Contracts.new().validate_snapshot(snapshot)
 	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
-	if snapshot.content_revision != Core.CONTENT_REVISION or snapshot.chapter_id != "chapter_01_shiganshina" or snapshot.character_id != "garrison_01": return {"ok":false,"error_code":"content_mismatch"}
+	if snapshot.content_revision != Core.CONTENT_REVISION or snapshot.chapter_id != "chapter_01_shiganshina" or not Core.Characters.new().runtime_available(snapshot.character_id): return {"ok":false,"error_code":"content_mismatch"}
 	if not _runtime._validator._content_error.is_empty(): return {"ok":false,"error_code":_runtime._validator._content_error}
 	var capture_start := Time.get_ticks_usec()
 	var capture: Dictionary = _provider.capture_validation_inputs()

@@ -78,6 +78,7 @@ func state_valid(state: Dictionary) -> bool:
 	if not _base_errors.is_empty() or not state.get("equipment") is Dictionary or not state.get("passives") is Dictionary or not state.get("rules") is Dictionary: return false
 	if not number_valid(state.rules.get("permanent_damage_bonus",0.0),0.0,0.25): return false
 	var allowed = state.rules.get("allowed_equipment_ids")
+	if not number_valid(state.rules.get("character_blade_cooldown_multiplier",1.0),0.85,1.0): return false
 	if not allowed is Array or allowed.size() > _equipment.size(): return false
 	var unique := {}
 	for id in allowed:
@@ -161,7 +162,8 @@ func weapon_stats(state: Dictionary, item_id: String, level: int) -> Dictionary:
 	var row: Dictionary = _equipment[item_id]
 	var offset := level-1
 	var range_scale := stat(state,"range_multiplier",1.0)
-	var result := {"damage":(float(row.damage)+float(row.damage_per_level)*offset)*stat(state,"damage_multiplier",1.0),"range":(float(row.range)+float(row.range_per_level)*offset)*range_scale,"cooldown_ticks":maxi(1,int(round((float(row.cooldown_ticks)-float(row.cooldown_per_level)*offset)*stat(state,"cooldown_multiplier",1.0))))}
+	var character_cooldown := float(state.rules.get("character_blade_cooldown_multiplier",1.0)) if item_id == "blade_slash" else 1.0
+	var result := {"damage":(float(row.damage)+float(row.damage_per_level)*offset)*stat(state,"damage_multiplier",1.0),"range":(float(row.range)+float(row.range_per_level)*offset)*range_scale,"cooldown_ticks":maxi(1,int(round((float(row.cooldown_ticks)-float(row.cooldown_per_level)*offset)*stat(state,"cooldown_multiplier",1.0)*character_cooldown)))}
 	# Range scales linear geometry only, never angle, hit count or projectile speed.
 	for field in ["width","splash_radius"]:
 		if row.has(field): result[field] = float(row[field])*range_scale

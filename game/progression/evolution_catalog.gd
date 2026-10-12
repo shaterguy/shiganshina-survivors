@@ -113,9 +113,10 @@ func _effect_delta(state: Dictionary, recipe: Dictionary) -> Dictionary:
 	var params: Dictionary = recipe.effect_params
 	var weapon: Dictionary = owner.weapon_stats(state,recipe.base_item_id,int(recipe.required_weapon_level))
 	var scale: float = owner.stat(state,"range_multiplier",1.0)
+	var character_cooldown := float(state.rules.get("character_blade_cooldown_multiplier",1.0)) if recipe.base_item_id == "blade_slash" else 1.0
 	var damage := []
 	for multiplier in params.damage_multipliers: damage.append(float(weapon.damage)*float(multiplier))
-	var result := {"stages":2,"stage_damage":damage,"stage_delays":[int(params.stage_delays[0]),int(params.stage_delays[1])],"radius":float(params.radius)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0))))}
+	var result := {"stages":2,"stage_damage":damage,"stage_delays":[int(params.stage_delays[0]),int(params.stage_delays[1])],"radius":float(params.radius)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0)*character_cooldown)))}
 	# Linear distances scale once. Sector angles and tick delays never scale.
 	if recipe.effect_id == "wing_cut": result.arc_degrees = params.arc_degrees
 	else:

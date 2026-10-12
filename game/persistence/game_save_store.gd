@@ -1,5 +1,6 @@
 class_name GameSaveStore
 extends RefCounted
+const Characters = preload("res://game/progression/character_catalog.gd")
 const Contracts = preload("res://game/contracts/game_save_contracts.gd")
 const Service = preload("res://game/economy/supply_service.gd")
 const Legacy = preload("res://game/persistence/save_store.gd")
@@ -288,6 +289,8 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
 		var config: Dictionary = candidate.checkpoint.run_config
 		var loadout: Dictionary = current.profile.loadout
+		var expected_character := Characters.new().run_character_id(current.profile,candidate.checkpoint.chapter_id)
+		if expected_character.is_empty() or config.get("character_id",Characters.DEFAULT_CHARACTER) != expected_character: return false
 		if not _same(config.get("permanent_upgrades",{}),current.profile.get("permanent_upgrades",{})): return false
 		if config.doctrine_id != loadout.doctrine_id or config.target_evolution_id != loadout.target_evolution_id or config.prepared_supply != loadout.supply_item_id or candidate.checkpoint.run_serial != current.next_run_serial or candidate.checkpoint.supply_used: return false
 		expected.next_run_serial += 1
@@ -301,6 +304,12 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		var purchased: Dictionary = service.prepare_purchase(current,receipt.item_id,receipt.request_id,int(current.store_revision))
 		if not purchased.ok or purchased.get("already_applied",false): return false
 		expected = purchased.candidate
+	elif candidate.profile.get("selected_character_id",Characters.DEFAULT_CHARACTER) != current.profile.get("selected_character_id",Characters.DEFAULT_CHARACTER):
+		operation = "character_selection"
+		var chapter_id: String = current.checkpoint.chapter_id if current.checkpoint is Dictionary else Characters.DEFAULT_CHAPTER
+		var selected: Dictionary = service.prepare_character_selection(current,chapter_id,candidate.profile.get("selected_character_id",Characters.DEFAULT_CHARACTER),current.store_revision)
+		if not selected.get("ok",false): return false
+		expected = selected.candidate
 	if not _same(_economy(candidate),_economy(expected)): return false
 	if operation != "start":
 		if (current.checkpoint == null) != (candidate.checkpoint == null): return false
@@ -311,7 +320,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
 	return true
 func _economy(save: Dictionary) -> Dictionary:
-	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"permanent_upgrades":save.profile.get("permanent_upgrades",{}),"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
+	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"permanent_upgrades":save.profile.get("permanent_upgrades",{}),"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"selected_character_id":save.profile.get("selected_character_id",Characters.DEFAULT_CHARACTER),"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
 func _same(a: Variant, b: Variant) -> bool:
 	# Parse both sides so JSON-integer floats and in-memory ints compare equivalently.
 	return JSON.parse_string(JSON.stringify(a,"",true,true)) == JSON.parse_string(JSON.stringify(b,"",true,true))

@@ -1,5 +1,6 @@
 class_name GameSaveContracts
 extends RefCounted
+const Characters = preload("res://game/progression/character_catalog.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
 const MAX_COUNTER := 2147483647
 const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
@@ -61,6 +62,8 @@ func _validate(value: Variant, normalized: Variant = null, scope = null, context
 	if not state.get("run_config") is Dictionary: return ["invalid_snapshot"]
 	var config: Dictionary = state.run_config
 	if not _catalog.run_upgrade_config_valid(config) or not config.get("run_id") is String or not counter(config.get("run_serial")): return ["invalid_snapshot"]
+	if state.get("character_id") != config.get("character_id",Characters.DEFAULT_CHARACTER): return ["invalid_snapshot"]
+	if state.character_id != Characters.new().protagonist_id(state.chapter_id) and not Characters.new().selection_error(value.profile,state.chapter_id,state.character_id).is_empty(): return ["invalid_snapshot"]
 	if config.run_id != state.run_id or config.run_serial != state.run_serial or not _selection_valid(value.profile,{"doctrine_id":config.get("doctrine_id"),"target_evolution_id":config.get("target_evolution_id"),"supply_item_id":config.get("prepared_supply")}): return ["invalid_snapshot"]
 	if not state.get("supply_used") is bool or (config.prepared_supply == "" and state.supply_used): return ["invalid_snapshot"]
 	if not state.get("phase") is String or not state.phase in ["survival","evacuation","dead","won","abandoned"]: return ["invalid_snapshot"]
@@ -117,6 +120,7 @@ func _profile_valid(profile: Dictionary) -> bool:
 		if not profile.get(key) is Dictionary: return false
 	for key in ["cleared_chapter_ids","unlocked_character_ids","owned_doctrine_ids"]:
 		if not _unique_strings(profile.get(key)): return false
+	if not Characters.new().profile_selection_valid(profile): return false
 	if not "doctrine_standard" in profile.owned_doctrine_ids: return false
 	for id in profile.owned_doctrine_ids:
 		if _catalog.doctrine(id).is_empty(): return false

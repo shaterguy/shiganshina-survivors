@@ -1,5 +1,7 @@
 class_name SupplyService
 extends RefCounted
+const Characters = preload("res://game/progression/character_catalog.gd")
+var _characters = Characters.new()
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
 const Contracts = preload("res://game/contracts/game_save_contracts.gd")
@@ -13,7 +15,7 @@ var _contracts = Contracts.new(Callable())
 var _run_factory: Callable
 func _init(run_factory: Callable) -> void:
 	_run_factory = run_factory
-func shop_view(game_save: Variant) -> Dictionary:
+func shop_view(game_save: Variant, chapter_id: String = Characters.DEFAULT_CHAPTER) -> Dictionary:
 	var validation := _validate_economy(game_save)
 	var error: String = str(validation.get("error_code","invalid_game_save"))
 	if validation.get("ok") != true: return {"view_revision":1,"store_revision":int(game_save.get("store_revision",0)) if game_save is Dictionary and _counter(game_save.get("store_revision")) else 0,"balance":0,"items":[],"loadout":{},"can_shop":false,"lock_reason":error,"legacy_checkpoint_present":game_save.get("legacy_checkpoint_present",false) == true if game_save is Dictionary and game_save.get("legacy_checkpoint_present") is bool else false,"loadout_options":{"doctrines":[],"targets":[],"supplies":[]},"can_start":false,"start_blocked_reason":error}
@@ -33,7 +35,7 @@ func shop_view(game_save: Variant) -> Dictionary:
 		if definition.kind == "permanent_upgrade":
 			row.merge({"level":owned,"max_level":int(definition.max_owned),"is_max":owned >= definition.max_owned,"current_effect_text":_catalog.permanent_effect_text(definition,owned),"next_effect_text":_catalog.permanent_effect_text(definition,owned+1) if owned < definition.max_owned else "최고 단계","next_price":price if owned < definition.max_owned else null})
 		items.append(row)
-	return {"view_revision":1,"store_revision":int(game_save.store_revision),"balance":int(profile.supply_credits),"items":items,"loadout":profile.loadout.duplicate(true),"can_shop":not active,"lock_reason":"active_run" if active else "","legacy_checkpoint_present":game_save.legacy_checkpoint_present,"loadout_options":_loadout_options(profile,active),"can_start":_start_blocked(game_save).is_empty(),"start_blocked_reason":_start_blocked(game_save)}
+	return {"view_revision":1,"store_revision":int(game_save.store_revision),"balance":int(profile.supply_credits),"items":items,"loadout":profile.loadout.duplicate(true),"can_shop":not active,"lock_reason":"active_run" if active else "","legacy_checkpoint_present":game_save.legacy_checkpoint_present,"loadout_options":_loadout_options(profile,active),"selected_character_id":_characters.run_character_id(profile,chapter_id),"character_options":_characters.selection_rows(profile,chapter_id,active),"can_start":_start_blocked(game_save).is_empty(),"start_blocked_reason":_start_blocked(game_save)}
 func prepare_purchase(game_save: Variant, item_id: Variant, request_id: Variant, expected_revision: Variant) -> Dictionary:
 	if not item_id is String: return _fail("invalid_item")
 	if not request_id is String: return _fail("request_conflict")
@@ -90,6 +92,7 @@ func _validate_economy(save: Variant) -> Dictionary:
 	var state: Dictionary = save.checkpoint
 	if not state.get("content_revision") is String or state.content_revision != CONTENT_REVISION: return _fail("content_mismatch")
 	if not _run_envelope_valid(state): return _fail("invalid_snapshot")
+	if state.character_id != _characters.protagonist_id(state.chapter_id) and not _characters.selection_error(save.profile,state.chapter_id,state.character_id).is_empty(): return _fail("invalid_snapshot")
 	if state.run_serial != save.next_run_serial-1 or state.run_id != "%s:%d" % [save.career_id,int(state.run_serial)]: return _fail("invalid_snapshot")
 	var config: Dictionary = state.run_config
 	var selection := {"doctrine_id":config.doctrine_id,"target_evolution_id":config.target_evolution_id,"supply_item_id":config.prepared_supply}
@@ -113,6 +116,7 @@ func _run_envelope_valid(state: Dictionary) -> bool:
 	for key in ["run_id","doctrine_id","target_evolution_id","prepared_supply"]:
 		if not config.get(key) is String: return false
 	if config.run_id != state.run_id or config.run_serial != state.run_serial: return false
+	if state.get("character_id") != config.get("character_id",Characters.DEFAULT_CHARACTER): return false
 	if config.doctrine_id.is_empty() or config.target_evolution_id.is_empty() or not config.prepared_supply in ["","field_bandage"]: return false
 	return not (config.prepared_supply == "" and state.supply_used)
 func _counter(value: Variant) -> bool:
@@ -131,6 +135,19 @@ func prepare_loadout(game_save: Variant, selection: Variant, expected_revision: 
 	if not _loadout_valid(game_save.profile,selection): return _fail("invalid_loadout")
 	var candidate: Dictionary = game_save.duplicate(true)
 	candidate.profile.loadout = selection.duplicate(true)
+	return {"ok":true,"candidate":candidate}
+func prepare_character_selection(game_save: Variant, chapter_id: Variant, character_id: Variant, expected_revision: Variant) -> Dictionary:
+	if not chapter_id is String or not character_id is String: return _fail("invalid_character")
+	if not _counter(expected_revision): return _fail("stale_revision")
+	var validation := _validate_economy(game_save)
+	if validation.get("ok") != true: return _fail(str(validation.get("error_code","invalid_game_save")))
+	if expected_revision != game_save.store_revision: return _fail("stale_revision")
+	if game_save.store_revision >= MAX_COUNTER: return _fail("counter_exhausted")
+	if _has_unsettled_run(game_save): return _fail("active_run")
+	var error := _characters.selection_error(game_save.profile,chapter_id,character_id)
+	if not error.is_empty(): return _fail(error)
+	var candidate: Dictionary = game_save.duplicate(true)
+	candidate.profile.selected_character_id = character_id
 	return {"ok":true,"candidate":candidate}
 func prepare_run_start(game_save: Variant, chapter: Variant, seed: Variant, request_id: Variant, expected_revision: Variant) -> Dictionary:
 	if not chapter is Dictionary: return _fail("invalid_chapter")
@@ -162,6 +179,9 @@ func prepare_run_start(game_save: Variant, chapter: Variant, seed: Variant, requ
 	return _prepare_start_candidate(game_save,chapter,seed,selection,serial,request_id)
 func _prepare_start_candidate(game_save: Dictionary, chapter: Dictionary, seed: int, selection: Dictionary, serial: int, request_id: String) -> Dictionary:
 	var config := {"run_id":"%s:%d" % [game_save.career_id,serial],"run_serial":serial,"doctrine_id":selection.doctrine_id,"target_evolution_id":selection.target_evolution_id,"prepared_supply":selection.supply_item_id}
+	var character_id := _characters.run_character_id(game_save.profile,chapter.chapter_id)
+	if character_id.is_empty(): return _fail("invalid_character")
+	if character_id != Characters.DEFAULT_CHARACTER: config.character_id = character_id
 	var levels := _catalog.permanent_levels(game_save.profile)
 	if not levels.is_empty(): config.permanent_upgrades = levels
 	var state = _run_factory.call(chapter.duplicate(true),seed,config.duplicate(true))
@@ -208,7 +228,7 @@ func prepare_settlement(game_save: Variant, terminal_state: Variant) -> Dictiona
 	for key in ["kills","minibosses_defeated"]:
 		if not _counter(terminal_state.stats.get(key)): return _fail("invalid_snapshot")
 	if not _counter(terminal_state.get("survival_tick")) or not _counter(terminal_state.get("active_tick")) or terminal_state.survival_tick > terminal_state.active_tick or terminal_state.stats.minibosses_defeated > 5: return _fail("invalid_snapshot")
-	for key in ["run_config","seed","chapter_id","content_revision"]:
+	for key in ["run_config","seed","chapter_id","content_revision","character_id"]:
 		if not _same(terminal_state.get(key),game_save.checkpoint.get(key)): return _fail("invalid_snapshot")
 	if not terminal_state.get("rules") is Dictionary or not game_save.checkpoint.get("rules") is Dictionary: return _fail("invalid_snapshot")
 	if not terminal_state.rules.get("content_fingerprint") is String or terminal_state.rules.content_fingerprint.is_empty() or terminal_state.rules.content_fingerprint != game_save.checkpoint.rules.get("content_fingerprint"): return _fail("invalid_snapshot")
@@ -231,6 +251,8 @@ func settlement_breakdown(state: Dictionary) -> Dictionary:
 		if int(state.survival_tick) >= milestone: survival += 10
 	return {"kills":mini(int(state.stats.kills)/10,40),"survival":survival,"minibosses":mini(int(state.stats.minibosses_defeated),5)*15,"clear":30 if state.phase == "won" else 0}
 func _record_result(profile: Dictionary, state: Dictionary) -> void:
+	if state.phase == "won":
+		for id in _characters.unlocks_for_clear(profile,state.chapter_id): profile.unlocked_character_ids.append(id)
 	if state.phase == "won" and not state.chapter_id in profile.cleared_chapter_ids: profile.cleared_chapter_ids.append(state.chapter_id)
 	var old: Dictionary = profile.best_runs.get(state.chapter_id,{})
 	if (state.phase == "won" and not old.get("won",false)) or int(state.survival_tick) >= int(old.get("survival_tick",-1)):
