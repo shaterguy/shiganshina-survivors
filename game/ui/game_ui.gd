@@ -5,6 +5,7 @@ const TOUCH_DEADZONE := 4.0 / TOUCH_RADIUS
 const MOUSE_POINTER_ID := -2 # Touch indices are nonnegative; -1 means no owner.
 const Progression = preload("res://game/progression/upgrade_catalog.gd")
 const Address = preload("res://game/world/world_address.gd")
+const Signature = preload("res://game/combat/character_skill_resolver.gd")
 const OwnedHUD = preload("res://game/ui/progression_hud.gd")
 const Card = preload("res://game/ui/growth_card.gd")
 const DetailPanel = preload("res://game/ui/evolution_detail_panel.gd")
@@ -270,25 +271,26 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	get_node("Pause").position = safe.position + Vector2(safe.size.x-54,2)
 	var portrait := size_px.y > size_px.x
 	_owned_hud.position = safe.position+Vector2(4,52) if portrait else safe.position+Vector2(198,20)
-	_owned_hud.reflow(Vector2(safe.size.x-8 if portrait else safe.size.x-266,108))
+	var signature_height := 24 if _owned_hud.signature_visible() else 0
+	_owned_hud.reflow(Vector2(safe.size.x-8 if portrait else safe.size.x-266,108+signature_height))
 	_hud.position = safe.position + Vector2(8,19)
 	_hud.size = Vector2(minf(184,safe.size.x-70),19)
 	_health.position = safe.position + Vector2(8,40)
 	_health.size = Vector2(176,4)
 	_xp.position = safe.position + Vector2(8,46)
 	_xp.size = Vector2(176,3)
-	var boss_left := safe.position+Vector2(8,176) if portrait else safe.position+Vector2(8,74)
+	var boss_left := safe.position+Vector2(8,176+signature_height) if portrait else safe.position+Vector2(8,74)
 	_boss_name.position = boss_left
 	_boss_name.size = Vector2(safe.size.x-16 if portrait else 176,20)
 	_boss_health.position = boss_left+Vector2(0,22)
 	_boss_health.size = Vector2(minf(250,safe.size.x-100) if portrait else 176,7)
-	_objective.position = safe.position + Vector2(8,162 if portrait else 52)
+	_objective.position = safe.position + Vector2(8,162+signature_height if portrait else 52)
 	if _notice.get_parent() == self:
-		_notice.position = safe.position + Vector2(8,202 if portrait else 130)
+		_notice.position = safe.position + Vector2(8,202+signature_height if portrait else 130+signature_height)
 		_notice.size = Vector2(safe.size.x-40,40)
 	_notice.z_index = 2
 	if _growth_notice.get_parent() == self:
-		_growth_notice.position = safe.position+Vector2(8,208 if portrait else 130)
+		_growth_notice.position = safe.position+Vector2(8,208+signature_height if portrait else 130+signature_height)
 		_growth_notice.size = Vector2(safe.size.x-16,44)
 	_growth_notice.z_index = 2
 	_hint.position = safe.position + Vector2(20,safe.size.y-28)
@@ -298,6 +300,7 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 func present(snapshot: Dictionary) -> void:
 	if _snapshot.get("run_id","") != snapshot.get("run_id",""): reset_progression_feedback()
 	_snapshot = snapshot.duplicate(true)
+	if _owned_hud.present_signature(Signature.presentation(snapshot)): reflow(_screen_size,_safe_rect)
 	_objective.text = objective_text(snapshot)
 	_objective.visible = not snapshot.is_empty()
 	_hud.visible = not snapshot.is_empty()
@@ -888,6 +891,11 @@ func _render_owned_skills() -> void:
 				var empty := Label.new()
 				empty.text = ("장비" if kind == "equipment" else "보조")+" · 빈 칸"
 				_choices.add_child(empty)
+	if _snapshot.get("character_id","") == "mikasa_01":
+		var signature := Label.new()
+		signature.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		signature.text = "집중 연격 · 가까운 적 한 명에게 자동 3연격\n18 / 18 / 36 피해 · 0 / 0.13 / 0.27초 · 재사용 12초\n매 타격 범위·방향·엄폐를 다시 확인합니다. 고유 슬롯이며 장비 칸을 사용하지 않습니다.\n초기 수치 · 글로벌 피해 강화 적용 · 대표 궁극 미구현" if Signature.enabled(_snapshot) else "고유 공격 · 다음 미카사 출격부터 집중 연격을 사용합니다."
+		_choices.add_child(signature)
 	_add_button("일시정지로 돌아가기",close_owned_skills).set_meta("semantic_id","owned_back")
 func _owned_row(id: String) -> Dictionary:
 	for kind in ["equipment","passives"]:
@@ -964,7 +972,7 @@ func _sync_upgrade_notice(mode: String) -> void:
 		_growth_notice.reparent(parent)
 		if parent != self: parent.move_child(_growth_notice,2)
 		else:
-			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,208 if _screen_size.y > _screen_size.x else 130)
+			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,(208 if _screen_size.y > _screen_size.x else 130)+(24 if _owned_hud.signature_visible() else 0))
 			_growth_notice.size = Vector2(_safe_rect.size.x-16,44)
 	var text := ("직전 선택 · " if mode == "upgrade" else "")+_growth_notice_text
 	if _growth_notice.text != text: _growth_notice.text = text

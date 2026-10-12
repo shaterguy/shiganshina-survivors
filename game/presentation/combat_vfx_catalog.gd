@@ -1,6 +1,6 @@
 class_name CombatVfxCatalog
 extends RefCounted
-const SKILLS := ["blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire","chain_lightning|","chain_lightning|evo_storm_chain","fire_zone|","fire_zone|evo_inferno_zone"]
+const SKILLS := ["character:mikasa_unique_attack|","blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire","chain_lightning|","chain_lightning|evo_storm_chain","fire_zone|","fire_zone|evo_inferno_zone"]
 const ROLES := ["cast","projectile","aim","impact","trail","area"]
 const PASSES := ["ground","world","contact_overlay"]
 var _data: Dictionary = {}

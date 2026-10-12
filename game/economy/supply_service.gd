@@ -182,6 +182,7 @@ func _prepare_start_candidate(game_save: Dictionary, chapter: Dictionary, seed: 
 	var character_id := _characters.run_character_id(game_save.profile,chapter.chapter_id)
 	if character_id.is_empty(): return _fail("invalid_character")
 	if character_id != Characters.DEFAULT_CHARACTER: config.character_id = character_id
+	if character_id == "mikasa_01": config.character_skill_revision = 1
 	var levels := _catalog.permanent_levels(game_save.profile)
 	if not levels.is_empty(): config.permanent_upgrades = levels
 	var state = _run_factory.call(chapter.duplicate(true),seed,config.duplicate(true))

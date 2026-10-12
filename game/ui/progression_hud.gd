@@ -6,6 +6,8 @@ const SHORT_NAMES := {"blade_slash":"쌍검","movement":"발걸음","fire_interv
 var _slots: Array[Control] = []
 var _entry: Button
 var _target: Label
+var _signature: Label
+var _signature_visible := false
 var _display := ""
 var _content: Dictionary = {}
 var _highlight_id := ""
@@ -48,11 +50,18 @@ func _ready() -> void:
 	_target.add_theme_constant_override("line_spacing",-1)
 	_target.add_theme_color_override("font_color",Color("e6c88d"))
 	add_child(_target)
+	_signature = Label.new()
+	_signature.name = "CharacterSkill"
+	_signature.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_signature.add_theme_font_size_override("font_size",13)
+	_signature.add_theme_color_override("font_color",Color("e6c88d"))
+	_signature.hide()
+	add_child(_signature)
 	set_process(false)
 	reflow(Vector2(288,108))
 func reflow(bounds: Vector2) -> void:
 	size = bounds
-	_entry.size = bounds
+	_entry.size = Vector2(bounds.x,108)
 	var slot_width := (bounds.x-6.0)/4.0
 	for index in _slots.size():
 		var slot := _slots[index]
@@ -66,6 +75,18 @@ func reflow(bounds: Vector2) -> void:
 		status.size = Vector2(slot_width-6,19)
 	_target.position = Vector2(0,69)
 	_target.size = Vector2(bounds.x,39)
+	_signature.position = Vector2(0,108)
+	_signature.size = Vector2(bounds.x,24)
+func present_signature(view: Dictionary) -> bool:
+	var visible_now := bool(view.get("visible",false))
+	var changed := visible_now != _signature_visible
+	_signature_visible = visible_now
+	_signature.visible = visible_now
+	var text := str(view.get("text",""))
+	if _signature.text != text: _signature.text = text
+	return changed
+func signature_visible() -> bool:
+	return _signature_visible
 func present(view: Dictionary) -> void:
 	var content := {"owned":view.get("owned",{}),"target":view.get("target",{}),"evolutions":view.get("evolutions",[])}
 	if content == _content: return

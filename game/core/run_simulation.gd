@@ -16,6 +16,7 @@ const Catalog = preload("res://game/progression/upgrade_catalog.gd")
 const Chapters = preload("res://game/director/chapter_catalog.gd")
 const Supplies = preload("res://game/economy/supply_catalog.gd")
 const Growth = preload("res://game/progression/growth_offer_service.gd")
+const Signature = preload("res://game/combat/character_skill_resolver.gd")
 const Fantasy = preload("res://game/combat/fantasy_attack_resolver.gd")
 const Evolved = preload("res://game/combat/evolved_attack_resolver.gd")
 const Streamed = preload("res://game/core/streamed_run_world.gd")
@@ -39,6 +40,7 @@ const GAMEPLAY_PATHS := ["data/equipment.json","data/passives.json","data/evolut
 var _catalog: UpgradeCatalog
 var _supplies: SupplyCatalog
 var _evolved
+var _signature
 var _chapter_provider
 var _chapter: Dictionary = {}
 var _definition_hashes: Dictionary = {}
@@ -82,6 +84,7 @@ func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dicti
 	else:
 		_supplies = Supplies.new(definitions.get(GAMEPLAY_PATHS[4],{}),definitions.get(GAMEPLAY_PATHS[3],{}),definitions.get(GAMEPLAY_PATHS[0],{}),definitions.get(GAMEPLAY_PATHS[1],{}))
 	_evolved = Evolved.new(_catalog)
+	_signature = Signature.new(_catalog)
 	var loaded := _load_provider_chapter()
 	if not loaded.get("ok",false):
 		_content_error = "content_mismatch"
@@ -164,6 +167,7 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	config.run_serial = int(config.run_serial)
 	var rules := _rules_for(current.chapter,doctrine,config)
 	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":config.get("character_id",Characters.DEFAULT_CHARACTER),"seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
+	if Signature.enabled(state): state.character_skill = Signature.initial_state()
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
 		state.escape_zone = Streamed.CITY_INACTIVE_EXIT.duplicate()
@@ -299,6 +303,7 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 	var existing_projectiles := {}
 	for projectile in state.projectiles: existing_projectiles[str(projectile.id)] = true
 	_auto_attack(state,events,boss_rewards)
+	_auto_signature(state,events)
 	_execute_player_attacks(state,events,boss_rewards)
 	_advance_projectiles(state,events,boss_rewards,existing_projectiles)
 	_remove_dead(state)
@@ -481,6 +486,7 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 			if not _projectile_valid(restored,projectile,canonical_damage): return _failure("invalid_core_state")
 			projectile.damage = canonical_damage[0]
 	if not Fantasy.canonicalize(restored,_catalog): return _failure("invalid_core_state")
+	_signature.canonicalize(restored)
 	_canonicalize_saved_vectors(restored)
 	if validation_helper != null:
 		var status: Dictionary = validation_helper.query_status()
@@ -514,7 +520,7 @@ func _v2_relationships_valid(state: Dictionary, chapter: Dictionary) -> bool:
 	if state.phase == "dead" and state.player.hp != 0: return false
 	if state.phase in ["survival","evacuation","won"] and not _number_valid(state.player.get("hp"),0.0000001): return false
 	# Raw enemy records are validated with their prepared world below.
-	if not _evolved.validate_records(_legacy_attack_state(state)) or not Fantasy.validate_records(state,_catalog) or not state.evolution_runtime.is_empty(): return false
+	if not _evolved.validate_records(_legacy_attack_state(state)) or not Fantasy.validate_records(state,_catalog) or not _signature.validate_records(state) or not state.evolution_runtime.is_empty(): return false
 	return true
 # Old production commands have durable monotonic owners already in RunState.
 # Batch collection bounds work and preserves opaque historical IDs unchanged.
@@ -605,6 +611,7 @@ func _apply_command(state: Dictionary, command: Dictionary, events: Array[Dictio
 				state.projectiles.clear()
 				state.telegraphs.clear()
 				state.player_attack_instances.clear()
+				if state.has("character_skill"): state.character_skill.pending_cast_id = ""
 				state.enemy_attack_instances.clear()
 				_claim_id(state.boss_ids_fired,"ch01_final_armored")
 				_emit(state,events,"phase_changed",phase_payload)
@@ -1099,8 +1106,32 @@ func _fantasy_cover_clear(state: Dictionary, origin: Vector2, target: Vector2) -
 	return World.sweep(origin,target-origin,0,_finite_geometry(state)).distance_to(target) <= 0.001
 func _legacy_attack_state(state: Dictionary) -> Dictionary:
 	var legacy := state.duplicate()
-	legacy.player_attack_instances = state.player_attack_instances.filter(func(record): return not record is Dictionary or not Fantasy.is_fantasy(record))
+	legacy.player_attack_instances = state.player_attack_instances.filter(func(record): return not record is Dictionary or (not Fantasy.is_fantasy(record) and not Signature.is_signature(record)))
 	return legacy
+func _auto_signature(state: Dictionary, events: Array[Dictionary]) -> void:
+	if not state.has("character_skill"): return
+	var runtime: Dictionary = state.character_skill
+	var tick := int(state.active_tick)
+	if tick < int(runtime.next_probe_tick) or tick < int(runtime.ready_tick) or not str(runtime.pending_cast_id).is_empty(): return
+	if tick > MAX_COUNTER-Signature.COOLDOWN or state.attack_seq >= MAX_COUNTER or state.event_seq > MAX_COUNTER-5: return
+	runtime.next_probe_tick = mini(MAX_COUNTER,tick+Signature.PROBE_INTERVAL)
+	if state.player_attack_instances.size()+3 > 64: return
+	var query := func(point: Vector2, radius: float): return _spatial.query(point,radius)
+	var clear := func(from: Vector2, to: Vector2): return _fantasy_cover_clear(state,from,to)
+	var target: int = _signature.choose_target(state,query,clear)
+	if target < 0: return
+	var direction := _vec(state.player.position).direction_to(_vec(state.entities[target].position))
+	if direction.is_zero_approx(): direction = _vec(state.player.facing)
+	var cast: String = state.run_id+":attack:"+str(int(state.attack_seq)+1)
+	var proposal: Dictionary = _signature.reserve(state,str(state.entities[target].id),direction,cast)
+	if not proposal.get("ok",false): return
+	state.attack_seq = int(state.attack_seq)+1
+	runtime.ready_tick = tick+Signature.COOLDOWN
+	runtime.next_probe_tick = runtime.ready_tick
+	runtime.pending_cast_id = cast
+	for record in proposal.records:
+		state.player_attack_instances.append(record)
+		_emit(state,events,"player_attack",_attack_payload(record,"scheduled"))
 func _fantasy_capacity(state: Dictionary, item_id: String, count: int, events: Array[Dictionary]) -> bool:
 	var casts := {}
 	var next_release := MAX_COUNTER
@@ -1121,6 +1152,7 @@ func _attack_payload(record: Dictionary, phase: String) -> Dictionary:
 	result.phase = phase
 	var geometry := {"shape":record.shape,"origin":record.origin.duplicate(),"direction":record.direction.duplicate(),"radius":float(record.radius),"arc_degrees":float(record.arc_degrees)}
 	for field in ["length","width","projectile_id","target_id"]:
+		if field == "target_id" and Signature.is_signature(record): continue
 		if record.has(field): geometry[field] = record[field]
 	result.geometry = geometry
 	return result
@@ -1146,11 +1178,16 @@ func _execute_player_attacks(state: Dictionary, events: Array[Dictionary], boss_
 			if entity.hp <= 0.0 or id in record.hit_entity_ids: continue
 			if record.has("target_id") and record.target_id != id: continue
 			if not Geometry.overlaps(record,_vec(entity.position),float(entity.radius)): continue
-			var visible := _fantasy_cover_clear(state,_vec(record.origin),_vec(entity.position)) if Fantasy.is_fantasy(record) else _cover_clear(state,_vec(record.origin),_vec(entity.position),0,16 if record.evolution_id == "evo_crossfire" else 4)
+			var visible := _fantasy_cover_clear(state,_vec(record.origin),_vec(entity.position)) if Fantasy.is_fantasy(record) or Signature.is_signature(record) else _cover_clear(state,_vec(record.origin),_vec(entity.position),0,16 if record.evolution_id == "evo_crossfire" else 4)
 			if visible:
 				record.hit_entity_ids.append(id)
 				_hit_entity(state,entity,float(record.damage),record.base_item_id,events,boss_rewards,record.attack_id)
 	state.player_attack_instances = pending
+	if state.has("character_skill") and not str(state.character_skill.pending_cast_id).is_empty():
+		var still_pending := false
+		for record in pending:
+			if Signature.is_signature(record): still_pending = true; break
+		if not still_pending: state.character_skill.pending_cast_id = ""
 func _advance_projectiles(state: Dictionary, events: Array[Dictionary], boss_rewards: Array[Dictionary], existing: Dictionary) -> void:
 	var kept: Array = []
 	for projectile in state.projectiles:
@@ -1422,7 +1459,7 @@ func _normalize_saved_numbers(value: Variant, parent_key := "") -> bool:
 				var child = value[key]
 				value.erase(key)
 				value[str(key)] = child
-			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
+			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["character_skill_revision","ready_tick","next_probe_tick","cast_damage_level","recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
 				var number: float = value[key]
 				if not is_finite(number) or number != floor(number) or number < (-1.0 if key in ["final_started_tick","role_wait_since"] else 0.0) or number > MAX_COUNTER: return false
 				value[key] = int(number)
@@ -1854,6 +1891,7 @@ func _validation_walkable(state: Dictionary, position: Vector2, radius: float, h
 # No per-tick restore, fresh helper, prepare or full-state recursive duplication.
 func _tick_candidate(state: Dictionary) -> Dictionary:
 	var candidate := state.duplicate()
+	if state.has("character_skill"): candidate.character_skill = state.character_skill.duplicate()
 	candidate.player = state.player.duplicate()
 	candidate.player.attack_ready_ticks = state.player.attack_ready_ticks.duplicate()
 	candidate.stats = state.stats.duplicate()

@@ -51,6 +51,7 @@ static func prepare(simulation, state: Dictionary, authority: Dictionary, chapte
 		if not checkpoint.has(collection): continue
 		var ids: Array = proposal.retire_ids.get(collection,[])
 		checkpoint[collection] = checkpoint[collection].filter(func(record): return not _record_id(record) in ids)
+	if checkpoint.has("character_skill"): checkpoint.character_skill.pending_cast_id = ""
 	if int(checkpoint.world.get("schema_version",1)) == 2:
 		# Consume only Core's admitted final record; never clear unrelated data.
 		checkpoint.world.dormant.entities = checkpoint.world.dormant.entities.filter(func(entry): return str(entry.record.id) != str(handoff.entity.id))

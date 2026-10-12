@@ -23,7 +23,7 @@ func _catalog(t) -> void:
 	t.check(registry.selection_error(profile,"chapter_02","mikasa_01") == "not_implemented","Future scenario is unavailable")
 	var mikasa: Dictionary = registry.definition("mikasa_01")
 	t.check(mikasa.implementation_status == "prototype" and mikasa.art_status == "missing","Prototype and missing original art are explicit")
-	t.check(mikasa.signature_ultimate.implementation_status == "planned" and mikasa.unique_skill.implementation_status == "planned","Numeric traits do not claim a finished unique skill or ultimate")
+	t.check(mikasa.signature_ultimate.implementation_status == "planned" and mikasa.unique_skill.implementation_status == "implemented","Implemented unique attack keeps signature ultimate planned")
 	t.check(registry.definition("levi_01").implementation_status == "planned","Levi remains planned without protagonist exclusion")
 	mikasa.traits.move_speed_multiplier = 999
 	t.check(registry.run_traits("mikasa_01").move_speed_multiplier == 1.08,"Registry values do not alias callers")

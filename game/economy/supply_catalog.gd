@@ -171,6 +171,9 @@ func permanent_levels_valid(value: Variant) -> bool:
 	return true
 func run_upgrade_config_valid(config: Dictionary) -> bool:
 	var character_fields := 1 if config.has("character_id") else 0
+	if config.has("character_skill_revision"):
+		if config.get("character_id","") != "mikasa_01" or not preload("res://game/progression/upgrade_catalog.gd").integer_valid(config.character_skill_revision,1,1): return false
+		character_fields += 1
 	if character_fields and not Characters.new().runtime_available(config.character_id): return false
 	if not config.has("permanent_upgrades"): return config.size() == 5+character_fields
 	return config.size() == 6+character_fields and permanent_levels_valid(config.permanent_upgrades)

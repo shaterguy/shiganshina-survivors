@@ -64,6 +64,7 @@ func _present_characters(view: Dictionary) -> void:
 		var selected := bool(option.get("is_selected",false))
 		var lines: Array[String] = [("[선택] " if selected else "")+str(option.get("name",id)),str(option.get("trait_text",""))]
 		if option.get("art_status","") != "ready": lines.append("전용 원화 미구현"+(" · 임시 외형" if option.get("implementation_status","") == "prototype" else ""))
+		if option.get("unique_skill",{}).get("implementation_status","") == "implemented": lines.append("고유 · 집중 연격 · 자동 3타 · 재사용 12초 (초기 수치)")
 		var unfinished: Array[String] = []
 		if option.get("unique_skill",{}).get("implementation_status","") == "planned": unfinished.append("고유 공격 미구현")
 		if option.get("signature_ultimate",{}).get("implementation_status","") == "planned": unfinished.append("대표 궁극 미구현")

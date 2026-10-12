@@ -15,7 +15,7 @@ func validate_snapshot(value: Dictionary) -> Array[String]:
 	for key in REQUIRED:
 		if not value.has(key): return ["missing:"+key]
 	for key in value:
-		if not key in REQUIRED and key != "world": return ["invalid_snapshot"]
+		if not key in REQUIRED and not key in ["world","character_skill"]: return ["invalid_snapshot"]
 	for key in ["content_revision","chapter_id","character_id","phase","run_id","rng_state","progression_rng_state"]:
 		if not value[key] is String or value[key].is_empty(): return ["invalid_snapshot"]
 	if not value.phase in PHASES: return ["invalid_snapshot"]
@@ -29,6 +29,7 @@ func validate_snapshot(value: Dictionary) -> Array[String]:
 	for key in ["player","equipment","passives","upgrade_offer","stats","rules","run_config","evolutions","evolution_runtime"]:
 		if not value[key] is Dictionary: return ["invalid_snapshot"]
 	if value.has("world") and not value.world is Dictionary: return ["invalid_snapshot"]
+	if value.has("character_skill") and not value.character_skill is Dictionary: return ["invalid_snapshot"]
 	return []
 func _json_safe(value: Variant) -> bool:
 	return _visit(value,0,[200000])

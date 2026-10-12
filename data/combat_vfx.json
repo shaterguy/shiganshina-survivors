@@ -604,6 +604,34 @@
           "mapping_note": "Final executed inferno stage reuses the original crossfire blast raster at its actual larger radius; no asset alias or approval override."
         }
       }
+    },
+    {
+      "recipe_id": "mikasa_unique_attack",
+      "base_item_id": "character:mikasa_unique_attack",
+      "evolution_id": "",
+      "visual_identity": "focused_three_strike",
+      "phases": {
+        "cast": {
+          "recipe_id": "mikasa_unique_attack.cast",
+          "role": "cast",
+          "art_id": "vfx_blade_crescent",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 8,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "sector",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_blade_crescent",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
     }
   ],
   "art_requirements": [
