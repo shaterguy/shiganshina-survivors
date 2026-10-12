@@ -302,8 +302,9 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 				_role_query(state)
 				break
 	_move_player(state,move)
-	_move_enemies(state,events)
+	var waiting_moves := _move_enemies(state,events)
 	_spatial.rebuild(state.entities)
+	_move_waiting_roles(state,waiting_moves)
 	_admit_role_attacks(state,events)
 	var boss_rewards: Array[Dictionary] = []
 	var existing_projectiles := {}
@@ -712,16 +713,41 @@ func _move_player(state: Dictionary, input: Vector2) -> void:
 	state.player.position = _array(position)
 	state.player.velocity = _array(velocity)
 	if not move.is_zero_approx(): state.player.facing = _array(move.normalized())
-func _move_enemies(state: Dictionary, events: Array[Dictionary]) -> void:
+func _move_enemies(state: Dictionary, events: Array[Dictionary]) -> Array[int]:
 	# Successful target clearances belong only to this movement batch.
 	var movement_targets := {}
-	for entity in state.entities:
+	var waiting_moves: Array[int] = []
+	for index in state.entities.size():
+		var entity: Dictionary = state.entities[index]
 		if not entity.has("action_state"): _initialize_action(state,entity)
 		_advance_enemy_action(state,entity,events,movement_targets)
+		# Eligibility/attack updates keep their original array order. Only the
+		# physical reposition of an already waiting actor is deferred.
+		if _is_live_role(entity) and entity.hp > 0 and entity.action_state == "move" and int(entity.role_wait_since) >= 0 and int(entity.role_wait_since) < int(state.active_tick):
+			waiting_moves.append(index)
 		# NEW derived inactive anchors: the move branch reads position/player;
 		# _start_enemy_action overwrites both anchors before using an attack.
 		# Never rewrite windup, airborne, attack or recovery geometry.
 		if state.has("world") and state.world.stage == "city" and entity.action_state == "move":
+			entity.locked_origin = entity.position.duplicate()
+			entity.locked_target = state.player.position.duplicate()
+	return waiting_moves
+func _move_waiting_roles(state: Dictionary, indices: Array[int]) -> void:
+	if indices.is_empty(): return
+	# The existing rebuild now describes this exact, fixed entity array after
+	# spawn and every ordinary/attack move (including terrain destruction).
+	# Relocate only moved waiters, so later waiters and combat queries stay exact.
+	# Movement only reads these normalized profiles. Reuse at most the three
+	# live roles within this call; never retain a catalog across tick/Core scope.
+	var waiting_profiles := {}
+	for index in indices:
+		var entity: Dictionary = state.entities[index]
+		var role := str(entity.enemy_id)
+		if not waiting_profiles.has(role): waiting_profiles[role] = _role_profile(role)
+		var previous := _vec(entity.position)
+		_move_waiting_role(state,entity,waiting_profiles[role])
+		_spatial.relocate(index,previous,_vec(entity.position))
+		if state.has("world") and state.world.stage == "city":
 			entity.locked_origin = entity.position.duplicate()
 			entity.locked_target = state.player.position.duplicate()
 func _initialize_action(state: Dictionary, entity: Dictionary) -> void:
@@ -2145,12 +2171,59 @@ func _advance_role_attack(state: Dictionary, entity: Dictionary, _events: Array[
 		var legal: Dictionary = _role_query(state).walkable(position,maxf(float(entity.radius),float(profile.width)*0.5))
 		if not legal.get("ok",false): _role_failure(legal); return
 		if legal.walkable:
-			if int(entity.role_wait_since) < 0: entity.role_wait_since = tick
+			if int(entity.role_wait_since) < 0:
+				entity.role_wait_since = tick
 			entity.velocity = [0.0,0.0]
 			return
 	entity.role_wait_since = -1
 	entity.role_retry_tick = 0
 	_move_pursuing_enemy(state,entity,movement_targets)
+# Waiting is an admission state, not a command to freeze the actor. These
+# provisional movement bands stay inside the authored attack trigger; they do
+# not change attack reach, damage, reservations or the durable retry clocks.
+func _move_waiting_role(state: Dictionary, entity: Dictionary, profile: Dictionary) -> void:
+	var band: Vector2 = {"stone_thrower":Vector2(180.0,250.0),"grabber":Vector2(115.0,155.0),"quadruped":Vector2(110.0,145.0)}[entity.enemy_id]
+	var position := _vec(entity.position)
+	var player := _vec(state.player.position)
+	var offset := position-player
+	var distance := offset.length()
+	var away := offset.normalized() if distance > 0.0001 else -_vec(entity.facing)
+	var speed := float(entity.speed)
+	var next_distance := move_toward(distance,clampf(distance,band.x,band.y),speed*0.55/TICKS_PER_SECOND)
+	# A bounded four-second lateral arc, with smooth reversals. Phase uses only
+	# saved wait age and identity, so restore/rebase cannot restart the motion.
+	# Differencing the sine avoids a persistent one-direction orbit at rest.
+	var phase := (int(state.active_tick)-int(entity.role_wait_since)+str(entity.id).hash()%240)%240
+	var angular_scale := speed*0.4*4.0/(TAU*(band.x+band.y)*0.5)
+	var angle := angular_scale*(sin(TAU*float(phase)/240.0)-sin(TAU*float(phase-1)/240.0))
+	var preferred := player+away.rotated(angle)*next_distance-position
+	var mirrored := player+away.rotated(-angle)*next_distance-position
+	# Peer bodies are non-solid, as in ordinary chase/spawn/restore. Keep the
+	# saved-phase intention stable; only actual terrain/range rejection can
+	# select the mirrored arc. No peer score or outward search redirects it.
+	var choices: Array[Vector2] = [preferred]
+	if mirrored != preferred: choices.append(mirrored)
+	# Preserve the legal attack-origin clearance as well as the torso. The
+	# existing swept-axis mover supplies wall sliding and transactional failure.
+	var radius := maxf(float(entity.radius),float(profile.width)*0.5)
+	var next := position
+	# At most two finite choices means at most two actual world moves.
+	for delta in choices:
+		if delta.is_zero_approx(): continue
+		var endpoint := _move_world(state,position,delta,radius)
+		if _streamed != null and not _streamed.query_status().get("ok",false): break
+		# Axis clipping is accepted only at its actual endpoint. Terrain and
+		# authored trigger remain hard boundaries, with transactional failure.
+		if endpoint.distance_to(player) <= float(profile.trigger_range) and not (endpoint-position).is_zero_approx():
+			next = endpoint
+			break
+	var travelled := next-position
+	entity.position = _array(next)
+	entity.velocity = _array(travelled*TICKS_PER_SECOND)
+	var facing := next.direction_to(player)
+	if not facing.is_zero_approx(): entity.facing = _array(facing)
+	if travelled.is_zero_approx() and preferred.length() > 0.0001 and _tick_navigation.has("actors"):
+		_tick_navigation.actors.append({"entity_id":str(entity.id),"reason":"waiting_reposition_blocked","radius":radius})
 func _admit_role_attacks(state: Dictionary, events: Array[Dictionary]) -> void:
 	if not _role_error.is_empty() or state.phase != "survival": return
 	var eligible: Array[Dictionary] = []
