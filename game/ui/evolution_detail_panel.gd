@@ -23,3 +23,26 @@ func present(detail: Dictionary) -> void:
 	_label.text = _display
 func display_text() -> String:
 	return _display
+func present_owned(row: Dictionary, evolution: Dictionary) -> void:
+	# Reuse the existing recipe body and append only authoritative owned facts.
+	present(evolution)
+	var recipe_text := _display
+	var level := ("MAX %d/%d" if row.get("is_max",false) else "Lv %d/%d") % [int(row.get("level",0)),int(row.get("max_level",0))]
+	var title := str(row.get("name","기술 정보 확인 중"))+" · "+level
+	if row.get("is_evolved",false): title = str(evolution.get("name",row.get("name","")))+" · 궁극\n기초 기술 "+level
+	var parts: Array[String] = [title,str(row.get("attack_summary","")),current_effect_text(row.get("effect_stats",{}))]
+	if evolution.is_empty(): parts.append(("MAX · " if row.get("is_max",false) else "")+"추가 진화 없음")
+	else: parts.append(recipe_text)
+	_display = Card.player_text("\n\n".join(parts))
+	_label.text = _display
+static func current_effect_text(stats: Dictionary) -> String:
+	var lines: Array[String] = []
+	var labels := {"damage":"타격당 피해","total_damage":"총 피해","hits":"연속 타격 수","range":"공격 범위","splash_radius":"폭발 반경"}
+	for key in labels:
+		if stats.has(key): lines.append("%s %s" % [labels[key],str(stats[key])])
+	if stats.has("stat") and stats.has("value"):
+		var names := {"damage_multiplier":"공격 피해 배율","cooldown_multiplier":"공격 간격 배율","move_multiplier":"이동 속도 배율","max_hp":"최대 체력","regen_per_second":"초당 체력 회복","pickup_radius":"수집 반경","range_multiplier":"공격 범위 배율","armor":"피해 감소"}
+		lines.append("%s %s" % [names.get(str(stats.stat),str(stats.stat)),str(stats.value)])
+	var effect := Card.effect_text(stats)
+	if not effect.is_empty(): lines.append(effect)
+	return "\n".join(lines)

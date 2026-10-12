@@ -5,6 +5,7 @@ const TOUCH_DEADZONE := 4.0 / TOUCH_RADIUS
 const MOUSE_POINTER_ID := -2 # Touch indices are nonnegative; -1 means no owner.
 const Progression = preload("res://game/progression/upgrade_catalog.gd")
 const Address = preload("res://game/world/world_address.gd")
+const OwnedHUD = preload("res://game/ui/progression_hud.gd")
 const Card = preload("res://game/ui/growth_card.gd")
 const DetailPanel = preload("res://game/ui/evolution_detail_panel.gd")
 const ShopPanel = preload("res://game/ui/supply_shop_panel.gd")
@@ -21,6 +22,7 @@ signal shop_open_requested
 signal shop_closed
 signal purchase_requested(item_id: String, view_revision: int)
 signal loadout_changed(selection: Dictionary, view_revision: int)
+signal character_selected(character_id: String, view_revision: int)
 signal run_start_requested
 signal recovery_start_requested
 signal recovery_keep_requested
@@ -39,6 +41,8 @@ var _supply_waiting_result := false
 var _supply_lock_revision := -1
 var _last_action_result: Dictionary = {}
 var _modal_focus := {"shop":"","loadout":""}
+var _owned_open := false
+var _detail_origin := "upgrade"
 var _detail_id := ""
 var _return_focus_id := ""
 var _accept_transition_gate := false
@@ -62,6 +66,7 @@ var _choices: GridContainer
 var _scroll: ScrollContainer
 var _title: Label
 var _subtitle: Label
+var _owned_hud: Control
 var _hud: Label
 var _health: ProgressBar
 var _xp: ProgressBar
@@ -74,6 +79,10 @@ var _input_kind := "touch"
 var _overlay: ColorRect
 var _hint: Label
 var _objective: Label
+var _growth_notice: Label
+var _growth_notice_text := ""
+var _growth_notice_seconds := 0.0
+var _growth_waiting_result := false
 var _notice: Label
 var _dev_notice: Label
 var _checkpoint_available := false
@@ -91,6 +100,8 @@ func _ready() -> void:
 	add_theme_font_size_override("font_size",16)
 	_hud = Label.new()
 	_hud.name = "HUD"
+	_hud.add_theme_font_size_override("font_size",13)
+	_hud.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_hud.position = Vector2(20,14)
 	_hud.add_theme_color_override("font_color",Color("f1e7cf"))
 	add_child(_hud)
@@ -112,6 +123,7 @@ func _ready() -> void:
 	_bar_colors(_boss_health,Color("cf6e46"))
 	add_child(_boss_health)
 	_boss_name = Label.new()
+	_boss_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_boss_name.add_theme_font_size_override("font_size",13)
 	_boss_name.add_theme_color_override("font_color",Color("f4c36b"))
 	add_child(_boss_name)
@@ -127,6 +139,10 @@ func _ready() -> void:
 	_stick_knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_stick_knob.modulate.a = 0.7
 	add_child(_stick_knob)
+	_owned_hud = OwnedHUD.new()
+	_owned_hud.name = "ProgressionHUD"
+	add_child(_owned_hud)
+	_owned_hud.details_requested.connect(open_owned_skills)
 	var pause := Button.new()
 	pause.text = "Ⅱ"
 	pause.name = "Pause"
@@ -147,8 +163,19 @@ func _ready() -> void:
 	_notice.add_theme_color_override("font_color",Color("f4c36b"))
 	_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_notice)
+	_growth_notice = Label.new()
+	_growth_notice.name = "ConfirmedUpgrade"
+	_growth_notice.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_growth_notice.add_theme_font_size_override("font_size",13)
+	_growth_notice.add_theme_color_override("font_color",Color("f4c36b"))
+	_growth_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_growth_notice.hide()
+	add_child(_growth_notice)
+	set_process(false)
 	_dev_notice = Label.new()
 	_dev_notice.text = development_notice(manifest if manifest is Dictionary else {})
+	_dev_notice.tooltip_text = _dev_notice.text
+	_dev_notice.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_dev_notice.add_theme_font_size_override("font_size",11)
 	_dev_notice.add_theme_color_override("font_color",Color("f4c36b"))
 	_dev_notice.z_index = 3
@@ -220,8 +247,15 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	var width := _menu_width(safe.size.x)
 	if geometry_changed and _mode == "upgrade":
 		_prepare_growth_widths(_growth_view.get("active_offer",{}).get("options",[]).size())
-	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
-	var height := minf(desired_height, safe.size.y - 36)
+	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
+	var short_supply := _mode in ["shop","loadout"] and _screen_size.x > _screen_size.y and safe.size.y < 360
+	var height := minf(desired_height, safe.size.y - (12 if short_supply else (32 if _mode == "shop" else 36)))
+	if _mode == "shop":
+		_subtitle.text = "전투 종료 정산 금화"+(" · " if short_supply else "\n")+"A 확인 · B 뒤로"
+	if _mode == "loadout":
+		_subtitle.text = "시나리오 1 · %s · 845" % _chapter_title()+(" · " if short_supply else "\n")+"A 선택 · B 상점"
+	if short_supply: _subtitle.add_theme_font_size_override("font_size",13)
+	else: _subtitle.remove_theme_font_size_override("font_size")
 	_panel.size = Vector2(width,height)
 	_panel.position = safe.position + (safe.size-_panel.size)*0.5
 	_layout_generation += 1
@@ -230,31 +264,44 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	# Keep the choice viewport large enough for the summary itself. Full recipe
 	# prose belongs to the explicit detail view, never an oversized focus target.
 	var compact_menu := _mode in ["title","pause","settings","won","dead","abandoned"]
-	_panel.get_node("Body").add_theme_constant_override("separation",8 if _mode == "upgrade" or compact_menu else 14)
+	_panel.get_node("Body").add_theme_constant_override("separation",4 if short_supply else (8 if _mode in ["upgrade","shop"] or compact_menu else 14))
 	_choices.add_theme_constant_override("v_separation",6 if compact_menu else 10)
-	_title.add_theme_font_size_override("font_size",24 if _mode == "upgrade" else 28)
-	get_node("Pause").position = safe.position + Vector2(safe.size.x-62,10)
-	_hud.position = safe.position + Vector2(20,20)
-	_health.position = safe.position + Vector2(20,50)
-	_health.size = Vector2(200,10)
-	_xp.position = safe.position + Vector2(20,65)
-	var boss_left := safe.position+Vector2(20,86) if size_px.y > size_px.x else safe.position+Vector2(safe.size.x*0.5+12,24)
+	_title.add_theme_font_size_override("font_size",20 if short_supply else (24 if _mode in ["upgrade","shop"] else 28))
+	get_node("Pause").position = safe.position + Vector2(safe.size.x-54,2)
+	var portrait := size_px.y > size_px.x
+	_owned_hud.position = safe.position+Vector2(4,52) if portrait else safe.position+Vector2(198,20)
+	_owned_hud.reflow(Vector2(safe.size.x-8 if portrait else safe.size.x-266,108))
+	_hud.position = safe.position + Vector2(8,19)
+	_hud.size = Vector2(minf(184,safe.size.x-70),19)
+	_health.position = safe.position + Vector2(8,40)
+	_health.size = Vector2(176,4)
+	_xp.position = safe.position + Vector2(8,46)
+	_xp.size = Vector2(176,3)
+	var boss_left := safe.position+Vector2(8,176) if portrait else safe.position+Vector2(8,74)
 	_boss_name.position = boss_left
+	_boss_name.size = Vector2(safe.size.x-16 if portrait else 176,20)
 	_boss_health.position = boss_left+Vector2(0,22)
-	_boss_health.size = Vector2(minf(250,safe.size.x-100),7)
-	_objective.position = safe.position + Vector2(20,120)
+	_boss_health.size = Vector2(minf(250,safe.size.x-100) if portrait else 176,7)
+	_objective.position = safe.position + Vector2(8,162 if portrait else 52)
 	if _notice.get_parent() == self:
-		_notice.position = safe.position + Vector2(20,145)
+		_notice.position = safe.position + Vector2(8,202 if portrait else 130)
 		_notice.size = Vector2(safe.size.x-40,40)
 	_notice.z_index = 2
+	if _growth_notice.get_parent() == self:
+		_growth_notice.position = safe.position+Vector2(8,208 if portrait else 130)
+		_growth_notice.size = Vector2(safe.size.x-16,44)
+	_growth_notice.z_index = 2
 	_hint.position = safe.position + Vector2(20,safe.size.y-28)
-	_dev_notice.position = safe.position + Vector2(20,2)
+	_dev_notice.position = safe.position + Vector2(8,2)
+	_dev_notice.size = Vector2(safe.size.x-72,16)
 	cancel_touch()
 func present(snapshot: Dictionary) -> void:
+	if _snapshot.get("run_id","") != snapshot.get("run_id",""): reset_progression_feedback()
 	_snapshot = snapshot.duplicate(true)
 	_objective.text = objective_text(snapshot)
 	_objective.visible = not snapshot.is_empty()
 	_hud.visible = not snapshot.is_empty()
+	_owned_hud.visible = not snapshot.is_empty()
 	_health.visible = not snapshot.is_empty()
 	_xp.visible = not snapshot.is_empty()
 	_boss_health.visible = false
@@ -289,6 +336,7 @@ func present(snapshot: Dictionary) -> void:
 			var remaining := _evacuation_seconds(snapshot)
 			_hud.text = "주민 대피 %d초" % remaining if remaining > 0 else "대피 완료 · 출구에 도착하면 탈출"
 	if not _supply_mode.is_empty(): mode = _supply_mode
+	if _owned_open: mode = "owned_skills"
 	if not _detail_id.is_empty(): mode = "evolution_detail"
 	if _settings_open: mode = "settings"
 	if not _recovery_view.is_empty(): mode = "save_recovery"
@@ -302,6 +350,7 @@ func present(snapshot: Dictionary) -> void:
 	if _notice.get_parent() != notice_parent:
 		_notice.reparent(notice_parent)
 		if notice_parent != self: notice_parent.move_child(_notice,2)
+	_sync_upgrade_notice(mode)
 	if mode == _mode and offer_id == _offer_id: return
 	_mode = mode
 	_scroll.follow_focus = mode != "evolution_detail"
@@ -321,13 +370,15 @@ func present(snapshot: Dictionary) -> void:
 			_add_button("새로 출격" if _checkpoint_available else "출격",func(): new_run_requested.emit())
 			_add_button("설정",open_settings)
 			if not _supply_view.is_empty():
-				_add_button("보급소",open_supply_shop).set_meta("semantic_id","shop_open")
+				_add_button("상점 · 영구 강화",open_supply_shop).set_meta("semantic_id","shop_open")
 		"upgrade":
 			_title.text = "전열을 가다듬어라"
 			_subtitle.text = _growth_subtitle()
 			var offer: Dictionary = _growth_view.get("active_offer",{})
 			if str(offer.get("offer_id","")) != offer_id: offer = snapshot.get("upgrade_offer",{})
 			_render_growth_cards(offer)
+		"owned_skills":
+			_render_owned_skills()
 		"evolution_detail":
 			_render_evolution_detail()
 		"shop", "loadout":
@@ -336,6 +387,7 @@ func present(snapshot: Dictionary) -> void:
 			_title.text = "잠시 숨을 고르자"
 			_subtitle.text = "전투와 생존 시간이 정지했습니다."
 			_add_button("계속",func(): resume_requested.emit())
+			_add_button("보유 기술 · 레벨과 진화 조건",open_owned_skills).set_meta("semantic_id","owned_open")
 			_add_button("설정",open_settings)
 			if not _supply_view.is_empty(): _add_button("보급소 · 전투 중 구매 불가",open_supply_shop).set_meta("semantic_id","shop_open")
 			_add_button("이번 판 종료",_confirm_end)
@@ -353,7 +405,7 @@ func present(snapshot: Dictionary) -> void:
 			_title.text = {"won":"주민 대피 완료","dead":"끝까지 싸웠다","abandoned":"전열에서 퇴각"}[mode]
 			_subtitle.text = {"won":"당신이 확보한 시간이 생명을 구했습니다.","dead":"다른 성장 조합으로 다시 도전하세요.","abandoned":"이번 출격을 종료했습니다. 보급소에서 다음 출격을 준비하세요."}[mode]
 			_add_button("다시 출격",func(): new_run_requested.emit())
-			if not _supply_view.is_empty(): _add_button("보급소",open_supply_shop).set_meta("semantic_id","shop_open")
+			if not _supply_view.is_empty(): _add_button("상점 · 영구 강화",open_supply_shop).set_meta("semantic_id","shop_open")
 	reflow(_screen_size,_safe_rect)
 	if not _buttons.is_empty(): _buttons[_focus_index].grab_focus()
 func present_recovery(view: Dictionary) -> void:
@@ -458,6 +510,9 @@ func navigate(action: String) -> void:
 		if not _detail_id.is_empty():
 			close_evolution_details()
 			return
+		if _owned_open:
+			close_owned_skills()
+			return
 		if _settings_open:
 			close_settings()
 			return
@@ -488,8 +543,11 @@ func _can_focus_button(button: Button) -> bool:
 	if not button.disabled: return true
 	# Shop cards hold their complete description and refusal reason. Read focus
 	# never enables a purchase; both accept and the panel retain disabled guards.
-	if _mode != "shop" or not _supply_panel is ShopPanel or not button.is_visible_in_tree(): return false
+	if not button.is_visible_in_tree(): return false
 	var id = button.get_meta("semantic_id","")
+	if _mode == "loadout" and _supply_panel is PreparationPanel and id is String and id.begins_with("character:") and id != "character:":
+		return _supply_panel.option_button("character_id",id.trim_prefix("character:")) == button
+	if _mode != "shop" or not _supply_panel is ShopPanel: return false
 	if not id is String or not id.begins_with("purchase:") or id == "purchase:": return false
 	return _supply_panel.item_button(id.trim_prefix("purchase:")) == button
 func accept_released() -> void:
@@ -534,7 +592,11 @@ func _clear_choices() -> void:
 func reset_obsolete_presentation(snapshot: Dictionary, checkpoint_available: bool) -> void:
 	# Authority replacement invalidates cached run views and their modal return
 	# paths. This is presentation-only and must not emit gameplay/shop intents.
+	reset_progression_feedback()
 	_growth_view = {}
+	_owned_open = false
+	_detail_origin = "upgrade"
+	_owned_hud.present({})
 	for index in range(_growth_cards.size()): _clear_growth_slot(index)
 	_detail_id = ""
 	_return_focus_id = ""
@@ -561,12 +623,18 @@ func present_progression(view: Dictionary) -> void:
 	var previous_focus := focused_semantic_id()
 	var previous_offer_id := _offer_id
 	_growth_view = view.duplicate(true)
+	_owned_hud.present(view)
 	# A pointer press focuses the card before release. Core records that focus
 	# in its view revision; rebuilding here would delete the pressed Button.
 	if reuse_controls: return
 	var offer: Dictionary = _growth_view.get("active_offer",{})
 	if offer.is_empty():
 		_target_button.hide()
+		if _owned_open:
+			_mode = ""
+			present(_snapshot)
+			_restore_focus(previous_focus)
+			return
 		if _mode in ["upgrade","evolution_detail"]:
 			_clear_choices()
 			for index in range(_growth_cards.size()): _clear_growth_slot(index)
@@ -625,7 +693,7 @@ func _prepare_growth_controls() -> void:
 		_register_button(card)
 		card.button_down.connect(func(): card.set_meta("growth_press_generation",_growth_generation))
 		card.chosen.connect(func(_option_id):
-			if _consume_growth_press(card): upgrade_chosen.emit(_offer_id,str(card.get_meta("semantic_id",""))))
+			if _consume_growth_press(card): _request_upgrade(str(card.get_meta("semantic_id",""))))
 		card.focus_entered.connect(func():
 			if _mode == "upgrade" and card.is_visible_in_tree(): upgrade_focus_changed.emit(str(card.get_meta("semantic_id",""))))
 		var details := Button.new()
@@ -639,7 +707,7 @@ func _prepare_growth_controls() -> void:
 			if _consume_growth_press(details): _open_growth_details(str(card.get_meta("semantic_id",""))))
 		_clear_growth_slot(index)
 func _consume_growth_press(button: Button) -> bool:
-	if _mode != "upgrade" or not button.is_visible_in_tree() or button.disabled: return false
+	if _mode != "upgrade" or _growth_waiting_result or not button.is_visible_in_tree() or button.disabled: return false
 	var valid := _dispatching_accept or int(button.get_meta("growth_press_generation",-1)) == _growth_generation
 	button.set_meta("growth_press_generation",-1)
 	return valid
@@ -652,7 +720,7 @@ func _clear_growth_slot(index: int) -> void:
 	details.set_meta("semantic_id","")
 	details.disabled = true
 func _menu_width(safe_width: float) -> float:
-	return minf(730 if _mode in ["upgrade","shop","loadout","evolution_detail","save_recovery"] else 520,safe_width-32)
+	return minf(730 if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else 520,safe_width-32)
 func _menu_columns() -> int:
 	return 3 if _screen_size.x > _screen_size.y and _mode == "upgrade" else 1
 func _prepare_growth_widths(option_count: int) -> void:
@@ -712,7 +780,7 @@ func _growth_summary(option: Dictionary) -> String:
 		for requirement in option.get("requirements",[]):
 			if requirement.get("kind") == "seal": parts.append("개조권 %d개 소비" % int(requirement.get("required",0)))
 	elif option.has("level"):
-		parts.append("Lv %d → %d" % [int(option.get("level",0)),int(option.get("next_level",0))])
+		parts.append(Card.level_change_text(option))
 	var effect := Card.effect_text(option.get("effect_delta",{}))
 	var benefit := effect.split("\n")[0] if not effect.is_empty() else str(option.get("description",""))
 	if not benefit.is_empty(): parts.append(benefit)
@@ -729,6 +797,7 @@ func _evolution_name(detail: Dictionary) -> String:
 	return str(detail.get("name",detail.get("evolution_id","진화")))
 func open_evolution_details(evolution_id: String = "") -> void:
 	if _growth_view.is_empty(): return
+	_detail_origin = "owned_skills" if _owned_open else "upgrade"
 	_return_focus_id = focused_semantic_id()
 	_detail_id = evolution_id if not evolution_id.is_empty() else str(_growth_view.get("target",{}).get("evolution_id",""))
 	if _detail_id.is_empty(): return
@@ -738,14 +807,27 @@ func open_evolution_details(evolution_id: String = "") -> void:
 func close_evolution_details() -> void:
 	_detail_id = ""
 	_arm_transition_gate()
-	present_progression(_growth_view)
+	if _detail_origin == "owned_skills":
+		_mode = ""
+		present(_snapshot)
+	else:
+		present_progression(_growth_view)
 	_restore_focus(_return_focus_id)
 func _render_evolution_detail() -> void:
 	_title.text = "진화 레시피"
 	_subtitle.text = "위/아래로 읽기 · B 뒤로\n성장 선택은 유지됩니다"
 	_scroll.follow_focus = false
 	_scroll.scroll_vertical = 0
-	if _detail_id.begins_with("option:"):
+	if _detail_id.begins_with("owned:"):
+		_title.text = "보유 기술 효과와 진화"
+		_subtitle.text = "위/아래로 읽기 · B 보유 기술로 돌아가기\n전투와 생존 시간은 정지되어 있습니다"
+		var row := _owned_row(_detail_id.trim_prefix("owned:"))
+		var recipe := _owned_recipe(row)
+		var panel = DetailPanel.new()
+		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		panel.present_owned(row,recipe)
+		_choices.add_child(panel)
+	elif _detail_id.begins_with("option:"):
 		_title.text = "성장 효과와 조건"
 		for option in _growth_view.get("active_offer",{}).get("options",[]):
 			if str(option.get("option_id","")) != _detail_id.trim_prefix("option:"): continue
@@ -770,7 +852,127 @@ func _render_evolution_detail() -> void:
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		panel.present(detail)
 		_choices.add_child(panel)
-	_add_button("성장 선택으로 돌아가기",close_evolution_details).set_meta("semantic_id","detail_back")
+	_add_button("보유 기술로 돌아가기" if _detail_origin == "owned_skills" else "성장 선택으로 돌아가기",close_evolution_details).set_meta("semantic_id","detail_back")
+func open_owned_skills() -> void:
+	if _mode not in ["play","pause"] or _growth_view.get("owned",{}).is_empty(): return
+	# The existing synchronous controller path must establish real Core pause.
+	# A UI overlay alone is not evidence that combat has stopped.
+	if _mode == "play": pause_changed.emit(true)
+	if _snapshot.get("pause_reasons",[]).is_empty(): return
+	_owned_open = true
+	_detail_id = ""
+	_arm_transition_gate()
+	_mode = ""
+	cancel_touch()
+	present(_snapshot)
+func close_owned_skills() -> void:
+	_owned_open = false
+	_detail_id = ""
+	_arm_transition_gate()
+	_mode = ""
+	present(_snapshot)
+	_restore_focus("owned_open")
+func _render_owned_skills() -> void:
+	_title.text = "보유 기술"
+	_subtitle.text = "현재 출격의 기술 · A 효과와 진화 조건\nB 일시정지로 돌아가기"
+	for kind in ["equipment","passives"]:
+		var rows: Array = _growth_view.get("owned",{}).get(kind,[])
+		for index in 4:
+			if index < rows.size():
+				var row: Dictionary = rows[index]
+				var id := str(row.get("item_id",""))
+				var title := str(row.get("name",""))
+				if row.get("is_evolved",false): title = OwnedHUD.evolution_name(_growth_view,str(row.get("evolution_id","")))
+				_add_button(title+" · "+OwnedHUD.level_text(row),func(): open_evolution_details("owned:"+id)).set_meta("semantic_id","owned:"+id)
+			else:
+				var empty := Label.new()
+				empty.text = ("장비" if kind == "equipment" else "보조")+" · 빈 칸"
+				_choices.add_child(empty)
+	_add_button("일시정지로 돌아가기",close_owned_skills).set_meta("semantic_id","owned_back")
+func _owned_row(id: String) -> Dictionary:
+	for kind in ["equipment","passives"]:
+		for row in _growth_view.get("owned",{}).get(kind,[]):
+			if row.get("item_id","") == id: return row
+	return {}
+func _owned_recipe(row: Dictionary) -> Dictionary:
+	for recipe in _growth_view.get("evolutions",[]):
+		if recipe.get("evolution_id","") == row.get("evolution_id",""): return recipe
+	return {}
+func _request_upgrade(option_id: String) -> void:
+	if _growth_waiting_result: return
+	_arm_transition_gate()
+	upgrade_chosen.emit(_offer_id,option_id)
+func set_upgrade_pending(enabled: bool) -> void:
+	if _growth_waiting_result == enabled: return
+	_growth_waiting_result = enabled
+	for index in _growth_cards.size():
+		if not _growth_groups[index].visible: continue
+		var option: Dictionary = _growth_cards[index]._option
+		_growth_cards[index].disabled = enabled or not bool(option.get("can_select",true)) or option.get("status","") == "evolved"
+		_growth_details[index].disabled = enabled
+func confirmed_upgrade_text() -> String:
+	return _growth_notice_text
+func reset_progression_feedback() -> void:
+	_growth_waiting_result = false
+	_growth_notice_text = ""
+	_growth_notice_seconds = 0.0
+	if is_instance_valid(_growth_notice): _growth_notice.hide()
+	set_process(false)
+func present_confirmed_upgrades(events: Array, view: Dictionary) -> void:
+	# Called only after Controller has adopted a read-back confirmed save.
+	# Old offered levels are presentation context; new values come from this DTO.
+	var previous_offer: Dictionary = _growth_view.get("active_offer",{}).duplicate(true)
+	present_progression(view)
+	for event in events:
+		if event.get("type","") != "upgrade_applied": continue
+		var payload: Dictionary = event.get("payload",{})
+		var kind := str(payload.get("kind",""))
+		var row := _owned_row(str(payload.get("item_id","")))
+		if kind == "evolution":
+			for owned in view.get("owned",{}).get("equipment",[]):
+				if owned.get("evolution_id","") == payload.get("item_id",""): row = owned
+		if row.is_empty(): continue
+		var option := {}
+		if previous_offer.get("offer_id","") == payload.get("offer_id",""):
+			for offered in previous_offer.get("options",[]):
+				if offered.get("option_id","") == payload.get("option_id",""): option = offered
+		var title := str(row.get("name",""))
+		var detail := str(row.get("attack_summary",""))
+		if kind == "evolution" and row.get("is_evolved",false):
+			title = OwnedHUD.evolution_name(view,str(row.evolution_id))+" · 궁극 진화"
+			_growth_notice_seconds = 2.0
+		else:
+			var level := OwnedHUD.level_text(row)
+			if not row.get("is_max",false) and option.has("level"):
+				level = ("신규 습득 · Lv %d/%d" % [int(row.level),int(row.max_level)]) if int(option.level) == 0 else ("Lv %d → %d/%d" % [int(option.level),int(row.level),int(row.max_level)])
+			title += " · "+level
+			var effect := Card.effect_text(option.get("effect_delta",{}))
+			if not effect.is_empty(): detail = effect.split("\n")[0]
+			if row.get("is_max",false):
+				for condition in row.get("requirements",[]):
+					if not condition.get("met",false):
+						detail = Card.requirements_text([condition])
+						break
+			_growth_notice_seconds = 1.4
+		_growth_notice_text = title+"\n"+detail
+		_owned_hud.highlight(str(row.get("item_id","")))
+		_sync_upgrade_notice(_mode)
+		set_process(true)
+func _sync_upgrade_notice(mode: String) -> void:
+	var parent: Node = _panel.get_node("Body") if mode == "upgrade" else self
+	if _growth_notice.get_parent() != parent:
+		_growth_notice.reparent(parent)
+		if parent != self: parent.move_child(_growth_notice,2)
+		else:
+			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,208 if _screen_size.y > _screen_size.x else 130)
+			_growth_notice.size = Vector2(_safe_rect.size.x-16,44)
+	var text := ("직전 선택 · " if mode == "upgrade" else "")+_growth_notice_text
+	if _growth_notice.text != text: _growth_notice.text = text
+	_growth_notice.visible = not _growth_notice_text.is_empty() and mode in ["play","upgrade"]
+func _process(delta: float) -> void:
+	if _mode != "play": return
+	_growth_notice_seconds = maxf(0,_growth_notice_seconds-delta)
+	if _growth_notice_seconds == 0: reset_progression_feedback()
 func _confirm_end() -> void:
 	_subtitle.text = "이번 판을 종료할까요? 진행 중인 전투는 끝납니다."
 	_buttons[0].text = "계속 싸우기"
@@ -864,12 +1066,15 @@ func _settle_panel() -> void:
 	if not is_inside_tree() or is_queued_for_deletion() or not is_instance_valid(_panel): return
 	var safe := Rect2(Vector2(_safe_rect.position),Vector2(_safe_rect.size))
 	var width := _menu_width(safe.size.x)
-	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
+	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
 	# After width propagation, wrapped text has its real minimum height.
-	_panel.size = Vector2(width,minf(desired_height,safe.size.y-36))
+	var short_supply := _mode in ["shop","loadout"] and _screen_size.x > _screen_size.y and safe.size.y < 360
+	_panel.size = Vector2(width,minf(desired_height,safe.size.y-(12 if short_supply else (32 if _mode == "shop" else 36))))
 	_panel.position = safe.position + (safe.size-_panel.size)*0.5
 	# Reflow does not change focus, so follow_focus alone misses rotated menus.
-	call_deferred("_reveal_settled_focus")
+	var callback := Callable(self,"_reveal_settled_focus")
+	if not get_tree().process_frame.is_connected(callback):
+		get_tree().process_frame.connect(callback,CONNECT_ONE_SHOT | CONNECT_DEFERRED)
 
 func _reveal_settled_focus() -> void:
 	if not is_inside_tree() or is_queued_for_deletion() or not _scroll.follow_focus: return
@@ -962,7 +1167,7 @@ func present_supply(view: Dictionary) -> void:
 		_last_action_result = {}
 	# Supply-only ACKs have no visible supply controls in combat/growth views.
 	# Preserve held movement, choice/back presses, focus and detail scrolling.
-	if _mode in ["play","upgrade","evolution_detail"]: return
+	if _mode in ["play","upgrade","owned_skills","evolution_detail"]: return
 	_mode = ""
 	present(_snapshot)
 	_restore_focus(focus)
@@ -994,8 +1199,8 @@ func close_supply_shop() -> void:
 	_restore_focus(_supply_origin_focus)
 	shop_closed.emit()
 func _render_supply_panel() -> void:
-	_title.text = "보급소" if _mode == "shop" else "출격 준비"
-	_subtitle.text = "전투 정산 보급금으로 교리와 소모품을 준비하세요.
+	_title.text = "상점 · 영구 강화" if _mode == "shop" else "출격 준비"
+	_subtitle.text = "전투 종료 정산 금화
 A 확인 · B 뒤로" if _mode == "shop" else "시나리오 1 · %s · 845
 A 장착 · B 보급소" % _chapter_title()
 	if _mode == "shop":
@@ -1007,6 +1212,7 @@ A 장착 · B 보급소" % _chapter_title()
 		var preparation = PreparationPanel.new()
 		preparation.present(_supply_view)
 		preparation.loadout_changed.connect(_request_loadout)
+		preparation.character_selected.connect(_request_character_selection)
 		preparation.run_start_requested.connect(_request_run_start)
 		_supply_panel = preparation
 	if _supply_locked:
@@ -1033,12 +1239,20 @@ func _request_loadout(selection: Dictionary, revision: int) -> void:
 	if _supply_locked: return
 	_lock_supply_request()
 	loadout_changed.emit(selection.duplicate(true),revision)
+func _request_character_selection(id: String, revision: int) -> void:
+	if _supply_locked: return
+	_arm_transition_gate()
+	_lock_supply_request()
+	character_selected.emit(id,revision)
 func _request_run_start() -> void:
 	if _supply_locked: return
 	_lock_supply_request()
 	run_start_requested.emit()
 func present_action_result(result: Dictionary) -> void:
-	if _supply_waiting_result or str(result.get("action","")) in ["purchase","loadout","run_start"]:
+	if str(result.get("action","")) == "upgrade":
+		set_upgrade_pending(false)
+		if result.get("ok",false): set_save_notice("")
+	if _supply_waiting_result or str(result.get("action","")) in ["purchase","loadout","character_selection","run_start"]:
 		_supply_locked = true
 		_supply_waiting_result = false
 		_supply_lock_revision = int(_supply_view.get("view_revision",0))

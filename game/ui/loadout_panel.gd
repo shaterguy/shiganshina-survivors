@@ -3,6 +3,7 @@ extends VBoxContainer
 const Card = preload("res://game/ui/growth_card.gd")
 const Shop = preload("res://game/ui/supply_shop_panel.gd")
 signal loadout_changed(selection: Dictionary, view_revision: int)
+signal character_selected(character_id: String, view_revision: int)
 signal run_start_requested
 var _view: Dictionary = {}
 var _selection: Dictionary = {}
@@ -24,6 +25,7 @@ func present(view: Dictionary) -> void:
 		child.queue_free()
 	_buttons.clear()
 	_options.clear()
+	_present_characters(view)
 	var groups := {"doctrines":"doctrine_id","targets":"target_evolution_id","supplies":"supply_item_id"}
 	var titles := {"doctrines":"활성 교리 · 하나만 장착","targets":"목표 진화 · 출격 후에는 변경할 수 없습니다","supplies":"소모 보급 · 0–1개 장착"}
 	for group in groups:
@@ -54,6 +56,35 @@ func present(view: Dictionary) -> void:
 	_start.disabled = _pending or not bool(view.get("can_start",false))
 	_start.pressed.connect(_request_start)
 	if not bool(view.get("can_start",false)): _label(Shop.reason_text(str(view.get("start_blocked_reason","active_run"))))
+func _present_characters(view: Dictionary) -> void:
+	if view.get("character_options",[]).is_empty(): return
+	_label("재도전 캐릭터 · 클리어한 시나리오").add_theme_font_size_override("font_size",18)
+	for option in view.character_options:
+		var id := str(option.get("id",""))
+		var selected := bool(option.get("is_selected",false))
+		var lines: Array[String] = [("[선택] " if selected else "")+str(option.get("name",id)),str(option.get("trait_text",""))]
+		if option.get("art_status","") != "ready": lines.append("전용 원화 미구현"+(" · 임시 외형" if option.get("implementation_status","") == "prototype" else ""))
+		var unfinished: Array[String] = []
+		if option.get("unique_skill",{}).get("implementation_status","") == "planned": unfinished.append("고유 공격 미구현")
+		if option.get("signature_ultimate",{}).get("implementation_status","") == "planned": unfinished.append("대표 궁극 미구현")
+		if not unfinished.is_empty(): lines.append(" · ".join(unfinished))
+		var reason := str(option.get("blocked_reason",""))
+		if not reason.is_empty(): lines.append(Shop.reason_text(reason))
+		elif not selected: lines.append("A · 다음 출격 캐릭터 선택")
+		var button := _button("\n".join(lines),"character:"+id)
+		button.add_theme_font_size_override("font_size",15)
+		button.tooltip_text = str(option.get("description",""))
+		button.disabled = _pending or selected or not bool(option.get("can_select",false))
+		button.pressed.connect(func(): _select_character(id))
+		_options["character_id:"+id] = button
+func _select_character(id: String) -> void:
+	var button := option_button("character_id",id)
+	if _pending or button == null or button.disabled: return
+	_pending = true
+	_pending_revision = int(_view.get("view_revision",0))
+	for action in _buttons: action.disabled = true
+	_status.text = "캐릭터 선택 저장 중…"
+	character_selected.emit(id,_pending_revision)
 func _label(value: String) -> Label:
 	var label := Label.new()
 	label.text = value

@@ -11,7 +11,9 @@ var _pending := false
 var _awaiting_fresh_view := false
 var _pending_revision := -1
 const REASONS := {
-	"insufficient_funds":"보급금 부족", "already_owned":"이미 보유한 영구 교리",
+	"invalid_character":"선택할 수 없는 캐릭터입니다", "character_locked":"아직 해금되지 않은 캐릭터입니다",
+	"chapter_not_cleared":"시나리오를 클리어한 후 재도전에서 선택할 수 있습니다", "not_implemented":"아직 구현되지 않아 선택할 수 없습니다",
+	"max_level":"MAX · 강화 완료", "insufficient_funds":"금화 부족", "already_owned":"이미 보유한 영구 교리",
 	"inventory_full":"보급품 재고 한도", "active_run":"진행 중인 출격이 있어 구매할 수 없습니다",
 	"not_owned":"보유하지 않음", "stale_revision":"정보가 바뀌었습니다. 최신 보급소를 확인하세요",
 	"write_failed":"저장에 실패했습니다. 잔액은 최신 저장 확인 후 갱신됩니다",
@@ -32,7 +34,7 @@ func present(view: Dictionary) -> void:
 		child.queue_free()
 	_buttons.clear()
 	_items.clear()
-	_balance = _label("보급금 · 잔액 %d" % int(view.get("balance",0)))
+	_balance = _label("금화 · 잔액 %d" % int(view.get("balance",0)))
 	_balance.add_theme_font_size_override("font_size",20)
 	if not bool(view.get("can_shop",false)): _label(reason_text(str(view.get("lock_reason","active_run"))))
 	for item in view.get("items",[]):
@@ -47,20 +49,32 @@ func present(view: Dictionary) -> void:
 		button.add_theme_font_size_override("font_size",16)
 		var kind := "영구 교리 해금" if str(item.get("kind","")) == "doctrine" else "소모 보급"
 		var lines: Array[String] = [str(item.get("name",id))+" · "+kind,str(item.get("description","")),"가격 %d · 구매 후 %d" % [int(item.get("price",0)),int(item.get("balance_after",view.get("balance",0)))]]
+		var permanent := str(item.get("kind","")) == "permanent_upgrade"
+		var is_max := permanent and bool(item.get("is_max",false))
+		if permanent:
+			var level := ("MAX %d/%d" if is_max else "Lv %d/%d") % [int(item.get("level",0)),int(item.get("max_level",0))]
+			lines = [str(item.get("name",id))+" · 영구 강화",level+" · 모든 새 출격에 적용","현재 · "+str(item.get("current_effect_text",""))]
+			button.add_theme_font_size_override("font_size",15)
+			button.tooltip_text = str(item.get("description",""))+"\n"+str(item.get("tradeoff_text",""))
+			if not is_max:
+				lines.append("다음 · "+str(item.get("next_effect_text","")))
+				lines.append("다음 가격 %d 금화 · 구매 후 %d" % [int(item.get("next_price",0)),int(item.get("balance_after",view.get("balance",0)))])
 		var tradeoff := str(item.get("tradeoff_text",""))
-		if not tradeoff.is_empty(): lines.append("대가 · "+tradeoff)
-		lines.append("보유 %d/%d" % [int(item.get("owned",0)),int(item.get("max_owned",1))])
+		if not permanent and not tradeoff.is_empty(): lines.append("대가 · "+tradeoff)
+		if not permanent: lines.append("보유 %d/%d" % [int(item.get("owned",0)),int(item.get("max_owned",1))])
 		var reason := str(item.get("blocked_reason",""))
 		if not bool(view.get("can_shop",false)): reason = str(view.get("lock_reason","active_run"))
-		if not reason.is_empty(): lines.append(reason_text(reason))
 		button.disabled = not bool(view.get("can_shop",false)) or not bool(item.get("can_purchase",false)) or _pending or _awaiting_fresh_view
-		lines.append("A · 구매" if not button.disabled else "구매 불가")
+		if not reason.is_empty(): lines.append(("구매 불가 · " if button.disabled and not is_max else "")+reason_text(reason))
+		if is_max:
+			if reason != "max_level": lines.append("MAX · 강화 완료")
+		elif not button.disabled or reason.is_empty(): lines.append("A · 구매" if not button.disabled else "구매 불가")
 		button.text = "\n".join(lines)
 		button.pressed.connect(func(): _purchase(id))
 		add_child(button)
 		_buttons.append(button)
 		_items[id] = button
-	_status = _label("최신 저장 정보를 확인하는 중입니다" if _awaiting_fresh_view else ("구매 저장 중…" if _pending else "구매한 교리는 출격 준비에서 따로 장착합니다."))
+	_status = _label("최신 저장 정보를 확인하는 중입니다" if _awaiting_fresh_view else ("구매 저장 중…" if _pending else "영구 강화는 모든 새 출격에 적용됩니다. 교리는 출격 준비에서 따로 장착합니다."))
 func _label(value: String) -> Label:
 	var label := Label.new()
 	label.text = value

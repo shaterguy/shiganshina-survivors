@@ -4,7 +4,11 @@ const Router = preload("res://game/input/input_router.gd")
 const Supply = preload("res://game/economy/supply_service.gd")
 const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
 const TARGETS := [["landscape",Vector2i(800,450),Rect2i(0,0,800,450)], ["tablet_landscape",Vector2i(720,450),Rect2i(0,0,720,450)], ["portrait",Vector2i(450,720),Rect2i(0,0,450,720)], ["physical_568x320_mapped",Vector2i(798,450),Rect2i(23,17,752,416)]]
-const IDS := ["purchase:doctrine_artillery","purchase:doctrine_mobile","purchase:field_bandage","loadout_open","supply_back"]
+static func ids(view: Dictionary) -> Array[String]:
+	var result: Array[String] = []
+	for item in view.items: result.append("purchase:"+str(item.item_id))
+	result.append_array(["loadout_open","supply_back"])
+	return result
 static func settle(t, frames: int = 8) -> void:
 	for ignored in range(frames): await t.process_frame
 static func active_view() -> Dictionary:

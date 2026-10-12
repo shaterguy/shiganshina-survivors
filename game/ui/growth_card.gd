@@ -33,7 +33,7 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 	if str(option.get("kind","")) == "evolution":
 		parts.append("궁극 진화 · "+("진화 완료" if str(option.get("status","")) == "evolved" else ("선행조건 충족" if bool(option.get("can_select",true)) else "선행조건 확인")))
 	elif option.has("level"):
-		parts.append("Lv %d → %d" % [int(option.get("level",0)),int(option.get("next_level",option.get("level",0)))])
+		parts.append(level_change_text(option))
 	var description := str(option.get("description",""))
 	if not description.is_empty(): parts.append(description)
 	var delta := effect_text(option.get("effect_delta",{}))
@@ -76,6 +76,15 @@ static func requirements_text(requirements: Array) -> String:
 	return "\n".join(lines)
 static func reason_text(reason: String) -> String:
 	return str(REASONS.get(reason,"선택할 수 없습니다" if not reason.is_empty() else ""))
+static func level_change_text(option: Dictionary) -> String:
+	var level := int(option.get("level",0))
+	var next := int(option.get("next_level",level))
+	# Older DTO fixtures remain readable; UI never invents a catalog cap.
+	if not option.has("max_level"): return "Lv %d → %d" % [level,next]
+	var cap := int(option.max_level)
+	if level == 0: return "신규 습득 · Lv %d/%d" % [next,cap]
+	if next == cap: return "Lv %d → MAX %d/%d" % [level,next,cap]
+	return "Lv %d → %d/%d" % [level,next,cap]
 static func effect_text(delta: Dictionary) -> String:
 	if delta.has("text"): return str(delta.text)
 	var names := {"damage":"피해", "cooldown_ticks":"공격 간격", "cooldown":"공격 간격", "range":"공격 범위", "radius":"반경", "move_speed":"이동 속도", "max_hp":"최대 체력", "value":"효과", "attack_range":"공격 범위", "pickup_radius":"수집 반경"}

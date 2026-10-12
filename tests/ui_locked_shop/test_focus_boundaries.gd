@@ -27,7 +27,10 @@ func run(t) -> void:
 	for ignored in range(h.ui._buttons.size()*2):
 		H.direction(h,"down")
 		await H.settle(t)
-		t.check(not h.ui._buttons[h.ui._focus_index].disabled,"non-shop disabled loadout controls remain skipped")
+		var focused: Button = h.ui._buttons[h.ui._focus_index]
+		var id: String = str(focused.get_meta("semantic_id",""))
+		var character_read: bool = id.begins_with("character:") and h.ui._supply_panel.option_button("character_id",id.trim_prefix("character:")) == focused
+		t.check(character_read or not focused.disabled,"only real character information may receive read-only focus in loadout")
 	H.joy(h.viewport,JOY_BUTTON_B,true)
 	H.joy(h.viewport,JOY_BUTTON_B,false)
 	await H.settle(t)
@@ -47,6 +50,9 @@ func _reject_invalid_read_targets(t,locked: bool) -> void:
 	cards[0].hide()
 	cards[1].set_meta("semantic_id","purchase:")
 	cards[2].set_meta("semantic_id","purchase:unknown")
+	# Added catalog products remain legitimate read targets; hide them in this
+	# invalid-target-only fixture so the expected surviving actions stay exact.
+	for index in range(3,cards.size()): cards[index].hide()
 	h.ui._supply_locked = locked
 	for ignored in range(6):
 		H.direction(h,"down")

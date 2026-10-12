@@ -112,6 +112,7 @@ func _ready() -> void:
 	ui.settings_changed.connect(_apply_settings)
 	ui.purchase_requested.connect(apply_purchase)
 	ui.loadout_changed.connect(apply_loadout)
+	ui.character_selected.connect(apply_character_selection)
 	ui.shop_open_requested.connect(_open_shop)
 	ui.shop_closed.connect(_close_shop)
 	ui.touch_move_changed.connect(input_router.set_touch_vector)
@@ -365,7 +366,7 @@ func _publish_preserved_start(authority: Dictionary, transaction: Dictionary, pr
 	ui.set_save_notice("이전 전투를 보관하고 새로 출격했습니다. 이전 전투 보상과 보급품 환급은 없습니다.")
 func supply_view() -> Dictionary:
 	if game_save.is_empty(): return {}
-	var view: Dictionary = supply_service.shop_view(game_save)
+	var view: Dictionary = supply_service.shop_view(game_save,str(chapter.chapter_id))
 	view.view_revision = _view_revision
 	if not _pending_transaction.is_empty():
 		view.can_shop = false
@@ -379,6 +380,9 @@ func supply_view() -> Dictionary:
 			for row in rows:
 				row.can_select = false
 				row.blocked_reason = "commit_outcome_unknown"
+		for row in view.get("character_options",[]):
+			row.can_select = false
+			row.blocked_reason = "commit_outcome_unknown"
 	return view
 func apply_purchase(item_id: String, view_revision: int) -> void:
 	if _defer_worker_command("purchase",[item_id],view_revision): return
@@ -400,6 +404,14 @@ func apply_loadout(selection: Dictionary, view_revision: int) -> void:
 		_action_failed("loadout",prepared.error_code)
 		return
 	_commit_candidate(prepared.candidate,"loadout")
+func apply_character_selection(character_id: String, view_revision: int) -> void:
+	if _defer_worker_command("character_selection",[character_id],view_revision): return
+	if not _command_ready("character_selection",view_revision): return
+	var prepared: Dictionary = supply_service.prepare_character_selection(game_save,str(chapter.chapter_id),character_id,int(game_save.store_revision))
+	if not prepared.ok:
+		_action_failed("character_selection",prepared.error_code)
+		return
+	_commit_candidate(prepared.candidate,"character_selection")
 func start_run(seed: int) -> void:
 	if _defer_worker_command("run_start",[seed]): return
 	if not game_save.is_empty() and not state.is_empty() and state.phase in TERMINAL and int(state.run_serial) > int(game_save.settled_through_serial):
@@ -723,7 +735,7 @@ func _command_ready(action: String, supplied_view: int = -1, scope = null) -> bo
 	if game_save.is_empty():
 		_action_failed(action,"save_unavailable")
 		return false
-	if action in ["purchase","loadout","run_start","settings","upgrade"] and not state.is_empty() and state.phase in TERMINAL and int(state.run_serial) > int(game_save.settled_through_serial):
+	if action in ["purchase","loadout","character_selection","run_start","settings","upgrade"] and not state.is_empty() and state.phase in TERMINAL and int(state.run_serial) > int(game_save.settled_through_serial):
 		_action_failed(action,"settlement_pending")
 		return false
 	if supplied_view >= 0 and (supplied_view != _view_revision or _view_store_revision != int(game_save.store_revision)):
@@ -907,6 +919,7 @@ func _publish_transaction(authority: Dictionary, transaction: Dictionary, prepar
 	if _city_runtime != null or transaction.replace_state or transaction.lifecycle_generation != _lifecycle_generation:
 		_apply_lifecycle_pause(state)
 	if transaction.reset_presentation:
+		ui.reset_progression_feedback()
 		ui.set_save_notice("")
 		world.reset_presentation()
 		audio.reset_presentation()
@@ -925,6 +938,7 @@ func _publish_transaction(authority: Dictionary, transaction: Dictionary, prepar
 	if not transaction.events.is_empty():
 		var events: Array[Dictionary] = []
 		events.assign(transaction.events)
+		ui.present_confirmed_upgrades(events,progression_view.build(state))
 		if not _lifecycle_blocked(): audio.consume_events(events)
 		world.consume_combat_events(events,simulation.snapshot(state))
 		world.consume_events(events)
@@ -977,7 +991,7 @@ func _install_authority(authority: Dictionary) -> void:
 	_view_revision += 1
 	_view_store_revision = int(game_save.store_revision)
 func _action_succeeded(action: String, receipt: Dictionary) -> void:
-	if is_instance_valid(ui): ui.present_action_result({"ok":true,"action":action,"receipt":receipt.duplicate(true),"message":"저장했습니다."})
+	if is_instance_valid(ui): ui.present_action_result({"ok":true,"action":action,"receipt":receipt.duplicate(true),"message":"" if action == "upgrade" else "저장했습니다."})
 	_refresh_view()
 func _action_failed(action: String, code: String) -> void:
 	if action in ["passage_selection","dock_transition"]: _final_error = code
@@ -1012,6 +1026,7 @@ func _present() -> void:
 	if not view.is_empty() and (not _city_step_error.is_empty() or not _city_render_error.is_empty()): view.pause_reasons.append("world_not_ready")
 	ui.present_recovery(recovery_view)
 	ui.present(view)
+	ui.set_upgrade_pending(_pending_transaction.get("action","") == "upgrade" or _autosave_intent.get("action","") == "upgrade")
 	if not game_save.is_empty() and _presented_supply_revision != _view_revision:
 		_presented_supply_revision = _view_revision
 		ui.present_supply(supply_view())
@@ -1338,6 +1353,7 @@ func _retry_worker_command() -> void:
 	match str(intent.action):
 		"purchase": apply_purchase(intent.arguments[0],_view_revision)
 		"loadout": apply_loadout(intent.arguments[0],_view_revision)
+		"character_selection": apply_character_selection(intent.arguments[0],_view_revision)
 		"run_start": start_run(intent.arguments[0])
 		"upgrade": apply_upgrade(intent.arguments[0],intent.arguments[1])
 		"settings": _apply_settings(intent.arguments[0])

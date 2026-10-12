@@ -1,0 +1,22 @@
+extends RefCounted
+const Fixture = preload("res://tests/core/new_current_regression_fixture.gd")
+const View = preload("res://game/progression/progression_view.gd")
+const UI = preload("res://game/ui/game_ui.gd")
+const Card = preload("res://game/ui/growth_card.gd")
+func run(t) -> void:
+	var sim = Fixture.simulation(t)
+	var state: Dictionary = Fixture.earn_offer(sim,21,24)
+	var view := View.new().build(state)
+	var ui = UI.new()
+	t.root.add_child(ui)
+	ui.present(sim.snapshot(state))
+	ui.present_progression(view)
+	for option in view.active_offer.options:
+		var text: String = ui._growth_summary(option)
+		t.check(text.contains("/%d" % int(option.max_level)),"growth summary displays DTO maximum for newly owned and existing skills")
+		if int(option.level) == 0: t.check(text.contains("신규 습득"),"new skill acquisition is named explicitly")
+	var card := Card.new()
+	card.present({"kind":"equipment","name":"쌍검","level":4,"next_level":5,"max_level":5})
+	t.check(card.display_text().contains("MAX 5/5"),"maximum growth is identified before selection")
+	card.free()
+	ui.free()
