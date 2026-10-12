@@ -1,0 +1,2638 @@
+{
+	"active_tick": 30256,
+	"attack_seq": 30,
+	"boss_ids_fired": [
+		"ch01_b05"
+	],
+	"chapter_id": "chapter_01_shiganshina",
+	"character_id": "garrison_01",
+	"command_ids_applied": [
+		"behavior:100:1",
+		"behavior:104:1",
+		"behavior:10:1",
+		"behavior:10:2",
+		"behavior:10:3",
+		"behavior:13:1",
+		"behavior:19:1",
+		"behavior:19:2",
+		"behavior:1:1",
+		"behavior:1:2",
+		"behavior:1:3",
+		"behavior:1:4",
+		"behavior:1:5",
+		"behavior:22:1",
+		"behavior:22:2",
+		"behavior:26:1",
+		"behavior:26:2",
+		"behavior:26:3",
+		"behavior:27:1",
+		"behavior:28:1",
+		"behavior:28:2",
+		"behavior:37:1",
+		"behavior:48:1",
+		"behavior:48:2",
+		"behavior:4:1",
+		"behavior:4:2",
+		"behavior:52:1",
+		"behavior:52:2",
+		"behavior:55:1",
+		"behavior:55:2",
+		"behavior:5:1",
+		"behavior:5:2",
+		"behavior:6:1",
+		"behavior:6:2",
+		"behavior:7:1",
+		"behavior:81:1",
+		"behavior:89:1",
+		"behavior:8:1",
+		"behavior:8:2",
+		"behavior:8:3",
+		"behavior:90:1",
+		"behavior:9:1",
+		"ch01_b05",
+		"enemy_28875_0",
+		"enemy_28875_1",
+		"enemy_28875_2",
+		"enemy_28950_0",
+		"enemy_28950_1",
+		"enemy_28950_2",
+		"enemy_29025_0",
+		"enemy_29025_1",
+		"enemy_29025_2",
+		"enemy_29100_0",
+		"enemy_29100_1",
+		"enemy_29100_2",
+		"enemy_29175_0",
+		"enemy_29175_1",
+		"enemy_29175_2",
+		"enemy_29250_0",
+		"enemy_29250_1",
+		"enemy_29250_2",
+		"enemy_29325_0",
+		"enemy_29325_1",
+		"enemy_29325_2",
+		"enemy_29400_0",
+		"enemy_29400_1",
+		"enemy_29400_2",
+		"enemy_29475_0",
+		"enemy_29475_1",
+		"enemy_29475_2",
+		"enemy_29550_0",
+		"enemy_29550_1",
+		"enemy_29550_2",
+		"enemy_29625_0",
+		"enemy_29625_1",
+		"enemy_29625_2",
+		"enemy_29700_0",
+		"enemy_29700_1",
+		"enemy_29700_2",
+		"enemy_29775_0",
+		"enemy_29775_1",
+		"enemy_29775_2",
+		"enemy_29850_0",
+		"enemy_29850_1",
+		"enemy_29850_2",
+		"enemy_29925_0",
+		"enemy_29925_1",
+		"enemy_29925_2",
+		"enemy_30000_0",
+		"enemy_30000_1",
+		"enemy_30000_2",
+		"enemy_30075_0",
+		"enemy_30075_1",
+		"enemy_30075_2",
+		"enemy_30150_0",
+		"enemy_30150_1",
+		"enemy_30150_2",
+		"enemy_30225_0",
+		"enemy_30225_1",
+		"enemy_30225_2"
+	],
+	"content_revision": "ch01.3-rebuild.7-grabber-hand",
+	"drops": [],
+	"enemy_attack_instances": [],
+	"entities": [
+		{
+			"action_ends_tick": 30236,
+			"action_started_tick": 30236,
+			"action_state": "move",
+			"art_id": "boss_charger",
+			"attack_kind": "charge",
+			"behavior": "charge",
+			"boss_id": "ch01_b05",
+			"damage": 24.0,
+			"enemy_id": "boss_charger",
+			"entity_id": 1,
+			"facing": [
+				0.998845636844635,
+				-0.04803428798913956
+			],
+			"hp": 856.0,
+			"id": 1,
+			"locked_direction": [
+				0.19528613984584808,
+				0.980746328830719
+			],
+			"locked_origin": [
+				65.39952087402344,
+				27.632423400878906
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 1000.0,
+			"next_action_tick": 30326,
+			"pattern_index": 5,
+			"position": [
+				65.39952087402344,
+				27.632423400878906
+			],
+			"radius": 28.0,
+			"spawned_tick": 18000,
+			"speed": 22.0,
+			"velocity": [
+				21.9746036529541,
+				-1.0567543506622314
+			],
+			"xp": 80
+		},
+		{
+			"action_ends_tick": 29956,
+			"action_started_tick": 29956,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "slam",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 5,
+			"facing": [
+				0.9999696612358093,
+				-0.007793012540787458
+			],
+			"hp": 40.0,
+			"id": 5,
+			"locked_direction": [
+				-0.9874712824821472,
+				-0.1577988713979721
+			],
+			"locked_origin": [
+				122.80351257324219,
+				4.030640602111816
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30076,
+			"pattern_index": 2,
+			"position": [
+				122.80351257324219,
+				4.030640602111816
+			],
+			"radius": 24.0,
+			"spawned_tick": 28875,
+			"speed": 17.0,
+			"velocity": [
+				16.99948501586914,
+				-0.13248121738433838
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30167,
+			"action_started_tick": 30167,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "slam",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 7,
+			"facing": [
+				0.9992800354957581,
+				0.037939753383398056
+			],
+			"hp": 76.0,
+			"id": 7,
+			"locked_direction": [
+				-0.9829018712043762,
+				0.18413016200065613
+			],
+			"locked_origin": [
+				144.7588348388672,
+				-18.802865982055664
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30287,
+			"pattern_index": 1,
+			"position": [
+				144.7588348388672,
+				-18.802865982055664
+			],
+			"radius": 24.0,
+			"spawned_tick": 28950,
+			"speed": 17.0,
+			"velocity": [
+				16.987760543823242,
+				0.6449757814407349
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30099,
+			"action_started_tick": 30099,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 8,
+			"facing": [
+				0.9998600482940674,
+				-0.016735278069972992
+			],
+			"hp": 29.0,
+			"id": 8,
+			"locked_direction": [
+				-0.9836510419845581,
+				-0.18008512258529663
+			],
+			"locked_origin": [
+				120.2711181640625,
+				8.69902515411377
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30189,
+			"pattern_index": 3,
+			"position": [
+				120.2711181640625,
+				8.69902515411377
+			],
+			"radius": 20.0,
+			"spawned_tick": 28950,
+			"speed": 24.0,
+			"velocity": [
+				23.996641159057617,
+				-0.4016466736793518
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30245,
+			"action_started_tick": 30245,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "slam",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 9,
+			"facing": [
+				0.9893949031829834,
+				0.14525049924850464
+			],
+			"hp": 100.0,
+			"id": 9,
+			"locked_direction": [
+				-0.8918486833572388,
+				0.45233389735221863
+			],
+			"locked_origin": [
+				307.69512939453125,
+				-48.784820556640625
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30365,
+			"pattern_index": 1,
+			"position": [
+				307.69512939453125,
+				-48.784820556640625
+			],
+			"radius": 24.0,
+			"spawned_tick": 29025,
+			"speed": 17.0,
+			"velocity": [
+				16.819713592529297,
+				2.4692585468292236
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30047,
+			"action_started_tick": 30047,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 10,
+			"facing": [
+				0.9999999403953552,
+				0.0003282130346633494
+			],
+			"hp": 17.0,
+			"id": 10,
+			"locked_direction": [
+				-0.999991238117218,
+				0.0041854893788695335
+			],
+			"locked_origin": [
+				142.00094604492188,
+				-0.16344979405403137
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30137,
+			"pattern_index": 3,
+			"position": [
+				142.00094604492188,
+				-0.16344979405403137
+			],
+			"radius": 20.0,
+			"spawned_tick": 29025,
+			"speed": 24.0,
+			"velocity": [
+				23.999998092651367,
+				0.007877113297581673
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29746,
+			"action_started_tick": 29746,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 11,
+			"facing": [
+				0.9986246228218079,
+				-0.05242948606610298
+			],
+			"hp": 10.0,
+			"id": 11,
+			"locked_direction": [
+				-0.14335449039936066,
+				-0.9896713495254517
+			],
+			"locked_origin": [
+				154.98643493652344,
+				25.464035034179688
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29836,
+			"pattern_index": 17,
+			"position": [
+				154.98643493652344,
+				25.464035034179688
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29025,
+			"speed": 50.0,
+			"velocity": [
+				49.93123245239258,
+				-2.621474266052246
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30094,
+			"action_started_tick": 30094,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 13,
+			"facing": [
+				0.9991638660430908,
+				0.040884919464588165
+			],
+			"hp": 53.0,
+			"id": 13,
+			"locked_direction": [
+				-0.98279869556427,
+				0.18468043208122253
+			],
+			"locked_origin": [
+				192.02793884277344,
+				-18.33062744140625
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30184,
+			"pattern_index": 1,
+			"position": [
+				192.02793884277344,
+				-18.33062744140625
+			],
+			"radius": 20.0,
+			"spawned_tick": 29100,
+			"speed": 24.0,
+			"velocity": [
+				23.97993278503418,
+				0.981238067150116
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29515,
+			"action_started_tick": 29515,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 17,
+			"facing": [
+				0.9994043111801147,
+				0.03451034054160118
+			],
+			"hp": 34.0,
+			"id": 17,
+			"locked_direction": [
+				-0.9832682609558105,
+				0.18216338753700256
+			],
+			"locked_origin": [
+				226.1632843017578,
+				-14.29015827178955
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29605,
+			"pattern_index": 11,
+			"position": [
+				226.1632843017578,
+				-14.29015827178955
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29175,
+			"speed": 50.0,
+			"velocity": [
+				49.97021484375,
+				1.7255170345306396
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29175,
+			"action_started_tick": 29175,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 18,
+			"facing": [
+				0.9978799223899841,
+				-0.06508177518844604
+			],
+			"hp": 32.0,
+			"id": 18,
+			"locked_direction": [
+				-0.6340467929840088,
+				-0.7732946276664734
+			],
+			"locked_origin": [
+				87.22229766845703,
+				36.05218505859375
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29175,
+			"pattern_index": 0,
+			"position": [
+				87.22229766845703,
+				36.05218505859375
+			],
+			"radius": 18.0,
+			"spawned_tick": 29175,
+			"speed": 23.0,
+			"velocity": [
+				22.95123863220215,
+				-1.4968807697296143
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 29250,
+			"action_started_tick": 29250,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 23,
+			"facing": [
+				0.19286826252937317,
+				0.9812245965003967
+			],
+			"hp": 100.0,
+			"id": 23,
+			"locked_direction": [
+				0.5157715678215027,
+				-0.8567261099815369
+			],
+			"locked_origin": [
+				-26.868850708007813,
+				247.3037109375
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 29250,
+			"pattern_index": 0,
+			"position": [
+				-26.868850708007813,
+				247.3037109375
+			],
+			"radius": 24.0,
+			"spawned_tick": 29250,
+			"speed": 17.0,
+			"velocity": [
+				3.2787604331970215,
+				16.680818557739258
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30123,
+			"action_started_tick": 30123,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "slam",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 27,
+			"facing": [
+				0.024467064067721367,
+				0.9997006058692932
+			],
+			"hp": 100.0,
+			"id": 27,
+			"locked_direction": [
+				0.061166610568761826,
+				-0.9981275796890259
+			],
+			"locked_origin": [
+				-5.79396390914917,
+				147.2642364501953
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30243,
+			"pattern_index": 1,
+			"position": [
+				-5.79396390914917,
+				147.2642364501953
+			],
+			"radius": 24.0,
+			"spawned_tick": 29325,
+			"speed": 17.0,
+			"velocity": [
+				0.4159400761127472,
+				16.994911193847656
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30110,
+			"action_started_tick": 30110,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 28,
+			"facing": [
+				0.9980976581573486,
+				-0.061652638018131256
+			],
+			"hp": 65.0,
+			"id": 28,
+			"locked_direction": [
+				0.871478259563446,
+				-0.49043405055999756
+			],
+			"locked_origin": [
+				-23.752748489379883,
+				41.00010299682617
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30200,
+			"pattern_index": 2,
+			"position": [
+				-23.752748489379883,
+				41.00010299682617
+			],
+			"radius": 20.0,
+			"spawned_tick": 29325,
+			"speed": 24.0,
+			"velocity": [
+				23.954343795776367,
+				-1.479663372039795
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29400,
+			"action_started_tick": 29400,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 31,
+			"facing": [
+				0.12819810211658478,
+				-0.9917486310005188
+			],
+			"hp": 100.0,
+			"id": 31,
+			"locked_direction": [
+				-0.5027665495872498,
+				-0.8644222021102905
+			],
+			"locked_origin": [
+				33.925148010253906,
+				124.88394165039063
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 29400,
+			"pattern_index": 0,
+			"position": [
+				33.925148010253906,
+				124.88394165039063
+			],
+			"radius": 24.0,
+			"spawned_tick": 29400,
+			"speed": 17.0,
+			"velocity": [
+				2.179367780685425,
+				-16.859725952148438
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 29400,
+			"action_started_tick": 29400,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "none",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 32,
+			"facing": [
+				0.06679599732160568,
+				0.9977666139602661
+			],
+			"hp": 65.0,
+			"id": 32,
+			"locked_direction": [
+				0.45306774973869324,
+				-0.8914761543273926
+			],
+			"locked_origin": [
+				-12.927070617675781,
+				190.90162658691406
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 29400,
+			"pattern_index": 0,
+			"position": [
+				-12.927070617675781,
+				190.90162658691406
+			],
+			"radius": 20.0,
+			"spawned_tick": 29400,
+			"speed": 24.0,
+			"velocity": [
+				1.6031038761138916,
+				23.946399688720703
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29400,
+			"action_started_tick": 29400,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 33,
+			"facing": [
+				0.9998427629470825,
+				-0.017732009291648865
+			],
+			"hp": 58.0,
+			"id": 33,
+			"locked_direction": [
+				0.9946390986442566,
+				-0.1034073606133461
+			],
+			"locked_origin": [
+				24.123319625854492,
+				10.922449111938477
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29400,
+			"pattern_index": 0,
+			"position": [
+				24.123319625854492,
+				10.922449111938477
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29400,
+			"speed": 50.0,
+			"velocity": [
+				49.99213790893555,
+				-0.8866004943847656
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30022,
+			"action_started_tick": 30022,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 37,
+			"facing": [
+				0.7076311111450195,
+				-0.7065820097923279
+			],
+			"hp": 65.0,
+			"id": 37,
+			"locked_direction": [
+				-0.11752374470233917,
+				-0.993070125579834
+			],
+			"locked_origin": [
+				51.02996063232422,
+				44.92708969116211
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30112,
+			"pattern_index": 1,
+			"position": [
+				51.02996063232422,
+				44.92708969116211
+			],
+			"radius": 20.0,
+			"spawned_tick": 29475,
+			"speed": 24.0,
+			"velocity": [
+				16.98314666748047,
+				-16.95796775817871
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29475,
+			"action_started_tick": 29475,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 38,
+			"facing": [
+				0.009442385286092758,
+				0.9999554753303528
+			],
+			"hp": 58.0,
+			"id": 38,
+			"locked_direction": [
+				0.7670978307723999,
+				-0.6415302157402039
+			],
+			"locked_origin": [
+				-1.3667722940444946,
+				239.25782775878906
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29475,
+			"pattern_index": 0,
+			"position": [
+				-1.3667722940444946,
+				239.25782775878906
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29475,
+			"speed": 50.0,
+			"velocity": [
+				0.4721192717552185,
+				49.997772216796875
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29475,
+			"action_started_tick": 29475,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 39,
+			"facing": [
+				0.6210237741470337,
+				-0.7837916612625122
+			],
+			"hp": 32.0,
+			"id": 39,
+			"locked_direction": [
+				0.9537245035171509,
+				0.3006817102432251
+			],
+			"locked_origin": [
+				-74.25724792480469,
+				-290.28021240234375
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29475,
+			"pattern_index": 0,
+			"position": [
+				-74.25724792480469,
+				-290.28021240234375
+			],
+			"radius": 18.0,
+			"spawned_tick": 29475,
+			"speed": 23.0,
+			"velocity": [
+				14.283546447753906,
+				-18.02720832824707
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 29550,
+			"action_started_tick": 29550,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 46,
+			"facing": [
+				0.010049417614936829,
+				0.99994957447052
+			],
+			"hp": 58.0,
+			"id": 46,
+			"locked_direction": [
+				0.28710541129112244,
+				-0.9578989744186401
+			],
+			"locked_origin": [
+				-1.4508758783340454,
+				239.63316345214844
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29550,
+			"pattern_index": 0,
+			"position": [
+				-1.4508758783340454,
+				239.63316345214844
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29550,
+			"speed": 50.0,
+			"velocity": [
+				0.502470850944519,
+				49.99747848510742
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29550,
+			"action_started_tick": 29550,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 47,
+			"facing": [
+				0.9993368983268738,
+				-0.036410585045814514
+			],
+			"hp": 32.0,
+			"id": 47,
+			"locked_direction": [
+				0.9603356719017029,
+				-0.27884641289711
+			],
+			"locked_origin": [
+				-14.889521598815918,
+				23.860733032226563
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29550,
+			"pattern_index": 0,
+			"position": [
+				-14.889521598815918,
+				23.860733032226563
+			],
+			"radius": 18.0,
+			"spawned_tick": 29550,
+			"speed": 23.0,
+			"velocity": [
+				22.98474884033203,
+				-0.837443470954895
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 30187,
+			"action_started_tick": 30187,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "charge",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 48,
+			"facing": [
+				0.9969115257263184,
+				0.0785333663225174
+			],
+			"hp": 24.0,
+			"id": 48,
+			"locked_direction": [
+				0.9037852883338928,
+				0.4279862642288208
+			],
+			"locked_origin": [
+				105.53285217285156,
+				-42.103538513183594
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30277,
+			"pattern_index": 2,
+			"position": [
+				105.53285217285156,
+				-42.103538513183594
+			],
+			"radius": 16.0,
+			"spawned_tick": 29550,
+			"speed": 43.0,
+			"velocity": [
+				42.86719512939453,
+				3.376934766769409
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 29625,
+			"action_started_tick": 29625,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 51,
+			"facing": [
+				0.9958641529083252,
+				-0.09085459262132645
+			],
+			"hp": 32.0,
+			"id": 51,
+			"locked_direction": [
+				0.5577806234359741,
+				-0.829988420009613
+			],
+			"locked_origin": [
+				-1.0684804916381836,
+				264.9125671386719
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29625,
+			"pattern_index": 0,
+			"position": [
+				-1.0684804916381836,
+				264.9125671386719
+			],
+			"radius": 18.0,
+			"spawned_tick": 29625,
+			"speed": 23.0,
+			"velocity": [
+				22.904874801635742,
+				-2.089655637741089
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 30063,
+			"action_started_tick": 30063,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "charge",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 52,
+			"facing": [
+				0.9999998211860657,
+				-0.0006355460500344634
+			],
+			"hp": 24.0,
+			"id": 52,
+			"locked_direction": [
+				0.9920212626457214,
+				0.12607035040855408
+			],
+			"locked_origin": [
+				142.30056762695313,
+				0.31631097197532654
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30153,
+			"pattern_index": 2,
+			"position": [
+				142.30056762695313,
+				0.31631097197532654
+			],
+			"radius": 16.0,
+			"spawned_tick": 29625,
+			"speed": 43.0,
+			"velocity": [
+				42.99999237060547,
+				-0.027328480035066605
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 29625,
+			"action_started_tick": 29625,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 53,
+			"facing": [
+				0.38287660479545593,
+				-0.9237995147705078
+			],
+			"hp": 100.0,
+			"id": 53,
+			"locked_direction": [
+				0.4326130747795105,
+				0.9015796780586243
+			],
+			"locked_origin": [
+				-48.428321838378906,
+				-267.1528015136719
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 29625,
+			"pattern_index": 0,
+			"position": [
+				-48.428321838378906,
+				-267.1528015136719
+			],
+			"radius": 24.0,
+			"spawned_tick": 29625,
+			"speed": 17.0,
+			"velocity": [
+				6.508902072906494,
+				-15.704591751098633
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30138,
+			"action_started_tick": 30138,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "charge",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 55,
+			"facing": [
+				0.9999194145202637,
+				-0.012696503661572933
+			],
+			"hp": 24.0,
+			"id": 55,
+			"locked_direction": [
+				0.9458781480789185,
+				-0.32452210783958435
+			],
+			"locked_origin": [
+				92.44207763671875,
+				6.95263147354126
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30228,
+			"pattern_index": 2,
+			"position": [
+				92.44207763671875,
+				6.95263147354126
+			],
+			"radius": 16.0,
+			"spawned_tick": 29700,
+			"speed": 43.0,
+			"velocity": [
+				42.99653625488281,
+				-0.5459496378898621
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 29700,
+			"action_started_tick": 29700,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 56,
+			"facing": [
+				0.7263094186782837,
+				-0.6873679161071777
+			],
+			"hp": 100.0,
+			"id": 56,
+			"locked_direction": [
+				0.8600608706474304,
+				0.5101914405822754
+			],
+			"locked_origin": [
+				-134.7970733642578,
+				-256.4301452636719
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 29700,
+			"pattern_index": 0,
+			"position": [
+				-134.7970733642578,
+				-256.4301452636719
+			],
+			"radius": 24.0,
+			"spawned_tick": 29700,
+			"speed": 17.0,
+			"velocity": [
+				12.347260475158691,
+				-11.68525505065918
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 29700,
+			"action_started_tick": 29700,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "none",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 57,
+			"facing": [
+				0.9173164367675781,
+				0.3981590270996094
+			],
+			"hp": 65.0,
+			"id": 57,
+			"locked_direction": [
+				0.038379766047000885,
+				0.9992632865905762
+			],
+			"locked_origin": [
+				9.889054298400879,
+				-229.98959350585938
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 29700,
+			"pattern_index": 0,
+			"position": [
+				9.889054298400879,
+				-229.98959350585938
+			],
+			"radius": 20.0,
+			"spawned_tick": 29700,
+			"speed": 24.0,
+			"velocity": [
+				22.015594482421875,
+				9.555816650390625
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29775,
+			"action_started_tick": 29775,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 64,
+			"facing": [
+				0.9999186396598816,
+				-0.012760176323354244
+			],
+			"hp": 100.0,
+			"id": 64,
+			"locked_direction": [
+				0.9986173510551453,
+				-0.05256842449307442
+			],
+			"locked_origin": [
+				-153.14723205566406,
+				10.121521949768066
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 29775,
+			"pattern_index": 0,
+			"position": [
+				-153.14723205566406,
+				10.121521949768066
+			],
+			"radius": 24.0,
+			"spawned_tick": 29775,
+			"speed": 17.0,
+			"velocity": [
+				16.99861717224121,
+				-0.21692299842834473
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 29775,
+			"action_started_tick": 29775,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "none",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 65,
+			"facing": [
+				0.6307974457740784,
+				-0.7759475708007813
+			],
+			"hp": 65.0,
+			"id": 65,
+			"locked_direction": [
+				0.5862231254577637,
+				0.810149610042572
+			],
+			"locked_origin": [
+				-44.95268249511719,
+				-328.70343017578125
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 29775,
+			"pattern_index": 0,
+			"position": [
+				-44.95268249511719,
+				-328.70343017578125
+			],
+			"radius": 20.0,
+			"spawned_tick": 29775,
+			"speed": 24.0,
+			"velocity": [
+				15.139139175415039,
+				-18.62274169921875
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29775,
+			"action_started_tick": 29775,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 66,
+			"facing": [
+				0.9481716752052307,
+				0.31775861978530884
+			],
+			"hp": 58.0,
+			"id": 66,
+			"locked_direction": [
+				-0.36218520998954773,
+				0.9321061968803406
+			],
+			"locked_origin": [
+				231.00103759765625,
+				-137.06689453125
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29775,
+			"pattern_index": 0,
+			"position": [
+				231.00103759765625,
+				-137.06689453125
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29775,
+			"speed": 50.0,
+			"velocity": [
+				47.40858459472656,
+				15.887930870056152
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29850,
+			"action_started_tick": 29850,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "none",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 70,
+			"facing": [
+				0.6928920149803162,
+				-0.7210414409637451
+			],
+			"hp": 65.0,
+			"id": 70,
+			"locked_direction": [
+				0.9371564388275146,
+				0.34890952706336975
+			],
+			"locked_origin": [
+				-158.97097778320313,
+				-218.57066345214844
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 29850,
+			"pattern_index": 0,
+			"position": [
+				-158.97097778320313,
+				-218.57066345214844
+			],
+			"radius": 20.0,
+			"spawned_tick": 29850,
+			"speed": 24.0,
+			"velocity": [
+				16.62940788269043,
+				-17.304994583129883
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29850,
+			"action_started_tick": 29850,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 71,
+			"facing": [
+				0.1307346075773239,
+				-0.991417407989502
+			],
+			"hp": 58.0,
+			"id": 71,
+			"locked_direction": [
+				0.21568091213703156,
+				0.9764639139175415
+			],
+			"locked_origin": [
+				-5.251401424407959,
+				-344.17633056640625
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29850,
+			"pattern_index": 0,
+			"position": [
+				-5.251401424407959,
+				-344.17633056640625
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29850,
+			"speed": 50.0,
+			"velocity": [
+				6.5367302894592285,
+				-49.57086944580078
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29850,
+			"action_started_tick": 29850,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 72,
+			"facing": [
+				0.983126163482666,
+				0.1829286515712738
+			],
+			"hp": 32.0,
+			"id": 72,
+			"locked_direction": [
+				-0.8398922681808472,
+				0.5427531003952026
+			],
+			"locked_origin": [
+				336.1212463378906,
+				-56.54221725463867
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29850,
+			"pattern_index": 0,
+			"position": [
+				336.1212463378906,
+				-56.54221725463867
+			],
+			"radius": 18.0,
+			"spawned_tick": 29850,
+			"speed": 23.0,
+			"velocity": [
+				22.611902236938477,
+				4.2073588371276855
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 29925,
+			"action_started_tick": 29925,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 79,
+			"facing": [
+				0.703248918056488,
+				-0.7109436988830566
+			],
+			"hp": 58.0,
+			"id": 79,
+			"locked_direction": [
+				0.7211001515388489,
+				0.6928308606147766
+			],
+			"locked_origin": [
+				-11.196113586425781,
+				-372.681396484375
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 29925,
+			"pattern_index": 0,
+			"position": [
+				-11.196113586425781,
+				-372.681396484375
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 29925,
+			"speed": 50.0,
+			"velocity": [
+				35.162445068359375,
+				-35.547183990478516
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 29925,
+			"action_started_tick": 29925,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 80,
+			"facing": [
+				0.8575244545936584,
+				0.5144431591033936
+			],
+			"hp": 32.0,
+			"id": 80,
+			"locked_direction": [
+				-0.19044049084186554,
+				0.9816986918449402
+			],
+			"locked_origin": [
+				121.6889419555664,
+				-195.77943420410156
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 29925,
+			"pattern_index": 0,
+			"position": [
+				121.6889419555664,
+				-195.77943420410156
+			],
+			"radius": 18.0,
+			"spawned_tick": 29925,
+			"speed": 23.0,
+			"velocity": [
+				19.72306251525879,
+				11.832192420959473
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 30159,
+			"action_started_tick": 30159,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "charge",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 81,
+			"facing": [
+				0.9963059425354004,
+				0.08587485551834106
+			],
+			"hp": 24.0,
+			"id": 81,
+			"locked_direction": [
+				-0.9587763547897339,
+				0.2841617465019226
+			],
+			"locked_origin": [
+				287.7138977050781,
+				-30.364686965942383
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30249,
+			"pattern_index": 1,
+			"position": [
+				287.7138977050781,
+				-30.364686965942383
+			],
+			"radius": 16.0,
+			"spawned_tick": 29925,
+			"speed": 43.0,
+			"velocity": [
+				42.841156005859375,
+				3.6926188468933105
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 30000,
+			"action_started_tick": 30000,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 88,
+			"facing": [
+				0.6330020427703857,
+				-0.7741501331329346
+			],
+			"hp": 32.0,
+			"id": 88,
+			"locked_direction": [
+				0.38608986139297485,
+				0.9224611520767212
+			],
+			"locked_origin": [
+				-51.339378356933594,
+				-321.2128601074219
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 30000,
+			"pattern_index": 0,
+			"position": [
+				-51.339378356933594,
+				-321.2128601074219
+			],
+			"radius": 18.0,
+			"spawned_tick": 30000,
+			"speed": 23.0,
+			"velocity": [
+				14.559046745300293,
+				-17.805452346801758
+			],
+			"xp": 4
+		},
+		{
+			"action_ends_tick": 30154,
+			"action_started_tick": 30154,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "charge",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 89,
+			"facing": [
+				0.999056875705719,
+				-0.0434202216565609
+			],
+			"hp": 24.0,
+			"id": 89,
+			"locked_direction": [
+				-0.3627324402332306,
+				0.9318933486938477
+			],
+			"locked_origin": [
+				196.9108123779297,
+				-135.17349243164063
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30244,
+			"pattern_index": 1,
+			"position": [
+				196.9108123779297,
+				-135.17349243164063
+			],
+			"radius": 16.0,
+			"spawned_tick": 30000,
+			"speed": 43.0,
+			"velocity": [
+				42.95944595336914,
+				-1.8670694828033447
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 30227,
+			"action_started_tick": 30227,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "slam",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 90,
+			"facing": [
+				0.9998157024383545,
+				-0.019196175038814545
+			],
+			"hp": 88.0,
+			"id": 90,
+			"locked_direction": [
+				-0.9978893995285034,
+				-0.06493775546550751
+			],
+			"locked_origin": [
+				279.7080078125,
+				6.917503356933594
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30347,
+			"pattern_index": 1,
+			"position": [
+				279.7080078125,
+				6.917503356933594
+			],
+			"radius": 24.0,
+			"spawned_tick": 30000,
+			"speed": 17.0,
+			"velocity": [
+				16.99686622619629,
+				-0.32633498311042786
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30075,
+			"action_started_tick": 30075,
+			"action_state": "move",
+			"art_id": "titan_runner",
+			"attack_kind": "none",
+			"behavior": "runner",
+			"boss_id": "",
+			"damage": 7.0,
+			"enemy_id": "runner",
+			"entity_id": 98,
+			"facing": [
+				0.3431295156478882,
+				0.9392880797386169
+			],
+			"hp": 24.0,
+			"id": 98,
+			"locked_direction": [
+				-0.003990196157246828,
+				0.9999921321868896
+			],
+			"locked_origin": [
+				299.947265625,
+				-230.08726501464844
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 24.0,
+			"next_action_tick": 30075,
+			"pattern_index": 0,
+			"position": [
+				299.947265625,
+				-230.08726501464844
+			],
+			"radius": 16.0,
+			"spawned_tick": 30075,
+			"speed": 43.0,
+			"velocity": [
+				14.754569053649902,
+				40.38938903808594
+			],
+			"xp": 5
+		},
+		{
+			"action_ends_tick": 30075,
+			"action_started_tick": 30075,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 99,
+			"facing": [
+				-0.32942068576812744,
+				0.9441832900047302
+			],
+			"hp": 100.0,
+			"id": 99,
+			"locked_direction": [
+				-0.8441564440727234,
+				0.53609699010849
+			],
+			"locked_origin": [
+				423.1488037109375,
+				-112.20799255371094
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30075,
+			"pattern_index": 0,
+			"position": [
+				423.1488037109375,
+				-112.20799255371094
+			],
+			"radius": 24.0,
+			"spawned_tick": 30075,
+			"speed": 17.0,
+			"velocity": [
+				-5.600151538848877,
+				16.051115036010742
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30289,
+			"action_started_tick": 30214,
+			"action_state": "recover",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 100,
+			"facing": [
+				-0.5573956370353699,
+				-0.8302471041679382
+			],
+			"hp": 65.0,
+			"id": 100,
+			"locked_direction": [
+				-0.5573956370353699,
+				-0.8302471041679382
+			],
+			"locked_origin": [
+				426.605224609375,
+				106.65679168701172
+			],
+			"locked_target": [
+				355.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30075,
+			"pattern_index": 1,
+			"position": [
+				426.605224609375,
+				106.65679168701172
+			],
+			"radius": 20.0,
+			"spawned_tick": 30075,
+			"speed": 24.0,
+			"velocity": [
+				0.0,
+				0.0
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30150,
+			"action_started_tick": 30150,
+			"action_state": "move",
+			"art_id": "titan_brute",
+			"attack_kind": "none",
+			"behavior": "brute",
+			"boss_id": "",
+			"damage": 17.0,
+			"enemy_id": "brute",
+			"entity_id": 103,
+			"facing": [
+				-0.39201027154922485,
+				0.9199608564376831
+			],
+			"hp": 100.0,
+			"id": 103,
+			"locked_direction": [
+				-0.40201589465141296,
+				0.9156327247619629
+			],
+			"locked_origin": [
+				484.4158020019531,
+				-235.65357971191406
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 100.0,
+			"next_action_tick": 30150,
+			"pattern_index": 0,
+			"position": [
+				484.4158020019531,
+				-235.65357971191406
+			],
+			"radius": 24.0,
+			"spawned_tick": 30150,
+			"speed": 17.0,
+			"velocity": [
+				-6.664174556732178,
+				15.639334678649902
+			],
+			"xp": 10
+		},
+		{
+			"action_ends_tick": 30266,
+			"action_started_tick": 30206,
+			"action_state": "windup",
+			"art_id": "titan_sweeper",
+			"attack_kind": "sweep",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 104,
+			"facing": [
+				-0.9521029591560364,
+				0.3057776391506195
+			],
+			"hp": 53.0,
+			"id": 104,
+			"locked_direction": [
+				-0.9521029591560364,
+				0.3057776391506195
+			],
+			"locked_origin": [
+				637.2672729492188,
+				-39.267391204833984
+			],
+			"locked_target": [
+				515.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30150,
+			"pattern_index": 1,
+			"position": [
+				637.2672729492188,
+				-39.267391204833984
+			],
+			"radius": 20.0,
+			"spawned_tick": 30150,
+			"speed": 24.0,
+			"velocity": [
+				0.0,
+				0.0
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30150,
+			"action_started_tick": 30150,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 105,
+			"facing": [
+				-0.08594836294651031,
+				-0.9962995648384094
+			],
+			"hp": 58.0,
+			"id": 105,
+			"locked_direction": [
+				-0.6343004703521729,
+				-0.7730866074562073
+			],
+			"locked_origin": [
+				513.4440307617188,
+				218.2080535888672
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 30150,
+			"pattern_index": 0,
+			"position": [
+				513.4440307617188,
+				218.2080535888672
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 0,
+			"role_wait_since": -1,
+			"spawned_tick": 30150,
+			"speed": 50.0,
+			"velocity": [
+				-4.297418117523193,
+				-49.814979553222656
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30225,
+			"action_started_tick": 30225,
+			"action_state": "move",
+			"art_id": "titan_sweeper",
+			"attack_kind": "none",
+			"behavior": "sweep",
+			"boss_id": "",
+			"damage": 13.0,
+			"enemy_id": "sweeper",
+			"entity_id": 107,
+			"facing": [
+				-0.03245970979332924,
+				-0.9994730353355408
+			],
+			"hp": 65.0,
+			"id": 107,
+			"locked_direction": [
+				-0.7343848943710327,
+				0.6787331700325012
+			],
+			"locked_origin": [
+				773.7036743164063,
+				-208.3765869140625
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 65.0,
+			"next_action_tick": 30225,
+			"pattern_index": 0,
+			"position": [
+				773.7036743164063,
+				-208.3765869140625
+			],
+			"radius": 20.0,
+			"spawned_tick": 30225,
+			"speed": 24.0,
+			"velocity": [
+				-0.7790330648422241,
+				-23.98735237121582
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30225,
+			"action_started_tick": 30225,
+			"action_state": "move",
+			"art_id": "titan_grabber",
+			"attack_kind": "none",
+			"behavior": "grab",
+			"boss_id": "",
+			"damage": 12.0,
+			"enemy_id": "grabber",
+			"entity_id": 108,
+			"facing": [
+				-0.931450605392456,
+				-0.363867849111557
+			],
+			"hp": 58.0,
+			"id": 108,
+			"locked_direction": [
+				-0.9569439888000488,
+				-0.2902725040912628
+			],
+			"locked_origin": [
+				805.7476196289063,
+				69.63179016113281
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 58.0,
+			"next_action_tick": 30225,
+			"pattern_index": 0,
+			"position": [
+				805.7476196289063,
+				69.63179016113281
+			],
+			"radius": 20.0,
+			"role_hand_reach": -1.0,
+			"role_retry_tick": 30267,
+			"role_wait_since": 30252,
+			"spawned_tick": 30225,
+			"speed": 50.0,
+			"velocity": [
+				0.0,
+				0.0
+			],
+			"xp": 8
+		},
+		{
+			"action_ends_tick": 30225,
+			"action_started_tick": 30225,
+			"action_state": "move",
+			"art_id": "titan_basic",
+			"attack_kind": "none",
+			"behavior": "chase",
+			"boss_id": "",
+			"damage": 9.0,
+			"enemy_id": "walker",
+			"entity_id": 109,
+			"facing": [
+				0.9546113014221191,
+				-0.2978542745113373
+			],
+			"hp": 32.0,
+			"id": 109,
+			"locked_direction": [
+				-0.30370858311653137,
+				-0.9527649879455566
+			],
+			"locked_origin": [
+				648.0015258789063,
+				272.44921875
+			],
+			"locked_target": [
+				640.0,
+				0.0
+			],
+			"max_hp": 32.0,
+			"next_action_tick": 30225,
+			"pattern_index": 0,
+			"position": [
+				648.0015258789063,
+				272.44921875
+			],
+			"radius": 18.0,
+			"spawned_tick": 30225,
+			"speed": 23.0,
+			"velocity": [
+				21.9560604095459,
+				-6.850648403167725
+			],
+			"xp": 4
+		}
+	],
+	"equipment": {
+		"blade_slash": 1
+	},
+	"escape_zone": [
+		0.0,
+		0.0,
+		0.0,
+		0.0
+	],
+	"evacuation_ready": false,
+	"event_seq": 121,
+	"evolution_runtime": {
+
+	},
+	"evolutions": {
+
+	},
+	"final_started_tick": -1,
+	"next_entity_id": 110,
+	"offer_seq": 1,
+	"passives": {
+		"max_health": 1
+	},
+	"pause_reasons": [],
+	"pending_offers": [],
+	"phase": "survival",
+	"player": {
+		"attack_ready_ticks": {
+			"blade_slash": 30278
+		},
+		"facing": [
+			1.0,
+			0.0
+		],
+		"hp": 120.0,
+		"id": "player",
+		"invulnerable_until": 30155,
+		"level": 2,
+		"max_hp": 120.0,
+		"position": [
+			640.0,
+			0.0
+		],
+		"radius": 8.0,
+		"velocity": [
+			150.0,
+			0.0
+		],
+		"xp": 21
+	},
+	"player_attack_instances": [],
+	"progression_rng_state": "-267613856603221327",
+	"projectiles": [],
+	"reward_ids_claimed": [
+		"offer:0123456789abcdef0123456789abcdef:1:offer:1"
+	],
+	"rng_state": "708718527385777908",
+	"rules": {
+		"allowed_equipment_ids": [
+			"blade_slash",
+			"spin_slash",
+			"odm_dash",
+			"reentry_combo",
+			"wall_cannon",
+			"ally_cover"
+		],
+		"base_hp": 100.0,
+		"base_move_speed": 150.0,
+		"content_fingerprint": "410f0bb4c818320effe455e9517e103004323f162aad4988c2d1589a340e92ad",
+		"enemy_catalog": {
+			"armored_titan": {
+				"action_profile": {
+					"active_ticks": 60,
+					"brake_ticks": 18.0,
+					"cooldown_ticks": 30,
+					"kind": "charge",
+					"length": 310.0,
+					"max_structure_attacks": 1.0,
+					"preparation_forward": 81.0,
+					"recovery_ticks": 90,
+					"rush_speed": 360.0,
+					"rush_start_speed": 180.0,
+					"shoulder_forward": 56.0,
+					"shoulder_radius": 16.0,
+					"structure_admission_interval_ticks": 180.0,
+					"structure_damage": 3.0,
+					"structure_reach": 33.0,
+					"trigger_range": 420.0,
+					"warning_ticks": 72,
+					"width": 64.0
+				},
+				"art_id": "armored_titan",
+				"behavior": "final_armored",
+				"damage": 30.0,
+				"hp": 1000000.0,
+				"name": "갑옷 거인",
+				"radius": 32.0,
+				"speed": 150.0,
+				"xp": 0
+			},
+			"boss_abnormal": {
+				"art_id": "boss_abnormal",
+				"behavior": "combo",
+				"damage": 35.0,
+				"hp": 4200.0,
+				"name": "퇴각로의 기행종",
+				"radius": 32.0,
+				"speed": 28.0,
+				"xp": 180
+			},
+			"boss_charger": {
+				"art_id": "boss_charger",
+				"behavior": "charge",
+				"damage": 24.0,
+				"hp": 1000.0,
+				"name": "돌진 기행종",
+				"radius": 28.0,
+				"speed": 22.0,
+				"xp": 80
+			},
+			"boss_grabber": {
+				"art_id": "boss_grabber",
+				"behavior": "grab",
+				"damage": 33.0,
+				"hp": 3400.0,
+				"name": "대피로의 강적",
+				"radius": 30.0,
+				"speed": 24.0,
+				"xp": 150
+			},
+			"boss_leaper": {
+				"art_id": "boss_leaper",
+				"behavior": "leap",
+				"damage": 30.0,
+				"hp": 2600.0,
+				"name": "도약 기행종",
+				"radius": 28.0,
+				"speed": 24.0,
+				"xp": 120
+			},
+			"boss_sweeper": {
+				"art_id": "boss_sweeper",
+				"behavior": "sweep",
+				"damage": 27.0,
+				"hp": 1800.0,
+				"name": "광장의 강적",
+				"radius": 30.0,
+				"speed": 20.0,
+				"xp": 100
+			},
+			"brute": {
+				"art_id": "titan_brute",
+				"behavior": "brute",
+				"damage": 17.0,
+				"hp": 100.0,
+				"name": "대형 거인",
+				"radius": 24.0,
+				"speed": 17.0,
+				"xp": 10
+			},
+			"grabber": {
+				"art_id": "titan_grabber",
+				"behavior": "grab",
+				"damage": 12.0,
+				"hp": 58.0,
+				"name": "붙잡는 거인",
+				"radius": 20.0,
+				"speed": 50.0,
+				"xp": 8
+			},
+			"runner": {
+				"art_id": "titan_runner",
+				"behavior": "runner",
+				"damage": 7.0,
+				"hp": 24.0,
+				"name": "빠른 거인",
+				"radius": 16.0,
+				"speed": 43.0,
+				"xp": 5
+			},
+			"sweeper": {
+				"art_id": "titan_sweeper",
+				"behavior": "sweep",
+				"damage": 13.0,
+				"hp": 65.0,
+				"name": "팔을 휘두르는 거인",
+				"radius": 20.0,
+				"speed": 24.0,
+				"xp": 8
+			},
+			"walker": {
+				"art_id": "titan_basic",
+				"behavior": "chase",
+				"damage": 9.0,
+				"hp": 32.0,
+				"name": "거인",
+				"radius": 18.0,
+				"speed": 23.0,
+				"xp": 4
+			}
+		},
+		"equipment_slots": 4,
+		"evacuation_ticks": 4500,
+		"move_speed": 150.0,
+		"passive_slots": 4,
+		"pickup_radius": 30.0,
+		"progression": {
+			"base_xp": 24,
+			"xp_per_level": 8
+		},
+		"world_geometry": {
+
+		}
+	},
+	"run_config": {
+		"doctrine_id": "doctrine_standard",
+		"prepared_supply": "",
+		"run_id": "0123456789abcdef0123456789abcdef:1",
+		"run_serial": 1,
+		"target_evolution_id": "evo_wing_cut"
+	},
+	"run_id": "0123456789abcdef0123456789abcdef:1",
+	"run_serial": 1,
+	"schema_version": 2,
+	"seed": 42,
+	"stats": {
+		"damage_dealt": 694.0,
+		"kills": 9,
+		"minibosses_defeated": 0
+	},
+	"supply_used": false,
+	"survival_tick": 30256,
+	"tactical_seals": 0,
+	"telegraphs": [
+		{
+			"active_from_tick": 30266,
+			"active_ticks": 12,
+			"arc_degrees": 90.0,
+			"behavior_attack": true,
+			"created_tick": 30206,
+			"damage": 13.0,
+			"direction": [
+				-0.9521029591560364,
+				0.3057776391506195
+			],
+			"expires_tick": 30278,
+			"id": 106,
+			"length": 1.0,
+			"origin": [
+				637.2672729492188,
+				-39.267391204833984
+			],
+			"radius": 100.0,
+			"shape": "sector",
+			"source_id": "104",
+			"warning_ticks": 60,
+			"width": 40.0
+		}
+	],
+	"upgrade_offer": {
+
+	},
+	"view_revision": 3,
+	"world": {
+		"content_fingerprint": "410f0bb4c818320effe455e9517e103004323f162aad4988c2d1589a340e92ad",
+		"delta_root": {
+			"format_revision": 1,
+			"root_hash": "e69d6a13c12cced505ecd3c69581a5926c7c87a2b417157847bd4a8268f9de28"
+		},
+		"dirty_chunks": [],
+		"evacuation": {
+
+		},
+		"generator_revision": "city_v1",
+		"mode": "streamed_city",
+		"next_structure_strike_tick": 0,
+		"origin_chunk": [
+			"0",
+			"0"
+		],
+		"origin_revision": 0,
+		"scene_id": "city",
+		"schema_version": 1,
+		"stage": "city",
+		"template_revision": "ch01_city_1",
+		"world_revision": 0
+	}
+}

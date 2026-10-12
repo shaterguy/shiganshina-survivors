@@ -270,6 +270,14 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 	for command in commands: _apply_command(state,command,events)
 	if state.phase == "evacuation" and not FINAL_ACTOR_SPAWN_ID in state.command_ids_applied and (int(state.active_tick)-int(state.final_started_tick)) % 30 == 0:
 		_try_spawn_final_actor(state,events)
+	# Bind the role query to the already prepared, pre-move tick coverage.
+	# Movement may cross a view-window edge; individual sweeps still require
+	# their exact resident geometry and retain the immutable identity guard.
+	if state.has("world") and state.world.stage == "city":
+		for entity in state.entities:
+			if _is_live_role(entity):
+				_role_query(state)
+				break
 	_move_player(state,move)
 	_move_enemies(state,events)
 	_spatial.rebuild(state.entities)
