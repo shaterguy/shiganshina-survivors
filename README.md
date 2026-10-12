@@ -1,4 +1,4 @@
-# 진격의 거인: 인류의 날개
+# 진격의 거인 인류의 날개
 
 현재 파일은 재구현 중인 개발 후보입니다. 게임 실행·APK 준비 상태는 [재구현 상태](docs/implementation/REBUILD-STATUS.md)를 확인하세요.
 
@@ -23,20 +23,21 @@ Windows에서는 `python3` 대신 `py -3`, Godot 실행파일의 절대 경로�
 
 ## Android 로컬 빌드
 
-[설치, 빌드, 검증, 키 백업·복구 안내](docs/build/android-local.md)를 따릅니다. GitHub Actions, Work 또는 클라우드 빌드 서비스는 사용하지 않습니다.
+[설치, 빌드, 검증, 키 백업·복구 안내](docs/build/android-local.md)를 따릅니다. 개발·테스트·미서명 APK 빌드는 로컬에서 진행하며, 승인된 GitHub 경로는 서명에만 사용합니다.
 
 ```sh
 python3 tools/build/build_android.py --check-ready
 python3 tools/build/build_android.py \
   --godot /absolute/path/to/godot \
   --template /absolute/path/to/android_debug-4.6.3.apk \
-  --output dist/shiganshina-dev-unsigned.apk
+  --output dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk
 ```
 
-- ARM64, `com.shaterguy.shiganshina.dev`, `0.1.0-dev3` / code `3`
+- ARM64, `com.shaterguy.wingsofhumanity.dev`, `0.1.0-dev4` / code `4`
 - 인터넷 권한 없음, 자체 제작 512×512 앱 아이콘
 - 표준 템플릿의 **미서명 APK 생성에는 Android SDK가 필요 없습니다**
-- 설치 가능한 서명 APK는 사용자가 별도로 준비한 기존 키와 Android Build Tools로 만듭니다
+- 설치 가능한 서명 APK는 [별도 GitHub 서명 계약](docs/build/github-signing-input-contract.md)에 따라 만듭니다
+- 이전 패키지와 별도 설치되며 Android 저장자료를 자동 이동하지 않습니다. Desktop 저장 경로는 그대로 유지합니다
 - 원화 승인 게이트는 모든 내보내기에 필수입니다. 미승인 아트가 있거나 `final_export_allowed`가 `false`이면 빌드는 중단됩니다. `--check-ready`가 최신 상태를 보여 줍니다
 
 ## 미완료 개발검증판

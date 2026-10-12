@@ -179,7 +179,7 @@ class ArmoredRuntimePackaging(unittest.TestCase):
 
     def test_archive_accepts_exact_imported_bundle_without_raw_png(self):
         report = self.check_archive(self.archive_entries())
-        self.assertEqual(report['version_code'], 3)
+        self.assertEqual(report['version_code'], common.PIN['android']['version_code'])
         self.assertEqual(report['armored_imported_payloads_compared'], 17)
 
     def test_source_only_archive_check_does_not_claim_imported_byte_comparison(self):

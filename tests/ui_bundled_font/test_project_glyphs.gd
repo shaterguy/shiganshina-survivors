@@ -19,7 +19,7 @@ func run(t) -> void:
  t.check(points.size()>400,"coverage includes actual game/data/chapter/scene text, not only one sample")
  for cp in points:
   t.check(ts.font_has_char(rids[0],cp),"bundled RID directly contains source codepoint U+%04X"%cp)
- var samples := ["진격의 거인: 인류의 날개", "시간시나구 탈출", "피해량 12.5 → 18.75", "기동 교리 · 보급금 40", "진화 선행조건\n쌍검 5/5 · 충족", "A · 선택   B · 뒤로   Ⅱ", "← ↑ → ↓ ↔ ± 0123456789"]
+ var samples := ["진격의 거인 인류의 날개", "시간시나구 탈출", "피해량 12.5 → 18.75", "기동 교리 · 보급금 40", "진화 선행조건\n쌍검 5/5 · 충족", "A · 선택   B · 뒤로   Ⅱ", "← ↑ → ↓ ↔ ± 0123456789"]
  for size in [11,12,13,15,16,20,24,28]:
   for text in samples:
    var line := TextLine.new()

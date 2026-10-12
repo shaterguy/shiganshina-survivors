@@ -7,10 +7,12 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOLS = ROOT / 'tools/build'
+ANDROID = json.loads((TOOLS / 'toolchain.json').read_text())['android']
 sys.path.insert(0, str(TOOLS))
 
 class AndroidToolingTests(unittest.TestCase):
@@ -86,16 +88,16 @@ class AndroidToolingTests(unittest.TestCase):
         self.assertTrue(Path(env['XDG_CONFIG_HOME']).is_dir())
 
     def test_manifest_reader_decodes_package_and_permissions(self):
-        manifest = binary_manifest('com.shaterguy.shiganshina.dev', '0.1.0-dev3', 3)
+        manifest = binary_manifest(ANDROID['package'], ANDROID['version_name'], ANDROID['version_code'])
         values = self.mod.parse_android_manifest(manifest)
-        self.assertEqual(values['package'], 'com.shaterguy.shiganshina.dev')
-        self.assertEqual(values['versionCode'], 3)
-        self.assertEqual(values['versionName'], '0.1.0-dev3')
+        self.assertEqual(values['package'], ANDROID['package'])
+        self.assertEqual(values['versionCode'], ANDROID['version_code'])
+        self.assertEqual(values['versionName'], ANDROID['version_name'])
         self.assertEqual(values['permissions'], [])
 
     def test_manifest_reader_supports_long_utf8_strings(self):
         version='dev-'+'x'*300
-        values=self.mod.parse_android_manifest(binary_manifest('com.shaterguy.shiganshina.dev', version, 1))
+        values=self.mod.parse_android_manifest(binary_manifest(ANDROID['package'], version, 1))
         self.assertEqual(values['versionName'],version)
 
     def test_manifest_reader_fails_on_truncation(self):
@@ -103,12 +105,12 @@ class AndroidToolingTests(unittest.TestCase):
             self.mod.parse_android_manifest(binary_manifest('x', 'v', 1)[:-1])
 
     def test_package_validation_rejects_internet(self):
-        data = binary_manifest('com.shaterguy.shiganshina.dev', '0.1.0-dev3', 3, internet=True)
+        data = binary_manifest(ANDROID['package'], ANDROID['version_name'], ANDROID['version_code'], internet=True)
         with self.assertRaisesRegex(self.mod.BuildError, 'INTERNET'):
             self.mod.validate_package(self.mod.parse_android_manifest(data))
 
     def test_package_validation_rejects_wrong_package_and_version(self):
-        for package, version, code in [('wrong', '0.1.0-dev3', 3), ('com.shaterguy.shiganshina.dev', 'wrong', 3), ('com.shaterguy.shiganshina.dev', '0.1.0-dev3', 4)]:
+        for package, version, code in [('wrong', ANDROID['version_name'], ANDROID['version_code']), (ANDROID['package'], 'wrong', ANDROID['version_code']), (ANDROID['package'], ANDROID['version_name'], ANDROID['version_code'] + 1)]:
             with self.assertRaises(self.mod.BuildError):
                 self.mod.validate_package(self.mod.parse_android_manifest(binary_manifest(package, version, code)))
 
@@ -171,7 +173,7 @@ class ArchiveAndWrapperTests(unittest.TestCase):
             z.writestr('AndroidManifest.xml', b'original')
             z.writestr('classes.dex', b'pinned-engine-code')
             z.writestr('lib/arm64-v8a/libgodot_android.so', b'pinned-library')
-        self.entries={'AndroidManifest.xml':binary_manifest('com.shaterguy.shiganshina.dev','0.1.0-dev3',3),
+        self.entries={'AndroidManifest.xml':binary_manifest(ANDROID['package'],ANDROID['version_name'],ANDROID['version_code']),
                       'classes.dex':b'pinned-engine-code','lib/arm64-v8a/libgodot_android.so':b'pinned-library',
                       'assets/assets/icon.png':b'icon', 'assets/project.binary':b'project', 'assets/assets/manifest.json':json.dumps(self.manifest).encode()}
 
@@ -252,10 +254,13 @@ class SigningSafetyTests(unittest.TestCase):
     def test_existing_dev_identity_is_default_and_cannot_be_overridden(self):
         self.assertTrue(hasattr(self.sign,'resolve_certificate_pin'),'missing existing-key certificate pin')
         expected='4256200e2c63dbfec3d0e9370ecca4b611ee11c65e1e2edad88003ea858c174c'
-        self.assertEqual(self.sign.resolve_certificate_pin({}),expected)
-        self.assertEqual(self.sign.resolve_certificate_pin({'EXPECTED_CERT_SHA256':expected.upper()}),expected)
-        with self.assertRaisesRegex(self.mod.BuildError,'existing DEV identity'):
-            self.sign.resolve_certificate_pin({'EXPECTED_CERT_SHA256':'b'*64})
+        with self.assertRaisesRegex(self.mod.BuildError, 'existing DEV identity'):
+            self.sign.resolve_certificate_pin({})
+        with patch.object(self.sign, 'PIN', {'android': {'package': 'com.shaterguy.shiganshina.dev'}}):
+            self.assertEqual(self.sign.resolve_certificate_pin({}),expected)
+            self.assertEqual(self.sign.resolve_certificate_pin({'EXPECTED_CERT_SHA256':expected.upper()}),expected)
+            with self.assertRaisesRegex(self.mod.BuildError,'existing DEV identity'):
+                self.sign.resolve_certificate_pin({'EXPECTED_CERT_SHA256':'b'*64})
 
     def test_explicit_tool_path_is_used(self):
         p=self.root/'zipalign'; p.touch()

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT/'tools/build'))
 import android_common as common
 import sign_android as signing
 
-REPOSITORY = 'shaterguy/shiganshina-survivors'
+REPOSITORY = 'shaterguy/wings-of-humanity'
 FINGERPRINT = 'a' * 64  # Synthetic public test value, not an actual certificate.
 SOURCE_HASH = 'b' * 64
 
@@ -58,11 +58,28 @@ class GithubDevSigningTests(unittest.TestCase):
 
     def test_legacy_default_remains_pinned(self):
         self.assertTrue(hasattr(signing, 'resolve_signing_identity'))
-        result = signing.resolve_signing_identity({})
-        self.assertEqual(result['policy'], 'historical-dev')
-        self.assertEqual(result['certificate_sha256'], signing.resolve_certificate_pin({}))
+        # The preserved historical record cannot authorize the renamed package.
+        with self.assertRaisesRegex(common.BuildError, 'existing DEV identity'):
+            signing.resolve_signing_identity({})
+        historical = {'android': {'package': 'com.shaterguy.shiganshina.dev'}}
+        with patch.object(signing, 'PIN', historical):
+            result = signing.resolve_signing_identity({})
+            self.assertEqual(result['policy'], 'historical-dev')
+            self.assertEqual(result['certificate_sha256'], signing.resolve_certificate_pin({}))
         with self.assertRaises(common.BuildError):
             signing.resolve_signing_identity({'EXPECTED_CERT_SHA256': FINGERPRINT})
+
+    def test_selected_jks_identity_drives_both_tool_types(self):
+        self.identity['keystore_type'] = 'JKS'
+        self.save_identity()
+        self.assertEqual(self.resolve()['keystore_type'], 'JKS')
+        settings = {'KEYSTORE_TYPE': 'JKS', 'KEY_ALIAS': 'fixture-alias',
+                    'KEYSTORE_PATH': '/MOCK_ONLY/key.jks',
+                    'KEYSTORE_PASSWORD_FILE': '/MOCK_ONLY/password-file'}
+        sign = signing.sign_command(['apksigner'], settings, Path('in.apk'), Path('out.apk'))
+        cert = signing.certificate_command(['keytool'], settings, Path('cert.der'))
+        self.assertEqual(sign[sign.index('--ks-type') + 1], 'JKS')
+        self.assertEqual(cert[cert.index('-storetype') + 1], 'JKS')
 
     def test_new_policy_requires_explicit_development_mode(self):
         with self.assertRaisesRegex(common.BuildError, 'development-validation'):
@@ -83,7 +100,7 @@ class GithubDevSigningTests(unittest.TestCase):
         original = copy.deepcopy(self.identity)
         for key, value in [('schema_version', True), ('policy', 'historical-dev'),
                            ('repository', 'other/repository'), ('package', 'wrong.package'),
-                           ('keystore_type', 'JKS'), ('identity_id', ''), ('identity_id', None),
+                           ('keystore_type', 'BKS'), ('identity_id', ''), ('identity_id', None),
                            ('key_alias', ''), ('certificate_sha256', 'UNSET'),
                            ('certificate_sha256', None)]:
             with self.subTest(key=key, value=value):
@@ -106,14 +123,16 @@ class GithubDevSigningTests(unittest.TestCase):
         self.assertEqual(result['certificate_sha256'], FINGERPRINT)
 
     def invoke(self, *, preflight_pin=FINGERPRINT, signed_pin=FINGERPRINT,
-               input_pin=None, source_pin=SOURCE_HASH, omit=None, mutate_input=False):
+               input_pin=None, source_pin=SOURCE_HASH, omit=None, mutate_input=False,
+               verified=False, changed_payload=False):
         """Exercise the real main orchestration, replacing tools/credentials only."""
         source = self.work/'unsigned.apk'; source.write_bytes(b'unsigned fixture')
         output = self.work/'new-dev.apk'
         self.input_hash = hashlib.sha256(source.read_bytes()).hexdigest()
         args = ['sign_android.py', '--input', str(source), '--output', str(output),
-                '--template', str(self.work/'template.apk'), '--development-validation',
+                '--development-validation',
                 '--github-new-dev']
+        args += ['--verified-input-only'] if verified else ['--template', str(self.work/'template.apk')]
         if omit != 'input': args += ['--expected-input-sha256', input_pin or self.input_hash]
         if omit != 'source': args += ['--expected-source-sha256', source_pin]
         self.labels = []
@@ -122,6 +141,7 @@ class GithubDevSigningTests(unittest.TestCase):
             if label == 'apksigner sign':
                 Path(command[command.index('--out') + 1]).write_bytes(b'signed fixture')
                 self.assertEqual(command[command.index('--ks-key-alias') + 1], 'fixture-alias')
+                self.assertEqual(command[command.index('--ks-type') + 1], self.identity['keystore_type'])
                 if mutate_input: source.write_bytes(b'changed')
             if label == 'apksigner verify':
                 return 'Signer #1 certificate SHA-256 digest: ' + signed_pin + '\n'
@@ -146,6 +166,10 @@ class GithubDevSigningTests(unittest.TestCase):
             stack.enter_context(patch.object(signing, 'run_tool', side_effect=tool))
             stack.enter_context(patch.object(signing, 'sha256', side_effect=hash_file))
             stack.enter_context(patch.object(common, 'read_manifest', return_value=manifest))
+            if verified:
+                self.payload_mock = stack.enter_context(patch.object(signing, 'verified_payload',
+                    side_effect=[{'AndroidManifest.xml': 'a'},
+                                 {'AndroidManifest.xml': 'b' if changed_payload else 'a'}], create=True))
             self.archive_mock = stack.enter_context(patch.object(common, 'verify_apk', return_value={}))
             stack.enter_context(patch.object(common, 'stage_project', return_value={'source_sha256': SOURCE_HASH}))
             # Any accidental subprocess call is a test failure, never an actual signing operation.
@@ -172,6 +196,38 @@ class GithubDevSigningTests(unittest.TestCase):
         self.assertEqual(self.labels, ['public certificate preflight', 'zipalign',
                          'apksigner sign', 'apksigner verify', 'zipalign verify'])
         self.assertEqual(self.archive_mock.call_count, 2)
+
+    def test_approved_input_path_needs_no_template_and_preserves_payload(self):
+        code, output = self.invoke(verified=True)
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        report = json.loads(output.with_suffix('.apk.signing.json').read_text())
+        self.assertIs(report['template_revalidated'], False)
+        self.assertEqual(report['payload_identity'], 'matched')
+        self.assertEqual(report['payload_entry_count'], 1)
+        self.assertEqual(self.archive_mock.call_count, 0)
+        self.assertEqual(self.payload_mock.call_count, 2)
+
+    def test_signed_payload_change_blocks_publication(self):
+        code, output = self.invoke(verified=True, changed_payload=True)
+        self.assertEqual(code, 2)
+        self.assertIn('payload', self.stderr.getvalue())
+        self.assertFalse(output.exists())
+
+    def test_verified_input_requires_both_explicit_modes(self):
+        for extra in ([], ['--github-new-dev'], ['--development-validation']):
+            args = ['sign_android.py', '--input', 'absent.apk', '--output', 'absent-out.apk',
+                    '--verified-input-only'] + extra
+            error = io.StringIO()
+            with patch.object(sys, 'argv', args), redirect_stderr(error):
+                self.assertEqual(signing.main(), 2)
+            self.assertIn('requires --github-new-dev and --development-validation', error.getvalue())
+
+    def test_main_preserves_selected_jks_type(self):
+        self.identity['keystore_type'] = 'JKS'
+        self.save_identity()
+        code, output = self.invoke()
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertTrue(output.exists())
 
     def test_missing_hashes_block_before_credentials_or_tools(self):
         for omitted in ('input', 'source'):

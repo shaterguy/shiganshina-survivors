@@ -367,7 +367,7 @@ func present(snapshot: Dictionary) -> void:
 		"save_recovery":
 			_render_recovery_panel()
 		"title":
-			_title.text = "진격의 거인: 인류의 날개"
+			_title.text = "진격의 거인 인류의 날개"
 			_subtitle.text = "시나리오 1 · %s · 845\n성벽은 무너졌다. 주민이 떠날 때까지 버텨라.\n30분 생존 · 다섯 강적 · 마지막 탈출" % _chapter_title()
 			if _checkpoint_available: _add_button("이어서 출격",func(): resume_requested.emit())
 			_add_button("새로 출격" if _checkpoint_available else "출격",func(): new_run_requested.emit())

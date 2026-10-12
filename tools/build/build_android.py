@@ -17,7 +17,7 @@ def main() -> int:
     parser.add_argument('--project', type=Path, default=ROOT)
     parser.add_argument('--godot', default='godot', help='Path to the pinned official standard Godot executable')
     parser.add_argument('--template', type=Path, help='Extracted templates/android_debug.apk (no SDK required)')
-    parser.add_argument('--output', type=Path, default=ROOT/'dist/shiganshina-dev-unsigned.apk')
+    parser.add_argument('--output', type=Path, default=ROOT/('dist/WingsOfHumanity-v' + PIN['android']['version_name'] + '-unsigned.apk'))
     parser.add_argument('--development-validation', action='store_true', help='Build incomplete validation-only package with five approved basic placeholders; never approve final art')
     parser.add_argument('--check-ready', action='store_true', help='Check manifest approval and source assets only; never launch Godot')
     parser.add_argument('--timeout', type=int, default=600)

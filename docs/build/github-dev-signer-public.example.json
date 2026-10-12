@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "policy": "github-new-dev",
-  "repository": "shaterguy/shiganshina-survivors",
+  "repository": "shaterguy/wings-of-humanity",
   "identity_id": null,
-  "package": "com.shaterguy.shiganshina.dev",
+  "package": "com.shaterguy.wingsofhumanity.dev",
   "key_alias": null,
   "keystore_type": "PKCS12",
   "certificate_sha256": null

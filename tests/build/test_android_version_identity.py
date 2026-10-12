@@ -8,11 +8,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class AndroidVersionIdentityTests(unittest.TestCase):
-    def test_candidate_uses_unused_dev3_and_increased_code(self):
+    def test_candidate_uses_unused_dev4_and_increased_code(self):
         pin = json.loads((ROOT / 'tools/build/toolchain.json').read_text())['android']
-        self.assertEqual(pin['version_name'], '0.1.0-dev3')
-        self.assertEqual(pin['version_code'], 3)
-        self.assertGreater(pin['version_code'], 1)  # Verified delivered dev1 baseline.
+        self.assertEqual(pin['version_name'], '0.1.0-dev4')
+        self.assertEqual(pin['version_code'], 4)
+        self.assertGreater(pin['version_code'], 3)  # Preserved dev3 build baseline.
 
     def test_project_and_export_preset_match_pin(self):
         pin = json.loads((ROOT / 'tools/build/toolchain.json').read_text())['android']
@@ -22,12 +22,13 @@ class AndroidVersionIdentityTests(unittest.TestCase):
         self.assertEqual(re.findall(r'preset\.set\("version/name","([^"]+)"\)', plugin), [pin['version_name']])
         self.assertEqual(re.findall(r'preset\.set\("version/code",(\d+)\)', plugin), [str(pin['version_code'])])
 
-    def test_development_package_and_signer_lineage_stay_fixed(self):
+    def test_new_package_is_separate_from_preserved_historical_signer(self):
         pin = json.loads((ROOT / 'tools/build/toolchain.json').read_text())['android']
         signer = json.loads((ROOT / 'docs/build/dev-signer-public.json').read_text())
         plugin = (ROOT / 'addons/chapter_export/plugin.gd').read_text()
-        self.assertEqual(pin['package'], 'com.shaterguy.shiganshina.dev')
-        self.assertEqual(signer['package'], pin['package'])
+        self.assertEqual(pin['package'], 'com.shaterguy.wingsofhumanity.dev')
+        self.assertEqual(signer['package'], 'com.shaterguy.shiganshina.dev')
+        self.assertNotEqual(signer['package'], pin['package'])
         self.assertEqual(re.findall(r'preset\.set\("package/unique_name","([^"]+)"\)', plugin), [pin['package']])
         self.assertEqual(signer['certificate_sha256'], '4256200e2c63dbfec3d0e9370ecca4b611ee11c65e1e2edad88003ea858c174c')
 

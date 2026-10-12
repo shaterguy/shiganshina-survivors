@@ -23,6 +23,6 @@ func run(t) -> void:
   t.check(rids.size()==1,"bundled variation has exactly one font RID")
   for rid in rids:
    t.check(ts.font_get_variation_coordinates(rid).get(2003265652,0)==600,"actual RID uses weight 600 rather than default Thin")
-  for value in "진격의 거인: 인류의 날개 시간시나구 탈출 보급소 진화 완료 → ← ↑ ↓ ↔ ± Ⅱ 0123456789":
+  for value in "진격의 거인 인류의 날개 시간시나구 탈출 보급소 진화 완료 → ← ↑ ↓ ↔ ± Ⅱ 0123456789":
    if value != " ": t.check(card_font.has_char(value.unicode_at(0)),"bundled font covers required glyph "+value)
  ui.free()

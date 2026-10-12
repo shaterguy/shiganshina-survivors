@@ -1,3 +1,11 @@
+> Current dev4 identity: **진격의 거인 인류의 날개**, repository
+> `shaterguy/wings-of-humanity`, package `com.shaterguy.wingsofhumanity.dev`.
+> Local builds remain unsigned. Use the separately reviewed
+> [GitHub signing contract](github-signing-input-contract.md) for this package.
+> The historical key, PHONE paths, and backup instructions below describe only
+> the old `com.shaterguy.shiganshina.dev` lineage. They do not authorize key lookup,
+> recovery, signing, or migration for dev4, and the default signer rejects dev4.
+
 # Portable local Android DEV build
 
 ## Status and limits
@@ -64,7 +72,7 @@ python3 tests/build/smoke_android_export.py \
 python3 tools/build/build_android.py \
   --godot /absolute/path/to/godot \
   --template /absolute/path/to/tools/android_debug-4.6.3.apk \
-  --output dist/shiganshina-dev-unsigned.apk
+  --output dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk
 ```
 
 If `godot` is on `PATH`, omit `--godot`. On Windows use `py -3` instead of `python3`, ordinary Windows paths, and a single-line command rather than POSIX backslash continuations.
@@ -79,18 +87,18 @@ The wrapper:
 6. Validates Android binary manifest package/version, ARM64-only native libraries, absence of INTERNET permission, ZIP integrity, source JSON, manifest assets and an archive whitelist. Untouched engine files must match the pinned template bytes.
 7. Publishes only after verification, plus a `.apk.build.json` report containing source-input digest, template digest, engine version and APK SHA-256. It refuses existing output/report paths.
 
-Identity: `com.shaterguy.shiganshina.dev`, version name `0.1.0-dev3`, version code `3`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
+Identity: `com.shaterguy.wingsofhumanity.dev`, version name `0.1.0-dev4`, version code `4`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
 
 Recheck an unsigned artifact against the current approved source:
 
 ```sh
-python3 tools/build/verify_android.py dist/shiganshina-dev-unsigned.apk \
+python3 tools/build/verify_android.py dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk \
   --template /absolute/path/to/tools/android_debug-4.6.3.apk
 ```
 
 This recipe pins build inputs and recreates a clean import environment. It does **not** claim byte-for-byte reproducibility across all hosts: ZIP timestamps and generated import/scene metadata can differ. Retain the source commit, tool pins and per-build report to audit each result. Cross-platform execution requires a compatible Godot binary; a phone/tablet alone is not automatically a supported build host.
 
-## 4. Sign locally with your existing DEV key
+## 4. Historical procedure: old-package local DEV signing
 
 Signing needs a local JDK plus official Android SDK **Build Tools** that support `zipalign -P 16` (35.0.0 or newer). The full SDK/Gradle pipeline is not needed for unsigned export. Install/accept licenses yourself on your machine. Follow the official [apksigner](https://developer.android.com/tools/apksigner) and [zipalign](https://developer.android.com/tools/zipalign) guidance: alignment comes before signing, and nothing modifies the APK after it is signed.
 
@@ -125,7 +133,7 @@ The checked-in public certificate SHA-256 is always enforced. You can independen
 
 The signer rechecks the art gate and unsigned archive, exports only the public certificate with [keytool `-exportcert` / `-storepass:file`](https://docs.oracle.com/en/java/javase/17/docs/specs/man/keytool.html), and checks its SHA-256 before any signing. A different key is rejected at this step. It then aligns, signs with `file:` password arguments, verifies the Android signature and one exact certificate fingerprint, checks alignment and signed contents, and publishes the final APK plus `.apk.signing.json`. It disables separate v4 `.idsig` generation. The report contains only package identity and public hashes. It never overwrites the unsigned file or an existing signed APK. Failure output suppresses tool output and signing command lines to avoid leaking private paths. No real signing has been validated until this procedure is run with the user's existing key; unit tests do not prove device installation.
 
-## 5. Back up and recover the existing key on another machine
+## 5. Historical procedure: old-key backup and recovery
 
 For the owner's minimal PHONE steps, use [한국어 키 백업·복원 안내](KEY-BACKUP-KO.md).
 
@@ -158,3 +166,21 @@ User-controlled backup workflow (backs up both the existing key and its existing
 5. Set `KEYSTORE_PATH` and `KEYSTORE_PASSWORD_FILE` to the recovered files. Clone the same source commit, obtain the pinned tools/template, rebuild and sign. The checked-in certificate pin is verified before signing, so a different key is rejected. After verified recovery, remove the temporary plaintext `restore.tar` yourself; retain the original key and your encrypted backups. Windows users can perform equivalent steps using trusted local archive/encryption tools and owner-only folder permissions.
 
 These backup and recovery steps must be performed locally by the key owner. The repository excludes common key/password/ciphertext forms, but `.gitignore` is only an accident-prevention layer; it does not protect a secret already committed under any name.
+
+## Name and save-path compatibility (dev4)
+
+The title has no colon and the Android label has no development suffix. The
+in-game incomplete-art notice and export gate remain active. Chapter 1 remains
+`시간시나구 탈출` (`chapter_01_shiganshina`); content and save schemas are unchanged.
+
+On desktop, Godot previously sanitized the colon in the title to a hyphen.
+The explicit `application/config/custom_user_dir_name` now preserves the same
+`Godot/app_userdata/진격의 거인- 인류의 날개` path on Windows/macOS and
+`godot/app_userdata/진격의 거인- 인류의 날개` on Linux/BSD. `user://saves` remains
+unchanged. A disposable Linux Godot test verifies that the renamed project can
+read the old directory. Windows/macOS paths follow Godot's documented layout
+but have not been exercised here.
+
+Android uses its app sandbox; the new package has separate storage and cannot
+read old-package saves automatically. No existing save files are moved, changed,
+or deleted. See [Godot data paths](https://docs.godotengine.org/en/stable/tutorials/io/data_paths.html).

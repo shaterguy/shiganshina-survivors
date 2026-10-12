@@ -3,14 +3,16 @@
 from __future__ import annotations
 import argparse
 import json
+import hashlib
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import shutil
 import stat
 import subprocess
 import sys
 import tempfile
+import zipfile
 from android_common import BuildError, PIN, ROOT, sha256, source_file
 
 
@@ -21,7 +23,7 @@ def sign_command(command: list[str], settings: dict, source: Path, output: Path)
         password_args += ['--key-pass', 'file:' + separate_password]
     # apksigner tries the keystore password for the key by default. Reusing one
     # file source twice can consume a nonexistent second line.
-    return command + ['sign', '--ks', settings['KEYSTORE_PATH'], '--ks-type', 'PKCS12', '--ks-key-alias', settings.get('KEY_ALIAS', 'shiganshina-dev'),
+    return command + ['sign', '--ks', settings['KEYSTORE_PATH'], '--ks-type', settings.get('KEYSTORE_TYPE', 'PKCS12'), '--ks-key-alias', settings.get('KEY_ALIAS', 'shiganshina-dev'),
                       ] + password_args + ['--v1-signing-enabled', 'false', '--v2-signing-enabled', 'true',
                       '--v3-signing-enabled', 'true', '--v4-signing-enabled', 'false',
                       '--out', str(output), str(source)]
@@ -55,7 +57,7 @@ def resolve_signing_identity(env: dict, *, github_new_dev: bool = False,
                 'key_alias': env.get('KEY_ALIAS', 'shiganshina-dev')}
     if not development_validation:
         raise BuildError('--github-new-dev requires --development-validation')
-    repository = 'shaterguy/shiganshina-survivors'
+    repository = 'shaterguy/wings-of-humanity'
     if env.get('GITHUB_ACTIONS') != 'true' or env.get('GITHUB_REPOSITORY') != repository:
         raise BuildError('New DEV signing requires the intended GitHub Actions repository')
     try:
@@ -65,7 +67,7 @@ def resolve_signing_identity(env: dict, *, github_new_dev: bool = False,
     if (not isinstance(identity, dict) or type(identity.get('schema_version')) is not int
             or identity['schema_version'] != 1 or identity.get('policy') != 'github-new-dev'
             or identity.get('repository') != repository or identity.get('package') != PIN['android']['package']
-            or identity.get('keystore_type') != 'PKCS12'
+            or identity.get('keystore_type') not in ('PKCS12', 'JKS')
             or not isinstance(identity.get('identity_id'), str)
             or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,63}', identity['identity_id'])
             or not isinstance(identity.get('key_alias'), str) or not identity['key_alias'].strip()):
@@ -83,7 +85,7 @@ def resolve_signing_identity(env: dict, *, github_new_dev: bool = False,
 def certificate_command(command: list[str], settings: dict, certificate: Path) -> list[str]:
     # Export only the public DER certificate; never export key material.
     return command + ['-exportcert', '-alias', settings.get('KEY_ALIAS', 'shiganshina-dev'),
-                      '-keystore', settings['KEYSTORE_PATH'], '-storetype', 'PKCS12',
+                      '-keystore', settings['KEYSTORE_PATH'], '-storetype', settings.get('KEYSTORE_TYPE', 'PKCS12'),
                       '-storepass:file', settings['KEYSTORE_PASSWORD_FILE'], '-file', str(certificate)]
 
 
@@ -138,11 +140,51 @@ def run_tool(command: list[str], label: str, env: dict) -> str:
     return result.stdout
 
 
+def verified_payload(path: Path, *, signed: bool = False) -> dict[str, str]:
+    """Check package/container and fingerprint every decompressed APK member.
+
+    This does not replace local template validation. The caller must bind the
+    already validated input by its approved SHA-256 before using this path.
+    """
+    from android_common import parse_android_manifest, validate_package
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)):
+                raise BuildError('APK contains duplicate entries')
+            with path.open('rb') as stream:
+                stream.seek(max(0, archive.start_dir - 16))
+                has_block = stream.read(16) == b'APK Sig Block 42'
+            if not signed and has_block:
+                raise BuildError('Expected unsigned APK, found a signing block')
+            if signed and not has_block:
+                raise BuildError('Signed APK lacks v2/v3 signing block')
+            hashes = {}
+            for entry in archive.infolist():
+                name = entry.filename
+                if name.startswith('/') or '..' in PurePosixPath(name).parts or '\\' in name:
+                    raise BuildError('APK contains unsafe entry')
+                if entry.flag_bits & 1:
+                    raise BuildError('APK contains encrypted entry')
+                if re.fullmatch(r'META-INF/[^/]+\.(RSA|DSA|EC|SF)', name, re.I):
+                    raise BuildError('APK contains an unexpected v1 signature')
+                digest = hashlib.sha256()
+                with archive.open(entry) as content:
+                    for part in iter(lambda: content.read(1024 * 1024), b''):
+                        digest.update(part)
+                hashes[name] = digest.hexdigest()
+            validate_package(parse_android_manifest(archive.read('AndroidManifest.xml')))
+            return hashes
+    except (OSError, zipfile.BadZipFile, KeyError, RuntimeError) as exc:
+        raise BuildError('Invalid APK archive') from exc
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--template', type=Path, required=True)
+    parser.add_argument('--template', type=Path)
+    parser.add_argument('--verified-input-only', action='store_true', help='Reuse exact locally validated input; GitHub DEV only, with payload preservation checks')
     parser.add_argument('--development-validation', action='store_true', help='Sign only the explicit incomplete development package, preserving final=false')
     parser.add_argument('--github-new-dev', action='store_true', help='Use the separately pinned GitHub DEV identity; no historical upgrade compatibility claim')
     parser.add_argument('--expected-input-sha256', help='Approved local unsigned APK digest; required for --github-new-dev')
@@ -150,6 +192,10 @@ def main() -> int:
     args = parser.parse_args()
     try:
         from android_common import read_manifest, stage_project, verify_apk
+        if args.verified_input_only and not (args.github_new_dev and args.development_validation):
+            raise BuildError('--verified-input-only requires --github-new-dev and --development-validation')
+        if not args.verified_input_only and args.template is None:
+            raise BuildError('--template is required unless --verified-input-only is selected')
         env = dict(os.environ)
         if any(env.get(key) for key in ('KEYSTORE_PASSWORD', 'KEY_PASSWORD', 'STORE_PASSWORD', 'ANDROID_KEYSTORE_PASSWORD')):
             raise BuildError('Plaintext password environment variables are forbidden; supply password-file paths')
@@ -167,7 +213,10 @@ def main() -> int:
         if args.expected_input_sha256 and input_hash != args.expected_input_sha256:
             raise BuildError('Input APK SHA-256 mismatch; signing was not attempted')
         manifest = read_manifest(ROOT, development_validation=args.development_validation)
-        verify_apk(source, args.template, ROOT, manifest, development_validation=args.development_validation)
+        if args.verified_input_only:
+            input_payload = verified_payload(source)
+        else:
+            verify_apk(source, args.template, ROOT, manifest, development_validation=args.development_validation)
         if args.expected_source_sha256:
             # Reuse the local builder's allowlist/fingerprint, without invoking Godot.
             with tempfile.TemporaryDirectory(prefix='shigan-source-check-') as folder:
@@ -180,6 +229,7 @@ def main() -> int:
             if not env.get(key): raise BuildError(key + ' is required')
             settings[key] = str(secret_file(env[key], key, ROOT))
         settings['KEY_ALIAS'] = identity['key_alias']
+        settings['KEYSTORE_TYPE'] = identity.get('keystore_type', 'PKCS12')
         aligner, signer = tool_command('zipalign', env), tool_command('apksigner', env)
         keytool = [jdk_tool('keytool', env)]
         tool_env = {key: env[key] for key in ('PATH', 'JAVA_HOME', 'SystemRoot', 'SYSTEMROOT', 'WINDIR', 'HOME', 'USERPROFILE', 'TEMP', 'TMP', 'TMPDIR', 'LANG') if key in env}
@@ -194,13 +244,20 @@ def main() -> int:
             run_tool(sign_command(signer, settings, aligned, signed), 'apksigner sign', tool_env)
             cert = verify_certificate(run_tool(signer + ['verify', '--verbose', '--print-certs', str(signed)], 'apksigner verify', tool_env), expected)
             run_tool(aligner + ['-c', '-P', '16', '4', str(signed)], 'zipalign verify', tool_env)
-            verify_apk(signed, args.template, ROOT, manifest, signed=True, development_validation=args.development_validation)
+            if args.verified_input_only:
+                if verified_payload(signed, signed=True) != input_payload:
+                    raise BuildError('Signed APK payload differs from the approved unsigned input')
+            else:
+                verify_apk(signed, args.template, ROOT, manifest, signed=True, development_validation=args.development_validation)
             if sha256(source) != input_hash: raise BuildError('Input APK changed during signing')
             report = {'package': PIN['android'], 'input_sha256': input_hash, 'output_sha256': sha256(signed), 'certificate_sha256': cert}
             if args.github_new_dev:
                 report.update({'signing_policy': identity['policy'], 'signing_identity_id': identity['identity_id'],
                                'signing_repository': identity['repository'], 'source_sha256': args.expected_source_sha256,
                                'template_sha256': PIN['template']['sha256']})
+            if args.verified_input_only:
+                report.update({'template_revalidated': False, 'payload_identity': 'matched',
+                               'payload_entry_count': len(input_payload)})
             if args.development_validation:
                 report.update({'build_mode':'development-validation', 'development_only':True, 'final_export_allowed':False, 'development_validation':manifest['development_validation']})
             # Exclusive creation prevents overwriting even if another process raced us.

@@ -10,8 +10,12 @@ config_version=5
 
 [application]
 
-config/name="진격의 거인: 인류의 날개"
-config/version="0.1.0-dev3"
+config/name="진격의 거인 인류의 날개"
+config/version="0.1.0-dev4"
+; Keep pre-rename desktop user:// saves in their existing location.
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Godot/app_userdata/진격의 거인- 인류의 날개"
+config/custom_user_dir_name.linuxbsd="godot/app_userdata/진격의 거인- 인류의 날개"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.6")
 config/icon="res://assets/art/ui/game_icon.png"
