@@ -33,6 +33,12 @@ UI_FONT_LICENSE = 'assets/fonts/NotoSansKR-OFL.txt'
 UI_FONT_SHA256 = '194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252'
 UI_FONT_LICENSE_SHA256 = '1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9'
 UI_FONT_IMPORTED = '.godot/imported/NotoSansKR-wght.ttf-' + hashlib.md5(('res://' + UI_FONT).encode()).hexdigest() + '.fontdata'
+ARMORED_BUNDLE = 'assets/art/rig/armored_runtime_v1'
+ARMORED_REGISTRATION = ARMORED_BUNDLE + '/registration.json'
+ARMORED_PARTS = ('girdle', 'head', 'head_seam_underlap', 'left_foot', 'left_forearm',
+                 'left_shin', 'left_thigh', 'left_upper_arm', 'neck', 'plate',
+                 'posterior_underlap', 'right_foot', 'right_forearm', 'right_shin',
+                 'right_thigh', 'right_upper_arm', 'torso')
 
 class BuildError(Exception):
     pass
@@ -210,6 +216,7 @@ def source_file(root: Path, relative: str) -> Path:
     return path
 
 def verify_source_hashes(root: Path, manifest: dict) -> None:
+    armored_runtime_sources(root, manifest)
     for name, asset in manifest['assets'].items():
         path = source_file(root, asset['path'][6:])
         if sha256(path) != asset['sha256']:
@@ -259,12 +266,73 @@ def bundled_font_sources(root: Path) -> set[str]:
     validate_font_import(raw, source=True)
     return selected
 
+def armored_import_target(relative: str) -> str:
+    return '.godot/imported/' + Path(relative).name + '-' + hashlib.md5(('res://' + relative).encode()).hexdigest() + '.ctex'
+
+def validate_armored_import(raw: bytes, relative: str, source: bool = False) -> None:
+    config = configparser.ConfigParser(interpolation=None)
+    config.optionxform = str
+    target = armored_import_target(relative)
+    try:
+        text = raw.decode('utf-8').rstrip('\0')
+        # Godot's informational dictionary is not INI; references are still
+        # checked against the complete original bytes below.
+        config.read_string(re.sub(r'(?ms)^metadata=\{\n.*?^\}\n', '', text))
+        expected = {'importer': '"texture"', 'type': '"CompressedTexture2D"', 'path': '"res://' + target + '"'}
+        if any(config.get('remap', key, fallback=None) != value for key, value in expected.items()):
+            raise BuildError('Invalid armored import remap: ' + relative)
+        refs = [target]
+        if source:
+            if (config.get('deps', 'source_file', fallback=None) != '"res://' + relative + '"'
+                    or config.get('deps', 'dest_files', fallback=None) != '["res://' + target + '"]'):
+                raise BuildError('Invalid armored import dependencies: ' + relative)
+            params = {'compress/mode': '0', 'mipmaps/generate': 'false',
+                      'process/fix_alpha_border': 'false', 'process/premult_alpha': 'false',
+                      'process/size_limit': '0', 'compress/normal_map': '0', 'compress/channel_pack': '0',
+                      'process/channel_remap/red': '0', 'process/channel_remap/green': '1',
+                      'process/channel_remap/blue': '2', 'process/channel_remap/alpha': '3'}
+            if any(config.get('params', key, fallback=None) != value for key, value in params.items()):
+                raise BuildError('Invalid armored lossless import settings: ' + relative)
+            refs += [relative, target]
+        if _resource_refs(raw) != refs:
+            raise BuildError('Invalid armored import resource references: ' + relative)
+    except (UnicodeError, configparser.Error) as exc:
+        raise BuildError('Invalid armored import metadata: ' + relative) from exc
+
+def armored_runtime_sources(root: Path, manifest: dict) -> set[str]:
+    """Only the consumed registration/17 parts, never provenance references."""
+    registration_path = root / ARMORED_REGISTRATION
+    if not (registration_path.exists() or registration_path.is_symlink()
+            or (root / 'game/presentation/armored/armored_raster.gd').exists()):
+        return set()
+    try:
+        registration = json.loads(source_file(root, ARMORED_REGISTRATION).read_bytes())
+    except (ValueError, UnicodeError) as exc:
+        raise BuildError('Invalid armored registration') from exc
+    if not isinstance(registration, dict) or not isinstance(registration.get('parts'), dict) or set(registration['parts']) != set(ARMORED_PARTS):
+        raise BuildError('Invalid armored registration parts')
+    if 'development_validation' not in manifest and registration.get('final_export_allowed') is not True:
+        raise BuildError('EXPORT_BLOCKED armored art_review_pending')
+    selected = {ARMORED_REGISTRATION}
+    for name in ARMORED_PARTS:
+        part = registration['parts'][name]
+        relative = ARMORED_BUNDLE + '/parts/' + name + '.png'
+        if (not isinstance(part, dict) or part.get('texture_path') != 'res://' + relative
+                or not re.fullmatch('[0-9a-f]{64}', str(part.get('packed_png_sha256', '')))):
+            raise BuildError('Invalid armored part path or SHA-256: ' + name)
+        if sha256(source_file(root, relative)) != part['packed_png_sha256']:
+            raise BuildError('Armored source SHA-256 mismatch: ' + name)
+        validate_armored_import(source_file(root, relative + '.import').read_bytes(), relative, source=True)
+        selected.update((relative, relative + '.import'))
+    return selected
+
 def stage_project(root: Path, dest: Path, manifest: dict) -> dict:
     """Fresh allowlisted checkout; no .git, user cache, credentials, docs or old art."""
     selected = {'project.godot', 'assets/manifest.json', 'addons/chapter_export/plugin.cfg',
                 'addons/chapter_export/plugin.gd', 'tools/build/export_readiness.gd',
                 'tools/build/production_export_filter.gd'}
     selected.update(bundled_font_sources(root))
+    selected.update(armored_runtime_sources(root, manifest))
     for folder, suffixes in [('game', {'.gd', '.uid', '.tres', '.tscn'}), ('scenes', {'.tscn', '.tres', '.uid'}),
                               ('data', {'.json'}), ('chapters', {'.json'})]:
         for file in (root / folder).rglob('*'):
@@ -384,6 +452,30 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         raise BuildError('APK asset manifest differs from the current source manifest')
     allowed = {'assets/assets/manifest.json', 'assets/project.binary', 'assets/assets.sparsepck', 'assets/_cl_',
                'assets/.godot/global_script_class_cache.cfg', 'assets/.godot/uid_cache.bin'}
+    armored_sources = armored_runtime_sources(root, manifest)
+    armored_compared = 0
+    if armored_sources:
+        member = 'assets/' + ARMORED_REGISTRATION
+        allowed.add(member)
+        if member not in name_set or archive.read(member) != source_file(root, ARMORED_REGISTRATION).read_bytes():
+            raise BuildError('APK armored registration missing or changed')
+        for name in ARMORED_PARTS:
+            relative = ARMORED_BUNDLE + '/parts/' + name + '.png'
+            member = 'assets/' + relative
+            imported = armored_import_target(relative)
+            target = 'assets/' + imported
+            allowed.update((member, member + '.import', target))
+            if member + '.import' not in name_set or target not in name_set or not archive.read(target):
+                raise BuildError('APK armored imported resource missing: ' + name)
+            validate_armored_import(archive.read(member + '.import'), relative)
+            if member in name_set and archive.read(member) != source_file(root, relative).read_bytes():
+                raise BuildError('APK armored original raster changed: ' + name)
+            # Fresh export compares actual imported payloads. A source-only signer
+            # has no .godot cache; remap/path checks are not a byte-identity claim.
+            if (root / imported).exists() or (root / imported).is_symlink():
+                if archive.read(target) != source_file(root, imported).read_bytes():
+                    raise BuildError('APK armored imported bytes changed: ' + name)
+                armored_compared += 1
     font_sources = bundled_font_sources(root)
     if font_sources:
         allowed.update('assets/' + path for path in font_sources)
@@ -466,7 +558,7 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         if member + '.import' not in name_set and member not in name_set:
             raise BuildError('APK missing bundled font')
     if archive.testzip() is not None: raise BuildError('APK CRC integrity failure')
-    return {'package': package['package'], 'version_name': package['versionName'], 'version_code': package['versionCode'], 'abi': 'arm64-v8a', 'permissions': package['permissions'], 'archive_entries': len(names)}
+    return {'package': package['package'], 'version_name': package['versionName'], 'version_code': package['versionCode'], 'abi': 'arm64-v8a', 'permissions': package['permissions'], 'archive_entries': len(names), 'armored_imported_payloads_compared': armored_compared}
 
 def verify_apk(path: Path, template_path: Path, root: Path, manifest: dict, signed: bool = False, development_validation: bool = False) -> dict:
     check_readiness(manifest, development_validation=development_validation)

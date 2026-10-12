@@ -143,6 +143,12 @@ class DevelopmentValidationTests(unittest.TestCase):
         for record in dev['assets'].values():
             relative = record['path'][6:]
             entries['assets/'+relative] = (source/relative).read_bytes()
+        entries['assets/' + common.ARMORED_REGISTRATION] = (source/common.ARMORED_REGISTRATION).read_bytes()
+        for name in common.ARMORED_PARTS:
+            relative = common.ARMORED_BUNDLE + '/parts/' + name + '.png'
+            imported = common.armored_import_target(relative)
+            entries['assets/' + relative + '.import'] = ('[remap]\nimporter="texture"\ntype="CompressedTexture2D"\npath="res://' + imported + '"\n').encode()
+            entries['assets/' + imported] = b'fixture-imported-texture'
         basic = dev['assets']['titan_basic']
         relative = basic['path'][6:]
         imported = '.godot/imported/' + Path(relative).name + '-' + hashlib.md5(basic['path'].encode()).hexdigest() + '.ctex'

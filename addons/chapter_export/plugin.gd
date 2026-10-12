@@ -21,6 +21,12 @@ func _export() -> void:
 		get_tree().quit(3)
 		return
 	var filter = load("res://tools/build/production_export_filter.gd").new()
+	var registration = JSON.parse_string(FileAccess.get_file_as_string(filter.ARMORED_REGISTRATION)) if FileAccess.file_exists(filter.ARMORED_REGISTRATION) else {}
+	var armored: Dictionary = filter.validate_armored_bundle(registration if registration is Dictionary else {}, export_mode)
+	if not armored.ok:
+		printerr("EXPORT_BLOCKED reason=" + str(armored.reason))
+		get_tree().quit(3)
+		return
 	add_export_plugin(filter)
 	var platform: EditorExportPlatform = EditorExportPlatformAndroid.new() if kind == "android" else EditorExportPlatformWeb.new()
 	var preset := platform.create_preset()
