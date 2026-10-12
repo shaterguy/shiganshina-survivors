@@ -10,8 +10,8 @@
   },
   "android": {
     "package": "com.shaterguy.shiganshina.dev",
-    "version_name": "0.1.0-dev1",
-    "version_code": 1,
+    "version_name": "0.1.0-dev3",
+    "version_code": 3,
     "abi": "arm64-v8a"
   }
 }

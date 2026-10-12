@@ -79,7 +79,7 @@ The wrapper:
 6. Validates Android binary manifest package/version, ARM64-only native libraries, absence of INTERNET permission, ZIP integrity, source JSON, manifest assets and an archive whitelist. Untouched engine files must match the pinned template bytes.
 7. Publishes only after verification, plus a `.apk.build.json` report containing source-input digest, template digest, engine version and APK SHA-256. It refuses existing output/report paths.
 
-Identity: `com.shaterguy.shiganshina.dev`, version name `0.1.0-dev1`, version code `1`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
+Identity: `com.shaterguy.shiganshina.dev`, version name `0.1.0-dev3`, version code `3`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
 
 Recheck an unsigned artifact against the current approved source:
 

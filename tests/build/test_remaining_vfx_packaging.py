@@ -18,8 +18,11 @@ class RemainingPackaging(unittest.TestCase):
   with tempfile.TemporaryDirectory() as tmp:
    dest=Path(tmp)/'stage';common.stage_project(ROOT,dest,manifest);common.verify_source_hashes(dest,manifest)
    actual={p.name for p in (dest/'assets/art/effects/vfx_remaining_v1').rglob('*') if p.is_file()}
-   self.assertEqual(actual,{aid+'.png' for aid in IDS})
-   for aid in IDS:self.assertEqual((dest/live['assets'][aid]['path'][6:]).read_bytes(),(ROOT/live['assets'][aid]['path'][6:]).read_bytes())
+   self.assertEqual(actual,{aid+suffix for aid in IDS for suffix in ('.png','.png.import')})
+   for aid in IDS:
+    for suffix in ('','.import'):
+     relative=live['assets'][aid]['path'][6:]+suffix
+     self.assertEqual((dest/relative).read_bytes(),(ROOT/relative).read_bytes())
  def test_final_export_remains_denied(self):
   with self.assertRaisesRegex(common.BuildError,'art_review_pending'):common.read_manifest(ROOT)
 if __name__=='__main__':unittest.main()

@@ -134,7 +134,7 @@ class DevelopmentValidationTests(unittest.TestCase):
         with zipfile.ZipFile(template, 'w') as archive:
             for key, value in vendor.items(): archive.writestr(key, value)
         entries = dict(vendor)
-        entries.update({'AndroidManifest.xml': binary_manifest('com.shaterguy.shiganshina.dev', '0.1.0-dev1', 1),
+        entries.update({'AndroidManifest.xml': binary_manifest('com.shaterguy.shiganshina.dev', '0.1.0-dev3', 3),
                         'assets/project.binary': b'project',
                         'assets/assets/manifest.json': (source/'assets/manifest.json').read_bytes()})
         for folder in ('data', 'chapters'):

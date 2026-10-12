@@ -33,7 +33,7 @@ python3 tools/build/build_android.py \
   --output dist/shiganshina-dev-unsigned.apk
 ```
 
-- ARM64, `com.shaterguy.shiganshina.dev`, `0.1.0-dev1` / code `1`
+- ARM64, `com.shaterguy.shiganshina.dev`, `0.1.0-dev3` / code `3`
 - 인터넷 권한 없음, 자체 제작 512×512 앱 아이콘
 - 표준 템플릿의 **미서명 APK 생성에는 Android SDK가 필요 없습니다**
 - 설치 가능한 서명 APK는 사용자가 별도로 준비한 기존 키와 Android Build Tools로 만듭니다
