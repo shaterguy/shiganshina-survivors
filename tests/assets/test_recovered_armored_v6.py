@@ -111,11 +111,33 @@ class RecoveredArmoredV6Tests(unittest.TestCase):
             expected.update(vfx_approved=True, approval_status='DEVELOPMENT_RENDER_REVIEWED',
                             review_record='docs/validation/vfx/primary-five-native-review.md')
             self.assertEqual(protected['assets'].pop(asset_id), expected)
+        # These ten originals are activated only for development rendering.
+        # Exact descriptor equality plus explicit false review flags prevents
+        # this additive exception from relaxing any native/final art boundary.
+        development_vfx = {}
+        for filename in ('evolution-runtime-candidate.json', 'fantasy-runtime-candidate.json'):
+            source = json.loads((ROOT / 'docs/art/vfx' / filename).read_text())
+            development_vfx.update(source['assets'])
+        self.assertEqual(set(development_vfx), {'vfx_hit_spark', 'vfx_wing_first_arc', 'vfx_wing_second_arc', 'vfx_crossfire_ally_aim', 'vfx_crossfire_falling_shell', 'vfx_crossfire_contact_blast', 'vfx_chain_lightning', 'vfx_storm_chain', 'vfx_fire_zone', 'vfx_inferno_zone'})
+        for asset_id, candidate in development_vfx.items():
+            expected = copy.deepcopy(candidate)
+            expected.update(development_render_enabled=True, native_reviewed=False,
+                            final_art_approved=False, review_status='development_enabled_native_review_pending')
+            self.assertIs(expected['vfx_approved'], False)
+            self.assertEqual(protected['assets'].pop(asset_id), expected)
+        # Exact reviewed enemy additions preserve every pre-existing Armor-only
+        # baseline field; unknown additions still fail the original fingerprint.
+        enemies = json.loads((ROOT / 'docs/art/enemies/development-runtime-candidate.json').read_text())
+        self.assertEqual(set(enemies['assets']), {'titan_quadruped', 'titan_stone_thrower', 'enemy_stone_projectile'})
+        for asset_id, candidate in enemies['assets'].items():
+            self.assertEqual(protected['assets'].pop(asset_id), candidate)
         self.assertEqual(digest(protected), self.registration['protected_manifest_semantic_sha256'])
         proposed = copy.deepcopy(self.manifest)
         proposed['assets']['armored_titan'] = copy.deepcopy(self.entry)
         proposed['assets'].pop('armored_titan')
         for asset_id in vfx['assets']: proposed['assets'].pop(asset_id)
+        for asset_id in development_vfx: proposed['assets'].pop(asset_id)
+        for asset_id in enemies['assets']: proposed['assets'].pop(asset_id)
         self.assertEqual(proposed, protected)
         if self.review['runtime_integrated']:
             self.assertEqual(self.manifest['assets']['armored_titan'], self.entry)

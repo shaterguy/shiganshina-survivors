@@ -57,9 +57,15 @@ func _rebind_current_content_for_boundary_fixture(t, historical: Dictionary, cur
 	for id in historical.rules.enemy_catalog:
 		t.check(_same_json(current.rules.enemy_catalog.get(id),historical.rules.enemy_catalog[id]),"rebind verifies original enemy definition unchanged: "+id)
 	for key in historical.rules:
-		if key not in ["content_fingerprint","enemy_catalog"]:
+		if key not in ["content_fingerprint","enemy_catalog","allowed_equipment_ids"]:
 			t.check(_same_json(historical.rules[key],current.rules[key]),"rebind verifies unrelated rule unchanged: "+key)
+	# Current test-only replay explicitly admits the two added fantasy weapons.
+	# No historical authority is migrated or relabeled by this fixture helper.
+	var expected_equipment: Array = historical.rules.allowed_equipment_ids.duplicate()
+	expected_equipment.append_array(["chain_lightning","fire_zone"])
+	t.check(_same_json(current.rules.allowed_equipment_ids,expected_equipment),"rebind admits exactly two new fantasy IDs and preserves historical equipment order")
 	var rebound := historical.duplicate(true)
+	rebound.rules.allowed_equipment_ids = current.rules.allowed_equipment_ids.duplicate()
 	rebound.rules.enemy_catalog = current.rules.enemy_catalog.duplicate(true)
 	rebound.rules.content_fingerprint = current.rules.content_fingerprint
 	rebound.world.content_fingerprint = current.world.content_fingerprint

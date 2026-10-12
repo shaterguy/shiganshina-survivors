@@ -1,6 +1,7 @@
 class_name CombatVfxBridge
 extends RefCounted
 const Director = preload("res://game/presentation/combat_vfx_director.gd")
+const Catalog = preload("res://game/presentation/combat_vfx_catalog.gd")
 const Renderer = preload("res://game/presentation/combat_vfx_renderer.gd")
 const Address = preload("res://game/world/world_address.gd")
 # Presentation owns these objects. No Core reference, gameplay clock, reward,
@@ -18,6 +19,7 @@ var _origin_revision := 0
 var _rebase_count := 0
 var _diagnostics: Array[String] = []
 func _init(asset_metadata: Dictionary = {}) -> void:
+	_renderer = Renderer.new(_raster_problem)
 	set_asset_metadata(asset_metadata)
 func set_asset_metadata(asset_metadata: Dictionary) -> void:
 	_metadata = asset_metadata.get("assets",asset_metadata).duplicate(true)
@@ -130,17 +132,7 @@ func _sync(snapshot: Dictionary, consuming: bool, events: Array) -> void:
 		_origin_revision = revision
 func _raster_problem(asset_id: String) -> String:
 	if _raster_validation.has(asset_id): return _raster_validation[asset_id]
-	var asset: Dictionary = _metadata[asset_id]
-	var path := str(asset.path)
-	var problem := ""
-	if not FileAccess.file_exists(path):
-		problem = "missing_raster"
-	elif FileAccess.get_sha256(path).to_lower() != str(asset.sha256).to_lower():
-		problem = "asset_hash_mismatch"
-	else:
-		var raster := Image.new()
-		var loaded := raster.load_png_from_buffer(FileAccess.get_file_as_bytes(path))
-		if loaded != OK or raster.is_empty() or raster.get_width() != int(asset.width) or raster.get_height() != int(asset.height): problem = "invalid_raster_dimensions"
+	var problem := Catalog.raster_problem(_metadata[asset_id])
 	_raster_validation[asset_id] = problem
 	return problem
 func _run_id(snapshot: Dictionary) -> String:

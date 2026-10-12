@@ -306,6 +306,8 @@ func _rebuild() -> void:
 					if not _buckets.has(key): _buckets[key] = []
 					_buckets[key].append(prop.prop_id)
 func _collision_box(prop: Dictionary, radius: float) -> Rect2:
+	# Exact worlds grow directly; derived callbacks retain legacy memoization.
+	if get_script() == StreamedWorld: return prop.ground_footprint.grow(radius)
 	# Exact collision radii are never rounded. Only finite declared classes cache;
 	# arbitrary intermediate radii expand on demand without growing the cache.
 	if not radius in [8.0,16.0,18.0,20.0,24.0,28.0,30.0,32.0]: return prop.ground_footprint.grow(radius)

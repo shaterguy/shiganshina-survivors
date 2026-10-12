@@ -3,6 +3,7 @@ extends RefCounted
 const Catalog = preload("res://game/presentation/combat_vfx_catalog.gd")
 const MAX_CORE_RESERVATIONS := 64
 const MAX_CORE_PROJECTILES := 256
+const MAX_FIRE_FIELDS := 2
 var _catalog: RefCounted
 var _effects: Array[Dictionary] = []
 var _run_id := ""
@@ -54,6 +55,7 @@ func present(snapshot: Dictionary) -> Array[Dictionary]:
 	var tick := int(snapshot.get("active_tick",0))
 	_prune(tick,snapshot)
 	_reconstruct_pending(snapshot)
+	_reconstruct_fire_fields(snapshot)
 	_reconstruct_projectiles(snapshot)
 	var output: Array[Dictionary] = []
 	for stored in _effects:
@@ -72,7 +74,7 @@ func present(snapshot: Dictionary) -> Array[Dictionary]:
 			effect.geometry.origin = _array(effect.origin)
 			effect.direction = _vec(effect.flight_start).direction_to(_vec(effect.flight_target))
 		var target_id = effect.geometry.get("target_id",null)
-		if target_id != null:
+		if target_id != null and effect.get("base_item_id","") != "chain_lightning":
 			var target := _target(snapshot,target_id)
 			# Only the core's explicit live target address supplies an actual hook.
 			if not target.is_empty(): effect.geometry.wire_anchor = target.position.duplicate()
@@ -120,12 +122,14 @@ func _attack(payload: Dictionary, tick: int, snapshot: Dictionary) -> void:
 	_remove_attack_role(attack_id,"aim")
 	_remove_attack_role(attack_id,"projectile")
 	var recipe_phase := "impact" if evo == "evo_crossfire" else ("projectile" if geometry.get("shape","") == "projectile" else "cast")
+	if base == "fire_zone" and evo == "evo_inferno_zone" and int(payload.get("stage_index",0)) == int(payload.get("stage_count",0))-1:
+		recipe_phase = "eruption"
 	var recipe: Dictionary = _catalog.recipe(base,evo,recipe_phase)
 	if recipe.is_empty():
 		_diagnostic("missing_recipe:"+base+"|"+evo+"|"+recipe_phase)
 		return
 	var effect := _make_effect(recipe,payload,tick)
-	effect.intensity_tier = _tier(snapshot,base)
+	effect.intensity_tier = _level_tier(int(payload.cast_level)) if payload.has("cast_level") else _tier(snapshot,base)
 	if recipe_phase == "projectile":
 		effect.projectile_id = geometry.get("projectile_id",-1)
 		effect.projectile_binding = "core"
@@ -172,13 +176,14 @@ func _projectile_impact(payload: Dictionary, tick: int, snapshot: Dictionary) ->
 	effect.effect_id = _run_id+":projectile:"+str(projectile_id)+":impact"
 	_add(effect)
 func _damage(payload: Dictionary, tick: int) -> void:
-	# Core damage carries entity_id and no position; WorldView can supply positions
-	# via snapshot lookup. Never synthesize a player attack or projectile explosion.
+	# Core enemy damage carries a frozen hit position, including killing blows.
+	# Other actor-only damage may resolve from the current snapshot. Never invent
+	# a hit point, player attack or projectile explosion.
 	var target_id = payload.get("entity_id",payload.get("target_id",null))
 	if target_id == null: return
 	var recipe := {"recipe_id":"damage.hit_spark","role":"impact","art_id":"vfx_hit_spark","anchor_policy":"target_ground","render_pass":"contact_overlay","duration_ticks":6,"contact_tick_policy":"damage_tick","shape_binding":"point","priority":30,"reduce_mode":"omit","layers":[{"art_id":"vfx_hit_spark","component":"main","render_pass":"contact_overlay","reduce_mode":"omit"}]}
 	var point = payload.get("position",[0,0])
-	var p := {"attack_id":"damage:"+str(target_id)+":"+str(tick),"origin":point,"direction":[1,0],"geometry":{"shape":"point","origin":point,"radius":4.0}}
+	var p := {"attack_id":"damage:"+str(target_id)+":"+str(tick),"origin":point,"direction":[1,0],"geometry":{"shape":"point","origin":point,"radius":9.0}}
 	var effect := _make_effect(recipe,p,tick)
 	effect.target_id = target_id
 	effect.coordinate_space = "actor" if not payload.has("position") else "world"
@@ -189,7 +194,7 @@ func _make_effect(recipe: Dictionary, payload: Dictionary, tick: int) -> Diction
 	var effect := recipe.duplicate(true)
 	var geometry: Dictionary = payload.get("geometry",{}).duplicate(true)
 	var attack_id := str(payload.get("attack_id",""))
-	effect.merge({"effect_id":attack_id+":"+str(recipe.get("role","cast")),"attack_id":attack_id,"start_tick":tick,"end_tick":tick+int(recipe.get("duration_ticks",1)),"coordinate_space":"world","origin":_vec(payload.get("origin",geometry.get("origin",[0,0]))),"direction":_vec(payload.get("direction",geometry.get("direction",[1,0]))),"geometry":geometry,"intensity_tier":1,"stage_index":int(payload.get("stage_index",0)),"execute_tick":int(payload.get("execute_tick",tick)),"origin_revision":_origin_revision},true)
+	effect.merge({"effect_id":attack_id+":"+str(recipe.get("role","cast")),"attack_id":attack_id,"cast_id":str(payload.get("cast_id",attack_id)),"cast_level":int(payload.get("cast_level",0)),"start_tick":tick,"end_tick":tick+int(recipe.get("duration_ticks",1)),"coordinate_space":"world","origin":_vec(payload.get("origin",geometry.get("origin",[0,0]))),"direction":_vec(payload.get("direction",geometry.get("direction",[1,0]))),"geometry":geometry,"intensity_tier":1,"stage_index":int(payload.get("stage_index",0)),"execute_tick":int(payload.get("execute_tick",tick)),"origin_revision":_origin_revision},true)
 	# Animation phase is independent of the core-existence retirement sentinel.
 	# Ordinary projectile loops share an absolute active-tick phase, so a restore
 	# needs no guessed launch tick or extra serialized core state.
@@ -205,6 +210,42 @@ func _reconstruct_pending(snapshot: Dictionary) -> void:
 		payload.geometry = {"shape":record.get("shape","circle"),"origin":record.get("origin",[0,0]),"direction":record.get("direction",[1,0]),"radius":record.get("radius",0.0),"arc_degrees":record.get("arc_degrees",360.0)}
 		_schedule_crossfire(payload,snapshot)
 	_enforce_capacity(int(snapshot.get("active_tick",0)))
+func _reconstruct_fire_fields(snapshot: Dictionary) -> void:
+	# Only bounded actual future reservations establish an ongoing floor. The
+	# first zero-delay stage has already executed in a canonical Core snapshot;
+	# scheduled events alone cannot create it. Rebuild from current local origin
+	# so cold restore and rebase need no presentation fields in the save DTO.
+	var tick := int(snapshot.get("active_tick",0))
+	var groups := {}
+	var pending: Array = snapshot.get("player_attack_instances",[])
+	for index in mini(MAX_CORE_RESERVATIONS,pending.size()):
+		var record: Dictionary = pending[index]
+		if record.get("base_item_id","") != "fire_zone" or int(record.get("execute_tick",0)) <= tick or int(record.get("attack_started_tick",tick+1)) > tick or int(record.get("stage_index",0)) <= 0: continue
+		var cast := str(record.get("cast_id",""))
+		if cast.is_empty(): continue
+		if not groups.has(cast):
+			if groups.size() >= MAX_FIRE_FIELDS: continue
+			groups[cast] = {"record":record,"last_tick":int(record.execute_tick)}
+		else:
+			groups[cast].last_tick = maxi(int(groups[cast].last_tick),int(record.execute_tick))
+	_effects = _effects.filter(func(e): return e.role != "area")
+	for cast in groups:
+		var group: Dictionary = groups[cast]
+		var record: Dictionary = group.record
+		var radius: float = _catalog.fire_field_radius(record)
+		if radius <= 0: continue
+		var recipe: Dictionary = _catalog.recipe("fire_zone",str(record.get("evolution_id","")),"area")
+		if recipe.is_empty(): continue
+		var payload: Dictionary = record.duplicate(true)
+		payload.attack_id = cast
+		payload.geometry = {"shape":"circle","origin":record.origin.duplicate(),"direction":record.direction.duplicate(),"radius":radius,"arc_degrees":360.0}
+		var effect := _make_effect(recipe,payload,int(record.attack_started_tick))
+		effect.end_tick = int(group.last_tick)
+		effect.execute_tick = int(record.attack_started_tick)
+		effect.stage_index = 0
+		effect.intensity_tier = _level_tier(int(record.get("cast_level",1)))
+		_add(effect)
+	_enforce_capacity(tick)
 func _reconstruct_projectiles(snapshot: Dictionary) -> void:
 	for projectile in snapshot.get("projectiles",[]):
 		var id := str(projectile.get("attack_id",""))+":projectile"
@@ -245,7 +286,7 @@ func _enforce_capacity(tick: int) -> void:
 		var candidate := -1
 		for index in _effects.size():
 			var e: Dictionary = _effects[index]
-			var protected: bool = e.role in ["aim","projectile"] or (e.priority >= 80 and tick == e.execute_tick)
+			var protected: bool = e.role in ["aim","projectile","area"] or (e.priority >= 80 and tick == e.execute_tick)
 			if protected: continue
 			if candidate == -1 or e.priority < _effects[candidate].priority or (e.priority == _effects[candidate].priority and e.start_tick < _effects[candidate].start_tick): candidate = index
 		if candidate >= 0:
@@ -296,4 +337,6 @@ func _array(value: Vector2) -> Array:
 
 func _tier(snapshot: Dictionary, base_item_id: String) -> int:
 	var level := int(snapshot.get("equipment",{}).get(base_item_id,1))
+	return _level_tier(level)
+func _level_tier(level: int) -> int:
 	return 3 if level >= 5 else (2 if level >= 3 else 1)

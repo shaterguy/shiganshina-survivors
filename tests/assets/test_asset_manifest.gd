@@ -28,5 +28,10 @@ func run(t) -> void:
 			t.check(not animation.frames.is_empty(), "animation contains frames: " + asset_id)
 			for frame in animation.frames: t.check(int(frame)>=0 and int(frame)<count, "animation frame in bounds: " + asset_id)
 		if a.kind == "sprite":
-			t.check(a.anchor_px == [a.cell_w/2,a.cell_h], "character anchor at bottom center: " + asset_id)
+			if asset_id in ["titan_quadruped","titan_stone_thrower"]:
+				var expected := Vector2(64,88) if asset_id == "titan_quadruped" else Vector2(72,168)
+				t.check(Vector2(a.anchor_px[0],a.anchor_px[1]) == expected, "ordinary ground anchor allows authored forward reach: " + asset_id)
+			else: t.check(a.anchor_px == [a.cell_w/2,a.cell_h], "character anchor at bottom center: " + asset_id)
+		elif a.kind == "projectile":
+			t.check(a.anchor_px == [a.cell_w/2,a.cell_h/2], "projectile anchor is centered: " + asset_id)
 	t.check(not manifest.assets.armored_titan.animations.has("death"), "Armored Titan has no death animation")

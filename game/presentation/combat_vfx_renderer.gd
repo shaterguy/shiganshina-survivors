@@ -2,6 +2,9 @@ class_name CombatVfxRenderer
 extends RefCounted
 const Catalog = preload("res://game/presentation/combat_vfx_catalog.gd")
 var _catalog = Catalog.new()
+var _raster_validator: Callable
+func _init(raster_validator: Callable = Callable()) -> void:
+	_raster_validator = raster_validator
 # Raster-only command builder. Consumers draw each pass; diagnostic records are
 # deliberately not CanvasItem commands and never authorize placeholder geometry.
 func commands(effects: Array[Dictionary], context: Dictionary) -> Array[Dictionary]:
@@ -9,6 +12,8 @@ func commands(effects: Array[Dictionary], context: Dictionary) -> Array[Dictiona
 	var tick := int(context.get("tick",0))
 	var metadata: Dictionary = context.get("asset_metadata",{})
 	if metadata.has("assets"): metadata = metadata.assets
+	# Validate each unique original once per command batch, including its bytes.
+	var validation: Dictionary = {}
 	for effect in effects:
 		if tick < int(effect.get("start_tick",0)) or tick >= int(effect.get("end_tick",0)): continue
 		if int(effect.get("origin_revision",0)) != int(context.get("origin_revision",0)):
@@ -30,15 +35,12 @@ func commands(effects: Array[Dictionary], context: Dictionary) -> Array[Dictiona
 				output.append(_diagnostic(effect,"missing_art",asset_id))
 				continue
 			var asset = metadata[asset_id]
-			var metadata_errors: Array[String] = _catalog.validate_art_metadata(asset_id,asset)
-			if not metadata_errors.is_empty():
-				var invalid := _diagnostic(effect,"invalid_art_metadata",asset_id)
-				invalid.metadata_errors = metadata_errors
+			if not validation.has(asset_id): validation[asset_id] = _catalog.render_problem(asset_id,asset,_raster_validator)
+			var problem: String = validation[asset_id]
+			if not problem.is_empty():
+				var invalid := _diagnostic(effect,problem,asset_id)
+				if problem == "invalid_art_metadata": invalid.metadata_errors = _catalog.validate_art_metadata(asset_id,asset)
 				output.append(invalid)
-				continue
-			var approved = asset.get("vfx_approved",false)
-			if not approved is bool or not approved:
-				output.append(_diagnostic(effect,"unapproved_art",asset_id))
 				continue
 			var command := _command(effect,layer,component,asset,tick,context,index)
 			if command.has("diagnostic"):
@@ -95,9 +97,10 @@ func _command(effect: Dictionary, layer: Dictionary, component: String, asset: D
 	var columns := maxi(1,int(asset.get("columns",1)))
 	var region := Rect2(Vector2((frame%columns)*cell.x,(frame/columns)*cell.y),cell)
 	# Ground aim and actual in-flight projectiles stay crisp; recovery alone fades.
-	var alpha := 1.0 if effect.get("role","") in ["aim","projectile"] else clampf(1.0-progress,0.0,1.0)
+	var alpha := 1.0 if effect.get("role","") in ["aim","projectile","area"] else clampf(1.0-progress,0.0,1.0)
+	alpha *= clampf(float(effect.get("opacity",1.0)),0.0,1.0)
 	var visual_bounds := _world_bounds(local_rect,anchor,rotation,scale)
-	return {"effect_id":str(effect.get("effect_id","")),"attack_id":str(effect.get("attack_id","")),"role":str(effect.get("role","")),"base_item_id":str(effect.get("base_item_id","")),"projectile_id":effect.get("projectile_id",null),"target_id":effect.get("target_id",null),"start_tick":int(effect.get("start_tick",0)),"asset_id":str(layer.art_id),"atlas_region":region,"world_anchor":anchor,"local_rect":local_rect,"rotation":rotation,"scale":scale,"alpha":alpha,"render_pass":str(layer.get("render_pass",effect.get("render_pass","world"))),"depth_y":anchor.y,"stable_id":str(effect.effect_id)+":"+str(index),"component":component,"contact_size":contact_size,"contact_geometry":geometry.duplicate(true),"world_bounds":visual_bounds,"intensity_tier":int(effect.get("intensity_tier",1)),"priority":int(effect.get("priority",0)),"source_sha256":str(asset.get("sha256",""))}
+	return {"effect_id":str(effect.get("effect_id","")),"attack_id":str(effect.get("attack_id","")),"cast_id":str(effect.get("cast_id","")),"evolution_id":str(effect.get("evolution_id","")),"stage_index":int(effect.get("stage_index",0)),"role":str(effect.get("role","")),"base_item_id":str(effect.get("base_item_id","")),"projectile_id":effect.get("projectile_id",null),"target_id":effect.get("target_id",null),"start_tick":int(effect.get("start_tick",0)),"asset_id":str(layer.art_id),"atlas_region":region,"world_anchor":anchor,"local_rect":local_rect,"rotation":rotation,"scale":scale,"alpha":alpha,"render_pass":str(layer.get("render_pass",effect.get("render_pass","world"))),"depth_y":anchor.y,"stable_id":str(effect.effect_id)+":"+str(index),"component":component,"contact_size":contact_size,"contact_geometry":geometry.duplicate(true),"world_bounds":visual_bounds,"intensity_tier":int(effect.get("intensity_tier",1)),"priority":int(effect.get("priority",0)),"source_sha256":str(asset.get("sha256",""))}
 func _world_bounds(rect: Rect2, anchor: Vector2, rotation: float, scale: Vector2) -> Rect2:
 	var points := [rect.position,Vector2(rect.end.x,rect.position.y),rect.end,Vector2(rect.position.x,rect.end.y)]
 	var transformed := anchor+(_vec(points[0])*scale).rotated(rotation)

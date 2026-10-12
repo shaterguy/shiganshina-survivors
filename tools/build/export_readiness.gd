@@ -1,4 +1,5 @@
 extends RefCounted
+const VfxCatalog = preload("res://game/presentation/combat_vfx_catalog.gd")
 # Final approval stays closed. Only exact development placeholder metadata permits validation export.
 func validate(manifest: Dictionary, mode: String = "final") -> Dictionary:
 	if mode == "development-validation": return validate_development(manifest)
@@ -73,7 +74,12 @@ func is_runtime_asset_path(record: Dictionary) -> bool:
 	var path := str(record.get("path",""))
 	var flat := RegEx.create_from_string("^res://assets/(art/(characters|environment|effects|ui)/[^/]+\\.png|audio/[^/]+\\.wav)$")
 	if flat.search(path) != null: return true
-	var reviewed = record.get("vfx_approved",false)
-	if record.get("kind") != "effect" or not reviewed is bool or not reviewed: return false
-	var nested := RegEx.create_from_string("^res://assets/art/effects/vfx_rebuild_v1/vfx_[A-Za-z0-9_-]+\\.png$")
+	var enemy_records := {
+		"res://assets/art/characters/enemy_diversity_v1/titan_quadruped.png":["sprite","nearest_palette_alpha128"],
+		"res://assets/art/characters/enemy_diversity_v1/titan_stone_thrower.png":["sprite","nearest_palette_alpha128_exclude_20252c"],
+		"res://assets/art/characters/enemy_diversity_v1/enemy_stone_projectile.png":["projectile","nearest_palette_alpha128"]}
+	if enemy_records.has(path):
+		return record.get("enemy_art_development_ready") is bool and record.enemy_art_development_ready and record.get("export_blocked") is bool and not record.export_blocked and [record.get("kind"),record.get("packing_profile")] == enemy_records[path]
+	if record.get("kind") != "effect" or not VfxCatalog.render_enabled(record): return false
+	var nested := RegEx.create_from_string("^res://assets/art/effects/vfx_(rebuild|evolution|fantasy)_v1/vfx_[A-Za-z0-9_-]+\\.png$")
 	return nested.search(path) != null

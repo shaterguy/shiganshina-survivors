@@ -30,6 +30,216 @@
   "mipmaps": false,
   "frame_order": "row_major_zero_based",
   "assets": {
+    "titan_quadruped": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/titan_quadruped.png",
+      "kind": "sprite",
+      "width": 720,
+      "height": 96,
+      "cell_w": 144,
+      "cell_h": 96,
+      "columns": 5,
+      "anchor_px": [
+        64,
+        88
+      ],
+      "art_revision": 1,
+      "animations": {
+        "move": {
+          "frames": [
+            0,
+            1
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        "idle": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true
+        },
+        "windup": {
+          "frames": [
+            2
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            3
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "recover": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        }
+      },
+      "sha256": "179a1207400b53551af67358c378324763a13ac5d70265e10692654aefe32272",
+      "export_blocked": false,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation and targeted walk-pose edit; mechanical nearest-neighbor crop/scale/atlas packing preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated fan-game artwork; private fan prototype, no official affiliation and no extracted anime frames.",
+      "collision_note": "Visual anchor is Core body ground position; body radius 18. Do not infer attack reach from raster bounds.",
+      "frame_notes": {
+        "0": "walk support A",
+        "1": "walk support B",
+        "2": "windup",
+        "3": "contact/release",
+        "4": "recovery; reused by idle/hit/death; no bespoke hit/death pose in this minimal set"
+      },
+      "source_atlas_sha256": "b6833aeb3ba0e51dc0b1a87f590a06e085ddc6b18e3d5cd8dbfd14fac347a384",
+      "packing_profile": "nearest_palette_alpha128",
+      "palette_excluded_hex": [],
+      "enemy_art_development_ready": true,
+      "ordinary_two_frame": true,
+      "review_record": "docs/art/enemies/development-integration.md"
+    },
+    "titan_stone_thrower": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/titan_stone_thrower.png",
+      "kind": "sprite",
+      "width": 960,
+      "height": 176,
+      "cell_w": 192,
+      "cell_h": 176,
+      "columns": 5,
+      "anchor_px": [
+        72,
+        168
+      ],
+      "art_revision": 1,
+      "animations": {
+        "move": {
+          "frames": [
+            0,
+            1
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        "idle": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true
+        },
+        "windup": {
+          "frames": [
+            2
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            3
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "recover": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        }
+      },
+      "sha256": "c701e2e5bf4263a736babed63c5777bf3b9b6ced957229130ffe6f684abf7ab8",
+      "export_blocked": false,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation and targeted walk-pose edit; mechanical nearest-neighbor crop/scale/atlas packing preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated fan-game artwork; private fan prototype, no official affiliation and no extracted anime frames.",
+      "collision_note": "Visual anchor is Core body ground position; body radius 24. Do not infer attack reach from raster bounds.",
+      "frame_notes": {
+        "0": "walk support A",
+        "1": "walk support B",
+        "2": "windup",
+        "3": "contact/release",
+        "4": "recovery; reused by idle/hit/death; no bespoke hit/death pose in this minimal set"
+      },
+      "source_atlas_sha256": "09dae345f7ed744bb3409eb789e86fd4551736649f038a2435b8d37702478fe2",
+      "packing_profile": "nearest_palette_alpha128_exclude_20252c",
+      "palette_excluded_hex": [
+        "#20252c"
+      ],
+      "enemy_art_development_ready": true,
+      "ordinary_two_frame": true,
+      "review_record": "docs/art/enemies/development-integration.md",
+      "contrast_note": "Nearest shared-palette mapping excludes #20252c; no added or removed alpha>=128 pixels; dark shading is flatter; native scene contrast remains unverified."
+    },
+    "enemy_stone_projectile": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/enemy_stone_projectile.png",
+      "kind": "projectile",
+      "width": 16,
+      "height": 16,
+      "cell_w": 16,
+      "cell_h": 16,
+      "columns": 1,
+      "anchor_px": [
+        8,
+        8
+      ],
+      "animations": {
+        "idle": {
+          "frames": [
+            0
+          ],
+          "fps": 1,
+          "loop": true
+        }
+      },
+      "sha256": "24e4a2e7fd3326c4f46a267c9e5741e03e4c36310e86b07394c047b4c2465fcc",
+      "export_blocked": false,
+      "art_revision": 1,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation; mechanical crop and nearest-neighbor resize preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated raster artwork. No extracted third-party assets.",
+      "collision_note": "Center on projectile_pose.current; authoritative radius 7. Draw only while visible and never after blocked.",
+      "source_atlas_sha256": "35e352ef7bb5fde1039e3ceeeccd93ab3ef7e422e4c85a277638ac44851f0813",
+      "packing_profile": "nearest_palette_alpha128",
+      "palette_excluded_hex": [],
+      "enemy_art_development_ready": true,
+      "review_record": "docs/art/enemies/development-integration.md"
+    },
     "garrison_01": {
       "path": "res://assets/art/characters/garrison_01_v2.png",
       "kind": "sprite",
@@ -2828,6 +3038,506 @@
       "notes": "Transparent-center dust ring constrained to actual splash radius.",
       "approval_status": "DEVELOPMENT_RENDER_REVIEWED",
       "review_record": "docs/validation/vfx/primary-five-native-review.md"
+    },
+    "vfx_hit_spark": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_hit_spark.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "728805688ce9c04fb5cdbc00840989dfebd4e807e4721c98e24397773ec1ffed",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_hit_spark-generation-v1.png",
+      "source_sha256": "3e3414d0e870d9e08c01114ca9e088e160c47e015807cb6eccb2d199e86cdd42",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_hit_spark-nearest-2x.png",
+      "notes": "Small target-only hit spark; damage events never synthesize casts or cannon blasts.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_wing_first_arc": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_wing_first_arc.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "813d3acec4b9cb29874913bc601185809fd132685fe700d65bc901d3cee85786",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_wing_first_arc-generation-v1.png",
+      "source_sha256": "5a362aa32ae9274e810cfa1e498104ba98a52562368d7f63beeb1a044347a2ed",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_wing_first_arc-nearest-2x.png",
+      "notes": "",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_wing_second_arc": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_wing_second_arc.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "093e5462cedc2683fd5a2b020e62c13efb5b04f439369003f8f488814c904a78",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_wing_second_arc-generation-v1.png",
+      "source_sha256": "e90cba5f1406623b59790dd3727d649e1dcfa022740d0615d648bbb96327e066",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_wing_second_arc-nearest-2x.png",
+      "notes": "Second different-curvature 110-degree arc; stage_index=1 replaces first, current player origin and locked direction.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_crossfire_ally_aim": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_crossfire_ally_aim.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "901879026d45ee923acc1e632c3f750865cda65b108ea0e68ff16547e3f92d69",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_crossfire_ally_aim-generation-v1.png",
+      "source_sha256": "bb33c2cebba384b9fd8dd1be0caf53c8f388550ec219077fb4007ee30a6285c0",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_crossfire_ally_aim-nearest-2x.png",
+      "notes": "Pale ally segmented ring with paired inward chevrons. No red fill or enemy-danger triangle vocabulary. Locked core disk radius.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_crossfire_falling_shell": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_crossfire_falling_shell.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 128,
+      "height": 64,
+      "cell_w": 32,
+      "cell_h": 32,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        16
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "87a45c2d2b36026792789b6a66f656a50946fd03310c0907d5e6c22005f9944f",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_crossfire_falling_shell-generation-v1.png",
+      "source_sha256": "ed46d993bdaa7919a1191f6fc29fb5362182b7bab2cee7f103ec82d363db7907",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_crossfire_falling_shell-nearest-2x.png",
+      "notes": "Distinct descending cannonball, lead=min(18, execute-start) ticks; stops at execute. Upper-stage visibility is visual only.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_crossfire_contact_blast": {
+      "path": "res://assets/art/effects/vfx_evolution_v1/vfx_crossfire_contact_blast.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "ded3dc052a741f7749b19c4744919f84b995613e8c5d9374347e96fa97029af0",
+      "source_path": "assets/art/effects/vfx_evolution_v1/source/vfx_crossfire_contact_blast-generation-v1.png",
+      "source_sha256": "41b982f5748a553ff6c0250b4bbb55d7347c7bb988e80d47f7ce6b568b04498e",
+      "preview_path": "assets/art/effects/vfx_evolution_v1/previews/vfx_crossfire_contact_blast-nearest-2x.png",
+      "notes": "Paired-command blast silhouette distinct from base cannon; actual locked disk radius, flash then dust/shards.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_chain_lightning": {
+      "path": "res://assets/art/effects/vfx_fantasy_v1/vfx_chain_lightning.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 128,
+      "cell_w": 128,
+      "cell_h": 64,
+      "columns": 4,
+      "anchor_px": [
+        12,
+        32
+      ],
+      "vfx_bounds_px": [
+        12,
+        0,
+        104,
+        64
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "2e7d0f75fa89cf15a406ebc155442cfdf2828df732b91bdf6af909fb27446a03",
+      "source_path": "assets/art/effects/vfx_fantasy_v1/source/vfx_chain_lightning-generation-v1.png",
+      "source_sha256": "2ad15d87aeeebb77cf1adf5b8cd6d1c7da581b6f3bc2e7adf0aca53db3e5909b",
+      "preview_path": "assets/art/effects/vfx_fantasy_v1/previews/vfx_chain_lightning-nearest-2x.png",
+      "notes": "Original fantasy contact effect; line is left anchored and field is center anchored. Same actual Core geometry; pending review.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_storm_chain": {
+      "path": "res://assets/art/effects/vfx_fantasy_v1/vfx_storm_chain.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 128,
+      "cell_w": 128,
+      "cell_h": 64,
+      "columns": 4,
+      "anchor_px": [
+        16,
+        32
+      ],
+      "vfx_bounds_px": [
+        16,
+        0,
+        96,
+        64
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "c648f753fac0d7df4e9076626ef9cc9896474ecc551149049f2f674f1fdc5594",
+      "source_path": "assets/art/effects/vfx_fantasy_v1/source/vfx_storm_chain-generation-v1.png",
+      "source_sha256": "c867d6b5e0ed9d4b69d2b632e9f80c7a26ed578a34e63793b9b31c211420b517",
+      "preview_path": "assets/art/effects/vfx_fantasy_v1/previews/vfx_storm_chain-nearest-2x.png",
+      "notes": "Original fantasy contact effect; line is left anchored and field is center anchored. Same actual Core geometry; pending review.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_fire_zone": {
+      "path": "res://assets/art/effects/vfx_fantasy_v1/vfx_fire_zone.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "0096b690b6ee5b1dd49cab662ea3fc2d0f407340b2315c55588301d2ad828ee5",
+      "source_path": "assets/art/effects/vfx_fantasy_v1/source/vfx_fire_zone-generation-v1.png",
+      "source_sha256": "115a0ed606f1728bb5d8c42188f9a64567906dd916562a07e6bfca8cf109356b",
+      "preview_path": "assets/art/effects/vfx_fantasy_v1/previews/vfx_fire_zone-nearest-2x.png",
+      "notes": "Original fantasy contact effect; line is left anchored and field is center anchored. Same actual Core geometry; pending review.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
+    },
+    "vfx_inferno_zone": {
+      "path": "res://assets/art/effects/vfx_fantasy_v1/vfx_inferno_zone.png",
+      "kind": "effect",
+      "source_status": "NEW",
+      "vfx_approved": false,
+      "source_method": "Original built-in image generation/edit; mechanical nearest/palette/alpha raster packing. No SVG, generated geometry drawing, third-party assets or geometry masks.",
+      "width": 512,
+      "height": 256,
+      "cell_w": 128,
+      "cell_h": 128,
+      "columns": 4,
+      "anchor_px": [
+        64,
+        64
+      ],
+      "vfx_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "animations": {
+        "attack": {
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 24,
+          "loop": false
+        }
+      },
+      "sha256": "9ef3660db685a0cbc795a7ded5bbd347761dca09ce435e9922efffaa4b773e23",
+      "source_path": "assets/art/effects/vfx_fantasy_v1/source/vfx_inferno_zone-generation-v1.png",
+      "source_sha256": "080dcd341de4056d331de4175f5a3011fa325c59062fadd14df0fa055884af61",
+      "preview_path": "assets/art/effects/vfx_fantasy_v1/previews/vfx_inferno_zone-nearest-2x.png",
+      "notes": "Original fantasy contact effect; line is left anchored and field is center anchored. Same actual Core geometry; pending review.",
+      "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
+      "development_render_enabled": true,
+      "native_reviewed": false,
+      "final_art_approved": false,
+      "review_status": "development_enabled_native_review_pending"
     }
   },
   "art_revision_status": {

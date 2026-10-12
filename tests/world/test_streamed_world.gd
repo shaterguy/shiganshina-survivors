@@ -59,7 +59,7 @@ func run(t) -> void:
 	var over: Dictionary = full.prepare(distant,[],F.hydration(distant),["20","20"])
 	t.check(not over.ok and over.error_code == "handover_capacity" and full.diagnostics().resident_chunks == 49,"oversized atomic handover requires preload/retirement scheduling")
 	for radius in [8.0,16.0,18.0,20.0,24.0,28.0,30.0,32.0]: full.sweep(Vector2(16,200),Vector2(264,0),radius)
-	t.check(full.diagnostics().get("clearance_cache_entries",-1) > 0 and full.diagnostics().get("clearance_cache_entries",9999) <= 512,"expanded footprint caches are clearance-class bounded")
+	t.check(full.diagnostics().get("clearance_cache_entries",-1) == 0,"exact expanded footprints are computed without retained geometry")
 
 	var seams = F.world(F.neighborhood())
 	for radius in [8.0,16.0,18.0,20.0,24.0,28.0,30.0,32.0]:

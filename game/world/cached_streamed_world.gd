@@ -13,6 +13,10 @@ func _collision_query_props(aabb: Rect2) -> Array:
 	# Further subclasses may override callbacks and must keep owned snapshots.
 	if get_script() != CachedStreamedWorld: return query_props(aabb)
 	return _query_props(aabb,false)
+func _collision_box(prop: Dictionary, radius: float) -> Rect2:
+	# The exact coverage-only subtype has the same immutable collision geometry.
+	if get_script() == CachedStreamedWorld: return prop.ground_footprint.grow(radius)
+	return super._collision_box(prop,radius)
 func covered(aabb: Rect2) -> bool:
 	if not _cacheable_rectangle(aabb):
 		_coverage_fallbacks += 1

@@ -37,13 +37,31 @@ UI_FONT_IMPORTED = '.godot/imported/NotoSansKR-wght.ttf-' + hashlib.md5(('res://
 class BuildError(Exception):
     pass
 
+def vfx_render_enabled(record: dict) -> bool:
+    """Strict Python mirror of CombatVfxCatalog.render_enabled (no review promotion)."""
+    return (record.get('vfx_approved') is True or (
+        record.get('vfx_approved') is False and record.get('kind') == 'effect'
+        and record.get('source_status') == 'NEW'
+        and record.get('development_render_enabled') is True
+        and record.get('native_reviewed') is False
+        and record.get('final_art_approved') is False
+        and record.get('review_status') == 'development_enabled_native_review_pending'))
+
 def is_runtime_asset(record: dict) -> bool:
     """Mirror Godot's manifest-selected runtime path predicate."""
     path = record.get('path', '')
     if not isinstance(path, str): return False
     if re.fullmatch(RUNTIME_ASSET_PATTERN, path): return True
-    return (record.get('kind') == 'effect' and record.get('vfx_approved') is True
-            and re.fullmatch(r'res://assets/art/effects/vfx_rebuild_v1/vfx_[A-Za-z0-9_-]+\.png', path) is not None)
+    enemy_records = {
+        'res://assets/art/characters/enemy_diversity_v1/titan_quadruped.png': ('sprite', 'nearest_palette_alpha128'),
+        'res://assets/art/characters/enemy_diversity_v1/titan_stone_thrower.png': ('sprite', 'nearest_palette_alpha128_exclude_20252c'),
+        'res://assets/art/characters/enemy_diversity_v1/enemy_stone_projectile.png': ('projectile', 'nearest_palette_alpha128'),
+    }
+    if path in enemy_records:
+        return (record.get('enemy_art_development_ready') is True and record.get('export_blocked') is False
+                and (record.get('kind'), record.get('packing_profile')) == enemy_records[path])
+    return (record.get('kind') == 'effect' and vfx_render_enabled(record)
+            and re.fullmatch(r'res://assets/art/effects/vfx_(?:rebuild|evolution|fantasy)_v1/vfx_[A-Za-z0-9_-]+\.png', path) is not None)
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -383,7 +401,7 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         allowed.update((member, member+'.import'))
         # The VFX bridge validates/decodes the raw PNG. An imported texture alone
         # is insufficient, and must not hide a changed original alongside it.
-        if asset.get('vfx_approved') is True:
+        if asset.get('kind') == 'effect' and vfx_render_enabled(asset):
             if member not in name_set or hashlib.sha256(archive.read(member)).hexdigest() != asset['sha256']:
                 raise BuildError('APK VFX original raster missing or changed: ' + relative)
         if member+'.import' in name_set:

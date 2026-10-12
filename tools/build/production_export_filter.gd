@@ -1,5 +1,6 @@
 @tool
 extends EditorExportPlugin
+const VfxCatalog = preload("res://game/presentation/combat_vfx_catalog.gd")
 const UI_FONT_FILES := ["res://assets/fonts/NotoSansKR-wght.ttf","res://assets/fonts/NotoSansKR-OFL.txt"]
 var _allowed_assets: Dictionary = {}
 func _get_name() -> String:
@@ -17,7 +18,7 @@ func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String,
 			if readiness.is_runtime_asset_path(record):
 				_allowed_assets[str(record.path)] = true
 				# VFX validates/decodes original PNG bytes at runtime, not only .ctex.
-				if record.get("vfx_approved",false) == true:
+				if record.get("kind") == "effect" and VfxCatalog.render_enabled(record):
 					add_file(str(record.path),FileAccess.get_file_as_bytes(str(record.path)),false)
 	# Keep unmodified font bytes and its license together; no directory wildcard.
 	for font_file in UI_FONT_FILES:

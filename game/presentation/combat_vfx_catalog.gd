@@ -1,10 +1,11 @@
 class_name CombatVfxCatalog
 extends RefCounted
-const SKILLS := ["blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire"]
-const ROLES := ["cast","projectile","aim","impact","trail"]
+const SKILLS := ["blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire","chain_lightning|","chain_lightning|evo_storm_chain","fire_zone|","fire_zone|evo_inferno_zone"]
+const ROLES := ["cast","projectile","aim","impact","trail","area"]
 const PASSES := ["ground","world","contact_overlay"]
 var _data: Dictionary = {}
 var _art_specs: Dictionary = {}
+var _inferno_field_ratio := 0.0
 func _init(definitions: Dictionary = {}) -> void:
 	if not definitions.is_empty():
 		_data = definitions.duplicate(true)
@@ -13,6 +14,18 @@ func _init(definitions: Dictionary = {}) -> void:
 		if parsed is Dictionary: _data = parsed
 	for requirement in _data.get("art_requirements",[]):
 		_art_specs[str(requirement.get("art_id",""))] = requirement.duplicate(true)
+	# A final pending eruption carries its larger radius. Recover the frozen
+	# field radius using authored gameplay proportions, never today's passives.
+	var evolutions = JSON.parse_string(FileAccess.get_file_as_string("res://data/evolutions.json"))
+	if evolutions is Dictionary:
+		var params: Dictionary = evolutions.get("items",{}).get("evo_inferno_zone",{}).get("effect_params",{})
+		if float(params.get("eruption_radius",0.0)) > 0:
+			_inferno_field_ratio = float(params.get("radius",0.0))/float(params.eruption_radius)
+func fire_field_radius(record: Dictionary) -> float:
+	var radius := float(record.get("radius",0.0))
+	if record.get("evolution_id","") == "evo_inferno_zone" and int(record.get("stage_index",0)) == int(record.get("stage_count",0))-1:
+		return radius*_inferno_field_ratio
+	return radius
 func definition_data() -> Dictionary:
 	return _data.duplicate(true)
 func art_requirements() -> Array[Dictionary]:
@@ -62,7 +75,7 @@ func validate(manifest: Dictionary) -> Array[String]:
 				_validate_art(str(layer.get("art_id","")),assets,errors)
 	for skill in SKILLS:
 		if not skill in skills: errors.append("missing_skill:"+skill)
-	# Damage feedback is deliberately independent of the eight player cast identities.
+	# Damage feedback is deliberately independent of player cast identities.
 	_validate_art("vfx_hit_spark",assets,errors)
 	return errors
 func _validate_art(id: String, assets: Dictionary, errors: Array[String]) -> void:
@@ -71,13 +84,37 @@ func _validate_art(id: String, assets: Dictionary, errors: Array[String]) -> voi
 		return
 	var metadata = assets[id]
 	for error in validate_art_metadata(id,metadata): _append_error(errors,error)
-	if metadata is Dictionary:
-		var approved = metadata.get("vfx_approved",false)
-		if not approved is bool or not approved: _append_error(errors,"unapproved_art:"+id)
+	var problem := render_problem(id,metadata)
+	if not problem.is_empty() and problem != "invalid_art_metadata": _append_error(errors,problem+":"+id)
+# Activation is separate from native review. Legacy reviewed originals retain
+# their existing gate; new originals need every explicit development field.
+static func render_enabled(metadata: Dictionary) -> bool:
+	var approved = metadata.get("vfx_approved",null)
+	if approved is bool and approved: return true
+	return approved is bool and not approved and metadata.get("kind") == "effect" and metadata.get("source_status") == "NEW" and _strict_flag(metadata,"development_render_enabled",true) and _strict_flag(metadata,"native_reviewed",false) and _strict_flag(metadata,"final_art_approved",false) and metadata.get("review_status") == "development_enabled_native_review_pending"
+static func _strict_flag(metadata: Dictionary, key: String, expected: bool) -> bool:
+	return metadata.get(key,null) is bool and metadata[key] == expected
+func render_problem(id: String, metadata: Variant, raster_validator: Callable = Callable()) -> String:
+	if not validate_art_metadata(id,metadata).is_empty(): return "invalid_art_metadata"
+	if not render_enabled(metadata): return "unapproved_art"
+	# Direct command construction verifies actual bytes. Bridge supplies its one
+	# existing config-scoped validator for its own immutable metadata, avoiding
+	# per-frame I/O/decode. No caller-controlled context receipt bypasses policy.
+	if metadata.get("vfx_approved") == false:
+		return str(raster_validator.call(id)) if raster_validator.is_valid() else raster_problem(metadata)
+	return ""
+static func raster_problem(asset: Dictionary) -> String:
+	var path := str(asset.get("path",""))
+	if not FileAccess.file_exists(path): return "missing_raster"
+	if FileAccess.get_sha256(path).to_lower() != str(asset.get("sha256","")).to_lower(): return "asset_hash_mismatch"
+	var raster := Image.new()
+	var loaded := raster.load_png_from_buffer(FileAccess.get_file_as_bytes(path))
+	if loaded != OK or raster.is_empty() or raster.get_width() != int(asset.get("width",0)) or raster.get_height() != int(asset.get("height",0)): return "invalid_raster_dimensions"
+	return ""
 func validate_art_metadata(id: String, metadata: Variant) -> Array[String]:
 	# Structural authority is the authored per-ID contract, never an approval flag.
 	# This pure check can inspect an unapproved QA candidate without approving it.
-	# Reading/hash-verifying actual PNG bytes remains A/I's asset boundary.
+	# render_problem adds the shared activation and original-byte policy.
 	var errors: Array[String] = []
 	if not _art_specs.has(id):
 		_metadata_issue(errors,id,"unknown_requirement")

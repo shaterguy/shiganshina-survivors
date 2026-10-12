@@ -13,7 +13,9 @@ class RegisteredPrimaryPackaging(unittest.TestCase):
    common.verify_source_hashes(target,manifest)
    for key,record in manifest['assets'].items():
     if key.startswith('vfx_'):
-     self.assertIs(record['vfx_approved'],True)
+     self.assertTrue(common.vfx_render_enabled(record))
+     if record['vfx_approved'] is False:
+      self.assertIs(record['native_reviewed'],False);self.assertIs(record['final_art_approved'],False)
      self.assertEqual((target/record['path'][6:]).read_bytes(),(ROOT/record['path'][6:]).read_bytes())
    self.assertFalse(any('/source/' in p.as_posix() or '/previews/' in p.as_posix() for p in target.rglob('*')))
  def test_unreviewed_nested_effects_stay_out(self):
@@ -40,3 +42,21 @@ class RawPrimaryArchive(ArchiveAndWrapperTests):
  def test_approved_vfx_raw_bytes_checked_even_when_import_exists(self):
   self.entries[self.raw_member]=b'wrong-raster'
   with self.assertRaisesRegex(common.BuildError,'VFX original raster'): self.check()
+
+class DevelopmentOriginalPackaging(unittest.TestCase):
+ def test_strict_separate_development_gate(self):
+  manifest=json.loads((ROOT/'assets/manifest.json').read_text())
+  good=manifest['assets']['vfx_chain_lightning']
+  self.assertTrue(common.vfx_render_enabled(good));self.assertTrue(common.is_runtime_asset(good))
+  for field,value in [('development_render_enabled',False),('development_render_enabled','true'),('development_render_enabled',1),('vfx_approved','true'),('native_reviewed',True),('native_reviewed','false'),('final_art_approved','false'),('review_status','approved'),('source_status','ACCEPTED')]:
+   record=dict(good);record[field]=value
+   self.assertFalse(common.vfx_render_enabled(record),(field,value));self.assertFalse(common.is_runtime_asset(record))
+  for path in ['res://assets/art/effects/vfx_fantasy_v1/source/source.png','res://assets/art/effects/vfx_evolution_v1/previews/vfx_hit.png','res://assets/art/effects/vfx_fantasy_v1/../vfx_hit.png']:
+   record=dict(good);record['path']=path;self.assertFalse(common.is_runtime_asset(record))
+
+class RawDevelopmentArchive(RawPrimaryArchive):
+ def setUp(self):
+  super().setUp()
+  record=self.manifest['assets']['vfx_cannon_shell']
+  record.update(vfx_approved=False,source_status='NEW',development_render_enabled=True,native_reviewed=False,final_art_approved=False,review_status='development_enabled_native_review_pending')
+  raw=json.dumps(self.manifest).encode();(self.root/'assets/manifest.json').write_bytes(raw);self.entries['assets/assets/manifest.json']=raw

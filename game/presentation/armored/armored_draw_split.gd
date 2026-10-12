@@ -51,10 +51,10 @@ func begin_frame() -> void:
    item.clear_commands()
    item.visible=false
 func routing_tail() -> bool: return _inserted
-func insert_actor(texture: Texture2D, transform: Transform2D, rect: Rect2) -> bool:
+func insert_actor(texture: Texture2D, transform: Transform2D, rect: Rect2, color:=Color.WHITE) -> bool:
  if _inserted or texture==null or not is_instance_valid(_actor) or not transform.is_finite() or not rect.position.is_finite() or not rect.size.is_finite() or not rect.has_area(): return false
  _actor.submit(["transform",transform])
- _actor.submit(["rect",rect,texture,false,Color.WHITE])
+ _actor.submit(["rect",rect,texture,false,color])
  _actor.visible=true; _tail.visible=true; _inserted=true
  return true
 func append_transform(transform: Transform2D) -> void:

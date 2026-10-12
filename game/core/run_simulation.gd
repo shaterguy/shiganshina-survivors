@@ -1191,7 +1191,7 @@ func _hit_entity(state: Dictionary, entity: Dictionary, damage: float, source: S
 	var amount := minf(float(entity.hp),damage)
 	entity.hp = maxf(0.0,float(entity.hp)-damage)
 	state.stats.damage_dealt = float(state.stats.damage_dealt)+amount
-	_emit(state,events,"damage",{"target_id":entity.id,"source_id":source,"amount":amount,"hp":entity.hp,"attack_id":attack_id,"base_item_id":source})
+	_emit(state,events,"damage",{"target_id":entity.id,"source_id":source,"amount":amount,"hp":entity.hp,"attack_id":attack_id,"base_item_id":source,"position":entity.position.duplicate()})
 	if entity.hp > 0.0: return
 	state.stats.kills = int(state.stats.kills)+1
 	_add_drop(state,entity.position,int(entity.xp))

@@ -18,7 +18,7 @@
           "role": "cast",
           "art_id": "vfx_blade_crescent",
           "anchor_policy": "world",
-          "render_pass": "world",
+          "render_pass": "contact_overlay",
           "duration_ticks": 10,
           "contact_tick_policy": "execute_tick",
           "shape_binding": "sector",
@@ -29,7 +29,7 @@
               "art_id": "vfx_blade_crescent",
               "component": "main",
               "reduce_mode": "preserve",
-              "render_pass": "world"
+              "render_pass": "contact_overlay"
             }
           ]
         }
@@ -46,7 +46,7 @@
           "role": "cast",
           "art_id": "vfx_spin_double_ring",
           "anchor_policy": "world",
-          "render_pass": "world",
+          "render_pass": "contact_overlay",
           "duration_ticks": 14,
           "contact_tick_policy": "execute_tick",
           "shape_binding": "circle",
@@ -57,7 +57,7 @@
               "art_id": "vfx_spin_double_ring",
               "component": "main",
               "reduce_mode": "preserve",
-              "render_pass": "world"
+              "render_pass": "contact_overlay"
             }
           ]
         }
@@ -308,7 +308,7 @@
           "role": "cast",
           "art_id": "vfx_wing_first_arc",
           "anchor_policy": "world",
-          "render_pass": "world",
+          "render_pass": "contact_overlay",
           "duration_ticks": 12,
           "contact_tick_policy": "execute_tick",
           "shape_binding": "sector",
@@ -319,13 +319,13 @@
               "art_id": "vfx_wing_first_arc",
               "component": "main",
               "reduce_mode": "preserve",
-              "render_pass": "world"
+              "render_pass": "contact_overlay"
             },
             {
               "art_id": "vfx_wing_second_arc",
               "component": "stage_second",
               "reduce_mode": "preserve",
-              "render_pass": "world"
+              "render_pass": "contact_overlay"
             }
           ]
         }
@@ -416,6 +416,188 @@
               "render_pass": "contact_overlay"
             }
           ]
+        }
+      }
+    },
+    {
+      "recipe_id": "chain_lightning",
+      "base_item_id": "chain_lightning",
+      "evolution_id": "",
+      "visual_identity": "single_jagged_actual_link",
+      "phases": {
+        "cast": {
+          "recipe_id": "chain_lightning.cast",
+          "role": "cast",
+          "art_id": "vfx_chain_lightning",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 8,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_chain_lightning",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_storm_chain",
+      "base_item_id": "chain_lightning",
+      "evolution_id": "evo_storm_chain",
+      "visual_identity": "forked_storm_actual_links",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_storm_chain.cast",
+          "role": "cast",
+          "art_id": "vfx_storm_chain",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 12,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_storm_chain",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "fire_zone",
+      "base_item_id": "fire_zone",
+      "evolution_id": "",
+      "visual_identity": "finite_ember_field_and_pulses",
+      "phases": {
+        "cast": {
+          "recipe_id": "fire_zone.cast",
+          "role": "cast",
+          "art_id": "vfx_fire_zone",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 8,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_fire_zone",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        },
+        "area": {
+          "recipe_id": "fire_zone.area",
+          "role": "area",
+          "art_id": "vfx_fire_zone",
+          "anchor_policy": "world",
+          "render_pass": "ground",
+          "duration_ticks": 0,
+          "contact_tick_policy": "none",
+          "shape_binding": "circle",
+          "priority": 90,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_fire_zone",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "ground"
+            }
+          ],
+          "animation_loop": true,
+          "animation_duration_ticks": 30,
+          "opacity": 0.55,
+          "lifetime_binding": "pending_cast_last_stage"
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_inferno_zone",
+      "base_item_id": "fire_zone",
+      "evolution_id": "evo_inferno_zone",
+      "visual_identity": "inferno_field_seven_pulses_final_eruption",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_inferno_zone.cast",
+          "role": "cast",
+          "art_id": "vfx_inferno_zone",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 8,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_inferno_zone",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        },
+        "area": {
+          "recipe_id": "evo_inferno_zone.area",
+          "role": "area",
+          "art_id": "vfx_inferno_zone",
+          "anchor_policy": "world",
+          "render_pass": "ground",
+          "duration_ticks": 0,
+          "contact_tick_policy": "none",
+          "shape_binding": "circle",
+          "priority": 90,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_inferno_zone",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "ground"
+            }
+          ],
+          "animation_loop": true,
+          "animation_duration_ticks": 20,
+          "opacity": 0.55,
+          "lifetime_binding": "pending_cast_last_stage"
+        },
+        "eruption": {
+          "recipe_id": "evo_inferno_zone.eruption",
+          "role": "impact",
+          "art_id": "vfx_crossfire_contact_blast",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 18,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 100,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_crossfire_contact_blast",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            }
+          ],
+          "core_art_id": "vfx_inferno_eruption",
+          "mapping_note": "Final executed inferno stage reuses the original crossfire blast raster at its actual larger radius; no asset alias or approval override."
         }
       }
     }
@@ -811,6 +993,98 @@
       "forward_axis": "+X",
       "source_requirement": "original raster, vfx_approved=true, exact sha256",
       "notes": "Small target-only hit spark; damage events never synthesize casts or cannon blasts."
+    },
+    {
+      "art_id": "vfx_chain_lightning",
+      "cell_px": [
+        128,
+        64
+      ],
+      "pivot_px": [
+        12,
+        32
+      ],
+      "contact_bounds_px": [
+        12,
+        0,
+        104,
+        64
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster; production requires vfx_approved=true and exact sha256; candidate remains unapproved",
+      "notes": "Actual segment length/width; left-edge origin, no invented branches or endpoints."
+    },
+    {
+      "art_id": "vfx_storm_chain",
+      "cell_px": [
+        128,
+        64
+      ],
+      "pivot_px": [
+        16,
+        32
+      ],
+      "contact_bounds_px": [
+        16,
+        0,
+        96,
+        64
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster; production requires vfx_approved=true and exact sha256; candidate remains unapproved",
+      "notes": "Actual segment length/width; left-edge origin, no invented branches or endpoints."
+    },
+    {
+      "art_id": "vfx_fire_zone",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster; production requires vfx_approved=true and exact sha256; candidate remains unapproved",
+      "notes": "Finite fixed-origin floor loop and actual pulse contact; art identity frozen per cast."
+    },
+    {
+      "art_id": "vfx_inferno_zone",
+      "cell_px": [
+        128,
+        128
+      ],
+      "pivot_px": [
+        64,
+        64
+      ],
+      "contact_bounds_px": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "frames": 8,
+      "columns": 4,
+      "contact_frame": 0,
+      "forward_axis": "+X",
+      "source_requirement": "original raster; production requires vfx_approved=true and exact sha256; candidate remains unapproved",
+      "notes": "Finite fixed-origin floor loop and actual pulse contact; art identity frozen per cast."
     }
   ]
 }

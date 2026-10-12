@@ -20,7 +20,10 @@ for aid,a in m['assets'].items():
   frames=a['animations']['move']['frames'];unique=set()
   for f in frames:
    x=f%a['columns']*a['cell_w'];y=f//a['columns']*a['cell_h'];unique.add(im.crop((x,y,x+a['cell_w'],y+a['cell_h'])).tobytes())
-  assert len(unique)>=4,aid;checks+=1
+  if a.get('ordinary_two_frame',False):
+   assert aid in {'titan_quadruped','titan_stone_thrower'} and frames==[0,1] and len(unique)==2,aid
+  else: assert len(unique)>=4,aid
+  checks+=1
  if a['kind']=='telegraph':
   for y in range(im.height):
    for x in range(im.width):

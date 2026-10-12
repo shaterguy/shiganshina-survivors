@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "filter": "nearest",
+  "mipmaps": false,
+  "frame_order": "row_major_zero_based",
+  "integration_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+  "assets": {
+    "titan_quadruped": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/titan_quadruped.png",
+      "kind": "sprite",
+      "width": 720,
+      "height": 96,
+      "cell_w": 144,
+      "cell_h": 96,
+      "columns": 5,
+      "anchor_px": [
+        64,
+        88
+      ],
+      "art_revision": 1,
+      "animations": {
+        "move": {
+          "frames": [
+            0,
+            1
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        "idle": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true
+        },
+        "windup": {
+          "frames": [
+            2
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            3
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "recover": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        }
+      },
+      "sha256": "179a1207400b53551af67358c378324763a13ac5d70265e10692654aefe32272",
+      "export_blocked": false,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation and targeted walk-pose edit; mechanical nearest-neighbor crop/scale/atlas packing preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated fan-game artwork; private fan prototype, no official affiliation and no extracted anime frames.",
+      "collision_note": "Visual anchor is Core body ground position; body radius 18. Do not infer attack reach from raster bounds.",
+      "frame_notes": {
+        "0": "walk support A",
+        "1": "walk support B",
+        "2": "windup",
+        "3": "contact/release",
+        "4": "recovery; reused by idle/hit/death; no bespoke hit/death pose in this minimal set"
+      },
+      "source_atlas_sha256": "b6833aeb3ba0e51dc0b1a87f590a06e085ddc6b18e3d5cd8dbfd14fac347a384",
+      "packing_profile": "nearest_palette_alpha128",
+      "palette_excluded_hex": [],
+      "enemy_art_development_ready": true,
+      "ordinary_two_frame": true,
+      "review_record": "docs/art/enemies/development-integration.md"
+    },
+    "titan_stone_thrower": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/titan_stone_thrower.png",
+      "kind": "sprite",
+      "width": 960,
+      "height": 176,
+      "cell_w": 192,
+      "cell_h": 176,
+      "columns": 5,
+      "anchor_px": [
+        72,
+        168
+      ],
+      "art_revision": 1,
+      "animations": {
+        "move": {
+          "frames": [
+            0,
+            1
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        "idle": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": true
+        },
+        "windup": {
+          "frames": [
+            2
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "attack": {
+          "frames": [
+            3
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "recover": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "hit": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        },
+        "death": {
+          "frames": [
+            4
+          ],
+          "fps": 1,
+          "loop": false
+        }
+      },
+      "sha256": "c701e2e5bf4263a736babed63c5777bf3b9b6ced957229130ffe6f684abf7ab8",
+      "export_blocked": false,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation and targeted walk-pose edit; mechanical nearest-neighbor crop/scale/atlas packing preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated fan-game artwork; private fan prototype, no official affiliation and no extracted anime frames.",
+      "collision_note": "Visual anchor is Core body ground position; body radius 24. Do not infer attack reach from raster bounds.",
+      "frame_notes": {
+        "0": "walk support A",
+        "1": "walk support B",
+        "2": "windup",
+        "3": "contact/release",
+        "4": "recovery; reused by idle/hit/death; no bespoke hit/death pose in this minimal set"
+      },
+      "source_atlas_sha256": "09dae345f7ed744bb3409eb789e86fd4551736649f038a2435b8d37702478fe2",
+      "packing_profile": "nearest_palette_alpha128_exclude_20252c",
+      "palette_excluded_hex": [
+        "#20252c"
+      ],
+      "enemy_art_development_ready": true,
+      "ordinary_two_frame": true,
+      "review_record": "docs/art/enemies/development-integration.md",
+      "contrast_note": "Nearest shared-palette mapping excludes #20252c; no added or removed alpha>=128 pixels; dark shading is flatter; native scene contrast remains unverified."
+    },
+    "enemy_stone_projectile": {
+      "path": "res://assets/art/characters/enemy_diversity_v1/enemy_stone_projectile.png",
+      "kind": "projectile",
+      "width": 16,
+      "height": 16,
+      "cell_w": 16,
+      "cell_h": 16,
+      "columns": 1,
+      "anchor_px": [
+        8,
+        8
+      ],
+      "animations": {
+        "idle": {
+          "frames": [
+            0
+          ],
+          "fps": 1,
+          "loop": true
+        }
+      },
+      "sha256": "24e4a2e7fd3326c4f46a267c9e5741e03e4c36310e86b07394c047b4c2465fcc",
+      "export_blocked": false,
+      "art_revision": 1,
+      "review_status": "DEVELOPMENT_STATIC_REVIEWED_NATIVE_UNVERIFIED",
+      "reason": "development static raster and headless integration only; native/gameplay unverified; final export remains blocked",
+      "source_method": "Original built-in image generation; mechanical crop and nearest-neighbor resize preserving RGBA. Deterministic alpha>=128 hard-mask and nearest shared-palette RGB mapping; no dithering or new poses. Thrower excludes only #20252c for dark-tile contrast.",
+      "license_note": "Original generated raster artwork. No extracted third-party assets.",
+      "collision_note": "Center on projectile_pose.current; authoritative radius 7. Draw only while visible and never after blocked.",
+      "source_atlas_sha256": "35e352ef7bb5fde1039e3ceeeccd93ab3ef7e422e4c85a277638ac44851f0813",
+      "packing_profile": "nearest_palette_alpha128",
+      "palette_excluded_hex": [],
+      "enemy_art_development_ready": true,
+      "review_record": "docs/art/enemies/development-integration.md"
+    }
+  }
+}

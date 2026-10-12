@@ -38,6 +38,7 @@ var _clock := 0.0
 var _attack_until := 0.0
 var _hit_until := 0.0
 var _enemy_hits: Dictionary = {}
+var _actor_draw_tint := Color.WHITE
 var _corpses: Array[Dictionary] = []
 var _attack_started := 0.0
 var reduce_effects := false
@@ -425,7 +426,7 @@ func _sprite(asset_id: String, world: Vector2, animation: String, scale_value: f
 	var region := frame_rect(asset_id,animation,_clock if seconds < 0 else seconds)
 	var anchor: Array = _assets[asset_id].get("anchor_px",[region.size.x/2,region.size.y])
 	_world_transform(_screen(world),0,Vector2(-1 if flip else 1,1)*scale_value)
-	_world_region(texture,Rect2(-Vector2(anchor[0],anchor[1]),region.size),region)
+	_world_region(texture,Rect2(-Vector2(anchor[0],anchor[1]),region.size),region,_actor_draw_tint)
 	_world_transform(Vector2.ZERO)
 func _draw_city() -> void:
 	var asset_id := "city_tiles"
@@ -509,7 +510,7 @@ func _actor_view(id: Variant, asset_id: String, point: Vector2, pose: String, sc
 	var anchor: Array = record.get("anchor_px",[size.x/2,size.y])
 	var corner := Vector2(-float(anchor[0])*scale_value,-float(anchor[1])*scale_value)
 	if flip: corner.x = float(anchor[0])*scale_value-size.x
-	var result := {"id":id,"asset_id":asset_id,"position":point,"depth_y":point.y,"render_bounds":Rect2(point+corner,size),"pose":pose,"scale":scale_value,"flip":flip,"seconds":seconds}
+	var result := {"id":id,"asset_id":asset_id,"position":point,"depth_y":point.y,"render_bounds":Rect2(point+corner,size),"pose":pose,"scale":scale_value,"flip":flip,"seconds":seconds,"tint":Color(1.55,1.40,1.15) if float(_enemy_hits.get(str(id),-1.0))-_clock > 0.14-5.0/60.0 else Color.WHITE}
 	if asset_id == "armored_titan" and _armored_display.get("supported",false) and str(id) == _armored_display.actor_id and point == _armored_display.root_position:
 		result.armored_raster = true
 		result.flip = _armored_display.flip
@@ -622,8 +623,12 @@ func _draw_upright_with_vfx(upright: Array, vfx: Array[Dictionary]) -> void:
 			_draw_vfx_command(command.vfx)
 		else:
 			var style: Dictionary = _city_draw_data[command.id.get_slice(":",0)][command.source_id] if command.has("source_id") else {}
-			if style.get("armored_raster",false) and _draw_armored_raster(): continue
+			_actor_draw_tint = style.get("tint",Color.WHITE)
+			if style.get("armored_raster",false) and _draw_armored_raster():
+				_actor_draw_tint = Color.WHITE
+				continue
 			_sprite(command.asset_id,command.position,command.pose,float(style.get("scale",1.0)),style.get("flip",false),float(style.get("seconds",_clock)))
+			_actor_draw_tint = Color.WHITE
 func _draw_hit_fallbacks() -> void:
 	for effect in _effects:
 		_sprite(effect.asset,Vector2(effect.position[0],effect.position[1])-Vector2(0,64),"attack",0.8,_snapshot.player.facing[0] < 0,_clock-float(effect.started))
@@ -792,7 +797,7 @@ func _armored_opaque(world_point: Vector2) -> bool:
 func _draw_armored_raster() -> bool:
 	if not _armored_display.get("supported",false) or not is_instance_valid(_armored_split): return false
 	var transform := Transform2D(0,_screen(_armored_display.root_position)).scaled_local(Vector2(-1 if _armored_display.flip else 1,1)*_armored_display.display_scale)
-	return _armored_split.insert_actor(_armored_raster.get_raster_texture(),transform,Rect2(-144,-280,288,288))
+	return _armored_split.insert_actor(_armored_raster.get_raster_texture(),transform,Rect2(-144,-280,288,288),_actor_draw_tint)
 func _world_transform(position: Vector2, rotation:=0.0, scale_value:=Vector2.ONE) -> void:
 	if is_instance_valid(_armored_split) and _armored_split.routing_tail():
 		_armored_split.append_transform(Transform2D(rotation,position).scaled_local(scale_value))

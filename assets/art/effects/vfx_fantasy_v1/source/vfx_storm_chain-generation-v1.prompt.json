@@ -1,0 +1,4 @@
+{
+  "transparent_background": true,
+  "prompt": "Use case: stylized-concept. Original pixel-art ultimate STORM CHAIN attack segment for a fantasy survivor game. 8 equally spaced animation frames in an exact 4x2 sheet on a wide 2:1 transparent RGBA canvas. Each square cell: a horizontal left-to-right braided electric discharge, TWO interwoven white-gold jagged cores with cyan/royal-blue secondary forks, a sharp small star at both fixed endpoints. It must look substantially more powerful and intricately branched than a single thin blue lightning line, without becoming an opaque rectangle. Identical start x10%, end x90%, vertical midpoint50% in all cells. Local forks remain between y25% and75%. Animation strongest first then successive braids/sparks changing across8frames. Crisp hard pixel clusters, limited palette, no soft blur/glow. No ring, text, labels, cell borders, symbols, background, character. Transparent padding fully separates neighboring frames."
+}
