@@ -181,6 +181,20 @@ func _distances(grid: Dictionary, target: int, goal: Vector2, radius: float, tic
 			if grid.flags[id] and _visible(_center(id,grid.local_origin),goal,radius):
 				distances[id] = 0
 				queue.append(id)
+	# Revalidate every seed in the original order before considering reuse.
+	# This exact implementation owns the flags until _build_grid replaces the
+	# whole grid on geometry changes; derived callbacks retain the original BFS.
+	# Keep only this grid's last field, never a chain of targets or rounded goals.
+	var scope := _direction_reuse_scope() if get_script() == CityNavigation or get_script() == load("res://game/world/precise_city_navigation.gd") else {}
+	if not scope.is_empty():
+		var inputs: Array = [scope.view,scope.source,scope.coverage,scope.revision,scope.origin,queue.duplicate()]
+		if grid.has("distances") and grid.get("distance_inputs",[]) == inputs:
+			grid.target = target
+			grid.tick = tick
+			return
+		grid.distance_inputs = inputs
+	else:
+		grid.erase("distance_inputs")
 	var head := 0
 	while head < queue.size():
 		var id := queue[head]
