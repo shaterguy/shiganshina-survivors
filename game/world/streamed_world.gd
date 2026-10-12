@@ -12,6 +12,7 @@ var _chunks: Dictionary = {}
 var _dirty: Dictionary = {}
 var _props: Dictionary = {}
 var _buckets: Dictionary = {}
+var _collision_bucket_cache: Dictionary = {}
 var _world_revision := 0
 var _coverage_revision := 0
 var _last_error := ""
@@ -210,6 +211,11 @@ func _collision_query_props(aabb: Rect2) -> Array:
 	return _query_props(aabb,false)
 func _query_props(aabb: Rect2, owned: bool) -> Array:
 	_query_count += 1
+	if not owned:
+		var result: Array = []
+		for prop in _collision_bucket_candidates(aabb):
+			if prop.ground_footprint.intersects(aabb,true): result.append(prop)
+		return result
 	var selected := {}
 	for y in range(int(floor(aabb.position.y/BUCKET)),int(floor(aabb.end.y/BUCKET))+1):
 		for x in range(int(floor(aabb.position.x/BUCKET)),int(floor(aabb.end.x/BUCKET))+1):
@@ -219,6 +225,23 @@ func _query_props(aabb: Rect2, owned: bool) -> Array:
 	ids.sort()
 	var result: Array = []
 	for id in ids: result.append(_props[id].duplicate(true) if owned else _props[id])
+	return result
+func _collision_bucket_candidates(aabb: Rect2) -> Array:
+	# Only exact synchronous collision readers reach this borrowed path. Cache
+	# the sorted bucket superset, never an AABB result or a collision decision.
+	var span := Vector4i(int(floor(aabb.position.x/BUCKET)),int(floor(aabb.position.y/BUCKET)),int(floor(aabb.end.x/BUCKET)),int(floor(aabb.end.y/BUCKET)))
+	if _collision_bucket_cache.has(span): return _collision_bucket_cache[span]
+	var selected := {}
+	for y in range(span.y,span.w+1):
+		for x in range(span.x,span.z+1):
+			for id in _buckets.get(Vector2i(x,y),[]): selected[id] = true
+	var ids: Array = selected.keys()
+	ids.sort()
+	var result: Array = []
+	for id in ids: result.append(_props[id])
+	# Uncommon/large spans still run the exact query without retaining records.
+	if _collision_bucket_cache.size() < 512 and (span.z-span.x+1)*(span.w-span.y+1) <= 256:
+		_collision_bucket_cache[span] = result
 	return result
 func covered(aabb: Rect2) -> bool:
 	var low_x := int(floor(aabb.position.x/768))
@@ -257,6 +280,7 @@ func chunk_keys() -> Array:
 func diagnostics() -> Dictionary:
 	return {"resident_chunks":_chunks.size(),"resident_props":_props.size(),"dirty_chunks":_dirty.size(),"peak_resident_chunks":_peak,"peak_pool_chunks":_peak_pool,"clearance_cache_entries":_clearance_cache.size(),"spatial_buckets":_buckets.size(),"world_revision":_world_revision,"coverage_revision":_coverage_revision,"query_count":_query_count,"last_error":_last_error}
 func _rebuild() -> void:
+	_collision_bucket_cache.clear()
 	for key in _clearance_cache.keys():
 		var cached: Dictionary = _clearance_cache[key]
 		var chunk: Dictionary = _chunks.get(cached.chunk_id,{})
