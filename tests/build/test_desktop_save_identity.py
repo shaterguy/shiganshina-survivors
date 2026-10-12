@@ -4,13 +4,15 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-@unittest.skipUnless(shutil.which('godot'), 'Godot runtime is required for save-root evidence')
+@unittest.skipUnless(sys.platform.startswith('linux') and shutil.which('godot'),
+                     'This disposable XDG profile probe requires Linux Godot')
 class DesktopSaveIdentityTests(unittest.TestCase):
     def test_renamed_project_reads_the_unchanged_legacy_save_location(self):
         with tempfile.TemporaryDirectory(prefix='wings-save-root-') as directory:
