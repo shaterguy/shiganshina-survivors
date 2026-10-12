@@ -124,22 +124,42 @@ func present_enemy_attacks(packet: Dictionary) -> Dictionary:
 		return {"ok":false,"error_code":"attack_view_terminal"}
 	var owners: Dictionary = {}
 	for entity in _snapshot.get("entities",[]):
-		if entity.get("enemy_id") == "grabber" and str(entity.get("boss_id","")).is_empty() and float(entity.get("hp",0)) > 0: owners[str(entity.id)] = entity
+		if entity.get("enemy_id") in ["grabber","quadruped","stone_thrower"] and str(entity.get("boss_id","")).is_empty() and float(entity.get("hp",0)) > 0: owners[str(entity.id)] = entity
 	var seen: Dictionary = {}
 	for attack in packet.attacks:
-		if not attack is Dictionary or not attack.get("role_id") is String or attack.role_id != "grabber" or not attack.get("source_id") is String or not owners.has(attack.source_id) or seen.has(attack.source_id):
+		if not attack is Dictionary or not attack.get("role_id") is String or attack.role_id not in ["grabber","quadruped","stone_thrower"] or not attack.get("source_id") is String or not owners.has(attack.source_id) or owners[attack.source_id].enemy_id != attack.role_id or seen.has(attack.source_id):
 			return {"ok":false,"error_code":"attack_view_invalid"}
-		if not attack.get("attack_id") is String or not attack.attack_id.begins_with(str(identity.run_id)+":enemy:"+attack.source_id+":") or not _enemy_hand_point_valid(attack.get("position")) or attack.position != owners[attack.source_id].position or not _enemy_hand_sample_valid(attack):
+		if not attack.get("attack_id") is String or not attack.attack_id.begins_with(str(identity.run_id)+":enemy:"+attack.source_id+":") or not _enemy_hand_point_valid(attack.get("position")) or attack.position != owners[attack.source_id].position or not _enemy_attack_sample_valid(attack):
 			return {"ok":false,"error_code":"attack_view_invalid"}
 		seen[attack.source_id] = true
 	_enemy_attack_packet = packet.duplicate(true)
 	return {"ok":true}
-func _enemy_hand_sample_valid(attack: Dictionary) -> bool:
-	if not attack.get("phase") is String or attack.phase not in ["windup","attack","recover"] or not attack.get("hand_pose") is Dictionary: return false
-	for field in ["rest","previous","current","warning_start","warning_end"]:
-		if not _enemy_hand_point_valid(attack.hand_pose.get(field)): return false
+func _enemy_attack_sample_valid(attack: Dictionary) -> bool:
+	if not attack.get("phase") is String or attack.phase not in ["windup","attack","recover"]: return false
+	if attack.role_id == "grabber":
+		if not attack.get("hand_pose") is Dictionary: return false
+		for field in ["rest","previous","current","warning_start","warning_end"]:
+			if not _enemy_hand_point_valid(attack.hand_pose.get(field)): return false
+	elif attack.has("hand_pose"): return false
+	if attack.role_id == "stone_thrower":
+		if not attack.get("projectile_pose") is Dictionary: return false
+		var pose: Dictionary = attack.projectile_pose
+		for field in ["previous","current"]:
+			if not _enemy_hand_point_valid(pose.get(field)): return false
+		if not (pose.get("radius") is int or pose.get("radius") is float) or not is_finite(float(pose.radius)) or float(pose.radius) <= 0.0: return false
+		if not pose.get("visible") is bool or not pose.get("blocked") is bool: return false
+		if attack.phase == "attack":
+			if pose.visible == pose.blocked: return false
+		elif pose.visible or pose.blocked: return false
+	elif attack.has("projectile_pose"): return false
 	if not attack.get("telegraph_geometry") is Array or not attack.get("damage_geometry") is Array: return false
-	if attack.telegraph_geometry.size() != (1 if attack.phase == "windup" else 0) or attack.damage_geometry.size() != (1 if attack.phase == "attack" else 0): return false
+	if attack.telegraph_geometry.size() != (1 if attack.phase == "windup" else 0): return false
+	# The collision tick retains its final clipped sweep. Later blocked ticks
+	# are still in the attack phase but have neither damage nor a visible rock.
+	var blocked_rock: bool = attack.role_id == "stone_thrower" and attack.projectile_pose.blocked
+	if attack.phase == "attack" and blocked_rock:
+		if attack.damage_geometry.size() > 1: return false
+	elif attack.damage_geometry.size() != (1 if attack.phase == "attack" else 0): return false
 	for geometry in attack.telegraph_geometry+attack.damage_geometry:
 		if not geometry is Dictionary or not geometry.get("shape") is String or geometry.shape != "line" or not _enemy_hand_point_valid(geometry.get("origin")) or not _enemy_hand_point_valid(geometry.get("direction")): return false
 		for field in ["length","width"]:
@@ -154,14 +174,28 @@ func _enemy_hand_point_valid(value: Variant) -> bool:
 func enemy_attack_commands() -> Array[Dictionary]:
 	var commands: Array[Dictionary] = []
 	for attack in _enemy_attack_packet.get("attacks",[]):
-		# Recovery has no dangerous footprint. No approved neutral return art is
-		# available; preserve its hand DTO without reusing a warning/reward icon.
+		# These footprints are diagnostics of Core geometry, not finished actor
+		# or projectile art. Recovery is harmless and has no danger footprint.
 		var geometry: Array = attack.telegraph_geometry if attack.phase == "windup" else attack.damage_geometry
+		var active_kind: String = {"grabber":"hand_sweep","quadruped":"body_sweep","stone_thrower":"projectile_sweep"}[attack.role_id]
 		for primitive in geometry:
-			commands.append({"attack_id":attack.attack_id,"source_id":attack.source_id,"kind":"warning" if attack.phase == "windup" else "hand_sweep","geometry":primitive.duplicate(true)})
+			commands.append({"attack_id":attack.attack_id,"source_id":attack.source_id,"role_id":attack.role_id,"kind":"warning" if attack.phase == "windup" else active_kind,"geometry":primitive.duplicate(true)})
+		var pose: Dictionary = attack.get("projectile_pose",{})
+		if pose.get("visible",false):
+			var command := {"attack_id":attack.attack_id,"source_id":attack.source_id,"role_id":attack.role_id,"kind":"projectile","asset_id":"enemy_stone_projectile","position":pose.current.duplicate(),"radius":pose.radius}
+			var art: Dictionary = _assets.get(command.asset_id,{})
+			if art.is_empty() or art.get("export_blocked",false): command.diagnostic = "enemy_projectile_art_unavailable"
+			commands.append(command)
 	return commands
 func _draw_enemy_attacks() -> void:
 	for command in enemy_attack_commands():
+		if command.kind == "projectile":
+			if command.has("diagnostic"): continue
+			var region := frame_rect(command.asset_id,"idle",0.0)
+			if region.size.x <= 0.0 or region.size.y <= 0.0: continue
+			# A centered square stone atlas is scaled to the real swept diameter.
+			_sprite(command.asset_id,Vector2(command.position[0],command.position[1]),"idle",float(command.radius)*2.0/maxf(region.size.x,region.size.y),false,0.0)
+			continue
 		var hazard: Dictionary = command.geometry
 		hazard.active_from_tick = int(_snapshot.active_tick)+(1 if command.kind == "warning" else 0)
 		_draw_telegraph(hazard)
