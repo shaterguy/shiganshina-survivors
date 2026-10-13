@@ -8,9 +8,11 @@ const Address = preload("res://game/world/world_address.gd")
 const Signature = preload("res://game/combat/character_skill_resolver.gd")
 const OwnedHUD = preload("res://game/ui/progression_hud.gd")
 const Card = preload("res://game/ui/growth_card.gd")
+const Icons = preload("res://game/ui/skill_icons.gd")
 const DetailPanel = preload("res://game/ui/evolution_detail_panel.gd")
 const ShopPanel = preload("res://game/ui/supply_shop_panel.gd")
 const PreparationPanel = preload("res://game/ui/loadout_panel.gd")
+signal audio_requested(id: String)
 signal upgrade_chosen(offer_id: String, option_id: String)
 signal upgrade_focus_changed(option_id: String)
 signal pause_changed(enabled: bool)
@@ -143,21 +145,29 @@ func _ready() -> void:
 	_owned_hud = OwnedHUD.new()
 	_owned_hud.name = "ProgressionHUD"
 	add_child(_owned_hud)
-	_owned_hud.details_requested.connect(open_owned_skills)
+	_owned_hud.details_requested.connect(func():
+		audio_requested.emit("select")
+		open_owned_skills())
 	var pause := Button.new()
 	pause.text = "Ⅱ"
 	pause.name = "Pause"
 	pause.custom_minimum_size = Vector2(48,48)
-	pause.pressed.connect(func(): pause_changed.emit(true))
+	pause.pressed.connect(func():
+		audio_requested.emit("cancel")
+		pause_changed.emit(true))
 	add_child(pause)
 	_hint = Label.new()
-	_hint.text = "왼쪽 아래를 드래그해 이동 · 자동 공격"
+	_hint.text = ""
 	_hint.add_theme_color_override("font_color",Color("e9d5af"))
 	_hint.add_theme_font_size_override("font_size",13)
 	add_child(_hint)
 	_objective = Label.new()
 	_objective.add_theme_font_size_override("font_size",13)
 	_objective.add_theme_color_override("font_color",Color("e6c88d"))
+	_objective.add_theme_color_override("font_shadow_color",Color("18211d"))
+	_objective.add_theme_constant_override("shadow_offset_x",1)
+	_objective.add_theme_constant_override("shadow_offset_y",1)
+	_objective.add_theme_constant_override("shadow_outline_size",0)
 	add_child(_objective)
 	_notice = Label.new()
 	_notice.add_theme_font_size_override("font_size",12)
@@ -218,7 +228,9 @@ func _ready() -> void:
 	_target_button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_target_button.button_down.connect(func(): _target_button.set_meta("growth_press_generation",_growth_generation))
 	_target_button.pressed.connect(func():
-		if _consume_growth_press(_target_button): open_evolution_details(str(_growth_view.get("target",{}).get("evolution_id",""))))
+		if _consume_growth_press(_target_button):
+			audio_requested.emit("select")
+			open_evolution_details(str(_growth_view.get("target",{}).get("evolution_id",""))))
 	_target_button.hide()
 	body.add_child(_target_button)
 	_choices = GridContainer.new()
@@ -255,6 +267,8 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 		_subtitle.text = "전투 종료 정산 금화"+(" · " if short_supply else "\n")+"A 확인 · B 뒤로"
 	if _mode == "loadout":
 		_subtitle.text = "시나리오 1 · %s · 845" % _chapter_title()+(" · " if short_supply else "\n")+"A 선택 · B 상점"
+	if _mode == "upgrade": _subtitle.text = _growth_subtitle()
+	_sync_upgrade_notice(_mode)
 	if short_supply: _subtitle.add_theme_font_size_override("font_size",13)
 	else: _subtitle.remove_theme_font_size_override("font_size")
 	_panel.size = Vector2(width,height)
@@ -345,7 +359,7 @@ func present(snapshot: Dictionary) -> void:
 	if not _recovery_view.is_empty(): mode = "save_recovery"
 	_stick_base.visible = mode == "play" and _input_kind != "gamepad"
 	_stick_knob.visible = _stick_base.visible
-	_hint.visible = mode == "play"
+	_hint.hide()
 	_update_stick()
 	var offer_id: String = snapshot.get("upgrade_offer",{}).get("offer_id","")
 	_notice.visible = not _notice.text.is_empty()
@@ -499,14 +513,23 @@ func _style_button(button: Button) -> void:
 	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 func _register_button(button: Button) -> void:
 	_buttons.append(button)
+	if not button.has_meta("audio_registered"):
+		button.set_meta("audio_registered",true)
+		button.pressed.connect(func():
+			if not button.disabled:
+				var closing := button.text.contains("닫기") or button.text.contains("돌아가기") or button.text.contains("취소")
+				audio_requested.emit("cancel" if closing else "select"))
 	if not button.has_meta("focus_registered"):
 		button.set_meta("focus_registered",true)
-		button.focus_entered.connect(func(): _focus_index = _buttons.find(button))
+		button.focus_entered.connect(func():
+			_focus_index = _buttons.find(button)
+			if _mode in ["upgrade","loadout"]: call_deferred("_reveal_settled_focus"))
 func navigate(action: String) -> void:
 	if _mode == "evolution_detail" and action in ["down","up"]:
 		_scroll.scroll_vertical = maxi(0,_scroll.scroll_vertical+(96 if action == "down" else -96))
 		return
 	if action in ["pause","cancel"]:
+		if _mode != "save_recovery" or not _recovery_view.get("lifecycle_blocked",false): audio_requested.emit("cancel")
 		if _mode == "save_recovery":
 			if not _recovery_view.get("lifecycle_blocked",false) and _recovery_view.get("kind") in ["checkpoint","retry","initialization_retry","blocked","conflict","oversize"]: recovery_keep_requested.emit()
 			return
@@ -676,10 +699,10 @@ func _can_reuse_growth_controls(view: Dictionary) -> bool:
 		offer.erase("selected_option_id")
 	return previous_content == next_content
 func _growth_subtitle() -> String:
-	var copy := "성장 1개 선택 · 전투 정지"
+	var copy := ""
 	var slots: Dictionary = _growth_view.get("slots",{})
 	if slots.has("equipment") and slots.has("passive"):
-		copy += " · 무기 %d/%d · 보조 %d/%d" % [slots.equipment.used,slots.equipment.max,slots.passive.used,slots.passive.max]
+		copy = "무기 %d/%d · 보조 %d/%d" % [slots.equipment.used,slots.equipment.max,slots.passive.used,slots.passive.max]
 	return copy
 func _prepare_growth_controls() -> void:
 	for index in range(3):
@@ -699,10 +722,17 @@ func _prepare_growth_controls() -> void:
 			if _consume_growth_press(card): _request_upgrade(str(card.get_meta("semantic_id",""))))
 		card.focus_entered.connect(func():
 			if _mode == "upgrade" and card.is_visible_in_tree(): upgrade_focus_changed.emit(str(card.get_meta("semantic_id",""))))
+		var requirements := VBoxContainer.new()
+		requirements.name = "Requirements"
+		requirements.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card.add_child(requirements)
 		var details := Button.new()
 		_style_button(details)
-		details.custom_minimum_size.y = 48
-		group.add_child(details)
+		details.custom_minimum_size = Vector2(48,48)
+		details.size_flags_horizontal = Control.SIZE_SHRINK_END
+		details.mouse_filter = Control.MOUSE_FILTER_STOP
+		card.add_child(details)
+		card.attach_inline_controls(requirements,details)
 		_growth_details.append(details)
 		_register_button(details)
 		details.button_down.connect(func(): details.set_meta("growth_press_generation",_growth_generation))
@@ -717,6 +747,7 @@ func _consume_growth_press(button: Button) -> bool:
 func _clear_growth_slot(index: int) -> void:
 	_growth_groups[index].hide()
 	_growth_cards[index].clear()
+	Icons.append_requirements(_growth_cards[index].get_node("Requirements"),[])
 	var details := _growth_details[index]
 	details.text = ""
 	details.tooltip_text = ""
@@ -725,7 +756,8 @@ func _clear_growth_slot(index: int) -> void:
 func _menu_width(safe_width: float) -> float:
 	return minf(730 if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else 520,safe_width-32)
 func _menu_columns() -> int:
-	return 3 if _screen_size.x > _screen_size.y and _mode == "upgrade" else 1
+	# Internal 48px information and full criterion names need usable card width.
+	return 2 if _screen_size.x > _screen_size.y and _safe_rect.size.x >= 760 and _mode == "upgrade" else 1
 func _prepare_growth_widths(option_count: int) -> void:
 	# Hidden slots do not participate in native container sorting. Give their
 	# existing EXPAND_FILL controls usable horizontal space before binding text.
@@ -748,7 +780,7 @@ func _prepare_growth_widths(option_count: int) -> void:
 	for index in range(count):
 		_growth_groups[index].size.x = column_width
 		_growth_cards[index].size.x = _growth_groups[index].size.x
-		_growth_details[index].size.x = _growth_groups[index].size.x
+		_growth_details[index].size.x = 48
 func _render_growth_cards(offer: Dictionary) -> void:
 	var options: Array = offer.get("options",[])
 	_prepare_growth_widths(options.size())
@@ -759,40 +791,25 @@ func _render_growth_cards(offer: Dictionary) -> void:
 		var option: Dictionary = options[index]
 		var card = _growth_cards[index]
 		card.present(option,_growth_summary(option))
+		Icons.append_requirements(card.get_node("Requirements"),option.get("requirements",[]) if option.get("kind","") == "evolution" else [])
 		# Keep Card's complete display/tooltip available, but make the selectable
 		# face small enough that focus scrolling cannot hide its name or action.
 		_register_button(card)
 		var id := str(option.get("option_id",""))
 		if id == offer.get("selected_option_id",""): _focus_index = _buttons.size()-1
 		var details := _growth_details[index]
-		details.text = "효과·조건 자세히"
+		details.text = "i"
+		details.tooltip_text = str(option.get("name","성장"))+" · 효과와 조건"
 		details.set_meta("semantic_id","growth_detail:"+id)
 		details.disabled = false
 		_register_button(details)
+		card.sync_inline_layout()
 		_growth_groups[index].show()
-	_target_button.visible = not _growth_view.get("target",{}).is_empty()
-	if _target_button.visible:
-		var target: Dictionary = _growth_view.target
-		_target_button.text = "목표 · %s · 진화 조건 보기" % _evolution_name(target)
-		_target_button.set_meta("semantic_id","detail:"+str(target.get("evolution_id","")))
-		_register_button(_target_button)
+	# Information is available from each independent i target and the owned
+	# reader. Do not repeat another full-width reading action above the choices.
+	_target_button.hide()
 func _growth_summary(option: Dictionary) -> String:
-	var parts: Array[String] = [str(option.get("name","성장"))]
-	if str(option.get("kind","")) == "evolution":
-		parts.append("궁극 진화")
-		for requirement in option.get("requirements",[]):
-			if requirement.get("kind") == "seal": parts.append("개조권 %d개 소비" % int(requirement.get("required",0)))
-	elif option.has("level"):
-		parts.append(Card.level_change_text(option))
-	var effect := Card.effect_text(option.get("effect_delta",{}))
-	var benefit := effect.split("\n")[0] if not effect.is_empty() else str(option.get("description",""))
-	if not benefit.is_empty(): parts.append(benefit)
-	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))
-	if not warning.is_empty(): parts.append("주의 · "+warning)
-	elif not str(option.get("tradeoff_text","")).is_empty(): parts.append("대가 있음 · 상세 확인")
-	var disabled := str(option.get("status","")) == "evolved" or not bool(option.get("can_select",true))
-	parts.append(("진화 완료" if str(option.get("status","")) == "evolved" else Card.reason_text(str(option.get("blocked_reason","")))) if disabled else "터치 / A · 선택")
-	return Card.player_text("\n".join(parts))
+	return Card.summary(option)
 func _open_growth_details(option_id: String) -> void:
 	# Reuse the read-only detail modal lifecycle and its B/accept-release gate.
 	open_evolution_details("option:"+option_id)
@@ -846,6 +863,10 @@ func _render_evolution_detail() -> void:
 			content.text = full_card.display_text().trim_suffix("\n\nA · 선택")
 			full_card.free()
 			_choices.add_child(content)
+			var requirements := VBoxContainer.new()
+			requirements.name = "Requirements"
+			Icons.append_requirements(requirements,option.get("requirements",[]))
+			_choices.add_child(requirements)
 			break
 	else:
 		var detail: Dictionary = {}
@@ -886,7 +907,10 @@ func _render_owned_skills() -> void:
 				var id := str(row.get("item_id",""))
 				var title := str(row.get("name",""))
 				if row.get("is_evolved",false): title = OwnedHUD.evolution_name(_growth_view,str(row.get("evolution_id","")))
-				_add_button(title+" · "+OwnedHUD.level_text(row),func(): open_evolution_details("owned:"+id)).set_meta("semantic_id","owned:"+id)
+				var button := _add_button(title+" · "+OwnedHUD.level_text(row),func(): open_evolution_details("owned:"+id))
+				button.set_meta("semantic_id","owned:"+id)
+				button.icon = Icons.texture_for(Icons.icon_id_for(row))
+				button.add_theme_constant_override("icon_max_width",32)
 			else:
 				var empty := Label.new()
 				empty.text = ("장비" if kind == "equipment" else "보조")+" · 빈 칸"
@@ -947,7 +971,7 @@ func present_confirmed_upgrades(events: Array, view: Dictionary) -> void:
 		var title := str(row.get("name",""))
 		var detail := str(row.get("attack_summary",""))
 		if kind == "evolution" and row.get("is_evolved",false):
-			title = OwnedHUD.evolution_name(view,str(row.evolution_id))+" · 궁극 진화"
+			title = OwnedHUD.evolution_name(view,str(row.evolution_id))+" · "+OwnedHUD.level_text(row)
 			_growth_notice_seconds = 2.0
 		else:
 			var level := OwnedHUD.level_text(row)
@@ -974,7 +998,10 @@ func _sync_upgrade_notice(mode: String) -> void:
 		else:
 			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,(208 if _screen_size.y > _screen_size.x else 130)+(24 if _owned_hud.signature_visible() else 0))
 			_growth_notice.size = Vector2(_safe_rect.size.x-16,44)
-	var text := ("직전 선택 · " if mode == "upgrade" else "")+_growth_notice_text
+	var compact_notice := mode == "upgrade" and _screen_size.x > _screen_size.y and _safe_rect.size.y < 400
+	var notice := _growth_notice_text.split("\n")[0] if compact_notice else _growth_notice_text
+	var text := ("직전 선택 · " if mode == "upgrade" else "")+notice
+	_growth_notice.tooltip_text = _growth_notice_text
 	if _growth_notice.text != text: _growth_notice.text = text
 	_growth_notice.visible = not _growth_notice_text.is_empty() and mode in ["play","upgrade"]
 func _process(delta: float) -> void:
@@ -1017,7 +1044,8 @@ func set_save_notice(message: String) -> void:
 		_notice.visible = not message.is_empty()
 func set_input_hint(kind: String) -> void:
 	_input_kind = kind
-	_hint.text = "스틱/D-pad 이동 · A 확인 · B 뒤로 · Menu 일시정지" if kind == "gamepad" else "왼쪽 아래를 드래그해 이동 · 자동 공격"
+	_hint.text = ""
+	_hint.hide()
 func _input(event: InputEvent) -> void:
 	# Release observation belongs to the modal UI; the router still emits intents.
 	if event is InputEventJoypadButton and event.button_index == JOY_BUTTON_A and not event.pressed: accept_released()
@@ -1087,7 +1115,17 @@ func _settle_panel() -> void:
 func _reveal_settled_focus() -> void:
 	if not is_inside_tree() or is_queued_for_deletion() or not _scroll.follow_focus: return
 	var focused := get_viewport().gui_get_focus_owner()
-	if focused != null and _scroll.is_ancestor_of(focused): _scroll.ensure_control_visible(focused)
+	if focused == null or not _scroll.is_ancestor_of(focused): return
+	_scroll.ensure_control_visible(focused)
+	if _mode == "upgrade":
+		var card: Control = focused if focused in _growth_cards else focused.get_parent() as Control
+		if card in _growth_cards: _scroll.ensure_control_visible(card)
+		return
+	if _mode != "loadout" or not is_instance_valid(_supply_panel): return
+	var semantic := str(focused.get_meta("semantic_id",""))
+	if not semantic.begins_with("loadout:target_evolution_id:"): return
+	var rows := _supply_panel.get_node_or_null("Requirements_"+semantic.trim_prefix("loadout:target_evolution_id:")) as Control
+	if rows != null and rows.is_visible_in_tree(): _scroll.ensure_control_visible(rows)
 
 func _set_touch_vector(value: Vector2) -> void:
 	var magnitude := value.length()
@@ -1228,7 +1266,7 @@ A 장착 · B 보급소" % _chapter_title()
 	_choices.add_child(_supply_panel)
 	for button in _supply_panel.action_buttons():
 		_style_button(button)
-		button.icon = _art_texture(str(button.get_meta("art_id","")))
+		button.icon = Icons.texture_for(str(button.get_meta("skill_icon_id",""))) if button.has_meta("skill_icon_id") else _art_texture(str(button.get_meta("art_id","")))
 		button.add_theme_constant_override("icon_max_width",32)
 		_register_button(button)
 	if _mode == "shop": _add_button("출격 준비",open_loadout).set_meta("semantic_id","loadout_open")

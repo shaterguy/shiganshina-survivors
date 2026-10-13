@@ -134,9 +134,16 @@ func _cache_and_dispatch(t) -> void:
 		t.check(not old_prop.is_empty() and not new_prop.is_empty() and new_prop.ground_footprint.position == old_prop.ground_footprint.position-Vector2(768,0),"same absolute building collision footprint shifts once with rebase")
 		if not new_prop.is_empty():
 			var box: Rect2 = new_prop.ground_footprint
-			var start := Vector2(box.position.x-64,box.get_center().y)
-			var hit: Dictionary = c.sweep(start,Vector2(box.size.x+128,0),8)
+			# The dense-city gap is 52px: begin 16px before this footprint,
+			# outside both radius8-expanded buildings, rather than inside its neighbor.
+			var start := Vector2(box.position.x-16,box.get_center().y)
+			var delta := Vector2(box.size.x+32,0)
+			var old_start := start+Vector2(768,0)
+			t.check(c.walkable(start,8).get("walkable",false) and h.walkable(old_start,8).get("walkable",false),"rebased dispatch fixture starts in the same real free gap on both origins")
+			var old_hit: Dictionary = h.sweep(old_start,delta,8)
+			var hit: Dictionary = c.sweep(start,delta,8)
 			t.check(hit.ok and hit.hit_prop_id == new_prop.prop_id and hit.fraction < 1,"rebased collision dispatch hits actual city prop identity")
+			t.check(old_hit.ok and old_hit.hit_prop_id == old_prop.prop_id and hit.fraction > 0 and hit.fraction == old_hit.fraction,"rebased collision preserves the same positive first-contact fraction")
 	var dock_state := state.duplicate(true); dock_state.phase = "evacuation"; dock_state.final_started_tick = 0
 	dock_state.world.stage = "dock"; dock_state.world.scene_id = "authored_dock"; dock_state.world.origin_revision = 1
 	dock_state.world.escape_rect = [-56,320,112,80]

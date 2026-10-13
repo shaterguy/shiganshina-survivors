@@ -3,6 +3,7 @@ const Core = preload("res://game/core/run_simulation.gd")
 const City = preload("res://game/director/streamed_chapter_provider.gd")
 const Helper = preload("res://game/core/streamed_run_world.gd")
 const Disk = preload("res://game/persistence/world_delta_store.gd")
+const Codec = preload("res://game/world/world_delta_codec.gd")
 const F = preload("res://tests/core/core_fixture.gd")
 const G = preload("res://tests/core/test_live_grabber.gd")
 class LateHelper:
@@ -91,23 +92,35 @@ func _cap_removal(t) -> void:
 	var f := fixture(t); var sim = f.sim; var state: Dictionary = f.state
 	var props: Array = sim._streamed.props_query(Rect2(0,0,768,768)).props
 	var chosen := {}; var origin := Vector2.ZERO; var target := Vector2.ZERO
+	var first_sweep: Dictionary = {}
 	for prop in props:
-		if not prop.destructible: continue
+		# This case isolates cap preservation; _cold_rebase covers translated attacks.
+		if not prop.destructible or prop.chunk_id != "0,0": continue
 		var box: Rect2 = prop.ground_footprint
 		origin = Vector2(box.position.x-90,box.get_center().y)
 		target = origin+Vector2(60,0)
+		if not Rect2(0,0,768,768).has_point(origin) or not Rect2(0,0,768,768).has_point(target): continue
 		if not sim._streamed.walkable(origin,22).get("walkable",false) or not sim._streamed.walkable(target,8).get("walkable",false): continue
 		var sweep: Dictionary = sim._streamed.sweep(origin,Vector2(210,0),22)
-		if sweep.ok and sweep.fraction < 1.0: chosen = prop; break
+		if sweep.ok and sweep.fraction > 0.0 and sweep.fraction < 1.0 and sweep.hit_prop_id == prop.prop_id:
+			chosen = prop; first_sweep = sweep; break
 	t.check(not chosen.is_empty(),"actual streamed destructible hand blocker found")
 	if chosen.is_empty(): return
+	t.check(first_sweep.hit_prop_id == chosen.prop_id,"selected destructible is the actual first hand-sweep blocker")
 	state.player.position = [target.x,target.y]
-	t.check(sim.prepare_world(state,f.hydration).ok,"clipped fixture remains actual Core-valid")
-	F.step(sim,state,Vector2.ZERO,[command([origin.x,origin.y])])
+	var spawn := command([origin.x,origin.y])
+	var needed: Dictionary = Helper.requirements(state,[spawn])
+	var hydrated: Dictionary = f.disk.hydrate(state.world.delta_root,needed.get("chunks",[]))
+	t.check(needed.ok and hydrated.ok,"clipped fixture hydrates current player and spawn requirements")
+	if not needed.ok or not hydrated.ok: return
+	f.hydration = hydrated.deltas
+	t.check(sim.prepare_world(state,f.hydration,[spawn]).ok,"clipped fixture remains actual Core-valid")
+	F.step(sim,state,Vector2.ZERO,[spawn])
 	t.check(state.enemy_attack_instances.size() == 1,"clipped attack has authoritative saved owner")
 	if state.enemy_attack_instances.is_empty(): print("CAP_ADMISSION ",sim.step_status()); return
 	var cap: float = state.entities[0].role_hand_reach
 	var id: String = state.enemy_attack_instances[0].attack_id
+	t.check(state.world.origin_chunk == ["0","0"] and state.entities[0].position == [origin.x,origin.y] and cap > 0.0 and cap < 210.0,"real blocker clips the fixed torso hand before full reach without rebasing this fixture")
 	var remote := {}
 	for prop in props:
 		if prop.destructible and prop.prop_id != chosen.prop_id and prop.ground_footprint.get_center().distance_to(origin) > 250: remote = prop; break
@@ -116,10 +129,32 @@ func _cap_removal(t) -> void:
 	for prop in [remote,chosen]:
 		state.world = state.world.duplicate(true)
 		state.world.world_revision += 1
-		state.world.dirty_chunks = [{"chunk":["0","0"],"props":[{"slot_id":prop.slot_id,"hp":0,"destroyed":true}]}]
+		var chunk: Array = Array(prop.chunk_id.split(","))
+		var dirty: Array = state.world.dirty_chunks.duplicate(true)
+		var record := {"chunk":chunk,"props":[]}
+		for item in dirty:
+			if item.chunk == chunk: record = item; break
+		if record.props.is_empty(): dirty.append(record)
+		record.props.append({"slot_id":prop.slot_id,"hp":0,"destroyed":true})
+		var normalized: Dictionary = Codec.normalize_records(dirty)
+		t.check(normalized.ok,"destruction addresses the selected absolute chunk and preserves earlier changes")
+		if not normalized.ok: return
+		state.world.dirty_chunks = normalized.records
+		needed = Helper.requirements(state)
+		hydrated = f.disk.hydrate(state.world.delta_root,needed.get("chunks",[]))
+		t.check(needed.ok and hydrated.ok,"changed real world hydrates every current dirty and active chunk")
+		if not needed.ok or not hydrated.ok: return
+		f.hydration = hydrated.deltas
 		var ready: Dictionary = sim.prepare_world(state,f.hydration)
 		t.check(ready.ok,"world change prepares exact saved hand without recapping")
 		if not ready.ok: print("CAP_PREPARE ",ready); return
+		var destroyed_ids: Array = []
+		for live_chunk in sim._streamed.render_view(state).chunks:
+			for live_prop in live_chunk.props:
+				if live_prop.destroyed and live_prop.collision_mask == 0: destroyed_ids.append(live_prop.prop_id)
+		t.check(prop.prop_id in destroyed_ids and remote.prop_id in destroyed_ids,"exact targeted destruction is visible and the earlier remote removal stays applied")
+		var after: Dictionary = sim._streamed.sweep(origin,Vector2(210,0),22)
+		t.check(after.ok and ((prop.prop_id == remote.prop_id and after.hit_prop_id == chosen.prop_id and after.fraction == first_sweep.fraction) or (prop.prop_id == chosen.prop_id and after.hit_prop_id != chosen.prop_id and after.fraction > first_sweep.fraction)),"remote removal preserves first blocker and local removal really opens the original hand segment")
 		F.step(sim,state,Vector2.ZERO)
 		t.check(state.entities[0].role_hand_reach == cap and state.enemy_attack_instances[0].attack_id == id,"remote/local destruction keeps ownership clock and first clipped cap")
 	var cold := Core.new(City.new())

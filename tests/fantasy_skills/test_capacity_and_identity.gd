@@ -6,8 +6,12 @@ func run(t) -> void:
 	_cross_family_identity(t)
 func _old_evolved(sim) -> Dictionary:
 	var state: Dictionary = X.state(sim)
-	state.equipment = {"wall_cannon":5,"fire_zone":1,"chain_lightning":1}
+	state.equipment = {"wall_cannon":5,"fire_zone":1,"chain_lightning":1,"ally_cover":1}
+	state.player.attack_ready_ticks.ally_cover = 2147483647
+	state.tactical_seals = 1
 	state.passives = {"fire_interval":3}
+	var recipe: Dictionary = sim._catalog.evolutions.definition("evo_crossfire")
+	for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
 	state.evolutions = {"wall_cannon":"evo_crossfire"}
 	state.active_tick = 18099
 	state.survival_tick = 18099
@@ -41,7 +45,7 @@ func _full_queue(t) -> void:
 func _cross_family_identity(t) -> void:
 	var sim = X.simulation()
 	var state := _old_evolved(sim)
-	state.player.attack_ready_ticks = {"wall_cannon":20000,"chain_lightning":20000}
+	state.player.attack_ready_ticks = {"wall_cannon":20000,"chain_lightning":20000,"ally_cover":2147483647}
 	F.step(sim,state,Vector2.ZERO,[F.spawn("identity-target",[100,0],"brute")])
 	t.check(state.player_attack_instances.size() == 3,"fire identity fixture has actual pending pulses")
 	if state.player_attack_instances.size() != 3: return

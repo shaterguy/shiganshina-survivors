@@ -72,7 +72,7 @@ func validate_development(manifest: Dictionary) -> Dictionary:
 # Runtime paths are manifest-selected. Candidate sources/previews are never exported.
 func is_runtime_asset_path(record: Dictionary) -> bool:
 	var path := str(record.get("path",""))
-	var flat := RegEx.create_from_string("^res://assets/(art/(characters|environment|effects|ui)/[^/]+\\.png|audio/[^/]+\\.wav)$")
+	var flat := RegEx.create_from_string("^res://assets/(art/(characters|environment|effects|ui)/[^/]+\\.png|audio/[^/]+\\.(wav|ogg))$")
 	if flat.search(path) != null: return true
 	var enemy_records := {
 		"res://assets/art/characters/enemy_diversity_v1/titan_quadruped.png":["sprite","nearest_palette_alpha128"],

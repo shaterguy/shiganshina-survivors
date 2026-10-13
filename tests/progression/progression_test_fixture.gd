@@ -18,3 +18,10 @@ static func ids(options: Array) -> Array:
 	return result
 static func read(path: String) -> Dictionary:
 	return JSON.parse_string(FileAccess.get_file_as_string(path))
+
+# Explicit preserved-definition tests keep dev4 seal/passive boundaries and RNG
+# oracles independently of the current final-stage run contract.
+static func legacy_definitions() -> Dictionary:
+	return read("res://tests/run_final_evolution/fixtures/dev4-evolutions.json")
+static func legacy_catalog():
+	return preload("res://game/progression/upgrade_catalog.gd").new(null,null,legacy_definitions())

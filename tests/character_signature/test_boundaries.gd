@@ -97,6 +97,8 @@ func _growth(t) -> void:
 	var state := _state(sim)
 	state.equipment = {"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	state.passives = {"damage":1,"movement":5,"fire_interval":5,"attack_range":5}
+	# Exhaust current run-attack final choices to isolate the later passive card.
+	state.evolutions = {"blade_slash":"evo_wing_cut","spin_slash":"evo_whirlwind","odm_dash":"evo_sky_lance","reentry_combo":"evo_echo_assault"}
 	for item in state.equipment: state.player.attack_ready_ticks[item] = 2147483647
 	F.step(sim,state,Vector2.ZERO,[F.spawn("growth-target",[80,0],"brute")])
 	var damage: float = state.player_attack_instances[0].damage

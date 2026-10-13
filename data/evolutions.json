@@ -1,17 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "items": {
     "evo_wing_cut": {
       "recipe_id": "evo_wing_cut",
       "base_item_id": "blade_slash",
       "required_weapon_level": 5,
-      "required_passives": [
-        {
-          "passive_id": "movement",
-          "level": 3
-        }
-      ],
-      "seal_cost": 1,
+      "required_passives": [],
+      "seal_cost": 0,
       "effect_id": "wing_cut",
       "effect_params": {
         "damage_multipliers": [
@@ -32,7 +27,14 @@
       "story_year": 845,
       "chapter_ids": [
         "chapter_01_shiganshina"
-      ]
+      ],
+      "required_equipment": [
+        {
+          "equipment_id": "odm_dash",
+          "level": 1
+        }
+      ],
+      "icon_id": "skill_evo_wing_cut"
     },
     "evo_crossfire": {
       "recipe_id": "evo_crossfire",
@@ -40,11 +42,11 @@
       "required_weapon_level": 5,
       "required_passives": [
         {
-          "passive_id": "fire_interval",
-          "level": 3
+          "passive_id": "armor",
+          "level": 1
         }
       ],
-      "seal_cost": 1,
+      "seal_cost": 0,
       "effect_id": "crossfire",
       "effect_params": {
         "damage_multipliers": [
@@ -66,7 +68,9 @@
       "story_year": 845,
       "chapter_ids": [
         "chapter_01_shiganshina"
-      ]
+      ],
+      "required_equipment": [],
+      "icon_id": "skill_evo_crossfire"
     },
     "evo_storm_chain": {
       "recipe_id": "evo_storm_chain",
@@ -76,10 +80,10 @@
       "required_equipment": [
         {
           "equipment_id": "fire_zone",
-          "level": 3
+          "level": 1
         }
       ],
-      "seal_cost": 1,
+      "seal_cost": 0,
       "effect_id": "storm_chain",
       "effect_params": {
         "damage_multiplier": 1.25,
@@ -94,20 +98,21 @@
       "story_year": 845,
       "chapter_ids": [
         "chapter_01_shiganshina"
-      ]
+      ],
+      "icon_id": "skill_evo_storm_chain"
     },
     "evo_inferno_zone": {
       "recipe_id": "evo_inferno_zone",
       "base_item_id": "fire_zone",
       "required_weapon_level": 5,
-      "required_passives": [],
-      "required_equipment": [
+      "required_passives": [
         {
-          "equipment_id": "chain_lightning",
-          "level": 3
+          "passive_id": "fire_interval",
+          "level": 1
         }
       ],
-      "seal_cost": 1,
+      "required_equipment": [],
+      "seal_cost": 0,
       "effect_id": "inferno_zone",
       "effect_params": {
         "damage_multipliers": [
@@ -138,6 +143,162 @@
       "name": "지옥불 지대",
       "description": "빠르게 일곱 번 태운 뒤 넓은 범위를 폭발시킨다.",
       "tradeoff_text": "고정된 지역을 벗어난 적에게는 피해를 주지 않습니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ],
+      "icon_id": "skill_evo_inferno_zone"
+    },
+    "evo_whirlwind": {
+      "recipe_id": "evo_whirlwind",
+      "base_item_id": "spin_slash",
+      "required_weapon_level": 5,
+      "required_passives": [
+        {
+          "passive_id": "movement",
+          "level": 1
+        }
+      ],
+      "required_equipment": [],
+      "seal_cost": 0,
+      "effect_id": "whirlwind",
+      "effect_params": {
+        "damage_multipliers": [
+          0.7,
+          0.9,
+          1.2
+        ],
+        "stage_delays": [
+          0,
+          10,
+          22
+        ],
+        "radius": 80,
+        "radius_step": 26,
+        "acquisition_range": 132,
+        "cooldown_ticks": 84
+      },
+      "name": "태풍 회전참",
+      "icon_id": "skill_evo_whirlwind",
+      "description": "플레이어를 따라 세 번 넓어지는 회전 베기",
+      "tradeoff_text": "각 타격은 정해진 순서와 궤적에 따라 실행됩니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_sky_lance": {
+      "recipe_id": "evo_sky_lance",
+      "base_item_id": "odm_dash",
+      "required_weapon_level": 5,
+      "required_passives": [],
+      "required_equipment": [
+        {
+          "equipment_id": "reentry_combo",
+          "level": 1
+        }
+      ],
+      "seal_cost": 0,
+      "effect_id": "sky_lance",
+      "effect_params": {
+        "damage_multipliers": [
+          0.9,
+          0.9,
+          1.3
+        ],
+        "stage_delays": [
+          0,
+          8,
+          18
+        ],
+        "length": 104,
+        "width": 32,
+        "advance_step": 72,
+        "acquisition_range": 240,
+        "cooldown_ticks": 108
+      },
+      "name": "창공 관통참",
+      "icon_id": "skill_evo_sky_lance",
+      "description": "목표 방향으로 세 구간을 차례로 관통하는 베기",
+      "tradeoff_text": "각 타격은 정해진 순서와 궤적에 따라 실행됩니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_echo_assault": {
+      "recipe_id": "evo_echo_assault",
+      "base_item_id": "reentry_combo",
+      "required_weapon_level": 5,
+      "required_passives": [],
+      "required_equipment": [
+        {
+          "equipment_id": "spin_slash",
+          "level": 1
+        }
+      ],
+      "seal_cost": 0,
+      "effect_id": "echo_assault",
+      "effect_params": {
+        "damage_multipliers": [
+          1.0,
+          1.0,
+          1.6
+        ],
+        "stage_delays": [
+          0,
+          10,
+          20
+        ],
+        "radius": 84,
+        "arc_degrees": 125,
+        "point_offset": 30,
+        "acquisition_range": 140,
+        "cooldown_ticks": 102
+      },
+      "name": "잔영 교차참",
+      "icon_id": "skill_evo_echo_assault",
+      "description": "목표 양쪽에서 교차한 뒤 중앙을 베는 세 번의 연격",
+      "tradeoff_text": "각 타격은 정해진 순서와 궤적에 따라 실행됩니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_wing_squad": {
+      "recipe_id": "evo_wing_squad",
+      "base_item_id": "ally_cover",
+      "required_weapon_level": 5,
+      "required_passives": [
+        {
+          "passive_id": "damage",
+          "level": 1
+        }
+      ],
+      "required_equipment": [],
+      "seal_cost": 0,
+      "effect_id": "wing_squad",
+      "effect_params": {
+        "damage_multipliers": [
+          0.8,
+          0.8,
+          1.25
+        ],
+        "stage_delays": [
+          0,
+          12,
+          24
+        ],
+        "length": 320,
+        "width": 24,
+        "point_offset": 28,
+        "acquisition_range": 320,
+        "cooldown_ticks": 96
+      },
+      "name": "날개 편대 엄호",
+      "icon_id": "skill_evo_wing_squad",
+      "description": "양쪽과 정면에서 교차하는 세 줄의 편대 엄호",
+      "tradeoff_text": "각 타격은 정해진 순서와 궤적에 따라 실행됩니다.",
       "story_year": 845,
       "chapter_ids": [
         "chapter_01_shiganshina"

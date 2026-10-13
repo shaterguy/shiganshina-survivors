@@ -16,23 +16,23 @@
   ],
   "provenance": {
     "origin_class": "newly_authored_compatible_definitions",
-    "definition_revision": "NEW-city-districts-1",
+    "definition_revision": "NEW-city-districts-3-visible-terraces",
     "setting_year": 845,
     "historical_layout_claim": false,
-    "visual_contact_status": "unverified_pending_integrated_render"
+    "visual_contact_status": "unverified_pending_dev5_integrated_render"
   },
   "templates": [
     {
       "template_id": "new_bakery_market",
       "district_name_ko": "제빵 시장 골목",
-      "design_intent": "Two bakery fronts and two deliveries identify the civilian market. Durable wagons stagger the western side lanes; breakable shop fronts open alternate approaches while the central cross remains a wide retreat.",
+      "design_intent": "Paired bakery fronts and narrow houses form six readable horizontal terraces. Two delivery wagons sit beside the shop fronts rather than in the narrow gaps. Staggered east and west rows connect short side alleys to the main retreat, while edge debris defines a partly open market crossing. Full-height silhouettes remain separate across neighboring chunks.",
       "slots": [
         {
           "slot_id": "nw_house",
           "definition_id": "house_bakery",
           "position": [
-            144,
-            224
+            80,
+            192
           ],
           "rotation_degrees": 0
         },
@@ -40,8 +40,8 @@
           "slot_id": "ne_house",
           "definition_id": "house_narrow",
           "position": [
-            624,
-            224
+            552,
+            248
           ],
           "rotation_degrees": 0
         },
@@ -49,8 +49,8 @@
           "slot_id": "sw_bakery",
           "definition_id": "house_bakery",
           "position": [
-            144,
-            704
+            80,
+            544
           ],
           "rotation_degrees": 0
         },
@@ -58,8 +58,8 @@
           "slot_id": "se_house",
           "definition_id": "house_narrow",
           "position": [
-            624,
-            704
+            552,
+            608
           ],
           "rotation_degrees": 0
         },
@@ -67,8 +67,8 @@
           "slot_id": "nw_delivery",
           "definition_id": "refugee_wagon",
           "position": [
-            224,
-            112
+            80,
+            272
           ],
           "rotation_degrees": 0
         },
@@ -76,8 +76,8 @@
           "slot_id": "sw_delivery",
           "definition_id": "refugee_wagon",
           "position": [
-            224,
-            576
+            80,
+            584
           ],
           "rotation_degrees": 0
         },
@@ -85,8 +85,8 @@
           "slot_id": "ne_debris",
           "definition_id": "burning_rubble",
           "position": [
-            544,
-            112
+            744,
+            392
           ],
           "rotation_degrees": 0
         },
@@ -94,8 +94,80 @@
           "slot_id": "se_debris",
           "definition_id": "burning_rubble",
           "position": [
-            544,
-            576
+            280,
+            312
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "nw_terrace_east",
+          "definition_id": "house_narrow",
+          "position": [
+            244,
+            192
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_shop_east",
+          "definition_id": "house_narrow",
+          "position": [
+            244,
+            544
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_west",
+          "definition_id": "house_narrow",
+          "position": [
+            100,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_east",
+          "definition_id": "house_narrow",
+          "position": [
+            248,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_west",
+          "definition_id": "house_narrow",
+          "position": [
+            552,
+            56
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            56
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_front_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            248
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "se_terrace_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            608
           ],
           "rotation_degrees": 0
         }
@@ -104,14 +176,14 @@
     {
       "template_id": "new_garrison_battery",
       "district_name_ko": "주둔병 포대 거리",
-      "design_intent": "Four durable cannon positions identify the garrison battery, each backed by a different building corner. Flanking the batteries is always possible; breakable quarters offer shorter covered turns, while the ruined northeast building remains a fixed obstacle.",
+      "design_intent": "Four durable cannon emplacements face the ends of compact barracks terraces. The ruined northeast redoubt and southwest store occupy wider single-building courts; the remaining houses form paired fronts and small flanking alleys. The batteries leave the main cross and the central retreat open. Full-height silhouettes remain separate across neighboring chunks.",
       "slots": [
         {
           "slot_id": "nw_house",
           "definition_id": "house_narrow",
           "position": [
-            144,
-            224
+            100,
+            192
           ],
           "rotation_degrees": 0
         },
@@ -119,8 +191,8 @@
           "slot_id": "ne_redoubt",
           "definition_id": "house_ruined",
           "position": [
-            624,
-            224
+            566,
+            56
           ],
           "rotation_degrees": 0
         },
@@ -128,8 +200,8 @@
           "slot_id": "sw_store",
           "definition_id": "house_warehouse",
           "position": [
-            144,
-            704
+            184,
+            544
           ],
           "rotation_degrees": 0
         },
@@ -137,8 +209,8 @@
           "slot_id": "se_quarters",
           "definition_id": "house_narrow",
           "position": [
-            624,
-            704
+            552,
+            608
           ],
           "rotation_degrees": 0
         },
@@ -146,8 +218,8 @@
           "slot_id": "nw_cannon",
           "definition_id": "cannon_prop",
           "position": [
-            208,
-            112
+            100,
+            272
           ],
           "rotation_degrees": 0
         },
@@ -155,8 +227,8 @@
           "slot_id": "ne_cannon",
           "definition_id": "cannon_prop",
           "position": [
-            560,
-            112
+            700,
+            288
           ],
           "rotation_degrees": 0
         },
@@ -164,8 +236,8 @@
           "slot_id": "sw_cannon",
           "definition_id": "cannon_prop",
           "position": [
-            208,
-            576
+            184,
+            584
           ],
           "rotation_degrees": 0
         },
@@ -173,8 +245,8 @@
           "slot_id": "se_cannon",
           "definition_id": "cannon_prop",
           "position": [
-            560,
-            576
+            700,
+            648
           ],
           "rotation_degrees": 0
         },
@@ -182,8 +254,62 @@
           "slot_id": "battery_debris",
           "definition_id": "burning_rubble",
           "position": [
-            96,
-            560
+            240,
+            304
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "nw_quarters_east",
+          "definition_id": "house_narrow",
+          "position": [
+            248,
+            192
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_west",
+          "definition_id": "house_narrow",
+          "position": [
+            100,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_east",
+          "definition_id": "house_narrow",
+          "position": [
+            248,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_front_west",
+          "definition_id": "house_narrow",
+          "position": [
+            552,
+            248
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_front_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            248
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "se_quarters_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            608
           ],
           "rotation_degrees": 0
         }
@@ -192,14 +318,14 @@
     {
       "template_id": "new_supply_warehouses",
       "district_name_ko": "보급 창고 지구",
-      "design_intent": "Four broad warehouses and four wagon loading courts form the most structured supply district. Their wider footprints require a longer corner around intact loading fronts; destroying a warehouse creates a new line through it. Wagons remain durable landmarks.",
+      "design_intent": "Four broad warehouse fronts surround distinct loading courts, with four wagons along their outside edges. Two paired worker-house terraces frame the courts without stacking over the warehouse roofs. The wider yards distinguish this supply district from the tight bakery lanes; all yards connect to the main cross and central retreat. Full-height silhouettes remain separate across neighboring chunks.",
       "slots": [
         {
           "slot_id": "nw_house",
           "definition_id": "house_warehouse",
           "position": [
-            144,
-            224
+            184,
+            192
           ],
           "rotation_degrees": 0
         },
@@ -207,8 +333,8 @@
           "slot_id": "ne_store",
           "definition_id": "house_warehouse",
           "position": [
-            624,
-            224
+            568,
+            248
           ],
           "rotation_degrees": 0
         },
@@ -216,8 +342,8 @@
           "slot_id": "sw_store",
           "definition_id": "house_warehouse",
           "position": [
-            144,
-            704
+            184,
+            544
           ],
           "rotation_degrees": 0
         },
@@ -225,8 +351,8 @@
           "slot_id": "se_store",
           "definition_id": "house_warehouse",
           "position": [
-            624,
-            704
+            568,
+            608
           ],
           "rotation_degrees": 0
         },
@@ -234,8 +360,8 @@
           "slot_id": "nw_wagon",
           "definition_id": "refugee_wagon",
           "position": [
-            128,
-            96
+            48,
+            272
           ],
           "rotation_degrees": 0
         },
@@ -243,8 +369,8 @@
           "slot_id": "ne_wagon",
           "definition_id": "refugee_wagon",
           "position": [
-            640,
-            96
+            720,
+            288
           ],
           "rotation_degrees": 0
         },
@@ -252,8 +378,8 @@
           "slot_id": "sw_wagon",
           "definition_id": "refugee_wagon",
           "position": [
-            128,
-            576
+            48,
+            584
           ],
           "rotation_degrees": 0
         },
@@ -261,8 +387,8 @@
           "slot_id": "se_wagon",
           "definition_id": "refugee_wagon",
           "position": [
-            640,
-            576
+            720,
+            648
           ],
           "rotation_degrees": 0
         },
@@ -270,8 +396,8 @@
           "slot_id": "nw_debris",
           "definition_id": "burning_rubble",
           "position": [
-            224,
-            96
+            48,
+            392
           ],
           "rotation_degrees": 0
         },
@@ -279,8 +405,44 @@
           "slot_id": "se_debris",
           "definition_id": "burning_rubble",
           "position": [
-            544,
-            576
+            720,
+            416
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_west",
+          "definition_id": "house_narrow",
+          "position": [
+            100,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_east",
+          "definition_id": "house_narrow",
+          "position": [
+            248,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_west",
+          "definition_id": "house_narrow",
+          "position": [
+            552,
+            56
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            56
           ],
           "rotation_degrees": 0
         }
@@ -289,14 +451,14 @@
     {
       "template_id": "new_breach_refuge",
       "district_name_ko": "피난 수레와 붕괴 구역",
-      "design_intent": "Two fixed ruined shells and a staggered wagon pair identify the damaged civilian refuge. Three passable rubble clusters are visual evidence of collapse, not fire damage zones. The intact eastern homes remain destructible; the western ruins keep their solid detour.",
+      "design_intent": "Two western ruined fronts define open refuge courts; eastern paired houses and a surviving bakery form tighter inhabited lanes. Refuge wagons, the surviving cannon and three debris piles identify the damaged district without filling its retreat. The staggered courts and terraces meet a partly open crossing, and full-height silhouettes remain separate across neighboring chunks.",
       "slots": [
         {
           "slot_id": "nw_ruin",
           "definition_id": "house_ruined",
           "position": [
-            144,
-            224
+            190,
+            192
           ],
           "rotation_degrees": 0
         },
@@ -304,8 +466,8 @@
           "slot_id": "ne_house",
           "definition_id": "house_narrow",
           "position": [
-            624,
-            224
+            552,
+            248
           ],
           "rotation_degrees": 0
         },
@@ -313,8 +475,8 @@
           "slot_id": "sw_ruin",
           "definition_id": "house_ruined",
           "position": [
-            144,
-            704
+            190,
+            544
           ],
           "rotation_degrees": 0
         },
@@ -322,8 +484,8 @@
           "slot_id": "se_bakery",
           "definition_id": "house_bakery",
           "position": [
-            624,
-            704
+            696,
+            608
           ],
           "rotation_degrees": 0
         },
@@ -331,8 +493,8 @@
           "slot_id": "nw_refuge",
           "definition_id": "refugee_wagon",
           "position": [
-            128,
-            96
+            48,
+            272
           ],
           "rotation_degrees": 0
         },
@@ -340,8 +502,8 @@
           "slot_id": "ne_refuge",
           "definition_id": "refugee_wagon",
           "position": [
-            640,
-            96
+            700,
+            288
           ],
           "rotation_degrees": 0
         },
@@ -349,8 +511,8 @@
           "slot_id": "sw_cannon",
           "definition_id": "cannon_prop",
           "position": [
-            224,
-            576
+            190,
+            584
           ],
           "rotation_degrees": 0
         },
@@ -358,8 +520,8 @@
           "slot_id": "nw_debris",
           "definition_id": "burning_rubble",
           "position": [
-            240,
-            96
+            264,
+            304
           ],
           "rotation_degrees": 0
         },
@@ -367,8 +529,8 @@
           "slot_id": "ne_debris",
           "definition_id": "burning_rubble",
           "position": [
-            544,
-            96
+            520,
+            360
           ],
           "rotation_degrees": 0
         },
@@ -376,12 +538,67 @@
           "slot_id": "se_debris",
           "definition_id": "burning_rubble",
           "position": [
-            560,
-            576
+            744,
+            408
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_west",
+          "definition_id": "house_narrow",
+          "position": [
+            100,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "sw_court_east",
+          "definition_id": "house_narrow",
+          "position": [
+            248,
+            768
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_west",
+          "definition_id": "house_narrow",
+          "position": [
+            552,
+            56
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_rear_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            56
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "ne_front_east",
+          "definition_id": "house_narrow",
+          "position": [
+            700,
+            248
+          ],
+          "rotation_degrees": 0
+        },
+        {
+          "slot_id": "se_terrace_west",
+          "definition_id": "house_narrow",
+          "position": [
+            552,
+            608
           ],
           "rotation_degrees": 0
         }
       ]
     }
-  ]
+  ],
+  "max_props": 20
 }

@@ -88,7 +88,11 @@ func _evolved(t,evolution: String) -> void:
 	var base: String = recipe.base_item_id
 	# Valid test-only already-earned boss ledger; the offer and choice are real.
 	state.equipment = {base:5}
-	state.passives = {recipe.required_passives[0].passive_id:3}
+	state.passives = {}
+	for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
+	for required in recipe.get("required_equipment",[]):
+		state.equipment[required.equipment_id] = int(required.level)
+		state.player.attack_ready_ticks[required.equipment_id] = 2147483647
 	state.active_tick = 18099
 	state.survival_tick = 18099
 	state.boss_ids_fired = ["ch01_b05"]
@@ -106,7 +110,10 @@ func _evolved(t,evolution: String) -> void:
 	if attacks.size() != 2: return
 	var definition: Dictionary = catalog.equipment[base]
 	var base_damage := (float(definition.damage)+4.0*float(definition.damage_per_level))*1.05
-	var owned: Dictionary = View.new().build(state).owned.equipment[0]
+	var owned := {}
+	for row in View.new().build(state).owned.equipment:
+		if row.item_id == base: owned = row
+	t.check(not owned.is_empty(),"purchased HUD resolves the evolved base by identity rather than partner ordering")
 	for index in 2:
 		var expected := base_damage*float(recipe.effect_params.damage_multipliers[index])
 		t.check(is_equal_approx(attacks[index].payload.damage,expected) and is_equal_approx(owned.effect_stats.stage_damage[index],expected),"purchased evolved stage and HUD share one damage formula")

@@ -42,20 +42,20 @@ func _pulses(t) -> void:
 func _requirements(t,catalog) -> void:
 	var sim = X.simulation()
 	var state: Dictionary = X.state(sim)
-	state.equipment = {"chain_lightning":5,"fire_zone":2}
-	state.tactical_seals = 1
+	state.equipment = {"chain_lightning":5}
+	state.tactical_seals = 0
 	var detail: Dictionary = catalog.evolutions.evaluate(state,"evo_storm_chain")
-	t.check(detail.status == "collecting" and not detail.can_evolve,"chain ultimate requires other attack Lv3")
-	state.equipment.fire_zone = 3
+	t.check(detail.status == "collecting" and not detail.can_evolve,"chain final stage requires another owned attack")
+	state.equipment.fire_zone = 1
 	detail = catalog.evolutions.evaluate(state,"evo_storm_chain")
-	t.check(detail.status == "ready" and detail.requirements.size() == 3,"cross-attack Lv3 plus seal makes ultimate ready")
+	t.check(detail.status == "ready" and detail.requirements.size() == 2,"other attack at one is sufficient with zero seals")
 	state.equipment = {"chain_lightning":5,"blade_slash":5,"odm_dash":5,"spin_slash":5}
 	detail = catalog.evolutions.evaluate(state,"evo_storm_chain")
 	t.check(detail.status == "blocked" and detail.requirements[1].blocked_reason == "equipment_slots","full slots expose impossible missing cross-skill instead of bypassing it")
-	state.equipment = {"chain_lightning":5,"fire_zone":3}
+	state.equipment = {"chain_lightning":5,"fire_zone":1}
 	state.evolutions = {"chain_lightning":"evo_storm_chain"}
 	state.tactical_seals = 0
 	var view: Dictionary = View.new().build(state)
-	t.check(not view.is_empty() and view.owned.equipment[0].max_level == 5,"new evolved skill uses existing owned progression DTO")
+	t.check(not view.is_empty() and view.owned.equipment[0].level == 6 and view.owned.equipment[0].base_level == 5 and view.owned.equipment[0].max_level == 6,"new evolved skill uses existing owned progression DTO")
 func _attacks(events: Array) -> Array:
 	return events.filter(func(e): return e.type == "player_attack" and e.payload.base_item_id == "fire_zone" and e.payload.phase == "executed")

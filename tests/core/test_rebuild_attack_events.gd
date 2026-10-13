@@ -82,7 +82,13 @@ static func evolved_state(sim,chapter: Dictionary,evolution: String) -> Dictiona
 	var state: Dictionary = sim.new_run(chapter,42,Fixture.run_config())
 	var base := "blade_slash" if evolution == "evo_wing_cut" else "wall_cannon"
 	state.equipment = {base:5}
+	var recipe: Dictionary = sim._catalog.evolutions.definition(evolution)
+	for required in recipe.get("required_equipment",[]):
+		state.equipment[required.equipment_id] = int(required.level)
+		state.player.attack_ready_ticks[required.equipment_id] = 2147483647
+	state.tactical_seals = 1-int(recipe.seal_cost)
 	state.passives = {"movement":3} if evolution == "evo_wing_cut" else {"fire_interval":3}
+	for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
 	state.evolutions = {base:evolution}
 	state.active_tick = 18099
 	state.survival_tick = 18099

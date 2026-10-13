@@ -5,7 +5,7 @@ const Generator = preload("res://game/world/city_generator.gd")
 const Navigation = preload("res://game/world/city_navigation.gd")
 const CountingStream = preload("res://tests/navigation_view/counting_stream.gd")
 const PATH := "res://game/world/streamed_navigation_view.gd"
-const A := Vector2(496,194)
+const A := Vector2(432,194)
 const B := Vector2(1152,384)
 func run(t) -> void:
 	t.check(FileAccess.file_exists(PATH),"NEW read-only navigation adapter exists")
@@ -33,6 +33,7 @@ func _equivalence_and_no_copies(t,View) -> void:
 	var view = View.new(f.world)
 	var direct = Navigation.new(f.world)
 	var nav = Navigation.new(view)
+	t.check(f.world.walkable(A,32) and f.world.walkable(B,32),"49-chunk fixture endpoints remain clear through radius 32")
 	var expected: Dictionary = direct.direction(A,B,8,0)
 	t.check(expected.ok and f.world.sweep(A,B-A,8).fraction < 1,"route is genuinely obstructed and crosses chunks")
 	t.check(nav.direction(A,B,8,0) == expected,"adapter returns exact recovered cold route")

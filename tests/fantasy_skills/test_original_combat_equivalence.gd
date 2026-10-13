@@ -31,6 +31,19 @@ func run(t) -> void:
 			var current = X.simulation()
 			var original := A.evolved_state(old,Finite.new().load_chapter("chapter_01_shiganshina").chapter,evolution)
 			var candidate := A.evolved_state(current,X.chapter(),evolution)
+			# Compare attacks with the same owned modifiers/materials on both
+			# sides, so a new armor material cannot change an enemy hurt event.
+			var common_equipment: Dictionary = original.equipment.duplicate(true)
+			var common_passives: Dictionary = original.passives.duplicate(true)
+			for id in candidate.equipment: common_equipment[id] = maxi(int(common_equipment.get(id,0)),int(candidate.equipment[id]))
+			for id in candidate.passives: common_passives[id] = maxi(int(common_passives.get(id,0)),int(candidate.passives[id]))
+			var base: String = old._catalog.evolutions.definition(evolution).base_item_id
+			for state in [original,candidate]:
+				state.equipment = common_equipment.duplicate(true)
+				state.passives = common_passives.duplicate(true)
+				for id in common_equipment:
+					if id != base: state.player.attack_ready_ticks[id] = 2147483647
+			t.check(old.restore(original).get("ok",false) and current.restore(candidate).get("ok",false),"controlled old/current evolution inputs satisfy both actual material contracts: "+evolution)
 			# Immutable purchased bonus uses the existing run config/rules binding.
 			if bonus > 0:
 				for state in [original,candidate]:

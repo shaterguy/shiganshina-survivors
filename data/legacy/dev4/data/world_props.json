@@ -1,0 +1,299 @@
+{
+  "revision": "ch01_props_1",
+  "mask_bits": {
+    "player": 1,
+    "grounded_titan": 2,
+    "physical_attack": 4,
+    "straight_projectile": 8,
+    "overhead": 16
+  },
+  "definitions": {
+    "house_narrow": {
+      "asset_id": "house_narrow",
+      "anchor_px": [
+        80,
+        192
+      ],
+      "ground_footprint": [
+        -70,
+        -52,
+        140,
+        52
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -80,
+        -192,
+        160,
+        192
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": true,
+      "structure_hp": 3,
+      "ruin_asset_id": "burning_rubble",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -48,
+        -96,
+        96,
+        96
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "cracked"
+    },
+    "house_bakery": {
+      "asset_id": "house_bakery",
+      "anchor_px": [
+        80,
+        192
+      ],
+      "ground_footprint": [
+        -70,
+        -52,
+        140,
+        52
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -80,
+        -192,
+        160,
+        192
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": true,
+      "structure_hp": 3,
+      "ruin_asset_id": "burning_rubble",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -48,
+        -96,
+        96,
+        96
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "cracked"
+    },
+    "house_warehouse": {
+      "asset_id": "house_warehouse",
+      "anchor_px": [
+        96,
+        192
+      ],
+      "ground_footprint": [
+        -88,
+        -60,
+        176,
+        60
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -96,
+        -192,
+        192,
+        192
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": true,
+      "structure_hp": 3,
+      "ruin_asset_id": "burning_rubble",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -48,
+        -96,
+        96,
+        96
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "cracked"
+    },
+    "house_ruined": {
+      "asset_id": "house_ruined",
+      "anchor_px": [
+        96,
+        192
+      ],
+      "ground_footprint": [
+        -82,
+        -44,
+        164,
+        44
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -96,
+        -192,
+        192,
+        192
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": false,
+      "structure_hp": 0,
+      "ruin_asset_id": "house_ruined",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -96,
+        -192,
+        192,
+        192
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "reinforced_art_review_required"
+    },
+    "refugee_wagon": {
+      "asset_id": "refugee_wagon",
+      "anchor_px": [
+        56,
+        96
+      ],
+      "ground_footprint": [
+        -48,
+        -40,
+        96,
+        40
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -56,
+        -96,
+        112,
+        96
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": false,
+      "structure_hp": 0,
+      "ruin_asset_id": "refugee_wagon",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -56,
+        -96,
+        112,
+        96
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "reinforced_art_review_required"
+    },
+    "cannon_prop": {
+      "asset_id": "cannon_prop",
+      "anchor_px": [
+        48,
+        80
+      ],
+      "ground_footprint": [
+        -44,
+        -32,
+        88,
+        32
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -48,
+        -80,
+        96,
+        80
+      ],
+      "collision_mask": 3,
+      "cover_mask": 12,
+      "destructible": false,
+      "structure_hp": 0,
+      "ruin_asset_id": "cannon_prop",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -48,
+        -80,
+        96,
+        80
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "reinforced_art_review_required"
+    },
+    "burning_rubble": {
+      "asset_id": "burning_rubble",
+      "anchor_px": [
+        48,
+        96
+      ],
+      "ground_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "depth_origin": 0,
+      "render_bounds": [
+        -48,
+        -96,
+        96,
+        96
+      ],
+      "collision_mask": 0,
+      "cover_mask": 0,
+      "destructible": false,
+      "structure_hp": 0,
+      "ruin_asset_id": "burning_rubble",
+      "ruin_footprint": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "ruin_render_bounds": [
+        -48,
+        -96,
+        96,
+        96
+      ],
+      "rotation_degrees": 0,
+      "contact_damage": 0,
+      "calibration_status": "candidate_pending_four_side_contact",
+      "damage_pose": "reinforced_art_review_required"
+    }
+  }
+}

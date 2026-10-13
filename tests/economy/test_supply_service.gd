@@ -2,6 +2,7 @@ extends RefCounted
 # NEW E1 isolation: SHAPE-ONLY R0 run factory, never real Core/Store validity.
 const Service = preload("res://game/economy/supply_service.gd")
 const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
+const ProgressionFixture = preload("res://tests/progression/progression_test_fixture.gd")
 const MAX := 2147483647
 var _fixture = Fixture.new()
 func run(t) -> void:
@@ -10,6 +11,7 @@ func run(t) -> void:
 	_loadout_start_cases(t)
 	_settlement_cases(t)
 	_claimed_growth_settlement_cases(t)
+	_legacy_target_cost_cases(t)
 	_invalid_authority_cases(t)
 func _service():
 	return Service.new(_fixture.make_run)
@@ -94,15 +96,32 @@ func _purchase_cases(t) -> void:
 	view.loadout.doctrine_id = "unknown"
 	t.check(_same(view_save,view_before),"E1 view cannot mutate its actual input authority")
 	t.check(view.loadout_options.doctrines.size() == 3 and view.loadout_options.supplies.size() == 2,"E1 meaningful doctrine and supply options supplied")
-	var expected_targets: Array = load("res://game/progression/upgrade_catalog.gd").new().evolutions.ids()
+	var upgrade_catalog = load("res://game/progression/upgrade_catalog.gd").new()
+	var expected_targets: Array = upgrade_catalog.evolutions.ids()
 	var actual_targets := []
 	for target in view.loadout_options.targets: actual_targets.append(target.id)
 	actual_targets.sort()
 	expected_targets.sort()
 	t.check(actual_targets == expected_targets,"E1 loadout exposes every actual ultimate recipe exactly once")
 	for target in view.loadout_options.targets:
-		t.check(target.seal_cost == 1 and target.requirements.size() == 2,"E1 shop target uses actual recipe costs")
+		var recipe: Dictionary = upgrade_catalog.evolutions.definition(target.id)
+		t.check(target.seal_cost == 0 and target.seal_cost == recipe.seal_cost and target.requirements.size() == 2,"E1 current shop target uses approved seal-free base5 plus one owned-Lv1 material: "+target.id)
+		t.check(target.requirements[0].required == 5 and target.requirements[1].required == 1,"E1 current target has no hidden higher material level: "+target.id)
 		for requirement in target.requirements: t.check(not requirement.name.is_empty(),"E1 named target prerequisite")
+func _legacy_target_cost_cases(t) -> void:
+	# Test-only dependency pins the unchanged dev4 definitions. A new-run shop
+	# uses schema2, while preserved schema1 still requires its actual seal1.
+	var service = _service()
+	service._upgrades = ProgressionFixture.legacy_catalog()
+	var save := _save(39)
+	var before := save.duplicate(true)
+	var view: Dictionary = service.shop_view(save)
+	t.check(view.get("can_shop",false) and _same(save,before),"E1 preserved-definition shop projection remains valid and read-only")
+	t.check(view.loadout_options.targets.size() == 4,"E1 preserved schema1 still exposes its original four recipes")
+	for target in view.loadout_options.targets:
+		var recipe: Dictionary = service._upgrades.evolutions.definition(target.id)
+		t.check(target.seal_cost == 1 and target.seal_cost == recipe.seal_cost and target.requirements.size() == 2,"E1 schema1 shop retains exact original seal1 cost: "+target.id)
+		t.check(target.requirements[0].required == 5 and target.requirements[1].required == 3,"E1 schema1 shop retains original base5 and material3: "+target.id)
 func _loadout_start_cases(t) -> void:
 	var service = _service()
 	var save := _save()

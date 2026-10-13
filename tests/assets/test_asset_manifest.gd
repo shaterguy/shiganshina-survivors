@@ -13,8 +13,8 @@ func run(t) -> void:
 		t.check(FileAccess.get_sha256(path) == a.sha256, "asset checksum matches: " + asset_id)
 		t.check(not str(a.get("source_method","")).is_empty(), "asset has provenance: " + asset_id)
 		if a.kind == "audio":
-			var sound = AudioStreamWAV.load_from_file(path)
-			t.check(sound != null and sound.get_length() > 0, "WAV decodes: " + asset_id)
+			var sound: AudioStream = AudioStreamOggVorbis.load_from_file(path) if path.ends_with(".ogg") else AudioStreamWAV.load_from_file(path)
+			t.check(sound != null and sound.get_length() > 0, "runtime audio decodes: " + asset_id)
 			continue
 		var picture := Image.new()
 		var decode_error := picture.load_png_from_buffer(FileAccess.get_file_as_bytes(path))

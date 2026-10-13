@@ -61,6 +61,13 @@ func test_max_items_fallback(t, sim) -> void:
 	var state: Dictionary = sim.new_run(Fixture.chapter(),7,Fixture.run_config())
 	state.equipment = {"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	state.passives = {"damage":5,"fire_interval":5,"movement":5,"armor":5}
+	# Internal base5 still has a legal final6 choice. A genuinely exhausted
+	# four-slot build must have completed every owned attack's final stage.
+	for id in sim._catalog.evolutions.ids():
+		var recipe: Dictionary = sim._catalog.evolutions.definition(id)
+		if state.equipment.has(recipe.base_item_id) and sim._catalog.evolutions.evaluate(state,id).get("can_evolve",false):
+			state.evolutions[recipe.base_item_id] = id
+	t.check(state.evolutions.size() == 4 and sim._catalog.candidates(state).is_empty(),"fallback fixture exhausts four final attack stages and every legal base/passive growth")
 	state.player.hp = 1.0
 	t.check(sim.restore(state).ok,"four-slot maxed arrangement is valid")
 	Fixture.drop_xp(sim,state,24)
@@ -95,15 +102,21 @@ func test_passive_effects(t, sim) -> void:
 	state.passives = {"damage":1,"fire_interval":1,"attack_range":1}
 	Fixture.step(sim,state,Vector2.ZERO,[Fixture.spawn("buff_target",[68,0])])
 	t.check(is_equal_approx(state.stats.damage_dealt,13.8) and state.player.attack_ready_ticks.blade_slash == 45,"damage interval and range passives alter attack")
-	# Current eight-weapon candidate pool: seed21 earns a real decorated health
-	# choice. This arrangement does not rewrite any frozen six-weapon offer.
-	state = sim.new_run(Fixture.chapter(),21,Fixture.run_config())
-	state.player.hp = 50.0
-	Fixture.drop_xp(sim,state,24)
+	# This tests an actually earned first health choice, not a seed21 RNG oracle.
+	# The changed target material shifts the current random pool. Search only a
+	# fixed small seed range using real XP/materialization; never insert an offer.
 	var selected := ""
-	for option in state.upgrade_offer.options:
-		if option.item_id == "max_health": selected = option.option_id
+	for seed in range(1,65):
+		state = sim.new_run(Fixture.chapter(),seed,Fixture.run_config())
+		state.player.hp = 50.0
+		Fixture.drop_xp(sim,state,24)
+		for option in state.upgrade_offer.options:
+			if option.item_id == "max_health": selected = option.option_id
+		if not selected.is_empty():
+			print("CURRENT_EARNED_HEALTH_SEED ",seed)
+			break
 	t.check(not selected.is_empty(),"real earned offer exposes max-health option")
 	if selected.is_empty(): return
+	t.check(state.player.level == 2 and state.player.xp == 0 and state.upgrade_offer.source == "level" and not state.passives.has("max_health") and sim.restore(state).get("ok",false),"bounded health search returns a valid first actually earned level offer")
 	t.check(sim.choose_upgrade(state,state.upgrade_offer.offer_id,selected).ok,"earned max-health choice applies")
 	t.check(state.player.max_hp == 120.0 and state.player.hp == 70.0,"max health upgrade raises cap and heals")

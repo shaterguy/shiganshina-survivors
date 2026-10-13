@@ -17,11 +17,16 @@ func scan(path: String, requested: PackedStringArray) -> void:
 			var suite := path.get_file()
 			if not requested.is_empty() and not suite in requested:
 				continue
+			var trace_before_checks: int = checks
+			var trace_before_failures: int = failures.size()
+			var trace_started_usec: int = Time.get_ticks_usec()
+			print("TEST_FILE_BEGIN "+JSON.stringify({"path":path.path_join(file),"suite":suite,"checks_before":trace_before_checks,"failures_before":trace_before_failures}))
 			var script = load(path.path_join(file))
 			check(script != null and script.can_instantiate(), "test script loads: " + file)
 			if script != null and script.can_instantiate():
 				var test = script.new()
 				await test.run(self)
+			print("TEST_FILE_END "+JSON.stringify({"path":path.path_join(file),"suite":suite,"phase":"body_returned","script_loaded":script != null,"checks_delta":checks-trace_before_checks,"body_checks":maxi(0,checks-trace_before_checks-1),"failures_delta":failures.size()-trace_before_failures,"elapsed_usec":Time.get_ticks_usec()-trace_started_usec}))
 	for folder in directory.get_directories():
 		await scan(path.path_join(folder), requested)
 func run() -> void:
@@ -36,5 +41,6 @@ func run() -> void:
 	# Allow a full fade/reap cycle after freeing scenes, before engine teardown.
 	await create_timer(0.25).timeout
 	check(checks > 0, "at least one test assertion ran")
+	print("TEST_RUN_RESULT "+JSON.stringify({"requested_suites_csv":",".join(OS.get_cmdline_user_args()),"checks":checks,"failures":failures.size(),"phase":"normal_tail_completed"}))
 	print("RESULT checks=%d failures=%d" % [checks, failures.size()])
 	quit(0 if failures.is_empty() else 1)

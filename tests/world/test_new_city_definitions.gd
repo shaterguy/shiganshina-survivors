@@ -6,7 +6,7 @@ const World = preload("res://game/world/streamed_world.gd")
 const Navigation = preload("res://game/world/city_navigation.gd")
 const Address = preload("res://game/world/world_address.gd")
 const DEFINITIONS_PATH := "res://chapters/chapter_01/city_templates.json"
-const GOLDEN_PATH := "res://tests/world/fixtures/NEW-city-vectors-grabber.json"
+const GOLDEN_PATH := "res://tests/world/fixtures/NEW-city-vectors-dense-roofs.json"
 const IDS := ["new_bakery_market","new_garrison_battery","new_supply_warehouses","new_breach_refuge"]
 
 func run(t) -> void:
@@ -31,7 +31,7 @@ func _definition_semantics(t,definitions: Dictionary,props: Dictionary,generator
 	for template in definitions.templates:
 		var seed := _seed_for_template(generator,template.template_id,["0","0"])
 		var chunk: Dictionary = generator.generate(seed,["0","0"])
-		t.check(chunk.props.size() >= 8 and chunk.props.size() <= 12,"district contains 8–12 authored props: "+template.template_id)
+		t.check(chunk.props.size() >= 8 and chunk.props.size() <= int(definitions.get("max_props",12)),"district stays within its bounded authored prop limit: "+template.template_id)
 		var counts := {}
 		var destructible_count := 0
 		var durable_count := 0

@@ -48,10 +48,18 @@ func _streamed_never_falls_back(t) -> void:
 		if (int(prop.collision_mask)&3) == 0: continue
 		var box: Rect2 = prop.ground_footprint
 		var origin := Vector2(box.position.x-40,box.get_center().y)
-		if not f.helper.walkable(origin,22).get("walkable",false): continue
+		# Search witnesses only within the guaranteed prepared central chunk.
+		# A boundary probe can latch world_not_ready and must not poison this
+		# separate exact-adapter/capacity contract before its deliberate failure.
+		if not Rect2(0,0,768,768).encloses(Rect2(origin,Vector2(120,0)).grow(24)): continue
+		var probe: Dictionary = f.helper.walkable(origin,22)
+		t.check(probe.get("ok",false) and f.helper.query_status().ok,"interior witness search keeps original prepared query scope clean")
+		if not probe.get("ok",false): return
+		if not probe.get("walkable",false): continue
 		var expected: Dictionary = f.helper.sweep(origin,Vector2(120,0),22)
 		if expected.get("hit_prop_id") != prop.prop_id: continue
 		var actual: Dictionary = q.sweep(origin,Vector2(120,0),22)
+		print("ROLE_WORLD_INTERIOR_WITNESS "+JSON.stringify({"index":index,"prop_id":prop.prop_id,"origin":[origin.x,origin.y],"expected":expected,"actual":actual,"helper_status":f.helper.query_status()}))
 		t.check(actual == expected and actual.fraction < 1.0,"prop beyond first32 retains exact blocker ID/fraction/position")
 		witnessed = true; break
 	t.check(witnessed,"beyond32 actual blocking prop witnessed")
@@ -63,6 +71,8 @@ func _streamed_never_falls_back(t) -> void:
 	bad = f.state.duplicate(true); bad.world = {}
 	t.check(not Q.for_streamed(f.helper,bad).status().ok,"empty city world rejected")
 	bad = f.state.duplicate(true); bad.entities.append({"position":[5000,5000],"radius":20,"speed":30})
+	t.check(f.helper.query_status().ok,"capacity fixture starts with no earlier query failure")
+	print("ROLE_WORLD_CLEAN_CAPACITY "+JSON.stringify({"requirements":H.requirements(bad),"prior_helper_status":f.helper.query_status(),"actual":Q.for_streamed(f.helper,bad).status()}))
 	t.check(Q.for_streamed(f.helper,bad).status().get("error_code") == H.requirements(bad).get("error_code") and not H.requirements(bad).ok,"over49 required chunks propagate capacity error: "+str(Q.for_streamed(f.helper,bad).status()))
 	var late: Dictionary = q.sweep(Vector2(384,384),Vector2(8000,0),22)
 	t.check(not late.ok and late.error_code == "world_not_ready","missing sweep coverage is explicit failure")

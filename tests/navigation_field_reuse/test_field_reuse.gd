@@ -81,12 +81,16 @@ func _routes(t,cached: bool) -> void:
   for radius in [8.0,8.0000000001,16.0,24.0,32.0]:
    for target in [Vector2(1152,384),Vector2(1152.0001220703125,384),Vector2(1140,390)]:
     va.begin_navigation_queries(); vb.begin_navigation_queries()
-    var actual: Dictionary = na.direction(Vector2(496,194),target,radius,tick)
-    var expected: Dictionary = nb.direction(Vector2(496,194),target,radius,tick)
+    var actual: Dictionary = na.direction(Vector2(432,194),target,radius,tick)
+    var expected: Dictionary = nb.direction(Vector2(432,194),target,radius,tick)
+    t.check(actual.ok and expected.ok and not actual.waypoints.is_empty(),"field route matrix exercises successful routing")
     t.check(actual == expected,"complete waypoints, length, direction and errors equal frozen baseline")
-    t.check(va.navigation_query_status() == vb.navigation_query_status() and a.diagnostics() == b.diagnostics(),"public route query effects and counters remain exact")
+    var actual_effects: Dictionary = a.diagnostics(); var baseline_effects: Dictionary = b.diagnostics()
+    var counts_valid: bool = actual_effects.has("query_count") and baseline_effects.has("query_count") and typeof(actual_effects.query_count) == TYPE_INT and typeof(baseline_effects.query_count) == TYPE_INT and actual_effects.query_count >= 0 and actual_effects.query_count <= baseline_effects.query_count
+    actual_effects.erase("query_count"); baseline_effects.erase("query_count")
+    t.check(va.navigation_query_status() == vb.navigation_query_status() and actual_effects == baseline_effects and counts_valid,"public route effects remain exact except nonincreasing query count")
     var cold = N.new(V.new(_world(cached)))
-    t.check(cold.direction(Vector2(496,194),target,radius,tick) == actual,"fresh navigation reconstruction preserves warm route result")
+    t.check(cold.direction(Vector2(432,194),target,radius,tick) == actual,"fresh navigation reconstruction preserves warm route result")
 func _fallback(t) -> void:
  for kind in ["stream","view","navigation","scope"]:
   var a = Tracing.new(F.generator(),42) if kind == "stream" else _world(false)
@@ -157,8 +161,9 @@ func _seed_boundaries(t,cached: bool) -> void:
   if previous != _seeds(ga): _count_check(t,_expansions(na) == before+1,"changed actual seed visibility always rebuilds BFS")
 func _epoch_and_ownership(t,cached: bool) -> void:
  var w = _world(cached); var v = V.new(w); var n = N.new(v)
- var start := Vector2(496,194); var goal := Vector2(1152,384)
- n.direction(start,goal,8,0)
+ var start := Vector2(432,194); var goal := Vector2(1152,384)
+ var initial_route: Dictionary = n.direction(start,goal,8,0)
+ t.check(initial_route.ok and not initial_route.waypoints.is_empty(),"grid ownership fixture executes successful routing")
  t.check(n._grids.has("0,0:8"),"obstructed public route owns a populated grid")
  if not n._grids.has("0,0:8"): return
  var old: Dictionary = n._grids["0,0:8"]

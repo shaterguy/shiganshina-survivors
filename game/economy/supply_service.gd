@@ -13,8 +13,12 @@ var _catalog = Catalog.new()
 var _upgrades = Upgrades.new()
 var _contracts = Contracts.new(Callable())
 var _run_factory: Callable
+var _content_resolver: Callable
 func _init(run_factory: Callable) -> void:
 	_run_factory = run_factory
+	var owner = run_factory.get_object()
+	if owner != null and owner.get_script() == load("res://game/app/prepared_city_runtime.gd") and owner._content_router != null:
+		_content_resolver = Callable(owner,"resolve_content")
 func shop_view(game_save: Variant, chapter_id: String = Characters.DEFAULT_CHAPTER) -> Dictionary:
 	var validation := _validate_economy(game_save)
 	var error: String = str(validation.get("error_code","invalid_game_save"))
@@ -97,6 +101,12 @@ func _validate_economy(save: Variant) -> Dictionary:
 	var config: Dictionary = state.run_config
 	var selection := {"doctrine_id":config.doctrine_id,"target_evolution_id":config.target_evolution_id,"supply_item_id":config.prepared_supply}
 	if not _selection_valid(save.profile,selection): return _fail("invalid_snapshot")
+	if _content_resolver.is_valid():
+		var route: Dictionary = _content_resolver.call(state)
+		if not route.get("ok",false): return _fail(str(route.get("error_code","content_mismatch")))
+		var definitions: Dictionary = route.immutable_inputs
+		var selected := Upgrades.new(definitions["data/equipment.json"],definitions["data/passives.json"],definitions["data/evolutions.json"])
+		if selected.evolutions.definition(config.target_evolution_id).is_empty(): return _fail("invalid_snapshot")
 	if state.phase in TERMINAL:
 		if state.run_serial != save.settled_through_serial: return _fail("invalid_game_save")
 	elif state.run_serial <= save.settled_through_serial: return _fail("invalid_game_save")
@@ -283,12 +293,12 @@ func _loadout_options(profile: Dictionary, active: bool) -> Dictionary:
 	var targets: Array[Dictionary] = []
 	for id in _upgrades.evolutions.ids():
 		var definition: Dictionary = _upgrades.evolutions.definition(id)
-		var requirements: Array[Dictionary] = [{"kind":"equipment","item_id":definition.base_item_id,"name":_upgrades.equipment[definition.base_item_id].name,"required":int(definition.required_weapon_level)}]
+		var requirements: Array[Dictionary] = [{"kind":"equipment","item_id":definition.base_item_id,"name":_upgrades.equipment[definition.base_item_id].name,"required":int(definition.required_weapon_level),"requirement_type":"base_level","icon_id":"skill_"+str(definition.base_item_id)}]
 		for passive in definition.required_passives:
-			requirements.append({"kind":"passive","item_id":passive.passive_id,"name":_upgrades.passives[passive.passive_id].name,"required":int(passive.level)})
+			requirements.append({"kind":"passive","item_id":passive.passive_id,"name":_upgrades.passives[passive.passive_id].name,"required":int(passive.level),"requirement_type":"owned_skill" if int(passive.level) == 1 else "level","icon_id":"skill_"+str(passive.passive_id)})
 		for required in definition.get("required_equipment",[]):
-			requirements.append({"kind":"equipment","item_id":required.equipment_id,"name":_upgrades.equipment[required.equipment_id].name,"required":int(required.level)})
-		targets.append({"id":id,"name":definition.name,"description":definition.description,"tradeoff_text":definition.tradeoff_text,"requirements":requirements,"seal_cost":int(definition.seal_cost),"can_select":not active,"blocked_reason":"active_run" if active else ""})
+			requirements.append({"kind":"equipment","item_id":required.equipment_id,"name":_upgrades.equipment[required.equipment_id].name,"required":int(required.level),"requirement_type":"owned_skill" if int(required.level) == 1 else "level","icon_id":"skill_"+str(required.equipment_id)})
+		targets.append({"id":id,"name":definition.name,"icon_id":"skill_"+str(id),"description":definition.description,"tradeoff_text":definition.tradeoff_text,"requirements":requirements,"seal_cost":int(definition.seal_cost),"can_select":not active,"blocked_reason":"active_run" if active else ""})
 	var supplies: Array[Dictionary] = [{"id":"","name":"장착 안 함","description":"보급품을 소비하지 않음","tradeoff_text":"","can_select":not active,"blocked_reason":"active_run" if active else "","owned":0}]
 	var bandage: Dictionary = _catalog.item("field_bandage")
 	var owned := int(profile.consumables.field_bandage)

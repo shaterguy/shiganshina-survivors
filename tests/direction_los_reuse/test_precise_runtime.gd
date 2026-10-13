@@ -18,7 +18,10 @@ func run(t) -> void:
    for radius in [8.0,8.01,16.0,24.0,32.0]:
     for target in [Vector2(1152,384),Vector2(1152.0001220703125,384)]:
      va.begin_navigation_queries(); vb.begin_navigation_queries()
-     t.check(na.direction(Vector2(496,194),target,radius,tick) == nb.direction(Vector2(496,194),target,radius,tick),"precise goal/radius invalidation route remains exact")
+     var actual: Dictionary = na.direction(Vector2(432,194),target,radius,tick)
+     var expected: Dictionary = nb.direction(Vector2(432,194),target,radius,tick)
+     t.check(actual.ok and expected.ok and not actual.waypoints.is_empty(),"precise route matrix exercises successful routing")
+     t.check(actual == expected,"precise goal/radius invalidation route remains exact")
      t.check(va.navigation_query_status() == vb.navigation_query_status(),"precise runtime sticky status remains exact")
      t.check(na._direction_los.is_empty(),"precise runtime return drops memo")
   print("PRECISE_REUSE_QUERIES ",JSON.stringify({"cached":cached,"actual":a.diagnostics().query_count,"baseline":b.diagnostics().query_count}))

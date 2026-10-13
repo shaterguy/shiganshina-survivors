@@ -4,7 +4,7 @@ const N = preload("res://game/world/precise_city_navigation.gd")
 const O = preload("res://tests/direction_los_reuse/oracle_precise_navigation.gd")
 const V = preload("res://game/world/streamed_navigation_view.gd")
 const Cached = preload("res://game/world/cached_streamed_world.gd")
-const A := Vector2(496,194)
+const A := Vector2(432,194)
 const B := Vector2(1152,384)
 func _world():
  var w = Cached.new(F.generator(),42)
@@ -14,7 +14,7 @@ func run(t) -> void:
  var w = _world(); var v = V.new(w); var n = N.new(v)
  var oracle = O.new(V.new(_world()))
  var expected: Dictionary = oracle.direction(A,B,8,0)
- t.check(expected.ok,"obstructed cross-chunk fixture has route")
+ t.check(expected.ok and not expected.waypoints.is_empty(),"obstructed cross-chunk fixture has route")
  for i in 2: t.check(n.direction(A,B,8,0) == expected,"warm exact route before counter check")
  var before: int = w.diagnostics().query_count
  t.check(n.direction(A,B,8,0) == expected,"same-tick repeat preserves every waypoint/direction/length")

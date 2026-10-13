@@ -5,6 +5,7 @@ const Fixture = preload("res://tests/core/new_current_regression_fixture.gd")
 const View = preload("res://game/progression/progression_view.gd")
 const UI = preload("res://game/ui/game_ui.gd")
 const Card = preload("res://game/ui/growth_card.gd")
+const SHORT_STATS := {"damage_multiplier":"피해","cooldown_multiplier":"간격","move_multiplier":"이동","max_hp":"체력","regen_per_second":"회복/초","pickup_radius":"수집 반경","range_multiplier":"공격 범위","armor":"피해 감소"}
 func _settle(t) -> void:
 	for frame in range(6): await t.process_frame
 func _button(ui, id: String):
@@ -35,9 +36,16 @@ func run(t) -> void:
 			var viewport: Rect2 = ui._scroll.get_global_rect()
 			t.check(viewport.grow(1).encloses(card.get_global_rect()),"%s selected card is fully visible including name and choice affordance: %s"%[str(screen),option.option_id])
 			t.check(card.text.begins_with(option.name),"card begins with its real name")
-			t.check(card.text.contains("선택"),"card explains the immediate choice action")
-			var effect := Card.effect_text(option.effect_delta).split("\n")[0]
-			t.check(card.text.contains(effect),"card keeps the immediate measured benefit")
+			t.check(not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세") and not card.text.contains("A · 선택"),"readable identity and effects need no repeated manipulation instruction")
+			var delta: Dictionary = option.effect_delta
+			var before_value := str(delta.get("before",delta.get("damage_before",""))).trim_suffix(".0")
+			var after_value := str(delta.get("after",delta.get("damage_after",""))).trim_suffix(".0")
+			var benefit: String = card.text.split("\n")[2] if card.text.split("\n").size() >= 3 else ""
+			t.check(not benefit.is_empty() and (benefit.contains(before_value) and benefit.contains(after_value) if not before_value.is_empty() else benefit.contains(Card.effect_text(delta).split("\n")[0])),"card keeps actual measured before/after benefit values in its short change row")
+			if delta.has("stat"):
+				t.check(benefit.begins_with(str(SHORT_STATS.get(str(delta.stat),str(delta.stat)))+" "),"short measured benefit names the actual authored stat rather than another effect")
+			elif delta.has("damage_before"):
+				t.check(benefit.begins_with("피해 "),"short attack benefit correctly labels its actual damage change")
 			var details = _button(ui,"growth_detail:"+str(option.option_id))
 			t.check(details != null,"each card exposes explicit full effects and requirements without hover")
 			if details == null: continue

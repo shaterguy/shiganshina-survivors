@@ -5,9 +5,9 @@ func run(t) -> void:
 	var path := "res://game/progression/evolution_catalog.gd"
 	t.check(ResourceLoader.exists(path),"NEW evolution catalog exists")
 	if not ResourceLoader.exists(path): return
-	var upgrades = Upgrades.new()
+	var upgrades = Fixture.legacy_catalog()
 	var script = load(path)
-	var catalog = script.new(upgrades)
+	var catalog = script.new(upgrades,Fixture.legacy_definitions())
 	t.check(catalog.validate().is_empty(),"initial 845 recipes validate")
 	t.check(catalog.ids() == ["evo_crossfire","evo_inferno_zone","evo_storm_chain","evo_wing_cut"],"recipe IDs have stable sorted order")
 	var state := Fixture.state()
@@ -64,7 +64,7 @@ func run(t) -> void:
 	t.check(catalog.definition("evo_wing_cut").required_passives[0].level == 3,"definition returns a deep copy")
 	_hostile_data(t,script,upgrades)
 func _hostile_data(t,script,upgrades) -> void:
-	var data := Fixture.read("res://data/evolutions.json")
+	var data := Fixture.legacy_definitions()
 	for field in ["story_year","required_weapon_level","seal_cost","effect_id","base_item_id","recipe_id","chapter_ids","required_passives","effect_params"]:
 		var bad := data.duplicate(true)
 		bad.items.evo_wing_cut.erase(field)

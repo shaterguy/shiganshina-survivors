@@ -18,7 +18,7 @@ func materialize(state: Dictionary, descriptor: Dictionary) -> Dictionary:
 	for id in _catalog.evolutions.ids():
 		var detail: Dictionary = _catalog.evolutions.evaluate(state,id)
 		if not detail.get("can_evolve",false): continue
-		var option := {"option_id":"evolution:"+id,"item_id":detail.base_item_id,"kind":"evolution","level":5,"next_level":5,"evolution_id":id}
+		var option := {"option_id":"evolution:"+id,"item_id":detail.base_item_id,"kind":"evolution","level":5,"next_level":_catalog.evolutions.final_stage_level(),"evolution_id":id}
 		chosen.append(_catalog.decorate_option(state,option))
 		if chosen.size() == 3: break
 	if descriptor.source == "level" and int(descriptor.level_ordinal)%2 == 0 and chosen.size() < 3:

@@ -17,7 +17,7 @@ func run(t) -> void:
 	t.check(ui.get_node("Overlay/Panel/Body/ChoicesScroll/Choices").get_child_count() == 3, "three upgrade options shown")
 	t.check(ui.get_node("Overlay/Panel/Body/ChoicesScroll/Choices").columns == 1, "portrait stacks cards")
 	ui.reflow(Vector2i(800,360),Rect2i(0,0,800,360))
-	t.check(ui.get_node("Overlay/Panel/Body/ChoicesScroll/Choices").columns == 3, "landscape places cards across")
+	t.check(ui.get_node("Overlay/Panel/Body/ChoicesScroll/Choices").columns == 2, "landscape preserves width for internal information and named criteria")
 	t.check(JSON.stringify(snapshot) == original, "UI never mutates state")
 	t.check(ui.get_node("Overlay/Panel/Body/ChoicesScroll").follow_focus, "layout scroll follows keyboard focus")
 	ui.free()

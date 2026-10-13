@@ -1,12 +1,26 @@
-"""Read-only validation of original runtime raster/audio assets."""
+"""Read-only validation of runtime raster/audio assets and licensed OGG scores."""
 from pathlib import Path
 from PIL import Image
-import hashlib,json,math,wave,struct
+import hashlib,json,math,wave,struct,subprocess,array,sys
 ROOT=Path(__file__).resolve().parents[2]
 m=json.loads((ROOT/'assets/manifest.json').read_text());palette={tuple(bytes.fromhex(c[1:])) for c in m['palette']};checks=0
 for aid,a in m['assets'].items():
  p=ROOT/a['path'][6:];assert p.is_file(),aid;assert hashlib.sha256(p.read_bytes()).hexdigest()==a['sha256'],aid;checks+=2
  if a['kind']=='audio':
+  if p.suffix=='.ogg':
+   probe=subprocess.run(['ffprobe','-v','error','-select_streams','a:0','-show_entries','stream=codec_name,sample_rate,channels,duration','-of','json',str(p)],capture_output=True,text=True,timeout=30)
+   assert probe.returncode==0,(aid,'OGG probe failed')
+   streams=json.loads(probe.stdout)['streams'];assert len(streams)==1,aid;info=streams[0]
+   assert info['codec_name']=='vorbis' and int(info['sample_rate'])==a['sample_rate']==44100 and int(info['channels'])==a['channels']==2,aid
+   decoded=subprocess.run(['ffmpeg','-v','error','-nostdin','-i',str(p),'-f','s16le','-acodec','pcm_s16le','-ac','2','-ar','44100','pipe:1'],capture_output=True,timeout=120)
+   assert decoded.returncode==0 and not decoded.stderr,(aid,'OGG full decode failed')
+   samples=array.array('h');samples.frombytes(decoded.stdout)
+   if sys.byteorder!='little':samples.byteswap()
+   peak=max(map(abs,samples));assert 0<peak<32767 and abs(len(samples)/88200-a['duration_seconds'])<.01,aid
+   assert a['loop'] is True and a['duration_seconds']>20 and 0<a['peak']<1 and a.get('source_layers'),aid
+   boundary_step=max(abs(samples[-2]-samples[0]),abs(samples[-1]-samples[1]))/32768.0
+   print('OGG_DECODE '+json.dumps({'id':aid,'decoded_seconds':len(samples)/88200,'peak':peak/32768.0,'end_to_start_adjacent_step':boundary_step,'note':'PCM boundary statistic, not subjective loop-quality approval'}))
+   checks+=5;continue
   with wave.open(str(p)) as f:
    assert f.getnchannels()==1 and f.getsampwidth()==2 and f.getframerate()==22050,aid
    data=struct.unpack('<'+'h'*f.getnframes(),f.readframes(f.getnframes()));assert 0<max(abs(x) for x in data)<32767,aid
@@ -34,4 +48,4 @@ for aid,a in m['assets'].items():
     assert (im.getpixel((x,y))[3]>0)==inside,(aid,x,y)
   checks+=im.width*im.height
 assert 'death' not in m['assets']['armored_titan']['animations'];checks+=1
-print(f'PASS: {len(m["assets"])} manifest records; {checks} raster/audio/geometry checks; RGBA/palette/alpha/frame/SHA/WAV and exact warning-mask geometry checks passed.')
+print(f'PASS: {len(m["assets"])} manifest records; {checks} raster/audio/geometry checks; RGBA/palette/alpha/frame/SHA/WAV/OGG and exact warning-mask geometry checks passed.')

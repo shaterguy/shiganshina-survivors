@@ -78,10 +78,20 @@ func configure_city_runtime(provider, runtime, world_store, directory: String) -
 	_city_runtime = runtime
 	_world_delta_store = world_store
 	chapter = loaded.chapter
-	simulation = Simulation.new(provider)
+	_adopt_city_simulation(Simulation.new(provider))
 	save_store = Save.new(directory,Callable(runtime,"validate_checkpoint"))
 	supply_service = Supply.new(Callable(runtime,"new_run"))
 	return {"ok":true}
+func _adopt_city_simulation(core) -> void:
+	simulation = core
+	progression_view = Progression.new(core._catalog)
+	chapter = core._chapter.duplicate(true)
+func _select_checkpoint_chapter(snapshot: Dictionary) -> bool:
+	if _city_runtime == null or _city_runtime._content_router == null: return true
+	var selected: Dictionary = _city_runtime.resolve_content(snapshot)
+	if not selected.get("ok",false): return false
+	chapter = selected.chapter.duplicate(true)
+	return true
 func _ready() -> void:
 	if _city_runtime == null: chapter = Chapters.new().load_chapter("chapter_01_shiganshina").chapter
 	audio = Audio.new()
@@ -96,6 +106,8 @@ func _ready() -> void:
 	ui = UI.new()
 	ui.name = "GameUI"
 	add_child(ui)
+	ui.audio_requested.connect(func(id: String):
+		if not _lifecycle_blocked(): audio.play_sound(id))
 	ui.recovery_start_requested.connect(func(): confirm_preserved_run_start(randi() & 0x7fffffff))
 	ui.recovery_keep_requested.connect(keep_saved_authority)
 	ui.recovery_retry_requested.connect(retry_save_recovery)
@@ -220,12 +232,12 @@ func _complete_startup_load(loaded: Dictionary) -> void:
 	state = {}
 	pending_checkpoint = {}
 	if game_save.checkpoint is Dictionary:
-		if not checkpoint_matches_chapter(game_save.checkpoint,chapter):
+		if not _select_checkpoint_chapter(game_save.checkpoint) or not checkpoint_matches_chapter(game_save.checkpoint,chapter):
 			_show_startup_block("blocked","content_mismatch")
 			return
 		if game_save.checkpoint.phase in TERMINAL:
 			if not terminal_pair.is_empty():
-				simulation = terminal_pair.simulation
+				_adopt_city_simulation(terminal_pair.simulation)
 				state = terminal_pair.state
 			else: state = game_save.checkpoint.duplicate(true)
 		else: pending_checkpoint = game_save.checkpoint.duplicate(true)
@@ -419,7 +431,14 @@ func start_run(seed: int) -> void:
 		return
 	if not _command_ready("run_start"): return
 	var request_id := "start:%s:%d" % [game_save.career_id,int(game_save.next_run_serial)]
-	var prepared: Dictionary = supply_service.prepare_run_start(game_save,chapter,seed & 0x7fffffff,request_id,int(game_save.store_revision))
+	var next_chapter: Dictionary = chapter
+	if _city_runtime != null and _city_runtime._content_router != null:
+		var current: Dictionary = _city_runtime.resolve_content()
+		if not current.get("ok",false):
+			_action_failed("run_start",str(current.get("error_code","content_mismatch")))
+			return
+		next_chapter = current.chapter
+	var prepared: Dictionary = supply_service.prepare_run_start(game_save,next_chapter,seed & 0x7fffffff,request_id,int(game_save.store_revision))
 	if not prepared.ok:
 		_action_failed("run_start",prepared.error_code)
 		return
@@ -518,7 +537,7 @@ func _step_city_tick() -> Dictionary:
 			events = refreshed.simulation.step(refreshed.state,move,commands)
 			status = refreshed.simulation.step_status()
 			if status.get("ok",false):
-				simulation = refreshed.simulation
+				_adopt_city_simulation(refreshed.simulation)
 				state = refreshed.state
 				_apply_lifecycle_pause(state)
 		else: status = refreshed
@@ -562,7 +581,7 @@ func _retry_city_hold() -> void:
 				_action_failed("world",_city_step_error)
 				_present()
 				return
-			if _city_runtime != null: simulation = prepared.simulation
+			if _city_runtime != null: _adopt_city_simulation(prepared.simulation)
 			else:
 				var hand: Dictionary = simulation.prepare_enemy_attack_view(prepared.state)
 				if not hand.get("ok",false):
@@ -642,7 +661,7 @@ func request_resume() -> void:
 				return
 		world.reset_presentation()
 		audio.reset_presentation()
-		if _city_runtime != null: simulation = restored.simulation
+		if _city_runtime != null: _adopt_city_simulation(restored.simulation)
 		state = restored.state
 		pending_checkpoint.clear()
 		ui.set_checkpoint_available(false)
@@ -896,7 +915,7 @@ func _publish_transaction(authority: Dictionary, transaction: Dictionary, prepar
 			_action_failed(str(transaction.action),"world_not_ready")
 			return
 		# Single synchronous adoption boundary: never expose B with A's cache.
-		simulation = prepared_pair.simulation
+		_adopt_city_simulation(prepared_pair.simulation)
 		state = prepared_pair.state
 		_clear_city_tick()
 		_city_render_error = ""
@@ -968,10 +987,10 @@ func _quarantine_authority(authority: Dictionary, prepared_pair: Dictionary = {}
 	_last_save_tick = -1
 	_last_phase = ""
 	_presented_growth_key = ""
-	if game_save.checkpoint is Dictionary and checkpoint_matches_chapter(game_save.checkpoint,chapter):
+	if game_save.checkpoint is Dictionary and _select_checkpoint_chapter(game_save.checkpoint) and checkpoint_matches_chapter(game_save.checkpoint,chapter):
 		if game_save.checkpoint.phase in TERMINAL:
 			if not prepared_pair.is_empty():
-				simulation = prepared_pair.simulation
+				_adopt_city_simulation(prepared_pair.simulation)
 				state = prepared_pair.state
 			else: state = game_save.checkpoint.duplicate(true)
 			_apply_lifecycle_pause(state)
@@ -1030,8 +1049,9 @@ func _present() -> void:
 	if not game_save.is_empty() and _presented_supply_revision != _view_revision:
 		_presented_supply_revision = _view_revision
 		ui.present_supply(supply_view())
-	audio.present(view)
-	if not _startup_view.is_empty() or _worker_recovery_active() or _lifecycle_blocked() or not _city_step_error.is_empty() or not _city_render_error.is_empty() or not _final_intent.is_empty() or not _final_error.is_empty():
+	var audio_suspended := not _startup_view.is_empty() or _worker_recovery_active() or _lifecycle_blocked() or not _city_step_error.is_empty() or not _city_render_error.is_empty() or not _final_intent.is_empty() or not _final_error.is_empty()
+	audio.present(view,audio_suspended)
+	if audio_suspended:
 		audio._music.stream_paused = true
 		for voice in audio._voices: voice.stream_paused = true
 	else:
@@ -1063,14 +1083,14 @@ func _present_world(view: Dictionary) -> void:
 	if not _city_render_error.is_empty(): ui.set_save_notice("도시 표시를 다시 준비해 주세요 (%s). 계속을 선택하면 재시도합니다."%_city_render_error)
 func _resize() -> void:
 	if not is_instance_valid(ui): return
-	if not state.is_empty(): simulation.set_pause(state,"rotation",true)
-	input_router.clear_transient_input()
+	# Reflow is synchronous: retain Core pause ownership and held pad/key input.
+	# Only old touch coordinates are invalidated; reflow cancels the touch ID.
+	input_router.set_touch_vector(Vector2.ZERO)
 	var viewport := Vector2i(get_viewport().get_visible_rect().size)
 	var safe_area := Rect2i(Vector2i.ZERO,viewport)
 	if OS.has_feature("android") or OS.has_feature("ios"):
 		safe_area = Lifecycle.new().map_safe_area(viewport,DisplayServer.window_get_size(),DisplayServer.get_display_safe_area(),DisplayServer.window_get_position())
 	ui.reflow(viewport,safe_area)
-	if not state.is_empty(): simulation.set_pause(state,"rotation",false)
 	_present()
 func _lifecycle_blocked() -> bool:
 	return not _foreground or _lifecycle_pause_intent.background or _lifecycle_pause_intent.controller_lost
@@ -1118,7 +1138,7 @@ func _capture_validation_frame() -> void:
 	print("VALIDATION_CAPTURE ",path," result=",result," phase=",state.get("phase","title")," tick=",state.get("active_tick",0)," viewport=",get_viewport().get_visible_rect().size)
 
 func checkpoint_matches_chapter(snapshot: Dictionary, current_chapter: Dictionary) -> bool:
-	return snapshot.get("chapter_id","") == current_chapter.get("chapter_id","") and snapshot.get("content_revision","") == current_chapter.get("content_revision","") and snapshot.get("rules",{}).get("world_geometry",{}) == current_chapter.get("world_geometry",{})
+	return snapshot.get("chapter_id","") == current_chapter.get("chapter_id","") and snapshot.get("content_revision","") == current_chapter.get("content_revision","") and snapshot.get("rules",{}).get("world_geometry",{}) == current_chapter.get("world_geometry",{}) and (_city_runtime == null or snapshot.get("rules",{}).get("content_fingerprint") == current_chapter.get("content_fingerprint"))
 
 # Single-writer city autosave. Active Core/Node/UI remain exclusively on main.
 const AutosaveWorker = preload("res://game/app/autosave_worker.gd")
@@ -1149,11 +1169,12 @@ func _retry_worker_terminal() -> void:
 		_autosave_terminal.clear()
 		return
 	_record_result()
-func _catalog_context(catalog) -> Dictionary:
-	return {"items":catalog._items.duplicate(true),"doctrines":catalog._doctrines.duplicate(true),"errors":catalog._errors.duplicate()}
+func _catalog_context(contracts) -> Dictionary:
+	var catalog = contracts._catalog
+	return {"items":catalog._items.duplicate(true),"doctrines":catalog._doctrines.duplicate(true),"errors":catalog._errors.duplicate(),"target_evolution_ids":contracts._target_evolution_ids.duplicate()}
 func _capture_worker_job(sequence: int) -> Dictionary:
 	var before := Time.get_ticks_usec()
-	var job := {"directory":save_store._directory,"authority":game_save.duplicate(true),"snapshot":simulation.snapshot(state),"generation":_autosave_generation,"sequence":sequence,"lifecycle_generation":_lifecycle_generation,"fault":autosave_test_fault.duplicate(true),"prepare_delay_ms":autosave_test_prepare_delay_ms,"validator_context":{"chapter":_city_runtime._validator._chapter.duplicate(true),"definitions":_city_runtime._validator._gameplay_definitions.duplicate(true),"content_error":_city_runtime._validator._content_error},"runtime_catalog":_catalog_context(_city_runtime._contracts._catalog),"store_catalog":_catalog_context(save_store._contracts._catalog)}
+	var job := {"directory":save_store._directory,"authority":game_save.duplicate(true),"snapshot":simulation.snapshot(state),"content_route":{"rules_version":simulation._chapter_provider.rules_version(),"content_fingerprint":simulation._chapter.content_fingerprint},"generation":_autosave_generation,"sequence":sequence,"lifecycle_generation":_lifecycle_generation,"fault":autosave_test_fault.duplicate(true),"prepare_delay_ms":autosave_test_prepare_delay_ms,"validator_context":{"chapter":_city_runtime._validator._chapter.duplicate(true),"definitions":_city_runtime._validator._gameplay_definitions.duplicate(true),"content_error":_city_runtime._validator._content_error},"runtime_catalog":_catalog_context(_city_runtime._contracts),"store_catalog":_catalog_context(save_store._contracts)}
 	_worker_metric("capture_usec",Time.get_ticks_usec()-before)
 	return job
 func _worker_reserved() -> bool:

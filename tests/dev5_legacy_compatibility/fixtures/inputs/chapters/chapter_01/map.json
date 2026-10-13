@@ -1,0 +1,191 @@
+{
+  "map_id": "shiganshina_streets",
+  "tile_size": 32,
+  "river_y": 416,
+  "dock_rect": [
+    -64,
+    320,
+    128,
+    192
+  ],
+  "props": [
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        -576,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        -384,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        -192,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_breach",
+      "position": [
+        0,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        192,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        384,
+        -360
+      ]
+    },
+    {
+      "asset_id": "wall_segment",
+      "position": [
+        576,
+        -360
+      ]
+    },
+    {
+      "asset_id": "house_narrow",
+      "position": [
+        -420,
+        -180
+      ]
+    },
+    {
+      "asset_id": "house_bakery",
+      "position": [
+        -420,
+        70
+      ]
+    },
+    {
+      "asset_id": "house_warehouse",
+      "position": [
+        -420,
+        310
+      ]
+    },
+    {
+      "asset_id": "house_narrow",
+      "position": [
+        420,
+        -180
+      ]
+    },
+    {
+      "asset_id": "house_bakery",
+      "position": [
+        420,
+        70
+      ]
+    },
+    {
+      "asset_id": "house_warehouse",
+      "position": [
+        420,
+        310
+      ]
+    },
+    {
+      "asset_id": "house_ruined",
+      "position": [
+        -220,
+        -230
+      ]
+    },
+    {
+      "asset_id": "burning_rubble",
+      "position": [
+        235,
+        -190
+      ]
+    },
+    {
+      "asset_id": "cannon_prop",
+      "position": [
+        -170,
+        -300
+      ]
+    },
+    {
+      "asset_id": "cannon_prop",
+      "position": [
+        170,
+        -300
+      ]
+    },
+    {
+      "asset_id": "refugee_wagon",
+      "position": [
+        105,
+        290
+      ]
+    }
+  ],
+  "geometry": {
+    "bounds": [
+      -640,
+      -300,
+      1280,
+      716
+    ],
+    "obstacles": [
+      [
+        -470,
+        -228,
+        100,
+        48
+      ],
+      [
+        -470,
+        22,
+        100,
+        48
+      ],
+      [
+        -470,
+        262,
+        100,
+        48
+      ],
+      [
+        370,
+        -228,
+        100,
+        48
+      ],
+      [
+        370,
+        22,
+        100,
+        48
+      ],
+      [
+        370,
+        262,
+        100,
+        48
+      ],
+      [
+        -270,
+        -270,
+        100,
+        40
+      ]
+    ]
+  }
+}

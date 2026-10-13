@@ -26,7 +26,7 @@ DEV_REJECTED_SHA256 = {
     'boss_abnormal': '9de54f758a3ad0e2370c1d8f469272d4f68f3ab196dd7ee8a65d747ed1ec787a',
 }
 DEV_IDS = sorted(DEV_REJECTED_SHA256)
-RUNTIME_ASSET_PATTERN = r'res://assets/(?:art/(?:characters|environment|effects|ui)/[^/]+\.png|audio/[^/]+\.wav)'
+RUNTIME_ASSET_PATTERN = r'res://assets/(?:art/(?:characters|environment|effects|ui)/[^/]+\.png|audio/[^/]+\.(?:wav|ogg))'
 # The UI font is a separate, exact-path bundle, never a manifest art exception.
 UI_FONT = 'assets/fonts/NotoSansKR-wght.ttf'
 UI_FONT_LICENSE = 'assets/fonts/NotoSansKR-OFL.txt'
@@ -499,14 +499,18 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         if asset.get('kind') == 'effect' and vfx_render_enabled(asset):
             if member not in name_set or hashlib.sha256(archive.read(member)).hexdigest() != asset['sha256']:
                 raise BuildError('APK VFX original raster missing or changed: ' + relative)
+        if asset.get('kind') == 'audio':
+            if member not in name_set or hashlib.sha256(archive.read(member)).hexdigest() != asset['sha256']:
+                raise BuildError('APK audio original missing or changed: ' + relative)
         if member+'.import' in name_set:
             # Imported bytes must belong to this exact resource path, never arbitrary source art.
             prefix = '.godot/imported/' + Path(relative).name + '-' + hashlib.md5(asset['path'].encode()).hexdigest()
             refs = _resource_refs(archive.read(member+'.import'))
             imported = [ref for ref in refs if ref.startswith('.godot/imported/')]
             if not imported: raise BuildError('APK asset has no imported resource: ' + relative)
+            suffixes = ('.oggvorbisstr',) if asset.get('kind') == 'audio' and relative.endswith('.ogg') else (('.sample',) if asset.get('kind') == 'audio' else ('.ctex', '.sample'))
             for ref in imported:
-                if ref not in (prefix+'.ctex', prefix+'.sample') or 'assets/'+ref not in name_set:
+                if ref not in tuple(prefix+suffix for suffix in suffixes) or 'assets/'+ref not in name_set:
                     raise BuildError('APK unexpected imported resource: ' + relative)
                 allowed.add('assets/'+ref)
         elif member in name_set:

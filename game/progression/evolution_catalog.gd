@@ -3,16 +3,18 @@ extends RefCounted
 # NEW recipe/evaluation authority. Only the approved 845 chapter is supported.
 # A weak owner avoids a Catalog -> EvolutionCatalog -> Catalog reference cycle.
 const CHAPTER_YEARS := {"chapter_01_shiganshina":845}
-const EFFECT_BASES := {"wing_cut":"blade_slash","crossfire":"wall_cannon","storm_chain":"chain_lightning","inferno_zone":"fire_zone"}
+const EFFECT_BASES := {"wing_cut":"blade_slash","crossfire":"wall_cannon","storm_chain":"chain_lightning","inferno_zone":"fire_zone","whirlwind":"spin_slash","sky_lance":"odm_dash","echo_assault":"reentry_combo","wing_squad":"ally_cover"}
 var _owner: WeakRef
 var _items: Dictionary = {}
 var _errors: Array[String] = []
+var _schema_version := 1
 func _init(upgrade_catalog, definitions_override = null) -> void:
 	_owner = weakref(upgrade_catalog)
 	var data = upgrade_catalog._read("res://data/evolutions.json") if definitions_override == null else definitions_override
-	if not upgrade_catalog.json_data_valid(data) or not data is Dictionary or data.get("schema_version") != 1 or not data.get("items") is Dictionary or data.items.is_empty() or data.items.size() > 32:
+	if not upgrade_catalog.json_data_valid(data) or not data is Dictionary or not _integer(data.get("schema_version"),1,2) or not data.get("items") is Dictionary or data.items.is_empty() or data.items.size() > 32:
 		_errors.append("invalid_item")
 		return
+	_schema_version = int(data.schema_version)
 	var equipment: Dictionary = upgrade_catalog.equipment
 	var passives: Dictionary = upgrade_catalog.passives
 	var bases := {}
@@ -28,10 +30,17 @@ func ids() -> Array:
 	result.sort()
 	return result
 func definition(id: String) -> Dictionary: return _items.get(id,{}).duplicate(true)
+func final_stage_level() -> int: return 6 if _schema_version == 2 else 5
+func spent_seals(state: Dictionary) -> int:
+	var total := 0
+	for id in state.get("evolutions",{}).values():
+		if not id is String or not _items.has(id): return -1
+		total += int(_items[id].seal_cost)
+	return total
 func _recipe_valid(id: Variant, row: Variant, equipment: Dictionary, passives: Dictionary) -> bool:
 	if not id is String or not id.begins_with("evo_") or id.length() > 80 or not row is Dictionary: return false
 	if row.get("recipe_id") != id or not row.get("base_item_id") is String or not equipment.has(row.base_item_id): return false
-	if not _integer(row.get("story_year"),845,845) or not _integer(row.get("required_weapon_level"),5,5) or not _integer(row.get("seal_cost"),1,1): return false
+	if not _integer(row.get("story_year"),845,845) or not _integer(row.get("required_weapon_level"),5,5) or not _integer(row.get("seal_cost"),0 if _schema_version == 2 else 1,0 if _schema_version == 2 else 1): return false
 	for field in ["name","description","tradeoff_text"]:
 		if not row.get(field) is String or row[field].is_empty(): return false
 	if not row.get("effect_id") is String or not EFFECT_BASES.has(row.effect_id) or EFFECT_BASES[row.effect_id] != row.base_item_id: return false
@@ -41,19 +50,22 @@ func _recipe_valid(id: Variant, row: Variant, equipment: Dictionary, passives: D
 		if not chapter is String or not CHAPTER_YEARS.has(chapter) or CHAPTER_YEARS[chapter] != row.story_year or seen.has(chapter): return false
 		seen[chapter] = true
 	if not row.get("required_passives") is Array or row.required_passives.size() > 4: return false
+	if _schema_version == 2 and row.get("icon_id") != "skill_"+id: return false
 	seen.clear()
 	for required in row.required_passives:
-		if not required is Dictionary or required.size() != 2 or not required.get("passive_id") is String or not passives.has(required.passive_id) or not _integer(required.get("level"),3,3) or seen.has(required.passive_id): return false
+		if not required is Dictionary or required.size() != 2 or not required.get("passive_id") is String or not passives.has(required.passive_id) or not _integer(required.get("level"),1 if _schema_version == 2 else 3,1 if _schema_version == 2 else 3) or seen.has(required.passive_id): return false
 		seen[required.passive_id] = true
 	var required_equipment = row.get("required_equipment",[])
 	if not required_equipment is Array or required_equipment.size() > 3 or (required_equipment.is_empty() and row.required_passives.is_empty()): return false
+	if _schema_version == 2 and required_equipment.size()+row.required_passives.size() != 1: return false
 	seen.clear()
 	for required in required_equipment:
-		if not required is Dictionary or required.size() != 2 or not required.get("equipment_id") is String or not equipment.has(required.equipment_id) or required.equipment_id == row.base_item_id or not _integer(required.get("level"),3,3) or seen.has(required.equipment_id): return false
+		if not required is Dictionary or required.size() != 2 or not required.get("equipment_id") is String or not equipment.has(required.equipment_id) or required.equipment_id == row.base_item_id or not _integer(required.get("level"),1 if _schema_version == 2 else 3,1 if _schema_version == 2 else 3) or seen.has(required.equipment_id): return false
 		seen[required.equipment_id] = true
 	return _effect_valid(row.effect_id,row.get("effect_params"))
 func _effect_valid(effect_id: String, params: Variant) -> bool:
 	if not params is Dictionary: return false
+	if effect_id in ["whirlwind","sky_lance","echo_assault","wing_squad"]: return _final_pattern_valid(effect_id,params)
 	if effect_id == "storm_chain":
 		return params.size() == 5 and params.has_all(["damage_multiplier","chain_count","hop_range","acquisition_range","cooldown_ticks"]) and _number(params.damage_multiplier,0.001,100) and _integer(params.chain_count,1,12) and _number(params.hop_range,1,10000) and _number(params.acquisition_range,1,10000) and _integer(params.cooldown_ticks,1,36000)
 	if effect_id == "inferno_zone":
@@ -75,11 +87,27 @@ func _effect_valid(effect_id: String, params: Variant) -> bool:
 	if not _number(params.radius,1,10000) or not _integer(params.cooldown_ticks,1,36000): return false
 	if effect_id == "wing_cut": return _number(params.arc_degrees,1,360)
 	return _number(params.acquisition_range,1,10000) and _number(params.point_offset,1,10000)
+func _final_pattern_valid(effect_id: String, params: Dictionary) -> bool:
+	var fields := ["damage_multipliers","stage_delays","acquisition_range","cooldown_ticks"]
+	match effect_id:
+		"whirlwind": fields.append_array(["radius","radius_step"])
+		"sky_lance": fields.append_array(["length","width","advance_step"])
+		"echo_assault": fields.append_array(["radius","arc_degrees","point_offset"])
+		"wing_squad": fields.append_array(["length","width","point_offset"])
+	if params.size() != fields.size() or not params.has_all(fields): return false
+	if not params.damage_multipliers is Array or params.damage_multipliers.size() != 3 or not params.stage_delays is Array or params.stage_delays.size() != 3 or params.stage_delays[0] != 0: return false
+	for index in 3:
+		if not _number(params.damage_multipliers[index],0.001,100) or not _integer(params.stage_delays[index],0,3600): return false
+		if index > 0 and params.stage_delays[index] <= params.stage_delays[index-1]: return false
+	for field in fields:
+		if field in ["damage_multipliers","stage_delays","cooldown_ticks"]: continue
+		if not _number(params[field],1,360 if field == "arc_degrees" else 10000): return false
+	return _integer(params.cooldown_ticks,1,36000)
 func progression_state_valid(state: Dictionary) -> bool:
 	var owner = _owner.get_ref()
 	if owner == null or not owner.state_valid(state) or not _errors.is_empty(): return false
 	var applied = state.get("evolutions",{})
-	if not applied is Dictionary or applied.size() > 4 or not _integer(state.get("tactical_seals",0),0,5) or applied.size()+int(state.get("tactical_seals",0)) > 5: return false
+	if not applied is Dictionary or applied.size() > 4 or not _integer(state.get("tactical_seals",0),0,5) or spent_seals(state)+int(state.get("tactical_seals",0)) > 5: return false
 	for base in applied:
 		if not (base is String or base is StringName) or not applied[base] is String or not _items.has(applied[base]): return false
 		var recipe: Dictionary = _items[applied[base]]
@@ -89,7 +117,7 @@ func progression_state_valid(state: Dictionary) -> bool:
 		for required in recipe.get("required_equipment",[]):
 			if state.equipment.get(required.equipment_id,0) < required.level: return false
 	return true
-func evaluate(state: Dictionary, evolution_id: String) -> Dictionary:
+func evaluate(state: Dictionary, evolution_id: String, presentation_only: bool = false) -> Dictionary:
 	if not _items.has(evolution_id) or not progression_state_valid(state): return {}
 	var owner = _owner.get_ref()
 	var recipe: Dictionary = _items[evolution_id]
@@ -115,8 +143,14 @@ func evaluate(state: Dictionary, evolution_id: String) -> Dictionary:
 		if current == 0: reason = "equipment_slots" if state.equipment.size() >= 4 else "missing_weapon"
 		elif current < required.level: reason = "weapon_level"
 		requirements.append(_requirement("equipment",required.equipment_id,equipment[required.equipment_id].name,current,int(required.level),reason))
-	var seals := int(state.get("tactical_seals",0))
-	requirements.append(_requirement("seal","tactical_seal","전술 개조권",seals,int(recipe.seal_cost),"" if seals >= recipe.seal_cost else "seal_required"))
+	if int(recipe.seal_cost) > 0:
+		var seals := int(state.get("tactical_seals",0))
+		requirements.append(_requirement("seal","tactical_seal","전술 개조권",seals,int(recipe.seal_cost),"" if seals >= recipe.seal_cost else "seal_required"))
+	if _schema_version == 2 or presentation_only:
+		for requirement in requirements:
+			requirement.icon_id = "skill_"+str(requirement.item_id)
+			requirement.owned = int(requirement.current) >= 1
+			requirement.requirement_type = "base_level" if requirement.item_id == recipe.base_item_id else ("owned_skill" if _schema_version == 2 else "level")
 	var complete := true
 	var blocked := false
 	for requirement in requirements:
@@ -127,7 +161,12 @@ func evaluate(state: Dictionary, evolution_id: String) -> Dictionary:
 	elif state.get("evolutions",{}).get(recipe.base_item_id,"") == evolution_id: status = "evolved"
 	elif blocked: status = "blocked"
 	elif complete: status = "ready"
-	return {"evolution_id":evolution_id,"base_item_id":recipe.base_item_id,"name":recipe.name,"description":recipe.description,"status":status,"can_evolve":status == "ready","requirements":requirements,"effect_delta":_effect_delta(state,recipe),"tradeoff_text":recipe.tradeoff_text}
+	var result := {"evolution_id":evolution_id,"base_item_id":recipe.base_item_id,"name":recipe.name,"description":recipe.description,"status":status,"can_evolve":status == "ready","requirements":requirements,"effect_delta":_effect_delta(state,recipe),"tradeoff_text":recipe.tradeoff_text}
+	if _schema_version == 2 or presentation_only:
+		result.icon_id = recipe.get("icon_id","skill_"+evolution_id)
+		result.display_level = 6 if status == "evolved" else weapon_level
+		result.display_max_level = 6
+	return result
 func _requirement(kind: String, id: String, label: String, current: int, required: int, reason: String) -> Dictionary:
 	return {"kind":kind,"item_id":id,"name":label,"current":current,"required":required,"met":current >= required,"blocked_reason":reason}
 func _effect_delta(state: Dictionary, recipe: Dictionary) -> Dictionary:
@@ -137,6 +176,14 @@ func _effect_delta(state: Dictionary, recipe: Dictionary) -> Dictionary:
 	var scale: float = owner.stat(state,"range_multiplier",1.0)
 	if recipe.effect_id == "storm_chain":
 		return {"stages":int(params.chain_count),"stage_damage":[float(weapon.damage)*float(params.damage_multiplier)],"stage_delays":[0],"damage":float(weapon.damage)*float(params.damage_multiplier),"radius":float(params.acquisition_range)*scale,"acquisition_range":float(params.acquisition_range)*scale,"range":float(params.acquisition_range)*scale,"chain_count":int(params.chain_count),"hop_range":float(params.hop_range)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0))))}
+	if recipe.effect_id in ["whirlwind","sky_lance","echo_assault","wing_squad"]:
+		var final_damage := []
+		for multiplier in params.damage_multipliers: final_damage.append(float(weapon.damage)*float(multiplier))
+		var final_stats := {"stages":3,"stage_damage":final_damage,"stage_delays":params.stage_delays.map(func(tick): return int(tick)),"radius":float(params.get("radius",0.0))*scale,"acquisition_range":float(params.acquisition_range)*scale,"cooldown_ticks":maxi(1,int(round(float(params.cooldown_ticks)*owner.stat(state,"cooldown_multiplier",1.0))))}
+		for field in ["radius_step","length","width","advance_step","point_offset"]:
+			if params.has(field): final_stats[field] = float(params[field])*scale
+		if params.has("arc_degrees"): final_stats.arc_degrees = params.arc_degrees
+		return final_stats
 	var character_cooldown := float(state.rules.get("character_blade_cooldown_multiplier",1.0)) if recipe.base_item_id == "blade_slash" else 1.0
 	var damage := []
 	for multiplier in params.damage_multipliers: damage.append(float(weapon.damage)*float(multiplier))

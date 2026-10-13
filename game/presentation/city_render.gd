@@ -25,9 +25,17 @@ static func build(world_view: Dictionary, actors: Array, corpses: Array, project
 				if shadow.intersects(camera_rect,true): ground.append({"kind":"shadow","id":"shadow:"+id,"position":actor.position,"bounds":shadow})
 				command.position.y -= height
 				command.render_bounds.position.y -= height
+				# A derived over-phase target grants only the depth of that exact roof.
+				# Wire detachment/cancellation does not erase this read-only identity.
+				var roof_id: String = str(actor.get("roof_prop_id",""))
+				if actor.get("is_player",false) and not roof_id.is_empty():
+					for chunk in world_view.get("chunks",[]):
+						for prop in chunk.props:
+							if prop.prop_id == roof_id:
+								command.depth_y = maxf(float(command.depth_y),float(prop.get("depth_y",prop.position.y))+0.01)
 			if command.render_bounds.intersects(camera_rect,true):
 				upright.append(command)
-				if actor.get("is_player",false): markers.append({"kind":"player_outline","id":"outline:"+id,"actor_id":id,"position":actor.position,"render_bounds":command.render_bounds,"occlusion_only":true})
+				if actor.get("is_player",false): markers.append({"kind":"player_outline","id":"outline:"+id,"actor_id":id,"position":command.position,"render_bounds":command.render_bounds,"occlusion_only":true})
 	upright.sort_custom(func(a,b): return a.depth_y < b.depth_y or (a.depth_y == b.depth_y and a.id < b.id))
 	ground.sort_custom(func(a,b): return a.id < b.id)
 	markers.sort_custom(func(a,b): return a.id < b.id)

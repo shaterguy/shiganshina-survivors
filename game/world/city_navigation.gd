@@ -237,11 +237,22 @@ func _visible(a: Vector2, b: Vector2, radius: float) -> bool:
 			# Do not round, reconstruct the endpoint, or equate reverse segments.
 			key = [a,b,radius]
 			if _direction_los.queries.has(key): return _direction_los.queries[key]
-	var hit: Dictionary = _world.sweep(a,b-a,radius)
-	var visible: bool = hit.ok and hit.fraction == 1.0
+	var visible: bool
+	var query_ok: bool
+	if not _direction_los.is_empty():
+		# Only the existing exact-script scope can select the narrower reader.
+		# The view falls back to its original sweep whenever failure-free
+		# geometry reads cannot be proved, retaining the real failure order.
+		var result: Dictionary = _world.visibility_query(a,b,radius)
+		query_ok = result.ok
+		visible = result.visible
+	else:
+		var hit: Dictionary = _world.sweep(a,b-a,radius)
+		query_ok = hit.ok
+		visible = hit.ok and hit.fraction == 1.0
 	if not _direction_los.is_empty():
 		# A blocked successful sweep is reusable; a failed query never is.
-		if hit.ok:
+		if query_ok:
 			if _direction_los.queries.size() < MAX_TICK_LOS: _direction_los.queries[key] = visible
 		else: _direction_los.clear()
 	return visible

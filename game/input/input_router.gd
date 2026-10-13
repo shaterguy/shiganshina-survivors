@@ -16,8 +16,12 @@ var _pressed_dpad := {}
 var _accept_armed := true
 var _menu_direction := ""
 var _repeat_remaining := 0.0
+var _connected_controllers := {}
+var _orientation_before_controller := -1
 func _ready() -> void:
 	Input.joy_connection_changed.connect(_on_connection)
+	# A pad can already be present before the signal subscription exists.
+	for device in _connected_joypads(): _on_connection(device,true)
 func _input(event: InputEvent) -> void:
 	if not _enabled: return # Relinquish GUI ownership when another screen owns input.
 	handle_event(event)
@@ -117,6 +121,7 @@ func set_active(enabled: bool) -> void:
 		clear_transient_input()
 		_accept_armed = false
 func _on_connection(device: int, connected: bool) -> void:
+	_update_controller_orientation(device,connected)
 	if connected:
 		_accept_armed = false
 	elif device == active_device:
@@ -124,6 +129,31 @@ func _on_connection(device: int, connected: bool) -> void:
 		_accept_armed = false
 		active_device = -1
 		active_controller_lost.emit()
+func _connected_joypads() -> Array[int]:
+	return Input.get_connected_joypads()
+func _supports_controller_orientation() -> bool:
+	return OS.has_feature("android")
+func _read_screen_orientation() -> int:
+	return DisplayServer.screen_get_orientation()
+func _write_screen_orientation(value: int) -> void:
+	DisplayServer.screen_set_orientation(value)
+func _update_controller_orientation(device: int, connected: bool) -> void:
+	# Input may be disabled by a modal or lifecycle pause. Connection policy is
+	# still active, and no gameplay state, input hint or save is changed here.
+	if not _supports_controller_orientation(): return
+	if connected:
+		if _connected_controllers.has(device): return
+		if _connected_controllers.is_empty():
+			_orientation_before_controller = _read_screen_orientation()
+			if _orientation_before_controller != DisplayServer.SCREEN_SENSOR_LANDSCAPE:
+				_write_screen_orientation(DisplayServer.SCREEN_SENSOR_LANDSCAPE)
+		_connected_controllers[device] = true
+	elif _connected_controllers.has(device):
+		_connected_controllers.erase(device)
+		if _connected_controllers.is_empty():
+			if _orientation_before_controller != DisplayServer.SCREEN_SENSOR_LANDSCAPE:
+				_write_screen_orientation(_orientation_before_controller)
+			_orientation_before_controller = -1
 func _hint(kind: String) -> void:
 	if input_kind != kind:
 		input_kind = kind

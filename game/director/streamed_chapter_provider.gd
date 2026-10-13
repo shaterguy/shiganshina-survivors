@@ -8,7 +8,22 @@ var _derived_key := ""
 var _derived_chapter: Dictionary = {}
 var _derived_builds := 0
 var _derived_hits := 0
+const DEV4_FINGERPRINT := "01ad1adb8da30c904fd5feb5d7fb9ce0da0b959d206560d76b382ff1e2b7eae7"
+const DEV4_MANIFEST_SHA256 := "01e42d824a111acceb4e64d90bc2c42884824df7a8dabd30c83b8604f67e30cc"
+const DEV4_ROOT := "res://data/legacy/dev4/"
+var _rules_version := "dev5"
+func _init(version: String = "dev5") -> void:
+	_rules_version = version
+func rules_version() -> String:
+	return _rules_version
 func load_chapter(id: String) -> Dictionary:
+	if _rules_version == "dev5": return _load_current_chapter(id)
+	if id != Chapters.CHAPTER_ID: return _fail("unknown_chapter")
+	var capture := capture_validation_inputs()
+	if not capture.get("ok",false): return _fail("content_mismatch")
+	var parsed := definitions_from_capture(capture)
+	return {"ok":true,"chapter":parsed.chapter} if parsed.get("ok",false) else _fail("content_mismatch")
+func _load_current_chapter(id: String) -> Dictionary:
 	var base: Dictionary = Chapters.new().load_chapter(id)
 	if not base.get("ok",false):
 		_clear_derived()
@@ -101,37 +116,70 @@ func _fail(code: String) -> Dictionary:
 
 # Transaction input protocol; opaque providers do not opt in.
 func capture_validation_inputs() -> Dictionary:
-	var paths := Chapters.PATHS.duplicate()
-	for path in ["assets/manifest.json","chapters/chapter_01/authored_dock.json"]:
-		if not path in paths: paths.append(path)
+	if not _rules_version in ["dev4","dev5"]: return _fail("content_mismatch")
+	var manifest := _legacy_manifest() if _rules_version == "dev4" else {}
+	if _rules_version == "dev4" and manifest.is_empty(): return _fail("content_mismatch")
 	var sources := {}
-	var hash := HashingContext.new()
-	hash.start(HashingContext.HASH_SHA256)
-	for path in paths:
-		var file := FileAccess.open("res://"+path,FileAccess.READ)
-		if file == null: return {"ok":false,"error_code":"content_mismatch"}
+	for path in _capture_paths():
+		var source: String = DEV4_ROOT+path if _rules_version == "dev4" else "res://"+path
+		var file := FileAccess.open(source,FileAccess.READ)
+		if file == null: return _fail("content_mismatch")
 		var length := file.get_length()
 		if length > Chapters.MAX_DEFINITION_BYTES:
 			file.close()
-			return {"ok":false,"error_code":"content_mismatch"}
+			return _fail("content_mismatch")
 		var bytes := file.get_buffer(length)
 		var error := file.get_error()
 		file.close()
-		if bytes.size() != length or not error in [OK,ERR_FILE_EOF]: return {"ok":false,"error_code":"content_mismatch"}
+		if bytes.size() != length or not error in [OK,ERR_FILE_EOF]: return _fail("content_mismatch")
+		if _rules_version == "dev4" and (length != manifest.definition_bytes.get(path) or _bytes_sha256(bytes) != manifest.definition_sha256.get(path)): return _fail("content_mismatch")
 		sources[path] = bytes
-		hash.update(var_to_bytes([path,length]))
-		hash.update(bytes)
-	return {"ok":true,"sha256":hash.finish().hex_encode(),"sources":sources}
+	return {"ok":true,"rules_version":_rules_version,"sha256":_capture_digest(sources),"sources":sources}
 func definitions_from_capture(capture: Dictionary) -> Dictionary:
+	if capture.get("rules_version") != _rules_version or not capture.get("sources") is Dictionary: return _fail("content_mismatch")
+	var sources: Dictionary = capture.sources
+	if sources.size() != _capture_paths().size(): return _fail("content_mismatch")
+	var manifest := _legacy_manifest() if _rules_version == "dev4" else {}
+	if _rules_version == "dev4" and manifest.is_empty(): return _fail("content_mismatch")
 	var definitions := {}
-	for path in capture.sources:
+	for path in _capture_paths():
+		if not sources.get(path) is PackedByteArray or sources[path].size() > Chapters.MAX_DEFINITION_BYTES: return _fail("content_mismatch")
+		if _rules_version == "dev4" and (sources[path].size() != manifest.definition_bytes.get(path) or _bytes_sha256(sources[path]) != manifest.definition_sha256.get(path)): return _fail("content_mismatch")
 		var parser := JSON.new()
-		if parser.parse(capture.sources[path].get_string_from_utf8()) != OK or not parser.data is Dictionary: return {"ok":false,"error_code":"content_mismatch"}
+		if parser.parse(sources[path].get_string_from_utf8()) != OK or not parser.data is Dictionary: return _fail("content_mismatch")
 		definitions[path] = parser.data
+	if capture.get("sha256") != _capture_digest(sources): return _fail("content_mismatch")
 	var base_definitions := {}
 	for path in Chapters.PATHS: base_definitions[path] = definitions[path]
 	var base := Chapters.new().from_definitions(Chapters.CHAPTER_ID,base_definitions)
-	if not base.get("ok",false): return {"ok":false,"error_code":"content_mismatch"}
+	if not base.get("ok",false): return _fail("content_mismatch")
 	var result := from_definitions(base.chapter,definitions["chapters/chapter_01/city_templates.json"],definitions["data/world_props.json"],definitions["assets/manifest.json"],definitions["chapters/chapter_01/authored_dock.json"])
-	if not result.get("ok",false): return {"ok":false,"error_code":"content_mismatch"}
-	return {"ok":true,"chapter":result.chapter.duplicate(true),"definitions":definitions.duplicate(true)}
+	if not result.get("ok",false): return _fail("content_mismatch")
+	if _rules_version == "dev4" and result.chapter.content_fingerprint != DEV4_FINGERPRINT: return _fail("content_mismatch")
+	return {"ok":true,"chapter":result.chapter.duplicate(true),"definitions":definitions.duplicate(true),"rules_version":_rules_version}
+func _capture_paths() -> Array:
+	var paths := Chapters.PATHS.duplicate()
+	for path in ["assets/manifest.json","chapters/chapter_01/authored_dock.json"]:
+		if not path in paths: paths.append(path)
+	return paths
+func _capture_digest(sources: Dictionary) -> String:
+	var hash := HashingContext.new()
+	hash.start(HashingContext.HASH_SHA256)
+	hash.update(var_to_bytes([_rules_version,DEV4_MANIFEST_SHA256 if _rules_version == "dev4" else ""]))
+	for path in _capture_paths():
+		hash.update(var_to_bytes([path,sources[path].size()]))
+		hash.update(sources[path])
+	return hash.finish().hex_encode()
+func _legacy_manifest() -> Dictionary:
+	var file := FileAccess.open(DEV4_ROOT+"manifest.json",FileAccess.READ)
+	if file == null or file.get_length() > Chapters.MAX_DEFINITION_BYTES: return {}
+	var bytes := file.get_buffer(file.get_length())
+	file.close()
+	if _bytes_sha256(bytes) != DEV4_MANIFEST_SHA256: return {}
+	var value: Variant = JSON.parse_string(bytes.get_string_from_utf8())
+	return value if value is Dictionary else {}
+func _bytes_sha256(bytes: PackedByteArray) -> String:
+	var hash := HashingContext.new()
+	hash.start(HashingContext.HASH_SHA256)
+	hash.update(bytes)
+	return hash.finish().hex_encode()

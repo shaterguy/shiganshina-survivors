@@ -21,7 +21,7 @@ func run(t) -> void:
 	var content: String = app.ui._choices.get_child(3).display_text() if app.ui._choices.get_child_count() > 3 and app.ui._choices.get_child(3).has_method("display_text") else ""
 	for child in app.ui._choices.get_children():
 		if child.has_method("display_text"): content = child.display_text()
-	t.check(content.contains("Lv 1/5") and content.contains("전방") and content.contains("선행조건"),"owned detail shows current level, real attack and recipe conditions")
+	t.check(content.contains("Lv 1/6") and content.contains("전방") and content.contains("선행조건"),"owned detail shows current level, real attack and recipe conditions")
 	app.ui.navigate("cancel")
 	t.check(app.ui._mode == "owned_skills" and app.ui.focused_semantic_id() == id,"B returns one step to originating owned item")
 	app.ui.navigate("accept")

@@ -1,10 +1,14 @@
-> Current dev4 identity: **진격의 거인 인류의 날개**, repository
+> dev5 keeps the established dev4 GitHub certificate SHA-256
+> `0ea1f152a801330f69ca0301a638de283e665c814535b54f407b1974c6bd2ae0`.
+> Do not regenerate or replace a signing key. Local export remains unsigned.
+
+> Current dev5 identity: **진격의 거인 인류의 날개**, repository
 > `shaterguy/wings-of-humanity`, package `com.shaterguy.wingsofhumanity.dev`.
 > Local builds remain unsigned. Use the separately reviewed
 > [GitHub signing contract](github-signing-input-contract.md) for this package.
 > The historical key, PHONE paths, and backup instructions below describe only
 > the old `com.shaterguy.shiganshina.dev` lineage. They do not authorize key lookup,
-> recovery, signing, or migration for dev4, and the default signer rejects dev4.
+> recovery, signing, or migration for this package, and the default signer rejects it.
 
 # Portable local Android DEV build
 
@@ -72,7 +76,7 @@ python3 tests/build/smoke_android_export.py \
 python3 tools/build/build_android.py \
   --godot /absolute/path/to/godot \
   --template /absolute/path/to/tools/android_debug-4.6.3.apk \
-  --output dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk
+  --output dist/WingsOfHumanity-v0.1.0-dev5-unsigned.apk
 ```
 
 If `godot` is on `PATH`, omit `--godot`. On Windows use `py -3` instead of `python3`, ordinary Windows paths, and a single-line command rather than POSIX backslash continuations.
@@ -87,12 +91,12 @@ The wrapper:
 6. Validates Android binary manifest package/version, ARM64-only native libraries, absence of INTERNET permission, ZIP integrity, source JSON, manifest assets and an archive whitelist. Untouched engine files must match the pinned template bytes.
 7. Publishes only after verification, plus a `.apk.build.json` report containing source-input digest, template digest, engine version and APK SHA-256. It refuses existing output/report paths.
 
-Identity: `com.shaterguy.wingsofhumanity.dev`, version name `0.1.0-dev4`, version code `4`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
+Identity: `com.shaterguy.wingsofhumanity.dev`, version name `0.1.0-dev5`, version code `5`, ARM64. The app uses its own 512×512 icon. The resulting file is **unsigned and is not installable yet**.
 
 Recheck an unsigned artifact against the current approved source:
 
 ```sh
-python3 tools/build/verify_android.py dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk \
+python3 tools/build/verify_android.py dist/WingsOfHumanity-v0.1.0-dev5-unsigned.apk \
   --template /absolute/path/to/tools/android_debug-4.6.3.apk
 ```
 

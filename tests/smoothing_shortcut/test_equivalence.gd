@@ -55,23 +55,27 @@ func _routes(t):
  var a=F.world(F.neighborhood());var b=F.world(F.neighborhood())
  var va=V.new(a);var vb=V.new(b);var na=N.new(va);var nb=O.new(vb)
  for radius in [8.0,8.01,16.0,18.0,20.0,24.0,28.0,30.0,32.0]:
-  for pair in [[Vector2(496,194),Vector2(1152,384)],[Vector2(384,384),Vector2(640,384)],[Vector2(100,100),Vector2(384,384)],[Vector2(672,762),Vector2(384,384)]]:
+  for pair in [[Vector2(432,194),Vector2(1152,384)],[Vector2(384,384),Vector2(640,384)],[Vector2(100,100),Vector2(384,384)],[Vector2(672,762),Vector2(384,384)]]:
    for tick in [0,1,12,2]:
     va.begin_navigation_queries();vb.begin_navigation_queries()
-    t.check(na.direction(pair[0],pair[1],radius,tick)==nb.direction(pair[0],pair[1],radius,tick),"clear/obstructed/blocked routes exact across radius and cache age")
+    var actual:Dictionary=na.direction(pair[0],pair[1],radius,tick)
+    var expected:Dictionary=nb.direction(pair[0],pair[1],radius,tick)
+    if pair[0]==Vector2(432,194):
+     t.check(actual.ok and expected.ok and not actual.waypoints.is_empty(),"obstructed smoothing fixture executes successful nonempty routing")
+    t.check(actual==expected,"clear/obstructed/blocked routes exact across radius and cache age")
     t.check(va.navigation_query_status()==vb.navigation_query_status(),"route error state exact")
  var changes:Array=[]
  for prop in a.localized_chunk("0,0").props:
   if prop.destructible:changes.append({"slot_id":prop.slot_id,"hp":0,"destroyed":true})
  for w in [a,b]:t.check(w.apply_props([{"chunk":["0","0"],"props":changes}],1).ok,"real geometry destruction applies")
- for radius in [8.0,24.0,32.0]:t.check(na.direction(Vector2(496,194),Vector2(1152,384),radius,20)==nb.direction(Vector2(496,194),Vector2(1152,384),radius,20),"geometry change invalidates route identically")
+ for radius in [8.0,24.0,32.0]:t.check(na.direction(Vector2(432,194),Vector2(1152,384),radius,20)==nb.direction(Vector2(432,194),Vector2(1152,384),radius,20),"geometry change invalidates route identically")
  var rebased:Array=[]
  for y in range(-1,2):
   for x in range(0,3):rebased.append([str(x),str(y)])
  for w in [a,b]:t.check(w.prepare(rebased,[],F.hydration(rebased),["1","0"]).ok,"real coverage and origin rebase")
  for radius in [8.0,24.0,32.0]:
-  t.check(na.direction(Vector2(-272,194),Vector2(384,384),radius,21)==nb.direction(Vector2(-272,194),Vector2(384,384),radius,21),"rebased physical route remains exact")
-  t.check(na.direction(Vector2(496,194),Vector2(1152,384),radius,22)==nb.direction(Vector2(496,194),Vector2(1152,384),radius,22),"same local coordinates after rebase use current world")
+  t.check(na.direction(Vector2(432,194)-Vector2(768,0),Vector2(384,384),radius,21)==nb.direction(Vector2(432,194)-Vector2(768,0),Vector2(384,384),radius,21),"rebased physical route remains exact")
+  t.check(na.direction(Vector2(432,194),Vector2(1152,384),radius,22)==nb.direction(Vector2(432,194),Vector2(1152,384),radius,22),"same local coordinates after rebase use current world")
 
 func _coverage_edges(t):
  var w=F.world(F.neighborhood())

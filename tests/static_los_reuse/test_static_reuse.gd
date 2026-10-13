@@ -4,7 +4,7 @@ const N = preload("res://game/world/precise_city_navigation.gd")
 const O = preload("res://tests/direction_los_reuse/oracle_precise_navigation.gd")
 const V = preload("res://game/world/streamed_navigation_view.gd")
 const Cached = preload("res://game/world/cached_streamed_world.gd")
-const A := Vector2(496,194)
+const A := Vector2(432,194)
 const B := Vector2(1152,384)
 const OPEN_A := Vector2(384,384)
 const OPEN_B := Vector2(640,384)
@@ -26,7 +26,10 @@ func run(t) -> void:
 func _across_ticks(t,cached: bool) -> void:
  var w = _world(cached); var v = V.new(w); var n = N.new(v)
  var o = O.new(V.new(_world(cached)))
- t.check(n.direction(A,B,8,0) == o.direction(A,B,8,0),"first static route is oracle-exact")
+ var actual: Dictionary = n.direction(A,B,8,0)
+ var expected: Dictionary = o.direction(A,B,8,0)
+ t.check(actual.ok and expected.ok and not actual.waypoints.is_empty(),"static fixture executes successful nonempty routing")
+ t.check(actual == expected,"first static route is oracle-exact")
  for tick in [1,11,12,13,24,10000]:
   var q := _q(w)
   t.check(n.direction(A,B,8,tick) == o.direction(A,B,8,tick),"static route exact across distance-field refresh and large tick step")
@@ -126,7 +129,7 @@ func _derived_cached(t) -> void:
   a.refuse = tick == 1; b.refuse = tick == 1
   t.check(n.direction(A,B,8,tick) == o.direction(A,B,8,tick),"derived cached world can change results at the next tick")
   t.check(n._tick_los.is_empty(),"derived cached world is never epoch-cache eligible")
-  t.check(a.calls == b.calls and va.navigation_query_status() == vb.navigation_query_status(),"derived cached sweep arguments, call order and sticky error stay exact")
+  t.check(not a.calls.is_empty() and a.calls == b.calls and va.navigation_query_status() == vb.navigation_query_status(),"derived cached sweep arguments, call order and sticky error stay exact")
 func _same_geometry_prepare(t,cached: bool) -> void:
  var w = _world(cached); var n = N.new(V.new(w))
  var before: Dictionary = n.direction(A,B,8,0)

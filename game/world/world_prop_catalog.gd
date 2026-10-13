@@ -31,6 +31,7 @@ static func validate(definitions: Dictionary, asset_manifest: Dictionary) -> Arr
 		for mask in ["collision_mask","cover_mask"]:
 			if not d.has(mask) or int(d[mask]) != d[mask] or d[mask] < 0 or d[mask] > 31: errors.append("invalid_mask:"+id)
 		if d.get("contact_damage",0) != 0: errors.append("undeclared_contact_damage:"+id)
+		if d.has("mobility_anchor") and not _valid_mobility_anchor(d.get("mobility_anchor"),d): errors.append("invalid_mobility_anchor:"+id)
 	return errors
 func place(prop_id: String, definition_id: String, position: Vector2, delta: Dictionary) -> Dictionary:
 	if not _definitions.has(definition_id) or prop_id.is_empty() or not is_finite(position.x) or not is_finite(position.y): return {}
@@ -43,7 +44,22 @@ func place(prop_id: String, definition_id: String, position: Vector2, delta: Dic
 	var art := rect(d.ruin_render_bounds if destroyed else d.render_bounds)
 	footprint.position += position
 	art.position += position
-	return {"prop_id":prop_id,"definition_id":definition_id,"slot_id":prop_id.get_slice(":",4),"asset_id":d.ruin_asset_id if destroyed else d.asset_id,"position":position,"ground_footprint":footprint,"depth_y":position.y+float(d.depth_origin),"render_bounds":art,"collision_mask":0 if destroyed else int(d.collision_mask),"cover_mask":0 if destroyed else int(d.cover_mask),"destructible":d.destructible,"hp":int(hp),"max_hp":int(d.structure_hp),"destroyed":destroyed,"contact_damage":0,"pose":"ruined" if destroyed else ("damaged" if hp < d.structure_hp else "intact"),"rotation_degrees":0}
+	var result := {"prop_id":prop_id,"definition_id":definition_id,"slot_id":prop_id.get_slice(":",4),"asset_id":d.ruin_asset_id if destroyed else d.asset_id,"position":position,"ground_footprint":footprint,"depth_y":position.y+float(d.depth_origin),"render_bounds":art,"collision_mask":0 if destroyed else int(d.collision_mask),"cover_mask":0 if destroyed else int(d.cover_mask),"destructible":d.destructible,"hp":int(hp),"max_hp":int(d.structure_hp),"destroyed":destroyed,"contact_damage":0,"pose":"ruined" if destroyed else ("damaged" if hp < d.structure_hp else "intact"),"rotation_degrees":0}
+	# Optional data keeps exact legacy placed records unchanged.
+	if d.has("mobility_anchor"): result.mobility_anchor = d.mobility_anchor.duplicate(true)
+	return result
+static func _valid_mobility_anchor(value: Variant, definition: Dictionary) -> bool:
+	if not value is Dictionary or value.size() != 4 or not value.has_all(["kind","connection","roof_height","pass_range"]): return false
+	# The contract accepts a future tree kind; no tree content or behavior is added.
+	if not value.kind in ["roof","tree"]: return false
+	if not value.connection is Array or value.connection.size() != 2: return false
+	for scalar in value.connection:
+		if not (scalar is int or scalar is float) or not is_finite(float(scalar)): return false
+	if not (value.roof_height is int or value.roof_height is float) or not is_finite(float(value.roof_height)) or value.roof_height < 16 or value.roof_height > 256: return false
+	if not _valid_rect(value.pass_range) or value.pass_range[2] <= 0 or value.pass_range[3] <= 0: return false
+	if not _valid_rect(definition.get("ground_footprint")): return false
+	var passage := rect(value.pass_range)
+	return rect(definition.ground_footprint).encloses(passage) and passage.has_point(Vector2(value.connection[0],value.connection[1])) and (int(definition.get("collision_mask",0)) & PLAYER) != 0
 static func rect(v: Array) -> Rect2:
 	return Rect2(float(v[0]),float(v[1]),float(v[2]),float(v[3]))
 static func _valid_rect(v: Variant) -> bool:

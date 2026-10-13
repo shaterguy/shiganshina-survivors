@@ -73,7 +73,7 @@ func run(t) -> void:
 		t.check(not is_instance_id_valid(id),"repeated catalog construction/free does not leak owners")
 	_rng_draws(t)
 func _rng_draws(t) -> void:
-	var catalog = Upgrades.new()
+	var catalog = Fixture.legacy_catalog()
 	var offers := Offers.new(catalog)
 	var state := Fixture.state()
 	var pool: Array = catalog.candidates(state)

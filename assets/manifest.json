@@ -1845,8 +1845,26 @@
     "slash": {
       "path": "res://assets/audio/slash.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-07.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.065,
+          "gain": 0.28,
+          "seconds": 0.32
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1858,16 +1876,35 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.16,
+      "duration_seconds": 0.48498866213151925,
       "loop": false,
-      "peak": 0.2076784569841609,
-      "sha256": "bb1f4dacc3f9f4333ca10f9fc0be428b7f32f464673e3484e37a5e30816135a9"
+      "peak": 0.7200537125766777,
+      "sha256": "3b3ef08520bd258835a962ce084c4f8ad4d50ba54a58ca01b12e7b87f27b2da3",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "hit": {
       "path": "res://assets/audio/hit.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/chop.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.32,
+          "seconds": 0.22
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1879,16 +1916,34 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.14,
+      "duration_seconds": 0.5531972789115647,
       "loop": false,
-      "peak": 0.3080233161412397,
-      "sha256": "79037efb0db4c4b5115b670fa5f65ae9bfa2dc449eb86cbc0b104c35582bdde9"
+      "peak": 0.7600024414807581,
+      "sha256": "bdafc242be745eacdc53236d84be3f24425119f2380b8cdcb05701d222d0f5b3",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "hurt": {
       "path": "res://assets/audio/hurt.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_medium_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth1.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.015,
+          "gain": 0.37
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1900,16 +1955,42 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.32,
+      "duration_seconds": 0.6756916099773242,
       "loop": false,
-      "peak": 0.29517502365184484,
-      "sha256": "a8d620b4eefb3a1ba0032d151b397ff565089ffadcbd6d7355127c1ac179fb8e"
+      "peak": 0.6537064729758598,
+      "sha256": "cc86f1edb6fa59607a8d333eb0a31655af383ae04a5172831225c52c4622fcaf",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "cannon": {
       "path": "res://assets/audio/cannon.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 1.0,
+          "seconds": 1.8
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPlate_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.25
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_003.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.04,
+          "gain": 0.4
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1921,16 +2002,35 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.8,
+      "duration_seconds": 2.0,
       "loop": false,
-      "peak": 0.3964964751121555,
-      "sha256": "fcceefc481b9ea9e5d982448a0b8052b4b6e140517e2cac4cf5bc19f1e8ccbd3"
+      "peak": 0.6129642628254036,
+      "sha256": "ec162cf7651dfa2990485fcf632d0e0efb7d05ecdfe3351cbd38aa4fca0cec08",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "gas": {
       "path": "res://assets/audio/gas.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #1.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.8,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth1.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.28
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1942,16 +2042,34 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.36,
+      "duration_seconds": 0.7499773242630385,
       "loop": false,
-      "peak": 0.12359996337778863,
-      "sha256": "ff67658603396be7842a206f395a4efa497461f02e398cedcff00a0e89a2bb42"
+      "peak": 0.6447645496993927,
+      "sha256": "a4167d2e1e446c3026505c6392eead152f363b171e951c62c4daba4f3bd2c565",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "step": {
       "path": "res://assets/audio/step.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/boots-leather-step-01.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1963,16 +2081,28 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.1,
+      "duration_seconds": 0.3565986394557823,
       "loop": false,
-      "peak": 0.07763908810693686,
-      "sha256": "06c9a0d95d4f9d66c0e44194aa4d9c33ea58f0bd23cd69504210cd71e3efed1f"
+      "peak": 0.26032288583025603,
+      "sha256": "78e815548a2cc93c3662119d4b79e10b9ed48ccb7857fcb781f4e7fdab508a49",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "xp": {
       "path": "res://assets/audio/xp.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "rpg",
+          "member": "Audio/handleCoins2.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.65,
+          "seconds": 0.13
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -1984,16 +2114,35 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.5099773242630385,
+      "duration_seconds": 0.22997732426303855,
       "loop": false,
-      "peak": 0.28192999053926204,
-      "sha256": "f7299caa1c2c99f67adcbe366ec7aa229a68c8365cf163eb8ddd2ae8befa5a89"
+      "peak": 0.4000061037018952,
+      "sha256": "15ac4fb47a89a3a0d085f248d34c80bff1396939278342b4379da1d7e13ee9e6",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "select": {
       "path": "res://assets/audio/select.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalClick.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.63
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth1.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.025,
+          "gain": 0.2,
+          "seconds": 0.16
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2005,16 +2154,36 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.52,
+      "duration_seconds": 0.46929705215419504,
       "loop": false,
-      "peak": 0.2889797662282174,
-      "sha256": "fb4d5ad857c477689891415e8b2713d0caecb2a689989939515056f0fabe257d"
+      "peak": 0.5039826654866176,
+      "sha256": "e9bef781125f59a72bc574eb4e090f52546cd8f980ce83f75a9c888dfc057a5d",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "cancel": {
       "path": "res://assets/audio/cancel.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalLatch.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.49,
+          "seconds": 0.14
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/bookClose.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.035,
+          "gain": 0.35,
+          "seconds": 0.16
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2026,16 +2195,42 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.58,
+      "duration_seconds": 0.2950113378684807,
       "loop": false,
-      "peak": 0.24073000274666587,
-      "sha256": "350abb5c9e04f12fc85f56ae2344f6b9db714d9a5a925b7b7132f7b25c0b8d8c"
+      "peak": 0.39219336527603993,
+      "sha256": "92386849c67a4bd10bda2ab0f2f4008ffac450289bafdb5208bd18061ecf14a8",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "level_up": {
       "path": "res://assets/audio/level_up.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactBell_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.45
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-4.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.4,
+          "reverse": true
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactBell_heavy_003.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.17,
+          "gain": 0.33
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2047,16 +2242,43 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 0.9,
+      "duration_seconds": 1.888843537414966,
       "loop": false,
-      "peak": 0.25510422070986055,
-      "sha256": "fd240a8a4b969bea499235d71af650ef7b7930892cd6a5b963c66045abfadfa9"
+      "peak": 0.29496139408551286,
+      "sha256": "a13b47a3276ce310e2f3850120daa095bd4dd4c255cf1c9389234458cae584d1",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "boss_spawn": {
       "path": "res://assets/audio/boss_spawn.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.85,
+          "seconds": 2.5
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_heavy_004.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.1,
+          "gain": 0.5
+        },
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #5.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.18,
+          "gain": 0.25,
+          "seconds": 0.65
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2068,16 +2290,36 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 1.28,
+      "duration_seconds": 2.292607709750567,
       "loop": false,
-      "peak": 0.20169682912686546,
-      "sha256": "c12def1afe316af75b7cfd005fb73310a5740a9c81b6651538b949ec2eeb8638"
+      "peak": 0.5955687124240852,
+      "sha256": "d5257908293a2cc744b48d5170f94435a030ec99dea969a3d00445d74e1ef613",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "victory": {
       "path": "res://assets/audio/victory.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "menu_music",
+          "member": "",
+          "source_sha256": "6c38472a541777c3ac2826e8623f1424a1d2ccc3757e16cafb270b004e64a65b",
+          "offset_seconds": 0.0,
+          "gain": 0.9,
+          "start": 27.0,
+          "seconds": 3.6
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactBell_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.02,
+          "gain": 0.12
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2089,16 +2331,44 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 1.52,
+      "duration_seconds": 3.8,
       "loop": false,
-      "peak": 0.2381664479506821,
-      "sha256": "f4203b6da2dff4b47bef21acbd04b973f84947971f35e9b7d656617a316f52f5"
+      "peak": 0.7000030518509476,
+      "sha256": "238ba2a8c68776ced94f3b5bdd19bf76a359189d5c00255503a494f061a7d543",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "death": {
       "path": "res://assets/audio/death.wav",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "combat_music",
+          "member": "",
+          "source_sha256": "dde7bd4f10bde031800ba8e22151fad591b7c13e1c9ae51920341b4e4ae37be5",
+          "offset_seconds": 0.0,
+          "gain": 0.6,
+          "start": 92.0,
+          "seconds": 2.6
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.55,
+          "seconds": 2.2
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/dropLeather.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.18,
+          "gain": 0.2
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2110,16 +2380,25 @@
       "animations": {},
       "sample_rate": 22050,
       "channels": 1,
-      "duration_seconds": 1.2999546485260771,
+      "duration_seconds": 2.8499773242630386,
       "loop": false,
-      "peak": 0.21796319467757194,
-      "sha256": "276ed3d5c6fdd71a7966fa3664e1d72ac009baa4aed265d91ca9faa2e5a80ccf"
+      "peak": 0.6700033570360424,
+      "sha256": "1b20423db3d49ff1add9d740bfef34ef7a9531820078790d15f9b9f3d0c34cb3",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "combat_loop": {
-      "path": "res://assets/audio/combat_loop.wav",
+      "path": "res://assets/audio/combat_loop.ogg",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "vorbis",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "combat_music",
+          "source_sha256": "dde7bd4f10bde031800ba8e22151fad591b7c13e1c9ae51920341b4e4ae37be5",
+          "modifications": "Vorbis q5 stereo, gain-only master, equal-power 1.2 second wrap seam"
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2129,18 +2408,27 @@
         0
       ],
       "animations": {},
-      "sample_rate": 22050,
-      "channels": 1,
-      "duration_seconds": 34.285714285714285,
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 114.91428571428571,
       "loop": true,
-      "peak": 0.35807367168187504,
-      "sha256": "6783f2577ef011c2633ed5496fd1befc2b6f8f0e49f4765419ea9d8bf24f2beb"
+      "peak": 0.7058871984481812,
+      "sha256": "bd7293bb7f076d44d8a71abeb22972f7ec93467da73f66fbb5b0637ae253ff1e",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "boss_loop": {
-      "path": "res://assets/audio/boss_loop.wav",
+      "path": "res://assets/audio/boss_loop.ogg",
       "kind": "audio",
-      "source_method": "Original deterministic waveform synthesis and original note score in tools/art/synthesize_audio.py; no sampled game audio.",
-      "license_note": "Original composition and synthesized sound.",
+      "codec": "vorbis",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boss_music",
+          "source_sha256": "e4f3be098b50213b56a60aefe60fffae79cd9f7c9008088f93c187ef1bbc856b",
+          "modifications": "Vorbis q5 stereo, gain-only master, composer-authored original seamless loop"
+        }
+      ],
       "width": 0,
       "height": 0,
       "cell_w": 0,
@@ -2150,12 +2438,13 @@
         0
       ],
       "animations": {},
-      "sample_rate": 22050,
-      "channels": 1,
-      "duration_seconds": 29.09092970521542,
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 108.0,
       "loop": true,
-      "peak": 0.3667409283730583,
-      "sha256": "68a7d39bfe10479e22cdc1bb715f2a53bfaeac5e53ff41a3f48c217c3109c480"
+      "peak": 0.5099726319313049,
+      "sha256": "7b00f60d2483dbc2d046ec8c8247bfc590a21e5e34810f2135226f96e9f5b7a6",
+      "audio_revision": "recorded_foley_orchestral_v1"
     },
     "house_narrow": {
       "path": "res://assets/art/environment/house_narrow.png",
@@ -3788,6 +4077,2539 @@
       "approval_status": "CANDIDATE_PENDING_ACTUAL_RENDER_REVIEW",
       "development_render_enabled": true,
       "review_status": "development_enabled_native_review_pending"
+    },
+    "titan_step": {
+      "path": "res://assets/audio/titan_step.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.64,
+          "rate": 0.84
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.34
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.048,
+          "gain": 0.29
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.9219047619047619,
+      "loop": false,
+      "peak": 0.5188756981109043,
+      "sha256": "7a31d55666c49b28b518b080163f7a1732b99883a1805f403f50d4f3c717b02b",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "wire_launch": {
+      "path": "res://assets/audio/wire_launch.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-01.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.58,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalLatch.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.38
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-1.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.03,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.32,
+      "loop": false,
+      "peak": 0.5089266640217291,
+      "sha256": "10cd4c0c82a0e8224cc73ee31392596bee666d3da48439bfa1d048636ccfeb7b",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "armor_block": {
+      "path": "res://assets/audio/armor_block.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-24.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_medium_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.025,
+          "gain": 0.36
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.5287981859410431,
+      "loop": false,
+      "peak": 0.6717429120761742,
+      "sha256": "d38e0904982d05e31387c05578a8d17f4cbf422950377ada471a58ab32bb3715",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "slash_v2": {
+      "path": "res://assets/audio/slash_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-6.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-11.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.065,
+          "gain": 0.28,
+          "seconds": 0.32
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.48498866213151925,
+      "loop": false,
+      "peak": 0.7203588976714377,
+      "sha256": "d7d9d88c20c295789b393577b2ca2dfbb0c2019640529132d240ea36698fcb08",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "hit_v2": {
+      "path": "res://assets/audio/hit_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/chop.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.32,
+          "seconds": 0.22
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.4766439909297052,
+      "loop": false,
+      "peak": 0.7227698599200415,
+      "sha256": "05fa0dd3de160750abc403656a8359cb4626a87b70ea258b1850f53623534a53",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "hurt_v2": {
+      "path": "res://assets/audio/hurt_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_medium_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth2.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.015,
+          "gain": 0.37
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.46766439909297053,
+      "loop": false,
+      "peak": 0.6555681020538957,
+      "sha256": "de922dbfd95f9339e80b4f69684e14e6e4164013d98c555f6d653832741e4416",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "step_v2": {
+      "path": "res://assets/audio/step_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/boots-leather-step-02.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.4214512471655329,
+      "loop": false,
+      "peak": 0.1989501632740257,
+      "sha256": "f7ee9468d83d889f74b2149edb425bf86e533cdea18578781dfe7195e86b5831",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "titan_step_v2": {
+      "path": "res://assets/audio/titan_step_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.64,
+          "rate": 0.84
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.34
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_003.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.048,
+          "gain": 0.29
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.9219047619047619,
+      "loop": false,
+      "peak": 0.5269631031220435,
+      "sha256": "8e2b13da30ad1c966a730fb097a99c77290820b4f39d3092957ed755f6fac71c",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "gas_v2": {
+      "path": "res://assets/audio/gas_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #2.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.8,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth2.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.28
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7499773242630385,
+      "loop": false,
+      "peak": 0.6213263344218268,
+      "sha256": "9285a91547ae26830a97bc2cdded90621aa765bb7993ed93a69e37048198eff5",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "wire_launch_v2": {
+      "path": "res://assets/audio/wire_launch_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-02.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.58,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalLatch.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.38
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-2.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.03,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.32,
+      "loop": false,
+      "peak": 0.5206457716605121,
+      "sha256": "cbed7c88f67e690c509331501f458948d19673a5b57310acd59a0a1ddbe0e5de",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "armor_block_v2": {
+      "path": "res://assets/audio/armor_block_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-26.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_medium_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.025,
+          "gain": 0.36
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7352834467120182,
+      "loop": false,
+      "peak": 0.6556291390728477,
+      "sha256": "91c768702aacac38fc65ade5012f38853954e73ae85633c4b8f1592ac49517bb",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "slash_v3": {
+      "path": "res://assets/audio/slash_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-7.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-15.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.065,
+          "gain": 0.28,
+          "seconds": 0.32
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.45387755102040817,
+      "loop": false,
+      "peak": 0.7202368236335337,
+      "sha256": "95e0340a629e02b3daa94f9487e5aae394a425291ad4f2d06906de9c54d0d327",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "hit_v3": {
+      "path": "res://assets/audio/hit_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/chop.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.32,
+          "seconds": 0.22
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.4291156462585034,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "f946536079bc8b29ac00ef52d4667dbed091d44994fa3617772b8dd017828205",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "hurt_v3": {
+      "path": "res://assets/audio/hurt_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_medium_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth3.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.015,
+          "gain": 0.37
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.5899773242630385,
+      "loop": false,
+      "peak": 0.6488235114597003,
+      "sha256": "659c4c5a0ddc4145e3532de6cf665ea9d10f9063ab2027e9cb9cdfe01d1e368b",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "step_v3": {
+      "path": "res://assets/audio/step_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/boots-leather-step-03.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.4388662131519274,
+      "loop": false,
+      "peak": 0.26563310647907956,
+      "sha256": "3a52544bf5e75713c3449af07396dbdf3636908a8c8d602819684f0d81d26fb3",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "titan_step_v3": {
+      "path": "res://assets/audio/titan_step_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.64,
+          "rate": 0.84
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.34
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/footstep_concrete_004.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.048,
+          "gain": 0.29
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.9219047619047619,
+      "loop": false,
+      "peak": 0.4036988433484909,
+      "sha256": "ccb47b91fc8c80e9ee431f3c1c057a201b071bb4fd1d967e699b9b7bb89fb2f0",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "gas_v3": {
+      "path": "res://assets/audio/gas_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #3.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.8,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth3.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.012,
+          "gain": 0.28
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7499773242630385,
+      "loop": false,
+      "peak": 0.6500137333292642,
+      "sha256": "95326c4fbe1c6461984e25d1699861bb39fb45563a2013da2f00c8c17f149e2a",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "wire_launch_v3": {
+      "path": "res://assets/audio/wire_launch_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-03.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.58,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalLatch.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.38
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-3.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.03,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.32,
+      "loop": false,
+      "peak": 0.5233924375133518,
+      "sha256": "6ee3afed0dba4cf2854502d03efefe70ec8e5b217ec3aec85c68752235abca31",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "armor_block_v3": {
+      "path": "res://assets/audio/armor_block_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-28.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.82
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_medium_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.025,
+          "gain": 0.36
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.4819501133786848,
+      "loop": false,
+      "peak": 0.6207770012512589,
+      "sha256": "67ee74c738e857cf2edb4bae9fe6776b73b847d7386430f5311f7eb8d51c56cf",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "heal": {
+      "path": "res://assets/audio/heal.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "rpg",
+          "member": "Audio/cloth3.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.68
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/clothBelt.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.16,
+          "gain": 0.48
+        },
+        {
+          "source_id": "rpg",
+          "member": "Audio/beltHandle1.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.3,
+          "gain": 0.22
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.9503401360544218,
+      "loop": false,
+      "peak": 0.500015259254738,
+      "sha256": "f36b28a3558f6e872846d73380f808a78c3e86932f94e55f9868c482d72ebe17",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "wire_release": {
+      "path": "res://assets/audio/wire_release.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "rpg",
+          "member": "Audio/metalLatch.ogg",
+          "source_sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+          "offset_seconds": 0.0,
+          "gain": 0.38
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sheath-unbuckle-02.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.025,
+          "gain": 0.6
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.872517006802721,
+      "loop": false,
+      "peak": 0.48002563554795985,
+      "sha256": "b4bf8c9e3657d5a1e6db8f2469ed24460a9c2500c2b9269e789810f9f193734c",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "land": {
+      "path": "res://assets/audio/land.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/boots-leather-jump-02.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.8
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactSoft_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.018,
+          "gain": 0.42
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.6871655328798186,
+      "loop": false,
+      "peak": 0.6181829279457991,
+      "sha256": "ff51527af101804772f9c11e38d6b09150f9de099a9ce390c1bb70f9e4df7127",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "structure_break": {
+      "path": "res://assets/audio/structure_break.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.65
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.035,
+          "gain": 0.55,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMining_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.11,
+          "gain": 0.5
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_medium_003.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.2,
+          "gain": 0.35
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7849886621315193,
+      "loop": false,
+      "peak": 0.5104220709860531,
+      "sha256": "558b20e73ac54d290686ce78d01e329331eea00fe060bbc78be5c4d084205577",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "spin_slash": {
+      "path": "res://assets/audio/spin_slash.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.85
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-12.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.12,
+          "gain": 0.7
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-16.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.19,
+          "gain": 0.28
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.628344671201814,
+      "loop": false,
+      "peak": 0.630481887264626,
+      "sha256": "9a1da5392ecb0d697d194b82997f1e5b9dc8ce778c4503b9b79a0988e248dfd7",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "reentry_combo": {
+      "path": "res://assets/audio/reentry_combo.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.8
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-8.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.095,
+          "gain": 0.7
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-21.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.17,
+          "gain": 0.55
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.8693877551020408,
+      "loop": false,
+      "peak": 0.641102328562273,
+      "sha256": "1cc83e5b565f290e769b4cd795d1579812bd88b8bc955cceb417784f0a75b6b7",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "ally_cover": {
+      "path": "res://assets/audio/ally_cover.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #4.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.55,
+          "seconds": 0.6
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-11.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.07,
+          "gain": 0.67
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-19.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.2,
+          "gain": 0.3
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.0779138321995465,
+      "loop": false,
+      "peak": 0.6315500350962859,
+      "sha256": "dbdbcb5e433da81a5376179fd98b53425a612739570b5160d9d98d05ceb9c2f3",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "chain_lightning": {
+      "path": "res://assets/audio/chain_lightning.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.8,
+          "start": 0.22,
+          "seconds": 0.2
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-39.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.025,
+          "gain": 0.55,
+          "seconds": 0.23
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.07,
+          "gain": 0.38,
+          "seconds": 0.4
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.5700226757369614,
+      "loop": false,
+      "peak": 0.5439924314096499,
+      "sha256": "e5ecf74a59e069535f94f168bc185c0e9e8d262554532e288f0c673a59af4783",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "fire_zone": {
+      "path": "res://assets/audio/fire_zone.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #5.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.45,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.7,
+          "start": 0.4,
+          "seconds": 0.85
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.9499773242630386,
+      "loop": false,
+      "peak": 0.6400036622211371,
+      "sha256": "055fd34efc500172e886c46c931489d7c91ea7939ab7d83315831d2a6bcb25c2",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_cut": {
+      "path": "res://assets/audio/evo_wing_cut.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-9.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-10.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.07,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.13,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.804625850340136,
+      "loop": false,
+      "peak": 0.7419965208899197,
+      "sha256": "83633e2e02b31e28b036a4ca7199936dfd6fd67a78233b9fabed31ab769558e5",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_crossfire": {
+      "path": "res://assets/audio/evo_crossfire.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "seconds": 1.0
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPlate_heavy_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.15,
+          "gain": 0.58,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.2,
+          "gain": 0.3
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.2,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "ec267d886916f9aed5636c2c42b48f4b010fa6279722cb1ec6c7e0bd494a63a9",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_storm_chain": {
+      "path": "res://assets/audio/evo_storm_chain.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.75,
+          "start": 0.0,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-35.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.018,
+          "gain": 0.5
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.14,
+          "gain": 0.62,
+          "start": 0.4,
+          "seconds": 0.2
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.1,
+          "gain": 0.43,
+          "seconds": 0.6
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.1640816326530612,
+      "loop": false,
+      "peak": 0.5345011749626148,
+      "sha256": "32b2116d0fe41ca468d8801fc54d4c8efa7d859816879fde583263f8fb7f5304",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_inferno_zone": {
+      "path": "res://assets/audio/evo_inferno_zone.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #2.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.6
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "start": 0.0,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.18,
+          "gain": 0.4,
+          "seconds": 0.65
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.0499773242630386,
+      "loop": false,
+      "peak": 0.5918149357585376,
+      "sha256": "7ec60e4fd17441c8ce5aa82aa62a5502a7a49d1abbd063ce3559759c6d756e29",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_whirlwind": {
+      "path": "res://assets/audio/evo_whirlwind.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.75
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-9.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.08,
+          "gain": 0.72
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-11.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.19,
+          "gain": 0.7
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-18.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.15,
+          "gain": 0.42
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.7802267573696144,
+      "loop": false,
+      "peak": 0.6000549333170568,
+      "sha256": "134f37986221ecfdf96dff25afe9be248cea9101f8177df73007f9eeccf818cb",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_sky_lance": {
+      "path": "res://assets/audio/evo_sky_lance.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-01.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.5,
+          "seconds": 0.25
+        },
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #1.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.78,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_heavy_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.1,
+          "gain": 0.48
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.06,
+          "gain": 0.5,
+          "seconds": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7499773242630385,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "472e778a533e3f0d094128ccdfc0f0c3d66b35ae8790d70c1a66ff1f68d2e42a",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_echo_assault": {
+      "path": "res://assets/audio/evo_echo_assault.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.8
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-11.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.075,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-8.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.17,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-27.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.25,
+          "gain": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.9011791383219954,
+      "loop": false,
+      "peak": 0.6404309213538011,
+      "sha256": "79103f98260d4063def8670d8a4512f813a05e2c43a01795e034d0aee22ce9e0",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_squad": {
+      "path": "res://assets/audio/evo_wing_squad.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #2.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.52,
+          "seconds": 0.45
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-9.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.035,
+          "gain": 0.66
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-22.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.11,
+          "gain": 0.4
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-5.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.23,
+          "gain": 0.55
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_000.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.3,
+          "gain": 0.38
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.8531972789115646,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "1c42994cc9ac2f8ed9a79be37fbab02e6d037141f979465d523638a219e36416",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_cut_v2": {
+      "path": "res://assets/audio/evo_wing_cut_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-11.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.07,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-6.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.13,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.8961904761904762,
+      "loop": false,
+      "peak": 0.6675923947874386,
+      "sha256": "226411d38c7486efb66a095f25f02c81debb15cb89be18d9e3309c187de353d4",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_crossfire_v2": {
+      "path": "res://assets/audio/evo_crossfire_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "seconds": 1.0
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPlate_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.175,
+          "gain": 0.58,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.2,
+          "gain": 0.3
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.2249886621315194,
+      "loop": false,
+      "peak": 0.6797082430494095,
+      "sha256": "30fec13b3e659d582bf2abadb75df2f904073e8003d986cbf0792b5b6a7193a6",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_storm_chain_v2": {
+      "path": "res://assets/audio/evo_storm_chain_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.75,
+          "start": 0.23,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-36.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.018,
+          "gain": 0.5
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.14,
+          "gain": 0.62,
+          "start": 0.5800000000000001,
+          "seconds": 0.2
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.1,
+          "gain": 0.43,
+          "seconds": 0.6
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.1839455782312924,
+      "loop": false,
+      "peak": 0.543595690786462,
+      "sha256": "7fe33c2e6fa5077539129e7e38abefb99c3438cceb88dec2ac2c6ba9af94d2b0",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_inferno_zone_v2": {
+      "path": "res://assets/audio/evo_inferno_zone_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #3.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.6
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "start": 0.24,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.18,
+          "gain": 0.4,
+          "seconds": 0.65
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.0499773242630386,
+      "loop": false,
+      "peak": 0.6835535752433851,
+      "sha256": "0c06c3f92f3101f16c358cef9728b379461d8a3a1360652e563eacb505585ee7",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_whirlwind_v2": {
+      "path": "res://assets/audio/evo_whirlwind_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-6.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.75
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.08,
+          "gain": 0.72
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.19,
+          "gain": 0.7
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-19.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.15,
+          "gain": 0.42
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.027936507936508,
+      "loop": false,
+      "peak": 0.5999023407696769,
+      "sha256": "4e8d547f06642fb93144dd7a5fbd70aab3e8e420631ff0bba05c38fb374bfa90",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_sky_lance_v2": {
+      "path": "res://assets/audio/evo_sky_lance_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-02.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.5,
+          "seconds": 0.25
+        },
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #2.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.78,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.1,
+          "gain": 0.48
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.06,
+          "gain": 0.5,
+          "seconds": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7499773242630385,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "5775c7c547af78187db6cce5ce34c1ad0ef2f71f5e40c1620ce33ad76d995ea3",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_echo_assault_v2": {
+      "path": "res://assets/audio/evo_echo_assault_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-6.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.8
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-12.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.075,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-9.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.17,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-28.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.25,
+          "gain": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.5063945578231293,
+      "loop": false,
+      "peak": 0.6400341807306131,
+      "sha256": "34f286206a89c68d3a665a2423bfb53b284ad5d6fa52a904cdc67fe1b87d26d6",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_squad_v2": {
+      "path": "res://assets/audio/evo_wing_squad_v2.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #3.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.52,
+          "seconds": 0.45
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.035,
+          "gain": 0.66
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-23.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.11,
+          "gain": 0.4
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-6.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.23,
+          "gain": 0.55
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_001.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.3,
+          "gain": 0.38
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.8103401360544218,
+      "loop": false,
+      "peak": 0.7089449751274147,
+      "sha256": "85c32ea761e1b6c7446b86d44b9fd71e57259e09791f7e7720c42be50e741886",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_cut_v3": {
+      "path": "res://assets/audio/evo_wing_cut_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-11.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.9
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-12.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.07,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-7.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.13,
+          "gain": 0.62
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.5014058956916099,
+      "loop": false,
+      "peak": 0.7199926755577257,
+      "sha256": "76354b085ceb1c76bacdaa690af691c3ff51bbf5b9807ab360a03e4b682936c0",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_crossfire_v3": {
+      "path": "res://assets/audio/evo_crossfire_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "seconds": 1.0
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPlate_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.0,
+          "gain": 0.32
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.2,
+          "gain": 0.58,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactWood_heavy_003.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.2,
+          "gain": 0.3
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.2499773242630385,
+      "loop": false,
+      "peak": 0.7322916348765526,
+      "sha256": "828549054c605f15ef1f171bd99f1c191513b3a8c811117887eb32f6953f7577",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_storm_chain_v3": {
+      "path": "res://assets/audio/evo_storm_chain_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.75,
+          "start": 0.46,
+          "seconds": 0.22
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-37.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.018,
+          "gain": 0.5
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.14,
+          "gain": 0.62,
+          "start": 0.76,
+          "seconds": 0.2
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.1,
+          "gain": 0.43,
+          "seconds": 0.6
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.84140589569161,
+      "loop": false,
+      "peak": 0.6212652974028748,
+      "sha256": "47e97a62282f17f186cc22f2b983e797f49703d628a4124832f4caa5d28d0ded",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_inferno_zone_v3": {
+      "path": "res://assets/audio/evo_inferno_zone_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #4.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.62,
+          "seconds": 0.6
+        },
+        {
+          "source_id": "fire",
+          "member": "",
+          "source_sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+          "offset_seconds": 0.0,
+          "gain": 0.72,
+          "start": 0.48,
+          "seconds": 0.85
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.18,
+          "gain": 0.4,
+          "seconds": 0.65
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 1.0499773242630386,
+      "loop": false,
+      "peak": 0.6025879696035645,
+      "sha256": "b88c1b9fef3c3aea0aaeb97e7ee63638c0ad52f85a1ed6126c6576fcad026194",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_whirlwind_v3": {
+      "path": "res://assets/audio/evo_whirlwind_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-7.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.75
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-11.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.08,
+          "gain": 0.72
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-9.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.19,
+          "gain": 0.7
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-20.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.15,
+          "gain": 0.42
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.642312925170068,
+      "loop": false,
+      "peak": 0.7600024414807581,
+      "sha256": "de845a070da1a95fd239fae2d9b72c7546113ee7b9b1edd8f0e57c856684be4a",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_sky_lance_v3": {
+      "path": "res://assets/audio/evo_sky_lance_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-thermos-scrape-03.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.0,
+          "gain": 0.5,
+          "seconds": 0.25
+        },
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #3.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.78,
+          "seconds": 0.65
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactMetal_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.1,
+          "gain": 0.48
+        },
+        {
+          "source_id": "boom",
+          "member": "",
+          "source_sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+          "offset_seconds": 0.06,
+          "gain": 0.5,
+          "seconds": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7499773242630385,
+      "loop": false,
+      "peak": 0.7488631855220191,
+      "sha256": "9ea0fb509f1e7c7b06e2736c6f655d6366cecef969752ef3ff8fac15d620feb8",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_echo_assault_v3": {
+      "path": "res://assets/audio/evo_echo_assault_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-7.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.0,
+          "gain": 0.8
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-13.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.075,
+          "gain": 0.55
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-10.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.17,
+          "gain": 0.65
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-29.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.25,
+          "gain": 0.5
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.6050793650793651,
+      "loop": false,
+      "peak": 0.6401257362590411,
+      "sha256": "1e836cd6b3ae25b6fd92a742ebd2deea15a3f70ac6060ddd700bd087f871fffa",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "evo_wing_squad_v3": {
+      "path": "res://assets/audio/evo_wing_squad_v3.wav",
+      "kind": "audio",
+      "codec": "pcm_s16le",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "steam",
+          "member": "steam hisses - Marker #4.wav",
+          "source_sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+          "offset_seconds": 0.0,
+          "gain": 0.52,
+          "seconds": 0.45
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-11.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.035,
+          "gain": 0.66
+        },
+        {
+          "source_id": "weapons",
+          "member": "sfx/sword-knife-clash-24.wav",
+          "source_sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+          "offset_seconds": 0.11,
+          "gain": 0.4
+        },
+        {
+          "source_id": "swishes",
+          "member": "swishes/swish-7.wav",
+          "source_sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+          "offset_seconds": 0.23,
+          "gain": 0.55
+        },
+        {
+          "source_id": "impact",
+          "member": "Audio/impactPunch_heavy_002.ogg",
+          "source_sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+          "offset_seconds": 0.3,
+          "gain": 0.38
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 22050,
+      "channels": 1,
+      "duration_seconds": 0.7291156462585034,
+      "loop": false,
+      "peak": 0.684926908169805,
+      "sha256": "a1de02b93b880f8cb761097517a616017cc945297cbb029d721819c381ce53a3",
+      "audio_revision": "recorded_foley_orchestral_v1"
+    },
+    "menu_loop": {
+      "path": "res://assets/audio/menu_loop.ogg",
+      "kind": "audio",
+      "codec": "vorbis",
+      "source_method": "Licensed foley layers / independently composed orchestral score; processed by tools/art/author_foley_audio.py. No old oscillator bank or note-score synthesis.",
+      "license_note": "Source works are CC0 1.0. Credits, source URLs, source SHA-256 and exact modifications are preserved in audio_sources and source_layers.",
+      "source_layers": [
+        {
+          "source_id": "menu_music",
+          "source_sha256": "6c38472a541777c3ac2826e8623f1424a1d2ccc3757e16cafb270b004e64a65b",
+          "modifications": "Vorbis q5 stereo, gain-only master, equal-power 1.2 second wrap seam"
+        }
+      ],
+      "width": 0,
+      "height": 0,
+      "cell_w": 0,
+      "cell_h": 0,
+      "anchor_px": [
+        0,
+        0
+      ],
+      "animations": {},
+      "sample_rate": 44100,
+      "channels": 2,
+      "duration_seconds": 68.44244897959183,
+      "loop": true,
+      "peak": 0.503419041633606,
+      "sha256": "d83ac1792fc0816492be0094ef7c7688eea81d570ea192c75b51425cd5568cb0",
+      "audio_revision": "recorded_foley_orchestral_v1"
     }
   },
   "art_revision_status": {
@@ -3810,5 +6632,170 @@
       "boss_abnormal"
     ],
     "final_export_allowed": false
+  },
+  "audio_sources": {
+    "impact": {
+      "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "size": 800850,
+      "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8",
+      "filename": "kenney_impact-sounds.zip",
+      "creator": "Kenney",
+      "title": "Impact Sounds",
+      "source_page": "https://kenney.nl/assets/impact-sounds",
+      "source_method": "Recorded impacts and footsteps, published audio asset pack.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Impact Sounds by Kenney (CC0 1.0)"
+    },
+    "rpg": {
+      "url": "https://kenney.nl/media/pages/assets/rpg-audio/8e99002d76-1677590336/kenney_rpg-audio.zip",
+      "size": 964837,
+      "sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b",
+      "filename": "kenney_rpg-audio.zip",
+      "creator": "Kenney",
+      "title": "RPG Audio",
+      "source_page": "https://kenney.nl/assets/rpg-audio",
+      "source_method": "Foley asset pack.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "RPG Audio by Kenney (CC0 1.0)"
+    },
+    "weapons": {
+      "url": "https://opengameart.org/sites/default/files/weapons-apparel.zip",
+      "size": 12608099,
+      "sha256": "81cc6317f21b68f8e7f2b23a5a0f5f33c301c39ee41347307eec02201be989e5",
+      "filename": "weapons-apparel.zip",
+      "creator": "Jan Schupke / Vehicle",
+      "title": "Fantasy Weapons and Apparel SFX Library",
+      "source_page": "https://opengameart.org/content/fantasy-weapons-and-apparel-sfx-library",
+      "source_method": "Publisher describes organic unprocessed recordings, apart from normalization.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Fantasy Weapons and Apparel SFX Library by Jan Schupke / Vehicle (CC0 1.0)"
+    },
+    "swishes": {
+      "url": "https://opengameart.org/sites/default/files/swishes.zip",
+      "size": 385150,
+      "sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693",
+      "filename": "swishes.zip",
+      "creator": "artisticdude",
+      "title": "Swishes Sound Pack",
+      "source_page": "https://opengameart.org/content/swishes-sound-pack",
+      "source_method": "Recorded clothes hanger and wood swings; edited in Logic Express per author.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Swishes Sound Pack by artisticdude (CC0 1.0)"
+    },
+    "steam": {
+      "url": "https://opengameart.org/sites/default/files/steam_hisses.zip",
+      "size": 622313,
+      "sha256": "7dc5ae6f43ef0e9a47b8333e1e1508463cb64877ab06baa0259c643a9ab4677f",
+      "filename": "steam_hisses.zip",
+      "creator": "bart",
+      "title": "Steam release sounds",
+      "source_page": "https://opengameart.org/content/steam-release-sounds",
+      "source_method": "Published steam hiss effects; production technique not asserted.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Steam release sounds by bart (CC0 1.0)"
+    },
+    "boom": {
+      "url": "https://opengameart.org/sites/default/files/NenadSimic%20-%20Muffled%20Distant%20Explosion.wav",
+      "size": 907518,
+      "sha256": "13a0bf75af94ec6d332bc71cba489b573466e05c4b17288158b3d683b41de39f",
+      "filename": "muffled_explosion.wav",
+      "creator": "NenadSimic",
+      "title": "Muffled Distant Explosion",
+      "source_page": "https://opengameart.org/content/muffled-distant-explosion",
+      "source_method": "Low-pitched log drum hit with delayed reverberation per author.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Muffled Distant Explosion by NenadSimic (CC0 1.0)"
+    },
+    "fire": {
+      "url": "https://opengameart.org/sites/default/files/fire-1.wav",
+      "size": 253232,
+      "sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5",
+      "filename": "fire-1.wav",
+      "creator": "AntumDeluge",
+      "title": "Fire Crackling",
+      "source_page": "https://opengameart.org/content/fire-crackling",
+      "source_method": "Crackling fireplace source.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Fire Crackling by AntumDeluge (CC0 1.0)"
+    },
+    "combat_music": {
+      "url": "https://opengameart.org/sites/default/files/Battle.mp3",
+      "size": 4646747,
+      "sha256": "dde7bd4f10bde031800ba8e22151fad591b7c13e1c9ae51920341b4e4ae37be5",
+      "filename": "Battle.mp3",
+      "creator": "Wolfgang_ / Theodore Kerr",
+      "title": "Battle Theme",
+      "source_page": "https://opengameart.org/content/battle-theme-0",
+      "source_method": "Independent orchestral score. Author later explicitly confirms attribution optional.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Battle Theme by Wolfgang_ / Theodore Kerr (CC0 1.0)"
+    },
+    "boss_music": {
+      "url": "https://opengameart.org/sites/default/files/determined_pursuit_loop.wav",
+      "size": 19052830,
+      "sha256": "e4f3be098b50213b56a60aefe60fffae79cd9f7c9008088f93c187ef1bbc856b",
+      "filename": "determined_pursuit_loop.wav",
+      "creator": "Emma_MA",
+      "title": "Determined Pursuit",
+      "source_page": "https://opengameart.org/content/determined-pursuit-epic-orchestra-loop",
+      "source_method": "Independent loopable orchestral score; creator dedicates to public domain January 2017.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "Determined Pursuit by Emma_MA (CC0 1.0)"
+    },
+    "menu_music": {
+      "url": "https://opengameart.org/sites/default/files/A%20Legend%20Will%20Rise.mp3",
+      "size": 2785768,
+      "sha256": "6c38472a541777c3ac2826e8623f1424a1d2ccc3757e16cafb270b004e64a65b",
+      "filename": "A Legend Will Rise.mp3",
+      "creator": "CodeManu",
+      "title": "A Legend Will Rise",
+      "source_page": "https://opengameart.org/content/a-legend-will-rise-orchestral",
+      "source_method": "Independent orchestral composition; no attribution required.",
+      "license": "CC0-1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "verified_date": "2026-10-13",
+      "attribution": "A Legend Will Rise by CodeManu (CC0 1.0)"
+    }
+  },
+  "audio_revision": {
+    "id": "recorded_foley_orchestral_v1",
+    "replaced_ids": [
+      "boss_loop",
+      "boss_spawn",
+      "cancel",
+      "cannon",
+      "combat_loop",
+      "death",
+      "gas",
+      "hit",
+      "hurt",
+      "level_up",
+      "select",
+      "slash",
+      "step",
+      "victory",
+      "xp"
+    ],
+    "voice_cap": 8,
+    "music_stream_cap": 1,
+    "source_policy": "CC0 sources verified at publisher/uploader pages and pinned to exact bytes; no anime/game soundtrack copies."
   }
 }

@@ -20,17 +20,15 @@ func build(state: Dictionary) -> Dictionary:
 		var identities := {}
 		for original in source.options:
 			if not original is Dictionary: return {}
-			var option: Dictionary = _catalog.decorate_option(state,original)
+			var option: Dictionary = _catalog.decorate_option(state,original,true)
 			if option.is_empty() or identities.has(option.option_id): return {}
 			identities[option.option_id] = true
-			var definitions: Dictionary = _catalog.passives if option.kind == "passive" else _catalog.equipment
-			option.max_level = int(definitions[option.item_id].max_level)
 			options.append(option)
 		if not identities.has(source.selected_option_id): return {}
 		offer = {"offer_id":source.offer_id,"source":source.source,"level_ordinal":source.level_ordinal,"selected_option_id":source.selected_option_id,"options":options}
 	var evolution_views: Array[Dictionary] = []
-	for id in _catalog.evolutions.ids(): evolution_views.append(_catalog.evolutions.evaluate(state,id))
-	var target: Dictionary = _catalog.evolutions.evaluate(state,state.run_config.target_evolution_id)
+	for id in _catalog.evolutions.ids(): evolution_views.append(_catalog.evolutions.evaluate(state,id,true))
+	var target: Dictionary = _catalog.evolutions.evaluate(state,state.run_config.target_evolution_id,true)
 	return {"view_revision":int(state.view_revision),"slots":{"equipment":{"used":state.equipment.size(),"max":4},"passive":{"used":state.passives.size(),"max":4}},"target":target,"evolutions":evolution_views,"active_offer":offer,"owned":_owned(state)}
 
 func _owned(state: Dictionary) -> Dictionary:
@@ -42,16 +40,26 @@ func _owned(state: Dictionary) -> Dictionary:
 		for id in ids:
 			var definition: Dictionary = definitions[id]
 			var level := int(state[kind][id])
-			var row := {"item_id":str(id),"name":definition.name,"level":level,"max_level":int(definition.max_level),"is_max":level == int(definition.max_level),"evolution_id":"","evolution_status":"unavailable","is_evolved":false,"requirements":[],"attack_summary":"","effect_stats":{}}
+			var row := {"item_id":str(id),"name":definition.name,"level":level,"base_level":level,"max_level":int(definition.max_level),"display_level":level,"display_max_level":int(definition.max_level),"icon_id":"skill_"+str(id),"evolution_name":"","evolution_icon_id":"","is_max":level == int(definition.max_level),"evolution_id":"","evolution_status":"unavailable","is_evolved":false,"requirements":[],"attack_summary":"","effect_stats":{}}
 			if kind == "equipment":
 				for recipe_id in _catalog.evolutions.ids():
-					var detail: Dictionary = _catalog.evolutions.evaluate(state,recipe_id)
+					var detail: Dictionary = _catalog.evolutions.evaluate(state,recipe_id,true)
 					if detail.base_item_id != id: continue
 					row.evolution_id = recipe_id
+					row.max_level = 6
+					row.display_max_level = 6
+					row.evolution_name = detail.name
+					row.evolution_icon_id = detail.icon_id
 					row.evolution_status = detail.status
 					row.is_evolved = detail.status == "evolved"
 					row.requirements = detail.requirements.duplicate(true)
-					if row.is_evolved: row.effect_stats = detail.effect_delta.duplicate(true)
+					if row.is_evolved:
+						row.level = 6
+						row.display_level = 6
+						row.icon_id = detail.icon_id
+						row.name = detail.name
+						row.effect_stats = detail.effect_delta.duplicate(true)
+					row.is_max = row.level == row.max_level
 					break
 				if not row.is_evolved:
 					row.effect_stats = _catalog.weapon_stats(state,id,level)
@@ -67,6 +75,8 @@ func _attack_summary(definition: Dictionary, row: Dictionary) -> String:
 	var stats: Dictionary = row.effect_stats
 	var interval := String.num(float(stats.cooldown_ticks)/60.0,2)+"초 간격"
 	if row.is_evolved:
+		var patterns := {"evo_whirlwind":"확장 회전참 3회","evo_sky_lance":"전진 관통참 3구간","evo_echo_assault":"잔영 교차참 3회","evo_wing_squad":"편대 교차 엄호 3줄"}
+		if patterns.has(row.evolution_id): return str(patterns[row.evolution_id])+" · "+interval
 		if row.evolution_id == "evo_storm_chain": return "폭풍 번개 · 최대 %d연결 · %s" % [int(stats.chain_count),interval]
 		if row.evolution_id == "evo_inferno_zone": return "지옥불 %d회 + 마지막 대폭발 · %s초 뒤 폭발 · %s" % [int(stats.stages)-1,String.num(float(stats.stage_delays[-1])/60.0,2),interval]
 		var times: Array[String] = []

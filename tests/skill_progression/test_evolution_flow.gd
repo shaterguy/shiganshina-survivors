@@ -1,6 +1,6 @@
 extends RefCounted
 # Test-only XP, clock and remaining-health arrangements. All offers, choices,
-# boss reward, casts, hits and restores below go through the real Core API.
+# casts, hits and restores below go through the real Core API.
 const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Core = preload("res://game/core/run_simulation.gd")
 const Current = preload("res://tests/core/current_combat_provider.gd")
@@ -13,54 +13,40 @@ func _flow(t,recipe: String) -> void:
 	var catalog := Catalog.new()
 	var definition: Dictionary = catalog.evolutions.definition(recipe)
 	var base: String = definition.base_item_id
-	var prerequisite: String = definition.required_passives[0].passive_id
 	var state := sim.new_run(F.chapter(),42,F.run_config(1,"doctrine_standard",recipe))
-	state.equipment = {base:4,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
-	state.passives = {prerequisite:2,"damage":5,"attack_range":5,"armor":5}
-	for id in state.equipment:
-		if id != base: state.player.attack_ready_ticks[id] = 2147483647
+	state.equipment = {base:4}
+	state.passives = {"damage":5,"attack_range":5}
+	state.passives["movement" if base == "blade_slash" else "fire_interval"] = 3
+	for required in definition.get("required_equipment",[]):
+		state.equipment[required.equipment_id] = int(required.level)
+		state.player.attack_ready_ticks[required.equipment_id] = 2147483647
+	for required in definition.required_passives: state.passives[required.passive_id] = int(required.level)
 	t.check(sim.restore(state).get("ok",false),"arranged near-max build is a real restorable run: "+recipe)
 	F.drop_xp(sim,state,24,"fixture:xp:weapon")
 	var offer: String = state.upgrade_offer.get("offer_id","")
 	var result := sim.choose_upgrade(state,offer,"equipment:"+base)
-	t.check(result.get("ok",false) and state.equipment[base] == 5,"actual level offer reaches bounded weapon maximum: "+recipe)
+	t.check(result.get("ok",false) and state.equipment[base] == 5,"actual level offer reaches bounded base maximum: "+recipe)
 	var owned := _weapon(View.new().build(state),base)
-	t.check(owned.get("is_max",false) and not owned.get("is_evolved",true) and owned.get("evolution_status") == "collecting","MAX HUD is distinct from unmet ultimate readiness: "+recipe)
+	t.check(not owned.get("is_max",true) and not owned.get("is_evolved",true) and owned.get("evolution_status") == "ready" and owned.get("max_level",0) == 6,"base five plus owned partner one leaves exactly the final stage ready: "+recipe)
 	var before := state.duplicate(true)
 	t.check(not sim.choose_upgrade(state,offer,"equipment:"+base).ok and state == before,"duplicate maximum-level selection is rejected without mutation")
 	for option in catalog.candidates(state):
-		t.check(option.item_id != base,"maximum weapon cannot be offered a sixth level")
-	F.drop_xp(sim,state,32,"fixture:xp:prerequisite")
-	result = sim.choose_upgrade(state,state.upgrade_offer.offer_id,"passive:"+prerequisite)
-	t.check(result.get("ok",false) and state.passives[prerequisite] == 3,"actual separate-skill offer completes the passive prerequisite: "+recipe)
-	owned = _weapon(View.new().build(state),base)
-	t.check(owned.requirements[1].met and not owned.requirements[2].met and owned.evolution_status == "collecting","prerequisite alone cannot grant ultimate without boss seal")
-	state.active_tick = 17999
-	state.survival_tick = 17999
-	state.player.attack_ready_ticks[base] = 18001
-	F.step(sim,state,Vector2.ZERO,[F.boss("ch01_b05",[60,0])])
-	t.check(state.entities.size() == 1,"authored five-minute boss was spawned")
-	if state.entities.is_empty(): return
-	state.entities[0].hp = 1.0
-	t.check(sim.restore(state).get("ok",false),"arranged remaining boss HP is accepted before real killing attack")
-	for tick in 180:
-		F.step(sim,state,Vector2.ZERO)
-		if state.stats.minibosses_defeated == 1: break
-	t.check(state.tactical_seals == 1 and state.stats.minibosses_defeated == 1,"real boss killing hit grants exactly one prerequisite seal")
-	t.check(not state.upgrade_offer.is_empty(),"earned boss reward opens a real offer")
+		t.check(option.item_id != base,"maximum base weapon has no ordinary sixth-level card")
+	F.drop_xp(sim,state,32,"fixture:xp:final")
+	t.check(not state.upgrade_offer.is_empty(),"earned XP opens the actual final-stage offer without a boss")
 	if state.upgrade_offer.is_empty(): return
 	offer = state.upgrade_offer.offer_id
 	var view := View.new().build(state)
-	t.check(_weapon(view,base).evolution_status == "ready" and view.active_offer.options[0].option_id == "evolution:"+recipe,"owned readiness and actual offered ultimate share authority")
+	t.check(_weapon(view,base).evolution_status == "ready" and view.active_offer.options[0].option_id == "evolution:"+recipe,"owned readiness and actual final offer share authority")
 	var pending := sim.restore(JSON.parse_string(JSON.stringify(sim.snapshot(state),"",true,true)))
-	t.check(pending.get("ok",false),"materialized ultimate offer restores without reroll")
+	t.check(pending.get("ok",false),"materialized final-stage offer restores without reroll")
 	if not pending.get("ok",false): return
 	var chosen := sim.choose_upgrade(state,offer,"evolution:"+recipe)
 	var resumed_choice := sim.choose_upgrade(pending.state,offer,"evolution:"+recipe)
 	t.check(chosen.ok and chosen == resumed_choice and state == pending.state,"pending-offer resume produces the same choice and events")
-	t.check(state.equipment[base] == 5 and state.passives[prerequisite] == 3 and state.tactical_seals == 0 and state.evolutions[base] == recipe,"evolution consumes one seal and preserves weapon/passive levels")
+	t.check(state.equipment[base] == 5 and state.tactical_seals == 0 and state.stats.minibosses_defeated == 0 and state.evolutions[base] == recipe,"final evolution needs no boss or seal and preserves the base level and owned material")
 	before = state.duplicate(true)
-	t.check(not sim.choose_upgrade(state,offer,"evolution:"+recipe).ok and state == before,"duplicate ultimate choice cannot spend twice")
+	t.check(not sim.choose_upgrade(state,offer,"evolution:"+recipe).ok and state == before,"duplicate final choice cannot apply twice")
 	# Isolate one cast from XP pickup and later recasts, without changing damage,
 	# geometry, stage times or the authoritative selected evolution.
 	state.drops.clear()

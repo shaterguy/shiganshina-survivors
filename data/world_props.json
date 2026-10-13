@@ -1,5 +1,5 @@
 {
-  "revision": "ch01_props_1",
+  "revision": "ch01_props_3_wall_aligned_roof",
   "mask_bits": {
     "player": 1,
     "grounded_titan": 2,
@@ -17,7 +17,7 @@
       "ground_footprint": [
         -70,
         -52,
-        140,
+        96,
         52
       ],
       "depth_origin": 0,
@@ -46,8 +46,22 @@
       ],
       "rotation_degrees": 0,
       "contact_damage": 0,
-      "calibration_status": "candidate_pending_four_side_contact",
-      "damage_pose": "cracked"
+      "calibration_status": "alpha_base_calibrated_pending_four_side_contact",
+      "damage_pose": "cracked",
+      "mobility_anchor": {
+        "kind": "roof",
+        "connection": [
+          -22,
+          -26
+        ],
+        "roof_height": 144,
+        "pass_range": [
+          -70,
+          -52,
+          96,
+          52
+        ]
+      }
     },
     "house_bakery": {
       "asset_id": "house_bakery",
@@ -88,7 +102,21 @@
       "rotation_degrees": 0,
       "contact_damage": 0,
       "calibration_status": "candidate_pending_four_side_contact",
-      "damage_pose": "cracked"
+      "damage_pose": "cracked",
+      "mobility_anchor": {
+        "kind": "roof",
+        "connection": [
+          0,
+          -26
+        ],
+        "roof_height": 144,
+        "pass_range": [
+          -70,
+          -52,
+          140,
+          52
+        ]
+      }
     },
     "house_warehouse": {
       "asset_id": "house_warehouse",
@@ -129,7 +157,21 @@
       "rotation_degrees": 0,
       "contact_damage": 0,
       "calibration_status": "candidate_pending_four_side_contact",
-      "damage_pose": "cracked"
+      "damage_pose": "cracked",
+      "mobility_anchor": {
+        "kind": "roof",
+        "connection": [
+          0,
+          -30
+        ],
+        "roof_height": 144,
+        "pass_range": [
+          -88,
+          -60,
+          176,
+          60
+        ]
+      }
     },
     "house_ruined": {
       "asset_id": "house_ruined",

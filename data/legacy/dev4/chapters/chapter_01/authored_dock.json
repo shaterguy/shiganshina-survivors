@@ -1,0 +1,70 @@
+{
+  "scene_id": "authored_dock",
+  "entry_position": [
+    0,
+    0
+  ],
+  "escape_rect": [
+    -56,
+    320,
+    112,
+    80
+  ],
+  "geometry": {
+    "bounds": [
+      -640,
+      -300,
+      1280,
+      716
+    ],
+    "obstacles": [
+      [
+        -470,
+        -228,
+        100,
+        48
+      ],
+      [
+        -470,
+        22,
+        100,
+        48
+      ],
+      [
+        -470,
+        262,
+        100,
+        48
+      ],
+      [
+        370,
+        -228,
+        100,
+        48
+      ],
+      [
+        370,
+        22,
+        100,
+        48
+      ],
+      [
+        370,
+        262,
+        100,
+        48
+      ],
+      [
+        -270,
+        -270,
+        100,
+        40
+      ]
+    ]
+  },
+  "calibration_status": "candidate_pending_physical_transition_and_contact_review",
+  "final_actor_entry_position": [
+    0,
+    -220
+  ]
+}

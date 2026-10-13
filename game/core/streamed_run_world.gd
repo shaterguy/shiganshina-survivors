@@ -2,6 +2,7 @@ class_name StreamedRunWorld
 extends RefCounted
 # NEW 2026-10-10 adapter, not a reconstruction of the missing latest helper.
 # Owns only replaceable derived caches. Every persistent change is a proposal.
+const Mobility = preload("res://game/core/player_mobility.gd")
 const Address = preload("res://game/world/world_address.gd")
 const Population = preload("res://game/core/city_population.gd")
 const Generator = preload("res://game/world/city_generator.gd")
@@ -109,6 +110,9 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 	if not state.get("run_id") is String or state.run_id.is_empty() or not _tick(state.get("seed")): return failure("invalid_snapshot")
 	var command_check := _validate_commands(state,commands)
 	if not command_check.ok: return command_check
+	# This spatial boundary also runs after Core increments the active clock,
+	# before movement. Save admission separately enforces exact mobility clocks.
+	if state.has("player_mobility") and not Mobility.validate(state,false).is_empty(): return failure("invalid_player_mobility")
 	# Dock queries belong exclusively to its authored finite geometry, never to a
 	# city distance window or hydrated city chunk. Core selects that backend.
 	if state.world.stage == "dock": return {"ok":true,"chunks":[],"stage":"dock","origin_chunk":state.world.origin_chunk.duplicate(),"offset":[0,0]}
@@ -119,6 +123,11 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 	var normalized := Address.normalize(origin,player)
 	if not normalized.ok: return normalized
 	var rectangles: Array[Rect2] = [Rect2(player-Vector2.ONE*VIEW_MARGIN,Vector2.ONE*VIEW_MARGIN*2)]
+	if state.has("player_mobility"):
+		if state.player_mobility.phase != "ground":
+			var mobility_route := Mobility.route_sample(state.player_mobility,origin)
+			if not mobility_route.get("ok",false): return mobility_route
+			for index in range(1,4): rectangles.append(segment_rect(mobility_route.points[index-1],mobility_route.points[index],float(state.player.radius)))
 	for collection in LIMITS:
 		if not state.get(collection) is Array or state[collection].size() > LIMITS[collection]: return failure("invalid_snapshot")
 		for index in state[collection].size():
@@ -196,7 +205,16 @@ func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> 
 	if state.world.world_revision > 0:
 		var applied: Dictionary = candidate.apply_props(state.world.dirty_chunks,int(state.world.world_revision))
 		if not applied.ok: return applied
-	if not candidate.walkable(vec(state.player.position),float(state.player.radius)): return failure("blocked")
+	if state.has("player_mobility") and state.player_mobility.phase != "ground":
+		# Validate privately; failed preparation must preserve the installed cache.
+		var probe = fresh()
+		probe._world = candidate
+		probe._stage = "city"
+		probe._remember_identity(state)
+		var clearance: Dictionary = probe.mobility_player_clearance(state)
+		if not clearance.get("ok",false): return clearance
+		if not clearance.get("walkable",false): return failure("blocked")
+	elif not candidate.walkable(vec(state.player.position),float(state.player.radius)): return failure("blocked")
 	var next_hydration := {}
 	for chunk in needed.chunks:
 		var key := Address.key(chunk)
@@ -368,6 +386,134 @@ func props_query(rectangle: Rect2) -> Dictionary:
 	if not _rect_finite(rectangle): return _query_result(failure("invalid_query"))
 	if _world == null or not _world.covered(rectangle): return _query_result(failure("world_not_ready"))
 	return {"ok":true,"props":_world.query_props(rectangle)}
+# Mobility reads use the same prepared geometry and collision primitives. They
+# return proposals only; Core owns accepted movement and all damage.
+func mobility_geometry(state: Dictionary, rectangle: Rect2) -> Dictionary:
+	if _stage != "city" or not matches(state): return _query_result(failure("world_not_ready"))
+	var queried := props_query(rectangle)
+	if not queried.ok: return queried
+	var anchors := []
+	for prop in queried.props:
+		var anchor := _mobility_anchor_record(state,prop)
+		if not anchor.is_empty(): anchors.append(anchor)
+	return {"ok":true,"anchors":anchors}
+func _mobility_anchor_record(state: Dictionary, prop: Dictionary) -> Dictionary:
+	if prop.get("destroyed",true) or prop.get("hp",0) <= 0 or prop.get("hp") != prop.get("max_hp") or not prop.get("mobility_anchor") is Dictionary: return {}
+	var data: Dictionary = prop.mobility_anchor
+	if data.get("kind") != "roof" or (int(prop.get("collision_mask",0)) & Props.PLAYER) == 0: return {}
+	var position: Vector2 = prop.position
+	var placed := Address.normalize(state.world.origin_chunk,position)
+	var connected := Address.normalize(state.world.origin_chunk,position+vec(data.connection))
+	if not placed.ok or not connected.ok: return {}
+	var ground: Rect2 = prop.ground_footprint
+	var relative := ground.position-position
+	var fingerprint: String = state.world.content_fingerprint
+	# Stable physical data only. Cache/global/origin counters must not make an
+	# unchanged roof stale after cold hydration, a save receipt or another hit.
+	var identity := [prop.prop_id,prop.slot_id,prop.definition_id,fingerprint,placed.chunk,[placed.local.x,placed.local.y],[relative.x,relative.y,ground.size.x,ground.size.y],int(prop.collision_mask),int(prop.hp),int(prop.max_hp),data.kind,[float(data.connection[0]),float(data.connection[1])],float(data.roof_height),[float(data.pass_range[0]),float(data.pass_range[1]),float(data.pass_range[2]),float(data.pass_range[3])]]
+	return {"prop_id":prop.prop_id,"slot_id":prop.slot_id,"definition_id":prop.definition_id,"kind":data.kind,"chunk":connected.chunk.duplicate(),"local":[connected.local.x,connected.local.y],"connection":[float(data.connection[0]),float(data.connection[1])],"roof_height":float(data.roof_height),"pass_range":[float(data.pass_range[0]),float(data.pass_range[1]),float(data.pass_range[2]),float(data.pass_range[3])],"content_fingerprint":fingerprint,"geometry_revision":JSON.stringify(identity).sha256_text()}
+func mobility_sweep(state: Dictionary, position: Vector2, delta: Vector2, radius: float, anchor: Dictionary, height: float) -> Dictionary:
+	return _mobility_sweep_checked(state,position,delta,radius,anchor,height,false)
+func mobility_cancel_sweep(state: Dictionary, position: Vector2, delta: Vector2, radius: float, anchor: Dictionary, height: float) -> Dictionary:
+	# Read-only emergency traversal. Never offers a new damaged-roof anchor.
+	return _mobility_sweep_checked(state,position,delta,radius,anchor,height,true)
+func _mobility_sweep_checked(state: Dictionary, position: Vector2, delta: Vector2, radius: float, anchor: Dictionary, height: float, cancellation: bool) -> Dictionary:
+	if _stage != "city" or not matches(state): return _query_result(failure("world_not_ready"))
+	if not is_finite(height) or height < 0: return failure("invalid_mobility_height")
+	var guarded := _query_guard(position,delta,radius)
+	if not guarded.ok: return guarded
+	if not anchor.get("prop_id") is String or not anchor.get("chunk") is Array or not point_valid(anchor.get("local")): return failure("invalid_mobility_anchor")
+	var connected := Address.relative(anchor.chunk,vec(anchor.local),state.world.origin_chunk)
+	if not connected.ok: return connected
+	var queried := props_query(Rect2(connected.local-Vector2.ONE,Vector2.ONE*2))
+	if not queried.ok: return queried
+	var actual := {}
+	var target := {}
+	var candidates: Array = queried.props
+	if cancellation:
+		# Ruins may have zero footprint and disappear from spatial queries.
+		# The exact resident identity map still contains the destroyed prop.
+		var known: Dictionary = _world._props.get(anchor.prop_id,{})
+		candidates = [] if known.is_empty() else [known]
+	for prop in candidates:
+		if prop.prop_id == anchor.prop_id:
+			target = prop
+			if cancellation:
+				# Reconstruct only this known prop's original authored physical
+				# identity. Actual world data/masks/hp are never changed.
+				target = Props.new(_definitions.props).place(prop.prop_id,prop.definition_id,prop.position,{})
+				if target.is_empty() or prop.max_hp != target.max_hp or not _same_json(prop.get("mobility_anchor"),target.get("mobility_anchor")): return failure("stale_mobility_anchor")
+				if not prop.destroyed and (prop.ground_footprint != target.ground_footprint or prop.collision_mask != target.collision_mask): return failure("stale_mobility_anchor")
+			actual = _mobility_anchor_record(state,target)
+			break
+	if actual.is_empty(): return failure("stale_mobility_anchor")
+	for field in actual:
+		if not anchor.has(field) or not _same_json(anchor[field],actual[field]): return failure("stale_mobility_anchor")
+	# Candidate metadata alone cannot turn a collision mask off.
+	if not Codec.exact_keys(anchor,actual.keys()+["pass_start","pass_end"]): return failure("invalid_roof_passage")
+	var beginning := _mobility_point(anchor.pass_start,state.world.origin_chunk,actual.geometry_revision)
+	var ending := _mobility_point(anchor.pass_end,state.world.origin_chunk,actual.geometry_revision)
+	if not beginning.ok or not ending.ok: return failure("invalid_roof_passage")
+	var from: Vector2 = beginning.position
+	var to: Vector2 = ending.position
+	var segment := to-from
+	var length := segment.length()
+	if length < 1 or length > 320 or float(anchor.pass_start.height) != float(actual.roof_height) or float(anchor.pass_end.height) != float(actual.roof_height): return failure("invalid_roof_passage")
+	var passage := Props.rect(actual.pass_range)
+	passage.position += connected.local-vec(actual.connection)
+	var permitted := passage.grow(radius)
+	var physical: Rect2 = target.ground_footprint.grow(radius)
+	if physical.has_point(from) or physical.has_point(to): return failure("invalid_roof_passage")
+	var entering: float = _world.slab_fraction(from,segment,physical)
+	var leaving: float = _world.slab_fraction(to,-segment,physical)
+	if entering >= 1.0 or leaving >= 1.0: return failure("invalid_roof_passage")
+	# The entire physical intersection must lie inside the declared pass range,
+	# rather than merely touching one permitted corner of a broader building.
+	if absf(_world.slab_fraction(from,segment,permitted)-entering)*length > 0.0002 or absf(_world.slab_fraction(to,-segment,permitted)-leaving)*length > 0.0002: return failure("invalid_roof_passage")
+	if height < float(actual.roof_height): return sweep(position,delta,radius)
+	for point in [position,position+delta]:
+		var fraction: float = (point-from).dot(segment)/segment.length_squared()
+		if fraction < 0 or fraction > 1 or point.distance_to(from+segment*fraction) > 0.0002: return failure("invalid_roof_passage")
+	queried = props_query(segment_rect(position,position+delta,radius))
+	if not queried.ok: return queried
+	var fraction := 1.0
+	var hit_id := ""
+	for prop in queried.props:
+		if prop.prop_id == actual.prop_id or (int(prop.collision_mask) & Props.PLAYER) == 0: continue
+		var hit: float = _world.slab_fraction(position,delta,prop.ground_footprint.grow(radius))
+		if hit < fraction or (hit == fraction and hit < 1 and (hit_id.is_empty() or prop.prop_id < hit_id)):
+			fraction = hit
+			hit_id = prop.prop_id
+	var accepted := position+delta*maxf(0,fraction-(0.0002/maxf(delta.length(),1.0) if fraction < 1 else 0.0))
+	return {"ok":true,"error_code":"","position":accepted,"hit_prop_id":hit_id,"fraction":fraction}
+func mobility_player_clearance(state: Dictionary, validate_contract := true) -> Dictionary:
+	if validate_contract and not Mobility.validate(state).is_empty(): return failure("invalid_player_mobility")
+	if not state.has("player_mobility") or state.player_mobility.phase == "ground": return walkable(vec(state.player.position),float(state.player.radius))
+	var m: Dictionary = state.player_mobility
+	var route := Mobility.route_sample(m,state.world.origin_chunk)
+	if not route.get("ok",false): return route
+	# Proof of the entire stored path, including descent and ground landing.
+	var rise := sweep(route.points[0],route.points[1]-route.points[0],8.0)
+	if not rise.get("ok",false): return rise
+	var over := mobility_cancel_sweep(state,route.points[1],route.points[2]-route.points[1],8.0,m.anchor,float(m.anchor.roof_height))
+	if not over.get("ok",false): return over
+	var land := sweep(route.points[2],route.points[3]-route.points[2],8.0)
+	if not land.get("ok",false): return land
+	var final_point := walkable(route.points[3],8.0)
+	if not final_point.get("ok",false): return final_point
+	if rise.fraction < 1.0 or over.fraction < 1.0 or land.fraction < 1.0 or not final_point.walkable: return failure("blocked_mobility_path")
+	var height := float(Mobility.visual_sample(state).height)
+	if float(m.progress) >= route.distances[1] and float(m.progress) <= route.distances[2] and height >= float(m.anchor.roof_height):
+		var actual := mobility_cancel_sweep(state,vec(state.player.position),Vector2.ZERO,8.0,m.anchor,height)
+		if not actual.get("ok",false): return actual
+		return {"ok":true,"walkable":actual.fraction == 1.0}
+	return walkable(vec(state.player.position),8.0)
+static func _mobility_point(value: Variant, origin: Array, revision: String) -> Dictionary:
+	if not value is Dictionary or not Codec.exact_keys(value,["chunk","local","height","geometry_revision"]) or not value.chunk is Array or not point_valid(value.local) or not number(value.height) or value.geometry_revision != revision: return failure("invalid_roof_passage")
+	var checked := Address.normalize(value.chunk,vec(value.local))
+	if not checked.ok or checked.chunk != value.chunk or checked.local != vec(value.local): return failure("invalid_roof_passage")
+	var relative := Address.relative(value.chunk,vec(value.local),origin)
+	return {"ok":true,"position":relative.local} if relative.ok else relative
 func _query_guard(position: Vector2, delta: Vector2, radius: float) -> Dictionary:
 	if not is_finite(radius) or radius < 0 or radius > 32: return _query_result(failure("unsupported_radius"))
 	if not _vector_valid(position) or not _vector_valid(delta) or delta.length() > MAX_LOCAL: return _query_result(failure("invalid_query"))
@@ -497,6 +643,7 @@ func dock_transition_proposal(state: Dictionary, command: Dictionary, dock_defin
 	if state.world.stage == "dock": return Evacuation.dock_transition(state,{"command_id":command.command_id},dock_definition)
 	checked = _validate_commands(state,[command])
 	if not checked.ok: return checked
+	if state.has("player_mobility") and state.player_mobility.get("phase") != "ground": return failure("mobility_airborne")
 	var evacuation: Dictionary = state.world.evacuation
 	if evacuation.is_empty() or not command.payload.get("passage_id") is String or command.payload.passage_id != evacuation.passage_id: return failure("wrong_passage")
 	var local := Address.relative(evacuation.chunk,Vector2(336,336),state.world.origin_chunk)

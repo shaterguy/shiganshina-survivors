@@ -1,5 +1,6 @@
 class_name GameSaveContracts
 extends RefCounted
+const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 const Characters = preload("res://game/progression/character_catalog.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
 const MAX_COUNTER := 2147483647
@@ -7,15 +8,18 @@ const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
 const TERMINAL := ["dead","won","abandoned"]
 var _validator: Callable
 var _catalog
+var _target_evolution_ids: Array = []
 func _init(checkpoint_validator: Callable, catalog_context: Variant = null) -> void:
 	_validator = checkpoint_validator
 	if catalog_context == null:
 		_catalog = Catalog.new()
+		_target_evolution_ids = Upgrades.new().evolutions.ids()
 	else:
 		_catalog = Catalog.new({}, {}, {}, {})
 		_catalog._items = catalog_context.items.duplicate(true)
 		_catalog._doctrines = catalog_context.doctrines.duplicate(true)
 		_catalog._errors.assign(catalog_context.errors)
+		_target_evolution_ids = catalog_context.get("target_evolution_ids",[]).duplicate()
 func validate_economy(value: Variant) -> Array[String]:
 	if not value is Dictionary: return ["invalid_game_save"]
 	var errors: Array[String] = []
@@ -142,7 +146,7 @@ func _selection_valid(profile: Dictionary, selection: Dictionary) -> bool:
 	if selection.size() != 3: return false
 	for key in ["doctrine_id","target_evolution_id","supply_item_id"]:
 		if not selection.get(key) is String: return false
-	return selection.get("doctrine_id") in profile.owned_doctrine_ids and selection.get("target_evolution_id") in ["evo_wing_cut","evo_crossfire","evo_storm_chain","evo_inferno_zone"] and selection.get("supply_item_id") in ["","field_bandage"]
+	return selection.get("doctrine_id") in profile.owned_doctrine_ids and selection.get("target_evolution_id") in _target_evolution_ids and selection.get("supply_item_id") in ["","field_bandage"]
 func _purchase_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 	if not receipt is Dictionary or not receipt.get("item_id") is String or not receipt.get("request_id") is String: return false
 	var item: Dictionary = _catalog.item(receipt.item_id)

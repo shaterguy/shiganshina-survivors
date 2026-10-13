@@ -183,6 +183,11 @@ func _checked_recovery_cap(t) -> void:
 	t.check(Budget.evaluate_query(candidate.attack,[live.attack],F.player([170,0]),q,c).accepted,"recovering live grab with valid cap consumes zero slots")
 func _count_actual_work(t) -> void:
 	var f := _fixture()
+	var origin_clear: Dictionary = f.helper.walkable(Vector2(300,210),22.0)
+	var target_clear: Dictionary = f.helper.walkable(Vector2(450,210),8.0)
+	t.check(origin_clear.get("ok",false) and origin_clear.get("walkable",false) and target_clear.get("ok",false) and target_clear.get("walkable",false),"counted actual hand origin and player endpoint are both legal")
+	if not origin_clear.get("walkable",false) or not target_clear.get("walkable",false):
+		print("COUNTED_GRAB_ENDPOINT_REFUSED ",origin_clear," ",target_clear); return
 	# Replace only derived backend with counted subclass, using same generator,
 	# seed, hydration and inherited real algorithms; no fake collision answers.
 	var h = f.helper; var needed := H.requirements(f.state); var hydration := WF.hydration(needed)
@@ -192,7 +197,12 @@ func _count_actual_work(t) -> void:
 	var times: Array[int] = []; var accepted := 0; var logical := 0; var queries := {}
 	for iteration in 40:
 		var q := Q.for_streamed(h,f.state)
-		var start := Time.get_ticks_usec(); var b := _grab(q,[290,210],[450,210]); var c := _context(); c.grab_reach_caps[b.attack.attack_id] = b.grab_reach_cap
+		# The current warehouse reaches x272; hand radius22 requires x>294.
+		var start := Time.get_ticks_usec(); var b := _grab(q,[300,210],[450,210])
+		t.check(b.get("ok",false) and b.has_all(["attack","grab_reach_cap"]),"counted real fixture begins a valid capped grab before measuring work")
+		if not b.get("ok",false) or not b.has_all(["attack","grab_reach_cap"]):
+			print("COUNTED_GRAB_FIXTURE_REFUSED ",b); return
+		var c := _context(); c.grab_reach_caps[b.attack.attack_id] = b.grab_reach_cap
 		var legacy := _legacy("legacy:2:100",[Model._line(Vector2(290,300),Vector2(370,300),32.0)],145,165)
 		c.legacy_cover_modes[legacy.attack_id] = ["legacy_mask4"]
 		var result := Budget.evaluate_query(b.attack,[legacy],F.player([450,210]),q,c)

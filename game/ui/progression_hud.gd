@@ -2,10 +2,11 @@ class_name ProgressionHUD
 extends Control
 # Eight fixed presentation slots. All numbers and eligibility come from the DTO.
 signal details_requested
-const SHORT_NAMES := {"blade_slash":"쌍검","movement":"발걸음","fire_interval":"재장전","wall_cannon":"성벽포격","tactical_seal":"개조권"}
+const Icons = preload("res://game/ui/skill_icons.gd")
 var _slots: Array[Control] = []
 var _entry: Button
 var _target: Label
+var _target_icon: TextureRect
 var _signature: Label
 var _signature_visible := false
 var _display := ""
@@ -33,6 +34,12 @@ func _ready() -> void:
 		slot.add_theme_stylebox_override("panel",style)
 		add_child(slot)
 		_slots.append(slot)
+		var icon := TextureRect.new()
+		icon.name = "Icon"
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		slot.add_child(icon)
 		for label_name in ["Name","Status"]:
 			var label := Label.new()
 			label.name = label_name
@@ -49,7 +56,17 @@ func _ready() -> void:
 	# the reserved 39px row without reducing the readable font size.
 	_target.add_theme_constant_override("line_spacing",-1)
 	_target.add_theme_color_override("font_color",Color("e6c88d"))
+	_target.add_theme_color_override("font_shadow_color",Color("18211d"))
+	_target.add_theme_constant_override("shadow_offset_x",1)
+	_target.add_theme_constant_override("shadow_offset_y",1)
+	_target.add_theme_constant_override("shadow_outline_size",0)
 	add_child(_target)
+	_target_icon = TextureRect.new()
+	_target_icon.name = "TargetIcon"
+	_target_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_target_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_target_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	add_child(_target_icon)
 	_signature = Label.new()
 	_signature.name = "CharacterSkill"
 	_signature.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -68,13 +85,17 @@ func reflow(bounds: Vector2) -> void:
 		slot.position = Vector2((index%4)*(slot_width+2),int(index/4)*34)
 		slot.size = Vector2(slot_width,33)
 		var title: Label = slot.get_node("Name")
-		title.position = Vector2(3,-1)
-		title.size = Vector2(slot_width-6,16)
+		title.hide()
+		var icon: TextureRect = slot.get_node("Icon")
+		icon.position = Vector2(3,4)
+		icon.size = Vector2(24,24)
 		var status: Label = slot.get_node("Status")
-		status.position = Vector2(3,14)
-		status.size = Vector2(slot_width-6,19)
-	_target.position = Vector2(0,69)
-	_target.size = Vector2(bounds.x,39)
+		status.position = Vector2(30,6)
+		status.size = Vector2(slot_width-33,21)
+	_target.position = Vector2(20 if _target_icon.texture != null else 0,69)
+	_target.size = Vector2(bounds.x-_target.position.x,39)
+	_target_icon.position = Vector2(0,70)
+	_target_icon.size = Vector2(16,16)
 	_signature.position = Vector2(0,108)
 	_signature.size = Vector2(bounds.x,24)
 func present_signature(view: Dictionary) -> bool:
@@ -95,21 +116,27 @@ func present(view: Dictionary) -> void:
 	for index in 8:
 		var rows: Array = content.owned.get("equipment" if index < 4 else "passives",[])
 		var row: Dictionary = rows[index%4] if index%4 < rows.size() else {}
-		var title := str(row.get("name","빈 칸"))
-		var status := "장비" if index < 4 else "보조"
+		var title := str(row.get("name",""))
+		var status := ""
 		if not row.is_empty():
-			status = level_text(row)
-			if row.get("is_evolved",false): title = evolution_name(view,str(row.get("evolution_id","")))
-			if index >= 4:
-				for requirement in content.target.get("requirements",[]):
-					if requirement.get("item_id","") == row.get("item_id",""): title = "◇ "+title
+			status = "%d/%d" % [int(row.get("display_level",row.get("level",0))),int(row.get("display_max_level",row.get("max_level",0)))]
+			if row.get("is_evolved",false): title = str(row.get("evolution_name",evolution_name(view,str(row.get("evolution_id","")))))
 		_slots[index].set_meta("item_id",str(row.get("item_id","")))
-		_slots[index].get_node("Name").text = title
+		_slots[index].modulate.a = 0.3 if row.is_empty() else 1.0
+		_slots[index].get_node("Icon").texture = null if row.is_empty() else Icons.texture_for(Icons.icon_id_for(row))
+		_slots[index].tooltip_text = "" if row.is_empty() else title+" · "+level_text(row)
+		_slots[index].get_node("Name").text = ""
 		_slots[index].get_node("Status").text = status
-		lines.append(title+" · "+status)
-	_target.text = target_text(content.target) if content.has("owned") and not content.owned.is_empty() else "기술 정보 확인 중"
-	lines.append(_target.text)
+		if not status.is_empty(): lines.append(status)
+	_target_icon.texture = Icons.texture_for("skill_"+str(content.target.get("evolution_id","")))
+	_target.text = target_summary(content.target) if content.has("owned") and not content.owned.is_empty() else "기술 정보 확인 중"
+	_target.visible = not _target.text.is_empty()
+	_target_icon.visible = _target.visible and _target_icon.texture != null
+	_target.tooltip_text = target_text(content.target)
+	_entry.tooltip_text = "보유 기술 · 전투를 멈추고 효과와 진화 조건 보기\n"+_target.tooltip_text
+	if _target.visible: lines.append(_target.text)
 	_display = "\n".join(lines)
+	reflow(size)
 func slot_controls() -> Array[Control]:
 	return _slots.duplicate()
 func display_text() -> String:
@@ -127,8 +154,10 @@ func _process(delta: float) -> void:
 	_highlight_id = ""
 	set_process(false)
 static func level_text(row: Dictionary) -> String:
-	if row.get("is_evolved",false): return "궁극"
-	return ("MAX %d/%d" if row.get("is_max",false) else "Lv %d/%d") % [int(row.get("level",0)),int(row.get("max_level",0))]
+	var level := int(row.get("display_level",row.get("level",0)))
+	var cap := int(row.get("display_max_level",row.get("max_level",0)))
+	if row.get("is_evolved",false): return "진화 %d/%d" % [level,cap]
+	return ("MAX %d/%d" if row.get("is_max",false) else "Lv %d/%d") % [level,cap]
 static func evolution_name(view: Dictionary, id: String) -> String:
 	for recipe in view.get("evolutions",[]):
 		if recipe.get("evolution_id","") == id: return str(recipe.get("name",id))
@@ -139,12 +168,19 @@ static func target_text(target: Dictionary) -> String:
 	var blocked := false
 	for requirement in target.get("requirements",[]):
 		blocked = blocked or requirement.get("blocked_reason","") in ["equipment_slots","passive_slots"]
-		var title := str(SHORT_NAMES.get(requirement.get("item_id",""),requirement.get("name","조건")))
-		conditions.append("%s %d/%d %s" % [title,int(requirement.get("current",0)),int(requirement.get("required",0)),"✓" if requirement.get("met",false) else "부족"])
-	var heading := str({"evo_wing_cut":"연속참","evo_crossfire":"교차포격"}.get(target.get("evolution_id",""),target.get("name","목표")))
+		conditions.append(Icons.requirement_text(requirement))
+	var heading := str(target.get("name","목표 진화"))
 	if blocked: heading = "필수 슬롯 없음"
 	elif target.get("status","") == "ready": heading = "진화 준비 완료 · 다음 성장 선택"
-	elif target.get("status","") == "evolved": return heading+" · 궁극 진화 완료\n보유 기술 · 눌러서 효과 확인"
+	elif target.get("status","") == "evolved": return heading+" · 진화 완료\n보유 기술 · 눌러서 효과 확인"
 	if conditions.is_empty(): return heading
 	if target.get("status","") == "ready": return heading+"\n"+" · ".join(conditions)
 	return heading+" · "+conditions[0]+"\n"+" · ".join(conditions.slice(1))
+static func target_summary(target: Dictionary) -> String:
+	if target.is_empty() or target.get("status","") == "evolved": return ""
+	var heading := str(target.get("name","목표 진화"))
+	var status := str(target.get("status",""))
+	var state := str({"ready":"준비","blocked":"조건 제한"}.get(status,"재료 부족"))
+	for requirement in target.get("requirements",[]):
+		if requirement.get("blocked_reason","") in ["equipment_slots","passive_slots"]: state = "슬롯 부족"
+	return heading+" · "+state

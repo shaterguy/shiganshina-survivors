@@ -12,6 +12,10 @@ func roundtrip(value: Dictionary) -> Dictionary:
 func test_queued_offer_rebases_levels(t,sim) -> void:
 	var state := Fixture.boss_reward_state(sim,2)
 	state.passives = {"movement":3}
+	# Satisfy the current wing material so the even earned level prioritizes
+	# blade growth, preserving the shared-family FIFO/rebase scenario.
+	state.equipment.odm_dash = 1
+	state.player.attack_ready_ticks.odm_dash = 2147483647
 	Fixture.step(sim,state,Vector2.ZERO)
 	var queued_id: String = state.pending_offers[0].offer_id
 	t.check(state.pending_offers[0].size() == 3 and not state.pending_offers[0].has("options"),"queued offer stores a deferred descriptor rather than stale options")

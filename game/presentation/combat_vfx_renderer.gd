@@ -23,6 +23,8 @@ func commands(effects: Array[Dictionary], context: Dictionary) -> Array[Dictiona
 		for index in layers.size():
 			var layer: Dictionary = layers[index]
 			var component := str(layer.get("component","main"))
+			# JSON numbers are floats; Array membership does not coerce an int.
+			if layer.has("stage_indices") and not layer.stage_indices.any(func(stage): return float(stage) == float(effect.get("stage_index",0))): continue
 			if effect.get("evolution_id","") == "evo_wing_cut":
 				if int(effect.get("stage_index",0)) == 0 and component == "stage_second": continue
 				if int(effect.get("stage_index",0)) == 1 and component == "main": continue
@@ -89,6 +91,10 @@ func _command(effect: Dictionary, layer: Dictionary, component: String, asset: D
 	var bounds_values: Array = asset.get("vfx_bounds_px",[0,0,cell.x,cell.y])
 	var bounds := Rect2(float(bounds_values[0]),float(bounds_values[1]),float(bounds_values[2]),float(bounds_values[3]))
 	if cell.x <= 0 or cell.y <= 0 or bounds.size.x <= 0 or bounds.size.y <= 0: return _diagnostic(effect,"invalid_asset_geometry",str(layer.art_id))
+	# Reused centered ally art is a forward path only for explicitly authored
+	# line layers. Keep legacy projectile and target-contact pivots untouched.
+	if shape == "line" and layer.get("forward_origin",false): pivot.x = bounds.position.x
+	rotation += deg_to_rad(float(layer.get("rotation_offset_degrees",0.0))+float(layer.get("stage_rotation_degrees",0.0))*int(effect.get("stage_index",0))+float(layer.get("rotation_speed_degrees",0.0))*maxi(0,tick-int(effect.get("start_tick",0))))
 	var scale := contact_size/bounds.size
 	var local_rect := Rect2(-pivot,cell)
 	var lifetime := maxi(1,int(effect.end_tick)-int(effect.start_tick))

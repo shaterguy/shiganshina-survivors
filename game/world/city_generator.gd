@@ -12,6 +12,12 @@ func _init(templates: Dictionary, props: Dictionary) -> void:
 func validate() -> Array[String]:
 	var errors: Array[String] = []
 	if _templates.get("generator_revision") != "city_v1" or _templates.get("template_revision") != "ch01_city_1" or _templates.get("chunk_size") != 768 or _templates.get("navigation_cell") != 32 or _templates.get("street_interval") != [288.0,480.0] or _templates.get("passage_rect") != [336.0,336.0,96.0,96.0]: errors.append("invalid_template_contract")
+	var declared_limit = _templates.get("max_props",12)
+	var max_props := 12
+	if not (declared_limit is int or declared_limit is float) or not is_finite(float(declared_limit)) or float(declared_limit) != floor(float(declared_limit)) or declared_limit < 1 or declared_limit > 24:
+		errors.append("invalid_prop_limit")
+	else:
+		max_props = int(declared_limit)
 	var templates: Array = _templates.get("templates",[])
 	if templates.size() != 4: errors.append("four_templates_required")
 	var ids := {}
@@ -20,7 +26,7 @@ func validate() -> Array[String]:
 		ids[template.template_id] = true
 		var slots := {}
 		var solids: Array[Rect2] = []
-		if template.slots.size() > 12: errors.append("too_many_props")
+		if template.slots.size() > max_props: errors.append("too_many_props")
 		for slot in template.slots:
 			if slots.has(slot.slot_id) or slot.slot_id.is_empty(): errors.append("duplicate_slot")
 			slots[slot.slot_id] = true

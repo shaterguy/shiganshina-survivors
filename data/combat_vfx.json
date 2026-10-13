@@ -632,6 +632,182 @@
           ]
         }
       }
+    },
+    {
+      "recipe_id": "evo_whirlwind",
+      "base_item_id": "spin_slash",
+      "evolution_id": "evo_whirlwind",
+      "visual_identity": "three_expanding_rings_with_opposed_rotating_blades",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_whirlwind.cast",
+          "role": "cast",
+          "art_id": "vfx_spin_double_ring",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 18,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "circle",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_spin_double_ring",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            },
+            {
+              "art_id": "vfx_wing_first_arc",
+              "component": "orbit_left",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "rotation_speed_degrees": 16.0,
+              "stage_rotation_degrees": 45.0
+            },
+            {
+              "art_id": "vfx_wing_second_arc",
+              "component": "orbit_right",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "rotation_offset_degrees": 180.0,
+              "rotation_speed_degrees": -16.0,
+              "stage_rotation_degrees": -45.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_sky_lance",
+      "base_item_id": "odm_dash",
+      "evolution_id": "evo_sky_lance",
+      "visual_identity": "three_forward_lightning_lances_and_cross_tips",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_sky_lance.cast",
+          "role": "cast",
+          "art_id": "vfx_chain_lightning",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_chain_lightning",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "forward_origin": true
+            },
+            {
+              "art_id": "vfx_dash_cross_tip",
+              "component": "tip",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            },
+            {
+              "art_id": "vfx_dash_compressed_gas",
+              "component": "wake",
+              "reduce_mode": "omit",
+              "render_pass": "contact_overlay",
+              "forward_origin": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_echo_assault",
+      "base_item_id": "reentry_combo",
+      "evolution_id": "evo_echo_assault",
+      "visual_identity": "three_alternating_sector_arcs_with_target_echo",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_echo_assault.cast",
+          "role": "cast",
+          "art_id": "vfx_wing_first_arc",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 10,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "sector",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_wing_first_arc",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "stage_indices": [
+                0,
+                2
+              ]
+            },
+            {
+              "art_id": "vfx_wing_second_arc",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "stage_indices": [
+                1
+              ]
+            },
+            {
+              "art_id": "vfx_reentry_triple",
+              "component": "afterimage",
+              "reduce_mode": "omit",
+              "render_pass": "contact_overlay"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "recipe_id": "evo_wing_squad",
+      "base_item_id": "ally_cover",
+      "evolution_id": "evo_wing_squad",
+      "visual_identity": "three_crossing_ally_flight_paths_with_arrival_cuts",
+      "phases": {
+        "cast": {
+          "recipe_id": "evo_wing_squad.cast",
+          "role": "cast",
+          "art_id": "vfx_ally_gas_swoop",
+          "anchor_policy": "world",
+          "render_pass": "contact_overlay",
+          "duration_ticks": 12,
+          "contact_tick_policy": "execute_tick",
+          "shape_binding": "line",
+          "priority": 80,
+          "reduce_mode": "preserve",
+          "layers": [
+            {
+              "art_id": "vfx_ally_gas_swoop",
+              "component": "main",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay",
+              "forward_origin": true
+            },
+            {
+              "art_id": "vfx_ally_arrival_cut",
+              "component": "tip",
+              "reduce_mode": "preserve",
+              "render_pass": "contact_overlay"
+            },
+            {
+              "art_id": "vfx_wing_first_arc",
+              "component": "wake",
+              "reduce_mode": "omit",
+              "render_pass": "contact_overlay",
+              "forward_origin": true
+            }
+          ]
+        }
+      }
     }
   ],
   "art_requirements": [

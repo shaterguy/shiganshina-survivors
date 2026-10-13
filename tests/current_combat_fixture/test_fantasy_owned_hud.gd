@@ -6,7 +6,7 @@ func run(t) -> void:
 	var sim = F.simulation(t)
 	var state: Dictionary = sim.new_run(F.chapter(),42,F.run_config(1,"doctrine_standard","evo_storm_chain"))
 	if state.has("error_code"): return
-	state.equipment = {"chain_lightning":5,"fire_zone":2}
+	state.equipment = {"chain_lightning":5}
 	var before := state.duplicate(true)
 	var ui := UI.new()
 	t.root.add_child(ui)
@@ -14,15 +14,16 @@ func run(t) -> void:
 	ui.present_progression(View.new().build(state))
 	var hud = ui.get_node("ProgressionHUD")
 	var text: String = hud.display_text()
-	t.check(text.contains("연쇄번개") and text.contains("화염지대") and text.contains("폭풍 연쇄"),"assembled current owned HUD names both fantasy attacks and selected ultimate")
-	t.check(text.contains("MAX 5/5") and text.contains("Lv 2/5") and text.contains("2/3") and text.contains("0/1"),"current owned HUD exposes weapon cap, cross-skill requirement and missing boss seal")
-	state.equipment.fire_zone = 3
-	state.tactical_seals = 1
+	t.check(hud.slot_controls()[0].tooltip_text.contains("연쇄번개") and hud.slot_controls()[0].get_node("Icon").texture != null and text.contains("폭풍 연쇄") and not text.contains("화염지대"),"HUD identifies the owned attack by its real icon/information and never claims the unowned partner")
+	var target: Label = hud.get_node("TargetRequirements")
+	t.check(hud.slot_controls()[0].get_node("Status").text == "5/6" and target.text.contains("재료 부족"),"visible HUD exposes attack-six cap and unmet target state")
+	t.check(target.tooltip_text.contains("미보유") and target.tooltip_text.contains("화염지대"),"separate target tooltip names the missing prerequisite")
+	state.equipment.fire_zone = 1
 	ui.present_progression(View.new().build(state))
-	t.check(hud.display_text().contains("진화 준비 완료"),"cross-skill Lv3 plus seal displays ready current ultimate")
+	t.check(hud.get_node("TargetRequirements").text.contains("준비"),"cross-skill level one displays ready evolution without a seal")
 	state.evolutions.chain_lightning = "evo_storm_chain"
 	state.tactical_seals = 0
 	ui.present_progression(View.new().build(state))
-	t.check(hud.display_text().contains("폭풍 연쇄") and hud.display_text().contains("궁극"),"current owned HUD displays actual ultimate name after evolution")
+	t.check(hud.slot_controls()[0].tooltip_text.contains("폭풍 연쇄") and hud.slot_controls()[0].get_node("Status").text == "6/6" and not hud.get_node("TargetRequirements").is_visible_in_tree(),"current evolved HUD preserves actual name information and sixth level without repeated completion text")
 	t.check(state.player == before.player and state.run_config == before.run_config,"current fantasy HUD reads combat authority without changing player or selection")
 	ui.free()

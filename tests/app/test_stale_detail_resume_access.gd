@@ -15,7 +15,7 @@ func run(t) -> void:
 	var committed: Dictionary = writer.game_save.duplicate(true)
 	# The actual background checkpoint request detects a replaced authority.
 	reader._notification(Node.NOTIFICATION_APPLICATION_FOCUS_OUT)
-	t.check(reader.state.is_empty() and reader.pending_checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and reader.pending_checkpoint.tactical_seals == 0,"stale recipe detail quarantines only confirmed evolution checkpoint")
+	t.check(reader.state.is_empty() and reader.pending_checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and reader.pending_checkpoint.tactical_seals == 1,"stale recipe detail quarantines only confirmed evolution checkpoint")
 	t.check(reader.ui._mode == "title" and reader.ui._detail_id.is_empty() and reader.ui._growth_view.is_empty(),"authority quarantine invalidates obsolete detail and growth presentation")
 	reader._notification(Node.NOTIFICATION_APPLICATION_FOCUS_IN)
 	reader.ui.navigate("cancel")
@@ -26,9 +26,9 @@ func run(t) -> void:
 	reader.ui.upgrade_chosen.connect(func(id,_option): choices.append(id))
 	reader.ui.accept_released()
 	reader.ui.navigate("accept")
-	t.check(not reader.state.is_empty() and reader.state.evolutions.get("blade_slash") == "evo_wing_cut" and reader.state.tactical_seals == 0 and reader.state.upgrade_offer.is_empty(),"reachable UI continue restores confirmed evolution and spent seal")
+	t.check(not reader.state.is_empty() and reader.state.evolutions.get("blade_slash") == "evo_wing_cut" and reader.state.tactical_seals == 1 and reader.state.upgrade_offer.is_empty(),"reachable UI continue restores confirmed evolution and retained boss seal")
 	t.check(choices.is_empty() and not obsolete in choices and reader.ui._mode == "play","fresh resume never emits an obsolete growth choice")
 	var disk: Dictionary = reader.save_store.load_game().game_save
-	t.check(disk.checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and disk.checkpoint.tactical_seals == 0,"explicit UI resume persists confirmed evolution without restoring old seal")
+	t.check(disk.checkpoint.evolutions.get("blade_slash") == "evo_wing_cut" and disk.checkpoint.tactical_seals == 1,"explicit UI resume persists confirmed evolution without altering the retained boss seal")
 	reader.free()
 	writer.free()

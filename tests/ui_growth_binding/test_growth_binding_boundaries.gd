@@ -24,18 +24,20 @@ func run(t) -> void:
 	await _settle(t)
 	var events: Array = []
 	ui.upgrade_chosen.connect(func(offer,id):events.append([offer,id]))
-	# Evolution target was already a persistent Button before slot reuse.
-	var target: Button = ui._target_button
+	# The separate information action is the persistent read-only focus target.
+	var target: Button = ui._growth_details[0]
+	target.grab_focus()
+	await _settle(t)
 	var point := target.get_global_rect().get_center()
 	vp.push_input(_mouse(point,true),true)
-	t.check(target.is_pressed(),"real GUI holds the persistent evolution target")
+	t.check(target.is_pressed(),"real GUI holds the persistent information action")
 	var revised := view.duplicate(true)
 	revised.target.name = "바뀐 진화 목표"
 	ui.present_progression(revised)
 	await _settle(t)
 	vp.push_input(_mouse(point,false),true)
 	await _settle(t)
-	t.check(ui._detail_id.is_empty(),"old target release cannot open a materially replaced recipe")
+	t.check(ui._detail_id.is_empty(),"old information release cannot open a materially replaced recipe")
 	if not ui._detail_id.is_empty(): ui.navigate("cancel")
 	# An empty progression update is an authority boundary even before the next
 	# synchronous snapshot arrives; no retained button may dispatch old IDs.

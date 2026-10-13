@@ -128,11 +128,11 @@ func option_well_formed(state: Dictionary, option: Dictionary) -> bool:
 	if not state_valid(state): return false
 	for field in ["option_id","item_id","kind"]:
 		if not option.get(field) is String or option[field].is_empty(): return false
-	if not integer_valid(option.get("level"),0,MAX_LEVEL) or not integer_valid(option.get("next_level"),1,MAX_LEVEL): return false
+	if not integer_valid(option.get("level"),0,MAX_LEVEL) or not integer_valid(option.get("next_level"),1,MAX_LEVEL+1): return false
 	if option.kind == "evolution":
 		if not option.get("evolution_id") is String: return false
 		var definition: Dictionary = evolutions.definition(option.evolution_id)
-		return not definition.is_empty() and option.item_id == definition.base_item_id and option.option_id == "evolution:"+option.evolution_id and option.level == MAX_LEVEL and option.next_level == MAX_LEVEL
+		return not definition.is_empty() and option.item_id == definition.base_item_id and option.option_id == "evolution:"+option.evolution_id and option.level == MAX_LEVEL and option.next_level == evolutions.final_stage_level()
 	if not option.kind in ["equipment","passive"]: return false
 	var catalog: Dictionary = _equipment if option.kind == "equipment" else _passives
 	if not catalog.has(option.item_id) or int(option.level) >= MAX_LEVEL or int(option.next_level) != int(option.level)+1: return false
@@ -192,12 +192,24 @@ func presentation_state_valid(state: Dictionary) -> bool:
 	for field in ["base_hp","pickup_radius"]:
 		if state.rules.has(field) and not number_valid(state.rules[field],1.0 if field == "base_hp" else 0.0,1000000.0): return false
 	return true
-func decorate_option(state: Dictionary, original: Dictionary) -> Dictionary:
+func decorate_option(state: Dictionary, original: Dictionary, presentation_only: bool = false) -> Dictionary:
 	if not presentation_state_valid(state) or not json_data_valid(original) or not option_well_formed(state,original): return {}
 	# Explicit scalar identity projection. Arbitrary source metadata is never copied.
 	var option := {}
 	for field in ["option_id","item_id","kind","level","next_level"]: option[field] = original[field]
 	if original.kind == "evolution": option.evolution_id = original.evolution_id
+	# Historical offer decoration is persisted authority, not a UI projection.
+	if evolutions._schema_version == 2 or presentation_only:
+		option.max_level = MAX_LEVEL
+		if original.kind != "passive":
+			for id in evolutions.ids():
+				if evolutions.definition(id).base_item_id != original.item_id: continue
+				option.max_level = MAX_LEVEL+1
+				break
+		option.display_level = int(original.level)
+		option.display_next_level = 6 if original.kind == "evolution" else int(original.next_level)
+		option.display_max_level = int(option.max_level)
+		option.icon_id = "skill_"+str(original.get("evolution_id",original.item_id))
 	option.can_select = option_valid(state,original)
 	option.blocked_reason = "" if option.can_select else "invalid_option"
 	option.slot_warning = ""
@@ -205,7 +217,7 @@ func decorate_option(state: Dictionary, original: Dictionary) -> Dictionary:
 	option.effect_delta = {}
 	option.requirements = []
 	var target_id: String = state.get("run_config",{}).get("target_evolution_id","")
-	var detail: Dictionary = evolutions.evaluate(state,option.get("evolution_id",target_id))
+	var detail: Dictionary = evolutions.evaluate(state,option.get("evolution_id",target_id),presentation_only)
 	if not detail.is_empty(): option.requirements = detail.requirements.duplicate(true)
 	if option.kind == "evolution":
 		for key in detail: option[key] = detail[key]

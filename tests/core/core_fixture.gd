@@ -39,10 +39,16 @@ static func evolution_ready_state(sim, chapter_data: Dictionary, config: Diction
 	var state: Dictionary = sim.new_run(chapter_data,seed,config)
 	if state.has("error_code"): return {}
 	state.equipment = {"blade_slash":5}
+	# Derive prerequisites from the selected definition, including legacy schema one.
+	var recipe: Dictionary = sim._catalog.evolutions.definition("evo_wing_cut")
+	for required in recipe.get("required_equipment",[]): state.equipment[required.equipment_id] = int(required.level)
 	state.passives = {"movement":3}
+	for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
 	state.active_tick = 17999
 	state.survival_tick = 17999
 	state.player.attack_ready_ticks = {"blade_slash":18001}
+	for id in state.equipment:
+		if id != "blade_slash": state.player.attack_ready_ticks[id] = 2147483647
 	if not sim.restore(state).get("ok",false): return {}
 	var command := {"command_id":"fixture:boss:ch01_b05","kind":"spawn_boss","payload":{"entity_id":"fixture:boss1","boss_id":"ch01_b05","enemy_id":"boss_charger","position":[45,0],"scheduled_tick":18000}}
 	step(sim,state,Vector2.ZERO,[command])

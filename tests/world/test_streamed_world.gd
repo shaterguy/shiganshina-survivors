@@ -12,9 +12,9 @@ func run(t) -> void:
 	var chunks := F.neighborhood()
 	t.check(w.prepare(chunks,[],F.hydration(chunks),["0","0"]).ok,"forward strip becomes ready")
 	for radius in [8.0,16.0,18.0,20.0,24.0,28.0,30.0,32.0]:
-		var start := Vector2(16,200)
+		var start := Vector2(16,176)
 		var hit: Dictionary = w.sweep(start,Vector2(200,0),radius)
-		t.check(hit.ok and hit.fraction < 1 and not hit.hit_prop_id.is_empty() and w.walkable(hit.position,radius),"exact radius swept contact stays walkable")
+		t.check(w.walkable(start,radius) and hit.ok and hit.fraction > 0 and hit.fraction < 1 and hit.hit_prop_id.ends_with(":nw_house") and w.walkable(hit.position,radius),"exact radius swept contact stays walkable")
 		var slide: Vector2 = w.move(start,Vector2(240,160),radius)
 		t.check(w.walkable(slide,radius),"diagonal slide stays outside house")
 	var unloaded: Dictionary = w.sweep(Vector2(384,384),Vector2(10000,10000),8)
@@ -119,11 +119,11 @@ func _hydration_boundary_regressions(t) -> void:
 
 func _axis_slide_boundary_regression(t) -> void:
 	var world = F.world(F.neighborhood())
-	var start := Vector2(0,300)
+	var start := Vector2(0,216)
 	var delta := Vector2(300,-300)
 	var straight: Dictionary = world.sweep(start,delta,8)
 	var slide: Vector2 = world.move(start,delta,8)
 	var horizontal: Dictionary = world.sweep(start,Vector2(delta.x,0),8)
 	var vertical: Dictionary = world.sweep(horizontal.position,Vector2(0,delta.y),8)
-	t.check(straight.position.is_equal_approx(Vector2(68,232)) and is_equal_approx(straight.fraction,68.0/300.0) and straight.hit_prop_id.ends_with(":nw_house"),"review diagonal straight sweep stops at exact house boundary")
-	t.check(slide == Vector2(300,0) and slide == vertical.position and horizontal.fraction == 1 and vertical.fraction == 1,"move deliberately follows collision-safe X-then-Y slide segments, not the obstructed diagonal")
+	t.check(straight.position.is_equal_approx(Vector2(88,128)) and is_equal_approx(straight.fraction,88.0/300.0) and straight.hit_prop_id.ends_with(":nw_house"),"review diagonal straight sweep stops at exact house boundary")
+	t.check(slide == Vector2(300,-84) and slide == vertical.position and horizontal.fraction == 1 and vertical.fraction == 1,"move deliberately follows collision-safe X-then-Y slide segments, not the obstructed diagonal")

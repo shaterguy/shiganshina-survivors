@@ -38,19 +38,26 @@ func run(t) -> void:
 		var defaults: Dictionary = sim.new_run(chapter,42,F.run_config())
 		var selected: Dictionary = sim.new_run(chapter,42,config)
 		var base := "blade_slash" if evolution == "evo_wing_cut" else "wall_cannon"
+		var recipe: Dictionary = sim._catalog.evolutions.definition(evolution)
 		for state in [defaults,selected]:
 			state.equipment = {base:5}
 			state.passives = {"movement":3} if evolution == "evo_wing_cut" else {"fire_interval":3}
-			state.tactical_seals = 1
+			# Keep the original modifiers on both characters and satisfy the
+			# current owned-Lv1 material without adding a second attacking family.
+			for required in recipe.get("required_equipment",[]):
+				state.equipment[required.equipment_id] = int(required.level)
+				state.player.attack_ready_ticks[required.equipment_id] = 2147483647
+			for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
+			state.tactical_seals = 1-int(recipe.seal_cost)
 			state.stats.minibosses_defeated = 1
 			state.stats.kills = 1
 			state.boss_ids_fired = ["ch01_b05"]
 			state.reward_ids_claimed = ["boss:ch01_b05"]
 			state.evolutions = {base:evolution}
-			state.tactical_seals = 0
 			state.active_tick = 18000
 			state.survival_tick = 18000
 			state.run_config.target_evolution_id = evolution
+			t.check(sim.restore(sim.snapshot(state)).get("ok",false),"Both character evolution arrangements satisfy actual recipe and seal ledger: "+evolution)
 			F.step(sim,state,Vector2.ZERO,[F.spawn("evolved_target",[40,0])])
 		var cooldown := int(defaults.player.attack_ready_ticks.get(base,0))-int(defaults.active_tick)
 		var selected_cd := int(selected.player.attack_ready_ticks.get(base,0))-int(selected.active_tick)

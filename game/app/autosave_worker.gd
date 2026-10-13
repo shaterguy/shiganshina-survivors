@@ -84,8 +84,13 @@ func _execute() -> Dictionary:
 	validator._chapter_provider = provider
 	validator._content_error = baseline.content_error
 	runtime._validator = validator
-	runtime._checkpoint = Adapter.new(disk,Callable(Helper,"requirements"),Callable(validator,"restore"))
+	runtime._checkpoint = Adapter.new(disk,Callable(Helper,"requirements"),Callable(runtime,"_restore_checkpoint"))
 	runtime._contracts = Contracts.new(Callable(runtime,"validate_checkpoint"),_job.runtime_catalog)
+	# Resolve in this worker from immutable job identity and independently captured
+	# files. Never replace the selected legacy provider with the current provider.
+	var route: Dictionary = runtime.resolve_content(_job.snapshot)
+	if not route.get("ok",false): return route
+	if not _same(_job.get("content_route",{}),{"rules_version":route.rules_version,"content_fingerprint":route.chapter.content_fingerprint}): return _fail("content_mismatch")
 	var store := Save.new(_job.directory,Callable(runtime,"validate_checkpoint"),Callable(self,"_fault"),Contracts.new(Callable(runtime,"validate_checkpoint"),_job.store_catalog))
 	var scope = Scope.create(runtime,_job.directory,int(_job.authority.store_revision))
 	var output: Dictionary

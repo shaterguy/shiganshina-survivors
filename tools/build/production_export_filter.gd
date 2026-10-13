@@ -52,6 +52,9 @@ func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String,
 		for record in manifest.assets.values():
 			if readiness.is_runtime_asset_path(record):
 				_allowed_assets[str(record.path)] = true
+				# Preserve exact licensed audio bytes alongside normal playback imports.
+				if record.get("kind") == "audio":
+					add_file(str(record.path),FileAccess.get_file_as_bytes(str(record.path)),false)
 				# VFX validates/decodes original PNG bytes at runtime, not only .ctex.
 				if record.get("kind") == "effect" and VfxCatalog.render_enabled(record):
 					add_file(str(record.path),FileAccess.get_file_as_bytes(str(record.path)),false)

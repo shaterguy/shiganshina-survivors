@@ -55,7 +55,7 @@ func _exact_cache_inputs(t) -> void:
 	t.check(fourth.ok and d.grid_builds == c.grid_builds and d.route_builds == c.route_builds+1,"same-cell exact goal movement refreshes distances without rebuilding geometry")
 
 func _radius_replay(t) -> void:
-	for pair in [[Vector2(100,384),Vector2(67,35)],[Vector2(384,384),Vector2(579,35)]]:
+	for pair in [[Vector2(100,384),Vector2(67,35)],[Vector2(384,384),Vector2(579,96)]]:
 		var setup := T.new().fixture(t)
 		if setup.is_empty(): return
 		var warm = setup.sim._streamed
@@ -66,15 +66,25 @@ func _radius_replay(t) -> void:
 		t.check(cold.prepare(setup.state,setup.hydration).ok,"radius18 control gets independent fresh geometry/navigation")
 		var expected: Dictionary = cold.direction(pair[0],pair[1],18.0,11)
 		t.check(result.ok and expected.ok and result == expected,"same-clearance radius17→18 path matches cold route exactly")
+		# Both endpoints must be physically valid, with a genuine obstructed route.
+		# Check after the original warm17/warm18/cold18 sequence to keep its inputs.
+		var start_clear: Dictionary = warm.walkable(pair[0],18.0)
+		var goal_clear: Dictionary = warm.walkable(pair[1],18.0)
+		t.check(start_clear.ok and goal_clear.ok and start_clear.walkable and goal_clear.walkable,"radius replay endpoints both fit the actual radius18 geometry")
+		var direct: Dictionary = warm.sweep(pair[0],pair[1]-pair[0],18.0)
+		t.check(direct.ok and direct.fraction > 0.0 and direct.fraction < 1.0 and not direct.hit_prop_id.is_empty(),"radius replay exercises a real positive first obstruction rather than a clear straight route")
 
 func _geometry_revisions(t) -> void:
 	var fixture := NF.new()._fixture()
 	var world = fixture.world
 	var nav := N.new(View.new(world))
-	var origin := Vector2(496,194)
+	var origin := Vector2(432,194)
 	var target := Vector2(1152,384)
 	var first := nav.direction(origin,target,8,0)
 	t.check(first.ok,"precise navigation has a real cross-chunk geometry control")
+	t.check(world.walkable(origin,8) and world.walkable(target,8) and world.chunk_at(origin).chunk_id != world.chunk_at(target).chunk_id,"geometry-revision control starts and ends at valid points in different real chunks")
+	var direct: Dictionary = world.sweep(origin,target-origin,8)
+	t.check(direct.ok and direct.fraction > 0.0 and direct.fraction < 1.0 and not direct.hit_prop_id.is_empty(),"cross-chunk revision control still requires an actual building detour")
 	var changes := []
 	for prop in world.localized_chunk("0,0").props:
 		if prop.destructible: changes.append({"slot_id":prop.slot_id,"hp":0,"destroyed":true})

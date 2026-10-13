@@ -19,8 +19,8 @@ func run(t) -> void:
 	app.apply_upgrade(offer.offer_id,offer.options[0].option_id)
 	t.check(app.state.evolutions.get("blade_slash") == "evo_wing_cut","real retry publishes the committed ultimate")
 	t.check(app.ui._notice.text.is_empty(),"successful retry removes the obsolete save failure notice")
-	t.check(app.ui.confirmed_upgrade_text().contains("입체기동 연속참") and app.ui.confirmed_upgrade_text().contains("궁극 진화"),"successful upgrade_applied identifies the newest authoritative ultimate")
-	t.check(app.ui.get_node("ProgressionHUD").display_text().contains("궁극"),"notice and durable HUD reflect the same published state")
+	t.check(app.ui.confirmed_upgrade_text().contains("입체기동 연속참") and app.ui.confirmed_upgrade_text().contains("진화 6/6") and not app.ui.confirmed_upgrade_text().contains("궁극"),"successful upgrade_applied names the committed evolution and completed sixth level")
+	t.check(app.ui.get_node("ProgressionHUD").display_text().contains("6/6"),"notice and durable HUD reflect the same published state")
 	var notice: String = app.ui.confirmed_upgrade_text()
 	var ttl: float = app.ui._growth_notice_seconds
 	app.apply_upgrade(offer.offer_id,offer.options[0].option_id)

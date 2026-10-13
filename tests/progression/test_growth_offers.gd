@@ -2,7 +2,7 @@ extends RefCounted
 const Fixture = preload("res://tests/progression/progression_test_fixture.gd")
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 func run(t) -> void:
-	var catalog = Upgrades.new()
+	var catalog = Fixture.legacy_catalog()
 	var state := Fixture.maxed()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42

@@ -30,10 +30,10 @@ python3 tools/build/build_android.py --check-ready
 python3 tools/build/build_android.py \
   --godot /absolute/path/to/godot \
   --template /absolute/path/to/android_debug-4.6.3.apk \
-  --output dist/WingsOfHumanity-v0.1.0-dev4-unsigned.apk
+  --output dist/WingsOfHumanity-v0.1.0-dev5-unsigned.apk
 ```
 
-- ARM64, `com.shaterguy.wingsofhumanity.dev`, `0.1.0-dev4` / code `4`
+- ARM64, `com.shaterguy.wingsofhumanity.dev`, `0.1.0-dev5` / code `5`
 - 인터넷 권한 없음, 자체 제작 512×512 앱 아이콘
 - 표준 템플릿의 **미서명 APK 생성에는 Android SDK가 필요 없습니다**
 - 설치 가능한 서명 APK는 [별도 GitHub 서명 계약](docs/build/github-signing-input-contract.md)에 따라 만듭니다

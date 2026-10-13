@@ -184,7 +184,12 @@ func _real_core_contracts(t, script) -> void:
 		var base := "blade_slash" if evo == "evo_wing_cut" else "wall_cannon"
 		var state: Dictionary = sim.new_run(Fixture.chapter(),502,Fixture.run_config())
 		state.equipment = {base:5}
+		var recipe: Dictionary = sim._catalog.evolutions.definition(evo)
+		for required in recipe.get("required_equipment",[]):
+			state.equipment[required.equipment_id] = int(required.level)
+			state.player.attack_ready_ticks[required.equipment_id] = 2147483647
 		state.passives = {"movement":3} if evo == "evo_wing_cut" else {"fire_interval":3}
+		for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
 		state.evolutions = {base:evo}
 		var d = script.new()
 		d.reset(state.run_id)

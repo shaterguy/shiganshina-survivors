@@ -63,7 +63,8 @@ func _choice_counts(t,sim,chapter: Dictionary) -> void:
 		var state: Dictionary = sim.new_run(chapter,42,Fixture.run_config())
 		state.equipment = {"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 		state.passives = {"damage":5,"armor":5,"pickup_radius":5,"attack_range":5}
-		if count > 0: state.equipment.blade_slash = 4
+		_complete_current_evolutions(sim,state)
+		if count > 0: state.passives.armor = 4
 		if count > 1: state.passives.damage = 4
 		state.player.hp = 20.0
 		var events := gain(sim,state,24)
@@ -78,7 +79,8 @@ func _choice_counts(t,sim,chapter: Dictionary) -> void:
 		t.check(sim.restore(state).get("ok",false),"scarce growth result passes actual restore")
 func _evolution_and_boss(t,sim,chapter: Dictionary) -> void:
 	var state: Dictionary = sim.new_run(chapter,42,Fixture.run_config())
-	state.equipment = {"blade_slash":5}
+	state.equipment = {"blade_slash":5,"odm_dash":1}
+	state.player.attack_ready_ticks.odm_dash = 2147483647
 	state.passives = {"movement":3}
 	state.player.hp = 40.0
 	state.active_tick = 17999
@@ -101,16 +103,17 @@ func _evolution_and_boss(t,sim,chapter: Dictionary) -> void:
 	var old_cooldown: int = state.player.attack_ready_ticks.blade_slash
 	var old_level: int = state.equipment.blade_slash
 	var choice: Dictionary = sim.choose_upgrade(state,state.upgrade_offer.offer_id,"evolution:evo_wing_cut")
-	t.check(choice.get("ok",false) and state.evolutions == {"blade_slash":"evo_wing_cut"} and state.tactical_seals == 0,"evolution choice spends exactly one seal and replaces attack profile")
+	t.check(choice.get("ok",false) and state.evolutions == {"blade_slash":"evo_wing_cut"} and state.tactical_seals == 1,"current evolution preserves the earned seal and replaces attack profile")
 	t.check(state.equipment.blade_slash == old_level and state.passives.movement == 3 and state.player.attack_ready_ticks.blade_slash == old_cooldown,"evolution preserves base slot, passive and existing cooldown")
 	t.check(sim.restore(state).get("ok",false),"chosen evolution passes actual restore")
 	Fixture.step(sim,state,Vector2.ZERO,[boss])
-	t.check(state.stats.minibosses_defeated == 1 and state.tactical_seals == 0,"duplicate boss command cannot reward twice")
+	t.check(state.stats.minibosses_defeated == 1 and state.tactical_seals == 1,"duplicate boss command cannot reward twice")
 	var mobile: Dictionary = sim.new_run(chapter,42,Fixture.run_config(1,"doctrine_mobile"))
 	mobile.equipment = {"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	mobile.passives = {"movement":5,"damage":5,"armor":5,"max_health":4}
 	mobile.player.max_hp = 165.0
 	mobile.player.hp = 50.0
+	_complete_current_evolutions(sim,mobile)
 	gain(sim,mobile,24)
 	if mobile.upgrade_offer.is_empty(): return
 	var applied: Dictionary = sim.choose_upgrade(mobile,mobile.upgrade_offer.offer_id,"passive:max_health")
@@ -210,6 +213,7 @@ func _large_xp_queue(t,sim,chapter: Dictionary) -> void:
 	var saturated: Dictionary=sim.new_run(chapter,42,Fixture.run_config())
 	saturated.equipment={"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	saturated.passives={"damage":5,"armor":5,"pickup_radius":5,"attack_range":5}
+	_complete_current_evolutions(sim,saturated)
 	gain(sim,saturated,1000000)
 	t.check(saturated.player.level==257 and saturated.offer_seq==256 and saturated.upgrade_offer.is_empty(),"zero-choice burst resolves only bounded256 thresholds in one tick")
 	var remaining: int=saturated.player.xp
@@ -219,6 +223,7 @@ func _reused_option_id(t,sim,chapter: Dictionary) -> void:
 	var state: Dictionary=sim.new_run(chapter,42,Fixture.run_config())
 	state.equipment={"blade_slash":1,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	state.passives={"damage":5,"armor":5,"pickup_radius":5,"attack_range":5}
+	_complete_current_evolutions(sim,state)
 	gain(sim,state,56)
 	var old_offer: String=state.upgrade_offer.offer_id
 	var semantic: String=state.upgrade_offer.options[0].option_id
@@ -249,6 +254,7 @@ func _derived_metadata_precision(t,sim,chapter: Dictionary) -> void:
 	var state: Dictionary=sim.new_run(chapter,42,Fixture.run_config())
 	state.equipment={"blade_slash":4,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	state.passives={"damage":5,"armor":4,"pickup_radius":5,"attack_range":5}
+	_complete_current_evolutions(sim,state)
 	gain(sim,state,56)
 	t.check(sim.choose_upgrade(state,state.upgrade_offer.offer_id,"passive:armor").get("ok",false),"actual first scarce choice promotes the blade4-to5 range-modified card")
 	var restored: Dictionary=sim.restore(JSON.parse_string(JSON.stringify(state,"",true,true)))
@@ -261,6 +267,7 @@ func _ledger_capacity_and_sources(t,sim,chapter: Dictionary) -> void:
 	var state: Dictionary=sim.new_run(chapter,42,Fixture.run_config())
 	state.equipment={"blade_slash":5,"spin_slash":5,"odm_dash":5,"reentry_combo":5}
 	state.passives={"damage":5,"armor":5,"pickup_radius":5,"attack_range":5}
+	_complete_current_evolutions(sim,state)
 	add_xp(state,100000000)
 	for tick in 17:
 		var before:=state.duplicate(true)
@@ -285,3 +292,18 @@ func _ledger_capacity_and_sources(t,sim,chapter: Dictionary) -> void:
 	var inflation: Dictionary=sim.new_run(chapter,42,Fixture.run_config())
 	inflation.offer_seq=1
 	t.check(not sim.restore(inflation).get("ok",false),"offer high-water cannot exceed earned level-ups plus actual bosses")
+
+# Scarce/zero-choice fixtures must exhaust the final stage as well as base five.
+# Only current zero-cost recipes are applied; preserved legacy definitions keep
+# their original arranged-state behavior and independent seal ledger tests.
+func _complete_current_evolutions(sim,state: Dictionary) -> void:
+	if sim._catalog.evolutions.final_stage_level() != 6: return
+	for id in sim._catalog.evolutions.ids():
+		var recipe: Dictionary = sim._catalog.evolutions.definition(id)
+		if state.equipment.get(recipe.base_item_id,0) != 5: continue
+		var ready := true
+		for required in recipe.required_equipment:
+			ready = ready and int(state.equipment.get(required.equipment_id,0)) >= int(required.level)
+		for required in recipe.required_passives:
+			ready = ready and int(state.passives.get(required.passive_id,0)) >= int(required.level)
+		if ready: state.evolutions[recipe.base_item_id] = id

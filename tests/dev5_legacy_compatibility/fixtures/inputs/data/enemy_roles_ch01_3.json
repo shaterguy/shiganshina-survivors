@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "role_revision": "enemy_roles.2",
+  "story_year": 845,
+  "roles": {
+    "walker": {
+      "definition": {
+        "hp": 32,
+        "speed": 42,
+        "damage": 9,
+        "xp": 4,
+        "radius": 18,
+        "name": "거인",
+        "behavior": "chase",
+        "art_id": "titan_basic"
+      },
+      "profile": {
+        "kind": "bite",
+        "trigger_range": 44,
+        "warning_ticks": 42,
+        "active_ticks": 8,
+        "recovery_ticks": 36,
+        "cooldown_ticks": 48,
+        "radius": 52,
+        "length": 0,
+        "width": 0,
+        "arc_degrees": 70,
+        "rush_speed": 0,
+        "airborne_ticks": 0,
+        "threat_cost": 0
+      }
+    },
+    "runner": {
+      "definition": {
+        "hp": 24,
+        "speed": 72,
+        "damage": 9,
+        "xp": 5,
+        "radius": 16,
+        "name": "빠른 거인",
+        "behavior": "runner",
+        "art_id": "titan_runner"
+      },
+      "profile": {
+        "kind": "charge",
+        "trigger_range": 96,
+        "warning_ticks": 45,
+        "active_ticks": 42,
+        "recovery_ticks": 66,
+        "cooldown_ticks": 90,
+        "radius": 0,
+        "length": 294,
+        "width": 32,
+        "arc_degrees": 0,
+        "rush_speed": 420,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "grabber": {
+      "definition": {
+        "hp": 58,
+        "speed": 50,
+        "damage": 12,
+        "xp": 8,
+        "radius": 20,
+        "name": "붙잡는 거인",
+        "behavior": "grab",
+        "art_id": "titan_grabber"
+      },
+      "profile": {
+        "kind": "grab",
+        "trigger_range": 190,
+        "warning_ticks": 60,
+        "active_ticks": 16,
+        "recovery_ticks": 84,
+        "cooldown_ticks": 90,
+        "radius": 0,
+        "length": 210,
+        "width": 44,
+        "arc_degrees": 0,
+        "rush_speed": 0,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "sweeper": {
+      "definition": {
+        "hp": 65,
+        "speed": 40,
+        "damage": 13,
+        "xp": 8,
+        "radius": 20,
+        "name": "팔을 휘두르는 거인",
+        "behavior": "sweep",
+        "art_id": "titan_sweeper"
+      },
+      "profile": {
+        "kind": "sweep",
+        "trigger_range": 110,
+        "warning_ticks": 60,
+        "active_ticks": 18,
+        "recovery_ticks": 78,
+        "cooldown_ticks": 90,
+        "radius": 128,
+        "length": 0,
+        "width": 24,
+        "arc_degrees": 110,
+        "rush_speed": 0,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "brute": {
+      "definition": {
+        "hp": 100,
+        "speed": 30,
+        "damage": 17,
+        "xp": 10,
+        "radius": 24,
+        "name": "대형 거인",
+        "behavior": "brute",
+        "art_id": "titan_brute"
+      },
+      "profile": {
+        "kind": "slam",
+        "trigger_range": 88,
+        "warning_ticks": 72,
+        "active_ticks": 12,
+        "recovery_ticks": 96,
+        "cooldown_ticks": 120,
+        "radius": 96,
+        "length": 0,
+        "width": 0,
+        "arc_degrees": 0,
+        "rush_speed": 0,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "leaper": {
+      "definition": {
+        "hp": 60,
+        "speed": 44,
+        "damage": 15,
+        "xp": 9,
+        "radius": 20,
+        "name": "도약형 기행종",
+        "behavior": "leap",
+        "art_id": "titan_leaper"
+      },
+      "profile": {
+        "kind": "leap",
+        "trigger_range": 260,
+        "warning_ticks": 66,
+        "active_ticks": 10,
+        "recovery_ticks": 108,
+        "cooldown_ticks": 120,
+        "radius": 64,
+        "length": 0,
+        "width": 0,
+        "arc_degrees": 0,
+        "rush_speed": 0,
+        "airborne_ticks": 24,
+        "threat_cost": 1
+      }
+    },
+    "quadruped": {
+      "definition": {
+        "name": "사족 질주 거인",
+        "hp": 46,
+        "speed": 62,
+        "damage": 11,
+        "xp": 7,
+        "radius": 18,
+        "behavior": "charge",
+        "art_id": "titan_quadruped"
+      },
+      "profile": {
+        "kind": "charge",
+        "trigger_range": 170,
+        "warning_ticks": 54,
+        "active_ticks": 32,
+        "recovery_ticks": 84,
+        "cooldown_ticks": 105,
+        "radius": 0,
+        "length": 176,
+        "width": 36,
+        "arc_degrees": 0,
+        "rush_speed": 330,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    },
+    "stone_thrower": {
+      "definition": {
+        "name": "투석 거인",
+        "hp": 76,
+        "speed": 28,
+        "damage": 14,
+        "xp": 10,
+        "radius": 24,
+        "behavior": "throw",
+        "art_id": "titan_stone_thrower"
+      },
+      "profile": {
+        "kind": "throw",
+        "trigger_range": 300,
+        "warning_ticks": 66,
+        "active_ticks": 54,
+        "recovery_ticks": 90,
+        "cooldown_ticks": 150,
+        "radius": 0,
+        "length": 324,
+        "width": 14,
+        "arc_degrees": 0,
+        "rush_speed": 360,
+        "airborne_ticks": 0,
+        "threat_cost": 1
+      }
+    }
+  }
+}

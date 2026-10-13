@@ -1,6 +1,7 @@
 class_name LoadoutPanel
 extends VBoxContainer
 const Card = preload("res://game/ui/growth_card.gd")
+const Icons = preload("res://game/ui/skill_icons.gd")
 const Shop = preload("res://game/ui/supply_shop_panel.gd")
 signal loadout_changed(selection: Dictionary, view_revision: int)
 signal character_selected(character_id: String, view_revision: int)
@@ -34,19 +35,27 @@ func present(view: Dictionary) -> void:
 		for option in view.get("loadout_options",{}).get(group,[]):
 			var id := str(option.get("id",""))
 			var selected := str(_selection.get(key,"")) == id
-			var lines: Array[String] = [("[장착] " if selected else "")+str(option.get("name",id)),Card.player_text(str(option.get("description","")))]
+			var lines: Array[String] = [("[장착] " if selected else "")+str(option.get("name",id))]
+			if group != "targets": lines.append(Card.player_text(str(option.get("description",""))))
 			var tradeoff := str(option.get("tradeoff_text",""))
-			if not tradeoff.is_empty(): lines.append("대가 · "+Card.player_text(tradeoff))
+			if not tradeoff.is_empty() and group != "targets": lines.append("대가 · "+Card.player_text(tradeoff))
 			if group == "targets":
-				for requirement in option.get("requirements",[]):
-					lines.append("필수 습득 · %s Lv %d" % [requirement.name,int(requirement.required)])
-				if option.has("seal_cost"):
+				if option.has("seal_cost") and int(option.seal_cost) > 0:
 					lines.append("보스 처치로 획득한 전술 개조권 %d개 소비" % int(option.seal_cost))
 			if option.has("owned") and not id.is_empty(): lines.append("보유 %d" % int(option.owned))
 			var reason := str(option.get("blocked_reason",""))
 			if not reason.is_empty(): lines.append(Shop.reason_text(reason))
 			var button := _button("\n".join(lines),"loadout:"+key+":"+id)
 			button.set_meta("art_id","icon_"+id)
+			if group == "targets":
+				button.set_meta("skill_icon_id",str(option.get("icon_id","skill_"+id)))
+				button.icon = Icons.texture_for(str(button.get_meta("skill_icon_id")))
+				button.add_theme_constant_override("icon_max_width",32)
+				button.tooltip_text = Card.player_text(str(option.get("description","")))+"\n"+Card.player_text(tradeoff)
+				var requirements := VBoxContainer.new()
+				requirements.name = "Requirements_"+id
+				Icons.append_requirements(requirements,option.get("requirements",[]))
+				add_child(requirements)
 			button.disabled = _pending or not bool(option.get("can_select",false))
 			button.pressed.connect(func(): _change(key,id))
 			_options[key+":"+id] = button
@@ -138,4 +147,6 @@ func display_text() -> String:
 	var lines: Array[String] = []
 	for child in get_children():
 		if child is Label or child is Button: lines.append(child.text)
+		elif child is VBoxContainer and str(child.name).begins_with("Requirements_"):
+			for row in child.get_children(): lines.append(row.get_node("Text").text)
 	return "\n".join(lines)

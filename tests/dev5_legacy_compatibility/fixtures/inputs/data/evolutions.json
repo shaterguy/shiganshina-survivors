@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "items": {
+    "evo_wing_cut": {
+      "recipe_id": "evo_wing_cut",
+      "base_item_id": "blade_slash",
+      "required_weapon_level": 5,
+      "required_passives": [
+        {
+          "passive_id": "movement",
+          "level": 3
+        }
+      ],
+      "seal_cost": 1,
+      "effect_id": "wing_cut",
+      "effect_params": {
+        "damage_multipliers": [
+          0.75,
+          1.0
+        ],
+        "stage_delays": [
+          0,
+          12
+        ],
+        "radius": 88,
+        "arc_degrees": 110,
+        "cooldown_ticks": 48
+      },
+      "name": "입체기동 연속참",
+      "description": "잠근 방향으로 두 번 베며 두 번째 베기의 원점은 실행 시 플레이어 위치입니다.",
+      "tradeoff_text": "베기 각도가 좁아져 근접 위치와 방향 예측이 필요합니다. 무적 효과는 없습니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_crossfire": {
+      "recipe_id": "evo_crossfire",
+      "base_item_id": "wall_cannon",
+      "required_weapon_level": 5,
+      "required_passives": [
+        {
+          "passive_id": "fire_interval",
+          "level": 3
+        }
+      ],
+      "seal_cost": 1,
+      "effect_id": "crossfire",
+      "effect_params": {
+        "damage_multipliers": [
+          0.7,
+          0.7
+        ],
+        "stage_delays": [
+          36,
+          66
+        ],
+        "radius": 56,
+        "cooldown_ticks": 168,
+        "acquisition_range": 456,
+        "point_offset": 24
+      },
+      "name": "교차 포격 지휘",
+      "description": "목표 양쪽에 고정한 두 지점을 36틱, 66틱 뒤 포격합니다.",
+      "tradeoff_text": "포격이 늦게 도착하며 빠른 적은 피할 수 있습니다. 이동을 보호하지 않습니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_storm_chain": {
+      "recipe_id": "evo_storm_chain",
+      "base_item_id": "chain_lightning",
+      "required_weapon_level": 5,
+      "required_passives": [],
+      "required_equipment": [
+        {
+          "equipment_id": "fire_zone",
+          "level": 3
+        }
+      ],
+      "seal_cost": 1,
+      "effect_id": "storm_chain",
+      "effect_params": {
+        "damage_multiplier": 1.25,
+        "chain_count": 12,
+        "hop_range": 120,
+        "acquisition_range": 240,
+        "cooldown_ticks": 96
+      },
+      "name": "폭풍 연쇄",
+      "description": "최대 12명의 적을 더 멀리 잇는 강력한 번개를 발사한다.",
+      "tradeoff_text": "적이 흩어지면 연결이 끊깁니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    },
+    "evo_inferno_zone": {
+      "recipe_id": "evo_inferno_zone",
+      "base_item_id": "fire_zone",
+      "required_weapon_level": 5,
+      "required_passives": [],
+      "required_equipment": [
+        {
+          "equipment_id": "chain_lightning",
+          "level": 3
+        }
+      ],
+      "seal_cost": 1,
+      "effect_id": "inferno_zone",
+      "effect_params": {
+        "damage_multipliers": [
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          1.2,
+          3.0
+        ],
+        "stage_delays": [
+          0,
+          20,
+          40,
+          60,
+          80,
+          100,
+          120,
+          150
+        ],
+        "radius": 64,
+        "eruption_radius": 112,
+        "acquisition_range": 240,
+        "cooldown_ticks": 240
+      },
+      "name": "지옥불 지대",
+      "description": "빠르게 일곱 번 태운 뒤 넓은 범위를 폭발시킨다.",
+      "tradeoff_text": "고정된 지역을 벗어난 적에게는 피해를 주지 않습니다.",
+      "story_year": 845,
+      "chapter_ids": [
+        "chapter_01_shiganshina"
+      ]
+    }
+  }
+}

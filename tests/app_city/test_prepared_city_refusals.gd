@@ -11,7 +11,7 @@ class RejectCore:
 		return {"ok":false,"error_code":"world_not_ready"}
 class RejectRuntime:
 	extends "res://game/app/prepared_city_runtime.gd"
-	func _new_core(): return RejectCore.new(_provider)
+	func _new_core(_snapshot: Dictionary = {}): return RejectCore.new(_provider)
 class FixedProvider:
 	extends RefCounted
 	var chapter: Dictionary

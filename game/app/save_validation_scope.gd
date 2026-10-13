@@ -7,7 +7,11 @@ const Core = preload("res://game/core/run_simulation.gd")
 class CapturedProvider:
 	extends RefCounted
 	var _chapter: Dictionary
-	func _init(chapter: Dictionary) -> void: _chapter = chapter.duplicate(true)
+	var _rules_version: String
+	func _init(chapter: Dictionary, version: String = "dev5") -> void:
+		_chapter = chapter.duplicate(true)
+		_rules_version = version
+	func rules_version() -> String: return _rules_version
 	func load_chapter(_id: String) -> Dictionary:
 		return {"ok":true,"chapter":_chapter.duplicate(true)}
 var final_fence_enabled := true
@@ -36,7 +40,7 @@ static func create(runtime, directory: String, revision: int):
 	scope._world_store = runtime._world_store
 	return scope
 func accepts_validator(validator: Callable) -> bool:
-	return not _closed and _runtime != null and validator.get_object() == _runtime and validator.get_method() == "validate_checkpoint" and _runtime._provider == _provider and _provider.get_instance_id() == _provider_id and _runtime._validator == _validator and _runtime._world_store == _world_store and _runtime._checkpoint._core_restore.get_object() == _validator and _runtime._checkpoint._store == _world_store
+	return not _closed and _runtime != null and validator.get_object() == _runtime and validator.get_method() == "validate_checkpoint" and _runtime._provider == _provider and _provider.get_instance_id() == _provider_id and _runtime._validator == _validator and _runtime._world_store == _world_store and _runtime._checkpoint._core_restore.get_object() == _runtime and _runtime._checkpoint._core_restore.get_method() == "_restore_checkpoint" and _runtime._checkpoint._store == _world_store
 func exact_key(value: Variant) -> String:
 	var hash := HashingContext.new()
 	hash.start(HashingContext.HASH_SHA256)
@@ -53,24 +57,22 @@ func recall(slot: String, key: String) -> Dictionary:
 	return _slots[slot].get(key,{}).duplicate(true)
 func restore(snapshot: Dictionary, hydration: Dictionary, manifest: String, context: Dictionary, envelope: Dictionary) -> Dictionary:
 	if _closed or context.get("directory",_directory) != _directory:
-		return _runtime._validator.restore(snapshot.duplicate(true),hydration.duplicate(true))
+		return _runtime._restore_checkpoint(snapshot.duplicate(true),hydration.duplicate(true))
 	# Match the original Core error precedence before any provider capture.
 	var errors: Array[String] = Core.Contracts.new().validate_snapshot(snapshot)
 	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
 	if snapshot.content_revision != Core.CONTENT_REVISION or snapshot.chapter_id != "chapter_01_shiganshina" or not Core.Characters.new().runtime_available(snapshot.character_id): return {"ok":false,"error_code":"content_mismatch"}
-	if not _runtime._validator._content_error.is_empty(): return {"ok":false,"error_code":_runtime._validator._content_error}
 	var capture_start := Time.get_ticks_usec()
-	var capture: Dictionary = _provider.capture_validation_inputs()
+	var selected: Dictionary = _runtime.validation_context(snapshot)
 	_stats.captures += 1
 	_stats.capture_usec += Time.get_ticks_usec()-capture_start
-	if not capture.ok: return capture
+	if not selected.get("ok",false): return selected
+	var capture: Dictionary = selected.capture
 	for bytes in capture.sources.values(): _stats.capture_bytes += bytes.size()
-	if capture.sha256 != _capture_key:
-		var parsed: Dictionary = _provider.definitions_from_capture(capture)
-		if not parsed.ok: return parsed
-		if not _runtime._validator._same_json(parsed.chapter,_runtime._validator._chapter): return {"ok":false,"error_code":"content_mismatch"}
-		_captured_core = Core.new(CapturedProvider.new(parsed.chapter),null,parsed.definitions)
-		_capture_key = capture.sha256
+	var selected_key := exact_key([selected.rules_version,selected.provider.get_instance_id(),selected.core.get_instance_id(),capture.sha256])
+	if selected_key != _capture_key:
+		_captured_core = Core.new(CapturedProvider.new(selected.chapter,selected.rules_version),null,selected.immutable_inputs)
+		_capture_key = selected_key
 	var slot: String = context.get("slot","B")
 	if slot == "read": slot = "B" if int(envelope.get("store_revision",-1)) == _revision+1 else "A"
 	var envelope_identity := envelope.duplicate(true)

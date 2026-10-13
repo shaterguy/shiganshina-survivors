@@ -19,8 +19,17 @@ func run(t) -> void:
 		return
 	t.check(hud.slot_controls().size() == 8,"HUD keeps four equipment and four passive slots")
 	var text: String = hud.display_text()
-	t.check(text.contains("MAX 5/5") and text.contains("Lv 2/5") and text.contains("빈 칸"),"HUD shows authoritative caps, levels and empty slots")
-	t.check(text.contains("2/3") and text.contains("0/1") and text.contains("부족"),"target shows every unmet passive and seal requirement")
+	var expected_levels := {"blade_slash":"5/6","reentry_combo":"5/6","wall_cannon":"2/6","movement":"2/5","damage":"5/5"}
+	for slot in hud.slot_controls():
+		var id := str(slot.get_meta("item_id",""))
+		if id.is_empty():
+			t.check(slot.get_node("Name").text.is_empty() and slot.get_node("Status").text.is_empty() and slot.get_node("Icon").texture == null,"empty HUD slots never label a fake held skill")
+		else:
+			t.check(slot.get_node("Status").text == expected_levels[id] and slot.get_node("Icon").texture != null,"HUD preserves each actual skill identity and its exact attack-six/passive-five cap")
+	var target_info: Label = hud.get_node("TargetRequirements")
+	t.check(target_info.text.contains("재료 부족") and not target_info.text.contains("보유 기술에서 조건 보기"),"visible target keeps unmet state without repeating reader instructions")
+	t.check(target_info.tooltip_text.contains("입체기동 돌진") and target_info.tooltip_text.contains("미보유"),"target tooltip separately retains the named level-one partner criterion")
+	t.check(state == before,"initial HUD presentation never changes gameplay authority")
 	var ids: Array = []
 	for control in hud.slot_controls(): ids.append(control.get_instance_id())
 	for screen in [Vector2i(320,568),Vector2i(450,800),Vector2i(640,360),Vector2i(800,450)]:
@@ -40,9 +49,9 @@ func run(t) -> void:
 		t.check(ui._layout_generation == generation,"idle HUD does not cause frame-level relayout")
 	for index in 8: t.check(ids[index] == hud.slot_controls()[index].get_instance_id(),"HUD reuses fixed slot controls")
 	state.passives.movement = 3
-	state.tactical_seals = 1
+	state.equipment.odm_dash = 1
 	ui.present_progression(View.new().build(state))
-	t.check(hud.display_text().contains("진화 준비 완료") and hud.display_text().contains("다음 성장 선택"),"ready target explains next growth choice instead of immediate evolution")
+	t.check(target_info.text.contains("준비") and not target_info.text.contains("보유 기술에서 조건 보기"),"ready target uses one short authored-name/status row")
 	ui.reflow(Vector2i(320,568),Rect2i(12,8,296,552))
 	var target: Label = hud.get_node("TargetRequirements")
 	for line in target.text.split("\n"):
@@ -50,8 +59,8 @@ func run(t) -> void:
 	state.evolutions.blade_slash = "evo_wing_cut"
 	state.tactical_seals = 0
 	ui.present_progression(View.new().build(state))
-	t.check(hud.display_text().contains("입체기동 연속참") and hud.display_text().contains("궁극"),"evolved slot uses actual ultimate name and status")
+	t.check(hud.slot_controls()[0].tooltip_text.contains("입체기동 연속참") and hud.slot_controls()[0].get_node("Status").text == "6/6" and not target_info.is_visible_in_tree(),"evolved icon keeps its full actual information and numeric level without a duplicate completed target row")
 	ui.present_progression({})
 	t.check(hud.display_text().contains("기술 정보 확인 중") and not hud.display_text().contains("Lv 0/5"),"missing DTO never invents levels")
-	t.check(before.equipment == state.equipment and before.player == state.player,"UI leaves gameplay authority untouched")
+	t.check(before.player == state.player and state.equipment == {"blade_slash":5,"reentry_combo":5,"wall_cannon":2,"odm_dash":1},"UI preserves authority after the test explicitly acquires its partner")
 	ui.free()

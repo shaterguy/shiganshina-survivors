@@ -1,3 +1,21 @@
+# Current dev5 signing continuity
+
+The dev5 package is `com.shaterguy.wingsofhumanity.dev`, version `0.1.0-dev5`,
+version code `5`, ARM64. Reuse the registered GitHub Secrets and the verified
+dev4 certificate SHA-256
+`0ea1f152a801330f69ca0301a638de283e665c814535b54f407b1974c6bd2ae0`
+(alias `shigan-dev`). A different certificate is a blocking mismatch. No new
+key creation, credential transfer, account setup, or expanded access is authorized.
+Local source validation and unsigned export precede GitHub signing. This document
+does not itself claim that a dev5 artifact has been built, signed or installed.
+The workflow, validator, source commit and build report must agree on dev5 identity.
+
+The remaining dev4 contract is preserved as historical context for its original
+rename and signing setup. Its permission to select a different lineage and its
+statements that runner verification was pending do not apply to dev5.
+
+## Historical dev4 contract
+
 # GitHub DEV signing input contract
 
 This is the dev4 contract for signing the already verified local APK. A

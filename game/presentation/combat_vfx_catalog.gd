@@ -1,6 +1,6 @@
 class_name CombatVfxCatalog
 extends RefCounted
-const SKILLS := ["character:mikasa_unique_attack|","blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire","chain_lightning|","chain_lightning|evo_storm_chain","fire_zone|","fire_zone|evo_inferno_zone"]
+const SKILLS := ["character:mikasa_unique_attack|","blade_slash|","spin_slash|","odm_dash|","reentry_combo|","wall_cannon|","ally_cover|","blade_slash|evo_wing_cut","wall_cannon|evo_crossfire","chain_lightning|","chain_lightning|evo_storm_chain","fire_zone|","fire_zone|evo_inferno_zone","spin_slash|evo_whirlwind","odm_dash|evo_sky_lance","reentry_combo|evo_echo_assault","ally_cover|evo_wing_squad"]
 const ROLES := ["cast","projectile","aim","impact","trail","area"]
 const PASSES := ["ground","world","contact_overlay"]
 var _data: Dictionary = {}
@@ -63,7 +63,7 @@ func validate(manifest: Dictionary) -> Array[String]:
 			if pid.is_empty() or pid in phase_ids: errors.append("duplicate_phase:"+pid)
 			phase_ids.append(pid)
 			if not p.get("role","") in ROLES: errors.append("invalid_role:"+pid)
-			if record.get("base_item_id") == "reentry_combo" and phase == "cast" and not presentation_size_valid(p.get("presentation_size_px",null)): errors.append("invalid_presentation_size:"+pid)
+			if record.get("base_item_id") == "reentry_combo" and record.get("evolution_id","") == "" and phase == "cast" and not presentation_size_valid(p.get("presentation_size_px",null)): errors.append("invalid_presentation_size:"+pid)
 			if not p.get("render_pass","") in PASSES: errors.append("invalid_pass:"+pid)
 			var duration = p.get("duration_ticks",-1)
 			if not (duration is int or duration is float) or not is_finite(float(duration)) or duration < 0 or duration != floor(float(duration)): errors.append("invalid_duration:"+pid)

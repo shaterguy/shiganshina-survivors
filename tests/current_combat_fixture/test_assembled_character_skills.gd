@@ -32,6 +32,7 @@ func _state(sim,id: String,mikasa: bool) -> Dictionary:
 			state.equipment[requirement.equipment_id] = requirement.level
 			state.player.attack_ready_ticks[requirement.equipment_id] = 2147483647
 		state.evolutions = {base:id}
+		state.tactical_seals = 1-int(recipe.seal_cost)
 		state.boss_ids_fired = ["ch01_b05"]
 		state.reward_ids_claimed = ["boss:ch01_b05"]
 		state.stats.minibosses_defeated = 1

@@ -126,7 +126,7 @@ func _attack(payload: Dictionary, tick: int, snapshot: Dictionary, contact: Dict
 		_schedule_crossfire(payload,snapshot)
 		return
 	if phase != "executed": return
-	if base == "reentry_combo" and (contact.is_empty() or str(contact.get("target_id","")) != str(geometry.get("target_id",""))): return
+	if base == "reentry_combo" and evo.is_empty() and (contact.is_empty() or str(contact.get("target_id","")) != str(geometry.get("target_id",""))): return
 	var attack_id := str(payload.get("attack_id",""))
 	_remove_attack_role(attack_id,"aim")
 	_remove_attack_role(attack_id,"projectile")
@@ -138,7 +138,7 @@ func _attack(payload: Dictionary, tick: int, snapshot: Dictionary, contact: Dict
 		_diagnostic("missing_recipe:"+base+"|"+evo+"|"+recipe_phase)
 		return
 	var effect := _make_effect(recipe,payload,tick)
-	if base == "reentry_combo": effect.contact_position = _vec(contact.position)
+	if base == "reentry_combo" and evo.is_empty(): effect.contact_position = _vec(contact.position)
 	effect.intensity_tier = _level_tier(int(payload.cast_level)) if payload.has("cast_level") else _tier(snapshot,base)
 	if recipe_phase == "projectile":
 		effect.projectile_id = geometry.get("projectile_id",-1)

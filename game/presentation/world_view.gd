@@ -2,6 +2,7 @@ class_name WorldView
 extends Node2D
 const CityDepth = preload("res://game/presentation/city_render.gd")
 const CityAddress = preload("res://game/world/world_address.gd")
+const MobilitySample = preload("res://game/core/player_mobility.gd")
 const VfxBridge = preload("res://game/presentation/combat_vfx_bridge.gd")
 const ArmoredMotion = preload("res://game/presentation/armored_motion_tracker.gd")
 const ArmoredPose = preload("res://game/presentation/armored/armored_pose.gd")
@@ -25,6 +26,7 @@ var _city_active := false
 var _city_view: Dictionary = {}
 var _city_draw_data: Dictionary = {}
 var _outline_textures: Dictionary = {}
+var _mobility_textures: Dictionary = {}
 var _raster_images: Dictionary = {}
 var _corpse_serial := 0
 var _dock_definition: Dictionary = {}
@@ -380,6 +382,8 @@ func _draw() -> void:
 	_draw_upright_with_vfx(packet.upright,vfx)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
+	var landing: Variant = mobility_commands().landing_position
+	if landing is Vector2: _draw_landing_marker(landing)
 	# Enemy warnings and the exact player-location feedback stay above effects.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 	_draw_enemy_attacks()
@@ -418,7 +422,7 @@ func _draw_telegraph(hazard: Dictionary) -> void:
 	for piece in telegraph_pieces(hazard):
 		_world_transform(_screen(Vector2(origin[0],origin[1])),angle+float(piece.get("rotation",0)))
 		var texture := _texture(piece.asset)
-		if texture != null: _world_region(texture,piece.rect,piece.region,Color(1,1,1,alpha))
+		if texture != null: _world_region(texture,piece.rect,piece.region,Color(1.0,0.28,0.34,alpha))
 	_world_transform(Vector2.ZERO)
 func _sprite(asset_id: String, world: Vector2, animation: String, scale_value: float, flip := false, seconds := -1.0) -> void:
 	var texture := _texture(asset_id)
@@ -526,8 +530,16 @@ func _city_render_packet() -> Dictionary:
 	var animation := player_animation(_snapshot)
 	var seconds := _clock-_attack_started if animation == "attack" else _clock
 	if animation == "move": seconds = movement_seconds("garrison_01","player",1.0,seconds)
-	var player := _actor_view("player","garrison_01",Vector2(_snapshot.player.position[0],_snapshot.player.position[1]),animation,1.0,float(_snapshot.player.facing[0]) < 0,seconds)
+	var mobility: Dictionary = mobility_commands()
+	# Reuse existing reviewed poses; actual hit/death/attack retain precedence.
+	if animation not in ["hit","death","attack"]:
+		if mobility.phase == "rise": animation = "move"; seconds = 0.3
+		elif mobility.phase == "over": animation = "move"; seconds = 0.5
+		elif mobility.phase == "land": animation = "windup"; seconds = 0.0
+	var player := _actor_view("player","garrison_01",mobility.ground_position,animation,1.0,float(_snapshot.player.facing[0]) < 0,seconds)
 	player.is_player = true
+	player.visual_height = float(mobility.height)
+	player.roof_prop_id = mobility.roof_prop_id
 	actors.append(player)
 	for entity in _snapshot.get("entities",[]):
 		var definition: Dictionary = _snapshot.get("rules",{}).get("enemy_catalog",{}).get(entity.enemy_id,{})
@@ -560,7 +572,71 @@ func _city_render_packet() -> Dictionary:
 			props.append(dto)
 		terrain = {"chunks":[{"chunk_id":"authored_dock","local_origin":Vector2.ZERO,"ground_variant":0,"props":props}]}
 	var depth_actors: Array = actors if _city_active else actors.filter(func(actor): return not actor.get("is_player",false))
-	return CityDepth.build(terrain,depth_actors,corpses,projectiles,Rect2(_camera-_viewport_size*0.5,_viewport_size))
+	var packet: Dictionary = CityDepth.build(terrain,depth_actors,corpses,projectiles,Rect2(_camera-_viewport_size*0.5,_viewport_size))
+	# Outline alpha intersection must use the displayed body, not ground bounds.
+	for command in packet.get("upright",[]):
+		if command.id == "actor:s:player":
+			_city_draw_data.actor.player.position = command.position
+			_city_draw_data.actor.player.render_bounds = command.render_bounds
+	return packet
+# All values are freshly derived from the accepted Core snapshot. No renderer
+# history, candidate selection, probability, path integration or physics lives here.
+func mobility_commands() -> Dictionary:
+	var sample: Dictionary = MobilitySample.visual_sample(_snapshot)
+	var point: Array = sample.ground_position
+	var ground: Vector2 = Vector2(point[0],point[1])
+	var result: Dictionary = {"height":float(sample.height),"phase":sample.phase,"ground_position":ground,"wire":{},"roof_prop_id":str(sample.get("roof_prop_id","")),"landing_position":null}
+	var anchor: Dictionary = sample.anchor
+	if not anchor.is_empty():
+		var relative: Dictionary = CityAddress.relative(anchor.chunk,Vector2(anchor.local[0],anchor.local[1]),_snapshot.get("world",{}).get("origin_chunk",[]))
+		if relative.get("ok",false):
+			result.wire = {"from":ground-Vector2(0,float(sample.height)+18.0),"to":relative.local-Vector2(0,float(anchor.roof_height))}
+	var mobility: Dictionary = _snapshot.get("player_mobility",{})
+	if sample.phase in ["rise","over","land"] and float(sample.height) > 0.0 and not mobility.get("cancelled",false) and mobility.get("landing") is Dictionary:
+		var landing: Dictionary = mobility.landing
+		if landing.get("chunk") is Array and landing.get("local") is Array and landing.local.size() == 2:
+			var local: Array = landing.local
+			if (local[0] is int or local[0] is float) and (local[1] is int or local[1] is float) and is_finite(float(local[0])) and is_finite(float(local[1])):
+				var relative: Dictionary = CityAddress.relative(landing.chunk,Vector2(local[0],local[1]),_snapshot.world.get("origin_chunk",[]))
+				if relative.get("ok",false): result.landing_position = relative.local
+	return result
+func _mobility_texture(kind: String) -> Texture2D:
+	if _mobility_textures.has(kind): return _mobility_textures[kind]
+	var size: Vector2i = Vector2i(36,12) if kind == "shadow" else (Vector2i(33,33) if kind == "landing" else Vector2i.ONE)
+	var raster: Image = Image.create(size.x,size.y,false,Image.FORMAT_RGBA8)
+	if kind == "shadow":
+		for y in 12:
+			for x in 36:
+				var normalized: Vector2 = Vector2((float(x)+0.5-18.0)/18.0,(float(y)+0.5-6.0)/6.0)
+				if normalized.length_squared() <= 1.0: raster.set_pixel(x,y,Color.WHITE)
+	elif kind == "landing":
+		for y in 33:
+			for x in 33:
+				var distance: float = Vector2(x-16,y-16).length_squared()
+				if (distance >= 196.0 and distance <= 256.0) or distance <= 6.25: raster.set_pixel(x,y,Color.WHITE)
+	else: raster.fill(Color.WHITE)
+	var texture: Texture2D = ImageTexture.create_from_image(raster)
+	_mobility_textures[kind] = texture
+	return texture
+func _draw_ground_shadow(command: Dictionary) -> void:
+	_world_transform(Vector2.ZERO)
+	_world_rect(_mobility_texture("shadow"),Rect2(_screen(command.position)-Vector2(18,6),Vector2(36,12)),false,Color(0.02,0.03,0.04,0.48))
+func _draw_mobility_wire(wire: Dictionary) -> void:
+	var start: Vector2 = wire["from"]
+	var finish: Vector2 = wire["to"]
+	var delta: Vector2 = finish-start
+	if delta.length_squared() <= 0.000001: return
+	_world_transform(_screen(start),delta.angle())
+	var texture: Texture2D = _mobility_texture("wire")
+	_world_rect(texture,Rect2(0,-1.5,delta.length(),3.0),false,Color(0.04,0.08,0.10,0.95))
+	_world_rect(texture,Rect2(0,-0.75,delta.length(),1.5),false,Color(0.60,0.91,0.94,1.0))
+	_world_transform(Vector2.ZERO)
+func _draw_landing_marker(point: Vector2) -> void:
+	_world_transform(Vector2.ZERO)
+	var texture: Texture2D = _mobility_texture("landing")
+	var center: Vector2 = _screen(point)
+	_world_rect(texture,Rect2(center-Vector2(18,18),Vector2(36,36)),false,Color(0.04,0.08,0.10,0.95))
+	_world_rect(texture,Rect2(center-Vector2(16,16),Vector2(32,32)),false,Color(0.24,0.94,1.0,1.0))
 func _draw_streamed_city() -> void:
 	if _city_view.is_empty(): return
 	var packet := _city_render_packet()
@@ -569,6 +645,8 @@ func _draw_streamed_city() -> void:
 	else:
 		for command in packet.ground:
 			if command.kind == "chunk_ground": _draw_city_ground(command)
+	for command in packet.ground:
+		if command.kind == "shadow": _draw_ground_shadow(command)
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
 	for drop in _snapshot.get("drops",[]): _sprite("xp_pickup",Vector2(drop.position[0],drop.position[1]),"idle",1.0)
@@ -581,7 +659,6 @@ func _draw_streamed_city() -> void:
 	_draw_upright_with_vfx(packet.upright,vfx)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
-	_draw_enemy_attacks()
 	for marker in packet.visibility_markers:
 		var behind := false
 		for command in packet.upright:
@@ -589,6 +666,9 @@ func _draw_streamed_city() -> void:
 			if behind and command.render_bounds.intersects(marker.render_bounds) and _city_rasters_overlap(_city_draw_data.actor["player"],command):
 				_draw_player_outline(marker,_city_draw_data.actor["player"])
 				break
+	var landing: Variant = mobility_commands().landing_position
+	if landing is Vector2: _draw_landing_marker(landing)
+	_draw_enemy_attacks()
 	# Danger is the final raster pass; a cyan outline never substitutes for it.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 func selected_passage_world_position() -> Variant:
@@ -627,6 +707,9 @@ func _draw_upright_with_vfx(upright: Array, vfx: Array[Dictionary]) -> void:
 			if style.get("armored_raster",false) and _draw_armored_raster():
 				_actor_draw_tint = Color.WHITE
 				continue
+			if command.id == "actor:s:player":
+				var wire: Dictionary = mobility_commands().wire
+				if not wire.is_empty(): _draw_mobility_wire(wire)
 			_sprite(command.asset_id,command.position,command.pose,float(style.get("scale",1.0)),style.get("flip",false),float(style.get("seconds",_clock)))
 			_actor_draw_tint = Color.WHITE
 func _draw_hit_fallbacks() -> void:

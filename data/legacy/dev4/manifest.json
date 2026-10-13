@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "rules_version": "dev4",
+  "source_commit": "b6e471f9ff4c447c99119fdefeff1c6502807f01",
+  "content_fingerprint": "01ad1adb8da30c904fd5feb5d7fb9ce0da0b959d206560d76b382ff1e2b7eae7",
+  "definition_sha256": {
+    "chapters/chapter_01/manifest.json": "0850e6df39f3cf58ec764aee7f7dbc445809736b62b37632a7188ffaf04cdb1a",
+    "chapters/chapter_01/map.json": "346706876348346d656998a6fe1eb2f52b5acebecf035e23f61a653874ca49fb",
+    "data/equipment.json": "768d2061b0a3eae7c8f9c9fe19c5b4dcd588256b05c2407f7eb77df7447efc37",
+    "data/passives.json": "e0e892361375545c6dfee5a1227a928f09a9bea21262bde0f827a8c80da6e2af",
+    "data/evolutions.json": "1d528a2ebc40d6ef6df7e08c60a5f87a3eaf27c58b28d262083346e5869051f7",
+    "data/doctrines.json": "f54a49dcef27f8d15eee656c9bb1cc9e3186632a6a0b5e7173811e8eae7210d1",
+    "data/supply_shop.json": "5bd5d41e76e421e5e42159a26a1ace29b3cd1bf61030d121f1bf134c065f93e3",
+    "data/enemies.json": "f660178280a826f2a18172fd800a635c1f6632b3fc9691b108ae7a09a61586d7",
+    "chapters/chapter_01/city_templates.json": "a1ff8b1ead168e30977813dee8c4a3091d7235b495eb0ec72b2ba38804d420e4",
+    "data/world_props.json": "b988b3b70a94bdd73ea4f8b940b013d1d761d5e8a98e1eae57bd8ec863c0f6c4",
+    "data/enemy_roles_ch01_3.json": "297326733fab6f54d5da2fddedf1a5685297efec5a6c6f49da567ccaee309834",
+    "assets/manifest.json": "07186688491c15394fe6c111855d896fa7d6b28f9a98abdbd9313e56a56a1255",
+    "chapters/chapter_01/authored_dock.json": "e99b5fb91537c879ff47cf141cf7f2704fb9a6562586c16b3f1dcf6465f30571"
+  },
+  "definition_bytes": {
+    "chapters/chapter_01/manifest.json": 2322,
+    "chapters/chapter_01/map.json": 2560,
+    "data/equipment.json": 3359,
+    "data/passives.json": 1588,
+    "data/evolutions.json": 3899,
+    "data/doctrines.json": 1649,
+    "data/supply_shop.json": 1657,
+    "data/enemies.json": 3228,
+    "chapters/chapter_01/city_templates.json": 9618,
+    "data/world_props.json": 5737,
+    "data/enemy_roles_ch01_3.json": 5091,
+    "assets/manifest.json": 117903,
+    "chapters/chapter_01/authored_dock.json": 859
+  }
+}

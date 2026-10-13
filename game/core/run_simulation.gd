@@ -20,6 +20,7 @@ const Signature = preload("res://game/combat/character_skill_resolver.gd")
 const Fantasy = preload("res://game/combat/fantasy_attack_resolver.gd")
 const Evolved = preload("res://game/combat/evolved_attack_resolver.gd")
 const Streamed = preload("res://game/core/streamed_run_world.gd")
+const Mobility = preload("res://game/core/player_mobility.gd")
 const Population = preload("res://game/core/city_population.gd")
 const WorldCodec = preload("res://game/world/world_delta_codec.gd")
 const ArmoredContact = preload("res://game/combat/armored_contact.gd")
@@ -52,6 +53,8 @@ var _last_step_status: Dictionary = {"ok":true}
 var _tick_navigation: Dictionary = {}
 # Per-tick travelled shoulder segments; never saved or replayed after a pause.
 var _final_sweeps: Array[Dictionary] = []
+var _mobility_sweeps: Array = []
+var _mobility_cast: Dictionary = {}
 var _role_samples: Dictionary = {}
 var _role_error: Dictionary = {}
 var _role_admission: Dictionary = {}
@@ -176,9 +179,12 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	if Signature.enabled(state): state.character_skill = Signature.initial_state()
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
+		if _mobility_rules_enabled(): state.player_mobility = Mobility.initial()
 		state.escape_zone = Streamed.CITY_INACTIVE_EXIT.duplicate()
 	if not _normalize_saved_numbers(state): return _failure("invalid_core_state")
 	return state
+func _mobility_rules_enabled() -> bool:
+	return _chapter_provider is Object and _chapter_provider.has_method("rules_version") and _chapter_provider.rules_version() == "dev5"
 func _config_valid(config: Dictionary, chapter: Dictionary) -> bool:
 	if not _supplies.run_upgrade_config_valid(config) or not config.has_all(["run_id","run_serial","doctrine_id","target_evolution_id","prepared_supply"]) or not Catalog.json_data_valid(config): return false
 	if not Growth._run_id_valid(config.run_id) or not Catalog.integer_valid(config.run_serial,1) or config.run_id.get_slice(":",1) != str(int(config.run_serial)): return false
@@ -220,6 +226,8 @@ func step(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Arra
 	# Transient geometry belongs only to this successfully accepted public step.
 	# Pauses and preflight/rebase refusals must not expose the preceding tick.
 	_final_sweeps.clear()
+	_mobility_sweeps.clear()
+	_mobility_cast.clear()
 	if commands.size() > 1024: return []
 	# Preserve the approved atomic incoming-ID exhaustion boundary even when an
 	# actor's own attack admission is deferred rather than partially scheduled.
@@ -302,6 +310,7 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 				_role_query(state)
 				break
 	_move_player(state,move)
+	if not _role_error.is_empty(): return events
 	var waiting_moves := _move_enemies(state,events)
 	_spatial.rebuild(state.entities)
 	_move_waiting_roles(state,waiting_moves)
@@ -321,6 +330,7 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 	if state.player.hp <= 0.0:
 		_end_run(state,"dead","damage",events)
 		return events
+	_apply_mobility_damage(state,events)
 	_use_prepared_supply(state,events)
 	_regenerate(state)
 	if state.phase == "evacuation":
@@ -436,6 +446,7 @@ func world_render_view(state: Dictionary) -> Dictionary:
 func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: Array = [], prepared: Array = []) -> Dictionary:
 	var errors: Array[String] = Contracts.new().validate_snapshot(value)
 	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
+	if value.has("player_mobility") and not _mobility_rules_enabled(): return _failure("content_mismatch")
 	if value.content_revision != CONTENT_REVISION or value.chapter_id != "chapter_01_shiganshina" or not Characters.new().runtime_available(value.character_id): return _failure("content_mismatch")
 	var current: Dictionary = _current_chapter()
 	if not current.get("ok",false): return current
@@ -449,6 +460,9 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 	if not _same_json(value.rules,_rules_for(current.chapter,doctrine,value.run_config)): return _failure("invalid_core_state")
 	var restored: Dictionary = value.duplicate(true)
 	if not _normalize_saved_numbers(restored): return _failure("invalid_core_state")
+	if restored.has("player_mobility"):
+		for field in ["schema_version","cast_id","started_tick","travel_ticks","cooldown_until","cancel_ticks","roll"]:
+			restored.player_mobility[field] = int(restored.player_mobility[field])
 	if not _catalog.evolutions.progression_state_valid(restored) or not _v2_relationships_valid(restored,current.chapter): return _failure("invalid_core_state")
 	var validation_helper
 	if city:
@@ -520,7 +534,7 @@ func _v2_relationships_valid(state: Dictionary, chapter: Dictionary) -> bool:
 		if id == "ch01_final_armored":
 			if state.survival_tick != FINAL_TICK: return false
 		elif not id in REAL_BOSS_IDS or state.survival_tick < (REAL_BOSS_IDS.find(id)+1)*18000: return false
-	if boss_rewards != state.stats.minibosses_defeated or boss_rewards != int(state.tactical_seals)+state.evolutions.size(): return false
+	if boss_rewards != state.stats.minibosses_defeated or boss_rewards != int(state.tactical_seals)+_catalog.evolutions.spent_seals(state): return false
 	if not Catalog.integer_valid(state.player.get("level"),1) or int(state.offer_seq) > int(state.player.level)-1+boss_rewards: return false
 	if not Catalog.integer_valid(state.stats.get("kills")) or state.stats.kills < boss_rewards: return false
 	if not _number_valid(state.player.get("hp")): return false
@@ -707,12 +721,62 @@ func _spawn_position(state: Dictionary, requested: Vector2, radius: float) -> Ve
 	return best
 func _move_player(state: Dictionary, input: Vector2) -> void:
 	var move := input.limit_length(1.0) if is_finite(input.x) and is_finite(input.y) else Vector2.ZERO
+	if state.has("player_mobility") and _mobility_rules_enabled() and state.has("world") and state.world.stage == "city":
+		var proposed: Dictionary = Mobility.advance(state,move,_streamed)
+		if proposed.status == "refused":
+			_role_error = _failure(proposed.error_code)
+			return
+		state.player_mobility = proposed.mobility
+		if proposed.status == "accepted":
+			var previous := _vec(state.player.position)
+			state.player.position = _array(proposed.proposed_position)
+			state.player.velocity = _array((proposed.proposed_position-previous)*TICKS_PER_SECOND)
+			_mobility_sweeps = proposed.sweeps
+			_mobility_cast = proposed.mobility.duplicate(true)
+			if not Mobility.vec(proposed.mobility.direction).is_zero_approx(): state.player.facing = proposed.mobility.direction.duplicate()
+			if proposed.mobility.phase == "ground": state.player_mobility = Mobility.grounded(proposed.mobility)
+			return
 	var speed := float(state.rules.move_speed)*_catalog.stat(state,"move_multiplier",1.0)
 	var velocity := move*speed
 	var position := _move_world(state,_vec(state.player.position),velocity/TICKS_PER_SECOND,float(state.player.radius))
 	state.player.position = _array(position)
 	state.player.velocity = _array(velocity)
 	if not move.is_zero_approx(): state.player.facing = _array(move.normalized())
+func _apply_mobility_damage(state: Dictionary, events: Array[Dictionary]) -> void:
+	if _mobility_sweeps.is_empty() or _mobility_cast.is_empty() or _mobility_cast.cancelled or float(state.player.hp) <= 0.0: return
+	# Enemy movement can damage the roof after our proposal. A stale wire must
+	# stop path damage in this same tick, not one tick later.
+	var route := Mobility.route_sample(_mobility_cast,state.world.origin_chunk)
+	if not route.get("ok",false):
+		_role_error = _failure("invalid_mobility_path")
+		return
+	var fresh: Dictionary = _streamed.mobility_sweep(state,route.points[1],Vector2.ZERO,8.0,_mobility_cast.anchor,float(_mobility_cast.anchor.roof_height))
+	if not fresh.get("ok",false):
+		if fresh.get("error_code") == "stale_mobility_anchor":
+			if state.player_mobility.phase != "ground": state.player_mobility.cancelled = true
+		else: _role_error = fresh
+		return
+	var rewards: Array[Dictionary] = []
+	# Earlier ordinary attacks may have removed array entries since the first
+	# rebuild. Path queries must index the current live array.
+	_spatial.rebuild(state.entities)
+	var attack_id: String = state.run_id+":mobility:"+str(int(_mobility_cast.cast_id))
+	for sweep in _mobility_sweeps:
+		var delta: Vector2 = sweep.to-sweep.from
+		var shape := {"shape":"line","origin":_array(sweep.from),"direction":_array(delta.normalized()),"length":delta.length(),"width":float(_mobility_cast.width)}
+		var midpoint: Vector2 = (sweep.from+sweep.to)*0.5
+		for index in _spatial.query(midpoint,delta.length()*0.5+float(_mobility_cast.width)*0.5+32.0):
+			var entity: Dictionary = state.entities[index]
+			var id := str(entity.id)
+			if entity.hp <= 0 or id in _mobility_cast.hit_ids or not Geometry.overlaps(shape,_vec(entity.position),float(entity.radius)): continue
+			_mobility_cast.hit_ids.append(id)
+			if state.player_mobility.phase != "ground": state.player_mobility.hit_ids.append(id)
+			_hit_entity(state,entity,float(_mobility_cast.damage),"player_mobility",events,rewards,attack_id)
+	# Existing combat order is untouched. Settle only newly accepted path kills
+	# before publishing this tick or opening its upgrade offer.
+	_remove_dead(state)
+	_collect_drops(state,events,rewards.size())
+	for reward in rewards: _claim_boss_reward(state,reward,events)
 func _move_enemies(state: Dictionary, events: Array[Dictionary]) -> Array[int]:
 	# Successful target clearances belong only to this movement batch.
 	var movement_targets := {}
@@ -1085,7 +1149,7 @@ func _auto_attack(state: Dictionary, events: Array[Dictionary], _boss_rewards: A
 		if target_index < 0: continue
 		var direction := _vec(state.player.position).direction_to(_vec(state.entities[target_index].position))
 		if direction.is_zero_approx(): direction = _vec(state.player.facing)
-		var count := 1 if evolution.is_empty() else 2
+		var count := 1 if evolution.is_empty() else int(detail.effect_delta.stages)
 		if definition.mode != "zone" and state.player_attack_instances.size()+count > 64: continue
 		if evolution.is_empty() and definition.mode == "projectile" and projectile_reservations >= MAX_PROJECTILES: continue
 		var cast_id: String = state.run_id+":attack:"+str(int(state.attack_seq)+1)
@@ -1549,7 +1613,10 @@ func _core_payload_valid(value: Dictionary, chapter: Dictionary = {}, validation
 	var rules: Dictionary = value.rules
 	var world = rules.get("world_geometry",{})
 	if not World.valid(world) or (value.content_revision == "ch01.2" and world.is_empty()): return false
-	if not _position_valid(player.get("position")) or not _validation_walkable(value,_vec(player.position),float(player.radius),validation_helper): return false
+	if not _position_valid(player.get("position")): return false
+	if value.has("player_mobility") and value.player_mobility.phase != "ground":
+		if validation_helper == null or not validation_helper.mobility_player_clearance(value).get("walkable",false): return false
+	elif not _validation_walkable(value,_vec(player.position),float(player.radius),validation_helper): return false
 	if not rules.get("allowed_equipment_ids",null) is Array or not _string_set_valid(rules.allowed_equipment_ids): return false
 	for item_id in rules.allowed_equipment_ids:
 		if not _catalog.equipment.has(item_id): return false
@@ -1884,6 +1951,18 @@ func _canonicalize_saved_vectors(state: Dictionary) -> void:
 	# JSON can otherwise leave a double ULP on a widened float32 coordinate.
 	for key in ["position","velocity","facing"]:
 		state.player[key] = _array(_vec(state.player[key]))
+	if state.has("player_mobility"):
+		var mobility: Dictionary = state.player_mobility
+		mobility.direction = _array(_vec(mobility.direction))
+		# These locals/directions were created by engine Vector2 operations.
+		# Recover real_t representation only; never translate absolute chunks,
+		# choose another path, change progress or force an airborne landing.
+		for point in mobility.path: point.local = _array(_vec(point.local))
+		if not mobility.anchor.is_empty():
+			mobility.anchor.local = _array(_vec(mobility.anchor.local))
+			for field in ["pass_start","pass_end"]:
+				mobility.anchor[field].local = _array(_vec(mobility.anchor[field].local))
+		if not mobility.landing.is_empty(): mobility.landing.local = _array(_vec(mobility.landing.local))
 	for collection in ["entities","projectiles","drops"]:
 		var records: Array = state[collection].duplicate()
 		if state.has("world") and state.world.get("schema_version") == 2 and collection in ["entities","drops"]:
@@ -1921,6 +2000,7 @@ func _validation_walkable(state: Dictionary, position: Vector2, radius: float, h
 func _tick_candidate(state: Dictionary) -> Dictionary:
 	var candidate := state.duplicate()
 	if state.has("character_skill"): candidate.character_skill = state.character_skill.duplicate()
+	if state.has("player_mobility"): candidate.player_mobility = state.player_mobility.duplicate(true)
 	candidate.player = state.player.duplicate()
 	candidate.player.attack_ready_ticks = state.player.attack_ready_ticks.duplicate()
 	candidate.stats = state.stats.duplicate()

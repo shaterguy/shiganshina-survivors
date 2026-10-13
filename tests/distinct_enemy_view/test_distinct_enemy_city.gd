@@ -61,11 +61,36 @@ func _destroy_blocker(t) -> void:
 	t.check(not chosen.is_empty(),"actual destructible rock blocker is found")
 	if chosen.is_empty(): return
 	state.player.position = [target.x,target.y]
-	t.check(sim.prepare_world(state,f.hydration).ok,"actual clipped rock fixture prepares")
 	var command: Dictionary = G.new().command([origin.x,origin.y]); command.payload.enemy_id = "stone_thrower"
+	command.origin_revision = state.world.origin_revision
+	var origin_address: Dictionary = Helper.Address.normalize(state.world.origin_chunk,origin)
+	var prop_chunk: Array = [str(chosen.prop_id).get_slice(":",2),str(chosen.prop_id).get_slice(":",3)]
+	t.check(origin_address.get("ok",false) and Helper.Address.parse(prop_chunk).get("ok",false),"rock fixture preserves canonical source and actual blocker addresses")
+	if not origin_address.get("ok",false) or not Helper.Address.parse(prop_chunk).get("ok",false): return
+	var needed: Dictionary = Helper.requirements(state,[command])
+	t.check(needed.get("ok",false),"moved rock fixture computes public command-aware hydration requirements")
+	if not needed.get("ok",false): return
+	var hydrated: Dictionary = f.disk.hydrate(state.world.delta_root,needed.chunks)
+	t.check(hydrated.get("ok",false),"moved rock fixture hydrates all actual required chunks from the same disk root")
+	if not hydrated.get("ok",false): return
+	f.hydration = hydrated.deltas
+	var missing: Array = []
+	for chunk in needed.get("chunks",[]):
+		var key: String = str(chunk[0])+","+str(chunk[1])
+		if not f.hydration.has(key): missing.append(key)
+	var frozen: PackedByteArray = var_to_bytes(state)
+	var prepared: Dictionary = sim.prepare_world(state,f.hydration,[command])
+	print("ROCK_FIXTURE_PREPARE_DIAGNOSTIC ",JSON.stringify({"prop_id":chosen.prop_id,"slot_id":chosen.slot_id,"origin":[origin.x,origin.y],"target":[target.x,target.y],"needed":needed,"hydration_keys":f.hydration.keys(),"missing_hydration_keys":missing,"prepare_result":prepared},"",true,true))
+	t.check(prepared.ok,"actual clipped rock fixture prepares")
+	t.check(var_to_bytes(state) == frozen,"Core preparation leaves caller positions and origin unchanged before the real tick")
+	var before_origin: Dictionary = {"chunk":state.world.origin_chunk.duplicate(),"revision":state.world.origin_revision,"player":state.player.position.duplicate(),"command_origin":command.payload.position.duplicate(),"command_revision":command.origin_revision}
 	F.step(sim,state,Vector2.ZERO,[command])
 	t.check(state.enemy_attack_instances.size() == 1,"actual clipped rock attack is admitted")
 	if state.enemy_attack_instances.is_empty(): return
+	var current_origin: Dictionary = Helper.Address.relative(origin_address.chunk,origin_address.local,state.world.origin_chunk)
+	var expected_revision: int = int(before_origin.revision)+(0 if Vector2(needed.offset[0],needed.offset[1]) == Vector2.ZERO else 1)
+	t.check(sim.step_status().get("ok",false) and current_origin.get("ok",false) and state.world.origin_chunk == needed.origin_chunk and state.world.origin_revision == expected_revision and Vector2(state.enemy_attack_instances[0].locked_origin[0],state.enemy_attack_instances[0].locked_origin[1]) == current_origin.local,"actual Core tick rebases the rock command once into its committed origin")
+	print("ROCK_FIXTURE_REBASE_DIAGNOSTIC ",JSON.stringify({"before":before_origin,"after":{"chunk":state.world.origin_chunk,"revision":state.world.origin_revision,"player":state.player.position,"locked_origin":state.enemy_attack_instances[0].locked_origin},"expected_locked_origin":[current_origin.local.x,current_origin.local.y],"expected_revision":expected_revision,"prop_chunk":prop_chunk,"prop_id":chosen.prop_id},"",true,true))
 	var attack: Dictionary = state.enemy_attack_instances[0].duplicate(true)
 	var blocked := false
 	while int(state.active_tick) < int(attack.attack_ends_tick)-2:
@@ -76,8 +101,18 @@ func _destroy_blocker(t) -> void:
 	if not blocked: return
 	state.world = state.world.duplicate(true)
 	state.world.world_revision += 1
-	state.world.dirty_chunks = [{"chunk":["0","0"],"props":[{"slot_id":chosen.slot_id,"hp":0,"destroyed":true}]}]
+	state.world.dirty_chunks = [{"chunk":prop_chunk,"props":[{"slot_id":chosen.slot_id,"hp":0,"destroyed":true}]}]
+	needed = Helper.requirements(state)
+	hydrated = f.disk.hydrate(state.world.delta_root,needed.get("chunks",[]))
+	t.check(needed.get("ok",false) and hydrated.get("ok",false),"actual blocker destruction retains complete current-origin hydration")
+	if not needed.get("ok",false) or not hydrated.get("ok",false): return
+	f.hydration = hydrated.deltas
 	t.check(sim.prepare_world(state,f.hydration).ok,"actual wall destruction re-prepares expired rock")
+	var destroyed: Array = []
+	for chunk in sim.world_render_view(state).get("chunks",[]):
+		for prop in chunk.props:
+			if prop.prop_id == chosen.prop_id: destroyed.append(prop)
+	t.check(destroyed.size() == 1 and destroyed[0].destroyed,"destruction changes the exact actual blocker rather than a same-slot prop in another chunk")
 	var view = View.new(); view.load_manifest()
 	while int(state.active_tick) < int(attack.attack_ends_tick):
 		F.step(sim,state,Vector2.ZERO)

@@ -3,7 +3,7 @@
   "display_name": "시간시나구 탈출",
   "content_revision": "ch01.3-rebuild.7-grabber-hand",
   "doctrine_ids": ["doctrine_standard", "doctrine_mobile", "doctrine_artillery"],
-  "evolution_ids": ["evo_wing_cut", "evo_crossfire", "evo_storm_chain", "evo_inferno_zone"],
+  "evolution_ids": ["evo_wing_cut", "evo_crossfire", "evo_storm_chain", "evo_inferno_zone", "evo_whirlwind", "evo_sky_lance", "evo_echo_assault", "evo_wing_squad"],
   "story_year": 845,
   "character_availability": [
     {

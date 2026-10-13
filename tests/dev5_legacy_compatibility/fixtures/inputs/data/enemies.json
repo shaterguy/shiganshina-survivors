@@ -1,0 +1,152 @@
+{
+  "walker": {
+    "name": "\uac70\uc778",
+    "hp": 32,
+    "speed": 23,
+    "damage": 9,
+    "xp": 4,
+    "radius": 18,
+    "behavior": "chase",
+    "art_id": "titan_basic"
+  },
+  "runner": {
+    "name": "\ube60\ub978 \uac70\uc778",
+    "hp": 24,
+    "speed": 43,
+    "damage": 7,
+    "xp": 5,
+    "radius": 16,
+    "behavior": "runner",
+    "art_id": "titan_runner"
+  },
+  "brute": {
+    "name": "\ub300\ud615 \uac70\uc778",
+    "hp": 100,
+    "speed": 17,
+    "damage": 17,
+    "xp": 10,
+    "radius": 24,
+    "behavior": "brute",
+    "art_id": "titan_brute"
+  },
+  "sweeper": {
+    "name": "\ud314\uc744 \ud718\ub450\ub974\ub294 \uac70\uc778",
+    "hp": 65,
+    "speed": 24,
+    "damage": 13,
+    "xp": 8,
+    "radius": 20,
+    "behavior": "sweep",
+    "art_id": "titan_sweeper"
+  },
+  "grabber": {
+    "name": "\ubd99\uc7a1\ub294 \uac70\uc778",
+    "hp": 58,
+    "speed": 50,
+    "damage": 12,
+    "xp": 8,
+    "radius": 20,
+    "behavior": "grab",
+    "art_id": "titan_grabber"
+  },
+  "boss_charger": {
+    "name": "\ub3cc\uc9c4 \uae30\ud589\uc885",
+    "hp": 1000,
+    "speed": 22,
+    "damage": 24,
+    "xp": 80,
+    "radius": 28,
+    "behavior": "charge",
+    "art_id": "boss_charger"
+  },
+  "boss_sweeper": {
+    "name": "\uad11\uc7a5\uc758 \uac15\uc801",
+    "hp": 1800,
+    "speed": 20,
+    "damage": 27,
+    "xp": 100,
+    "radius": 30,
+    "behavior": "sweep",
+    "art_id": "boss_sweeper"
+  },
+  "boss_leaper": {
+    "name": "\ub3c4\uc57d \uae30\ud589\uc885",
+    "hp": 2600,
+    "speed": 24,
+    "damage": 30,
+    "xp": 120,
+    "radius": 28,
+    "behavior": "leap",
+    "art_id": "boss_leaper"
+  },
+  "boss_grabber": {
+    "name": "\ub300\ud53c\ub85c\uc758 \uac15\uc801",
+    "hp": 3400,
+    "speed": 24,
+    "damage": 33,
+    "xp": 150,
+    "radius": 30,
+    "behavior": "grab",
+    "art_id": "boss_grabber"
+  },
+  "boss_abnormal": {
+    "name": "\ud1f4\uac01\ub85c\uc758 \uae30\ud589\uc885",
+    "hp": 4200,
+    "speed": 28,
+    "damage": 35,
+    "xp": 180,
+    "radius": 32,
+    "behavior": "combo",
+    "art_id": "boss_abnormal"
+  },
+  "armored_titan": {
+    "name": "\uac11\uc637 \uac70\uc778",
+    "hp": 1000000,
+    "speed": 150,
+    "damage": 30,
+    "xp": 0,
+    "radius": 32,
+    "behavior": "final_armored",
+    "art_id": "armored_titan",
+    "action_profile": {
+      "kind": "charge",
+      "trigger_range": 420.0,
+      "warning_ticks": 72,
+      "active_ticks": 60,
+      "brake_ticks": 18,
+      "recovery_ticks": 90,
+      "cooldown_ticks": 30,
+      "length": 310.0,
+      "width": 64.0,
+      "rush_start_speed": 180.0,
+      "rush_speed": 360.0,
+      "shoulder_forward": 56.0,
+      "preparation_forward": 81.0,
+      "shoulder_radius": 16.0,
+      "structure_damage": 3,
+      "structure_reach": 33,
+      "structure_admission_interval_ticks": 180,
+      "max_structure_attacks": 1
+    }
+  },
+  "quadruped": {
+    "name": "사족 질주 거인",
+    "hp": 46,
+    "speed": 62,
+    "damage": 11,
+    "xp": 7,
+    "radius": 18,
+    "behavior": "charge",
+    "art_id": "titan_quadruped"
+  },
+  "stone_thrower": {
+    "name": "투석 거인",
+    "hp": 76,
+    "speed": 28,
+    "damage": 14,
+    "xp": 10,
+    "radius": 24,
+    "behavior": "throw",
+    "art_id": "titan_stone_thrower"
+  }
+}

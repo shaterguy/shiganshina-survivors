@@ -6,7 +6,7 @@ func run(t) -> void:
 	var path := "res://game/progression/progression_view.gd"
 	t.check(ResourceLoader.exists(path),"NEW read-only progression view exists")
 	if not ResourceLoader.exists(path): return
-	var catalog = Upgrades.new()
+	var catalog = Fixture.legacy_catalog()
 	var builder = load(path).new(catalog)
 	var state := Fixture.state()
 	state.equipment.blade_slash = 4

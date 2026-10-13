@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "items": {
+    "damage": {
+      "name": "단련된 검술",
+      "description": "모든 공격 피해 +15%",
+      "stat": "damage_multiplier",
+      "increment": 0.15,
+      "max_level": 5
+    },
+    "fire_interval": {
+      "name": "신속한 재장전",
+      "description": "공격 간격 -8%",
+      "stat": "cooldown_multiplier",
+      "increment": -0.08,
+      "max_level": 5
+    },
+    "movement": {
+      "name": "가벼운 발걸음",
+      "description": "이동 속도 +10%",
+      "stat": "move_multiplier",
+      "increment": 0.1,
+      "max_level": 5
+    },
+    "max_health": {
+      "name": "병사의 체력",
+      "description": "최대 체력 +20, 체력 20 회복",
+      "stat": "max_hp",
+      "increment": 20.0,
+      "max_level": 5
+    },
+    "recovery": {
+      "name": "응급 처치",
+      "description": "매초 체력 0.5 회복",
+      "stat": "regen_per_second",
+      "increment": 0.5,
+      "max_level": 5
+    },
+    "pickup_radius": {
+      "name": "보급 회수",
+      "description": "경험치 수집 범위 +12",
+      "stat": "pickup_radius",
+      "increment": 12.0,
+      "max_level": 5
+    },
+    "attack_range": {
+      "name": "기동 거리",
+      "description": "공격 범위 +12%",
+      "stat": "range_multiplier",
+      "increment": 0.12,
+      "max_level": 5
+    },
+    "armor": {
+      "name": "방어 자세",
+      "description": "받는 피해 2 감소",
+      "stat": "armor",
+      "increment": 2.0,
+      "max_level": 5
+    }
+  },
+  "progression": {
+    "base_xp": 24,
+    "xp_per_level": 8
+  }
+}

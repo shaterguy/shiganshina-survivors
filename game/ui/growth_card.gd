@@ -2,8 +2,14 @@ class_name GrowthCard
 extends Button
 # Presentation only. Conditions and effects arrive from ProgressionView.
 signal chosen(option_id: String)
+const Icons = preload("res://game/ui/skill_icons.gd")
 var _option: Dictionary = {}
 var _display := ""
+var _requirements: VBoxContainer
+var _information: Button
+var _inline_styles: Dictionary = {}
+var _inline_padding := Vector4.ZERO
+var _inline_queued := false
 const ITEM_NAMES := {
 	"blade_slash":"쌍검 전방 베기", "spin_slash":"회전 베기", "odm_dash":"입체기동 돌진",
 	"reentry_combo":"재진입 연격", "wall_cannon":"성벽 포격", "ally_cover":"동료 엄호",
@@ -23,15 +29,58 @@ func _init() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	alignment = HORIZONTAL_ALIGNMENT_LEFT
+	expand_icon = true
 	add_theme_color_override("font_color",Color("f0dfba"))
 	add_theme_font_size_override("font_size",15)
+	add_theme_constant_override("icon_max_width",40)
 	pressed.connect(_choose)
+func attach_inline_controls(requirements: VBoxContainer, information: Button) -> void:
+	_requirements = requirements
+	_information = information
+	# Each card owns its style copies; content reservation never changes the
+	# shared theme or the native information button's independent hit target.
+	for state in ["normal","hover","focus","pressed","disabled"]:
+		var style: StyleBox = get_theme_stylebox(state).duplicate()
+		_inline_styles[state] = style
+		add_theme_stylebox_override(state,style)
+	var base: StyleBox = _inline_styles.normal
+	_inline_padding = Vector4(base.get_margin(SIDE_LEFT),base.get_margin(SIDE_TOP),base.get_margin(SIDE_RIGHT),base.get_margin(SIDE_BOTTOM))
+	resized.connect(_queue_inline_layout)
+	_requirements.minimum_size_changed.connect(_queue_inline_layout)
+	sync_inline_layout()
+func _queue_inline_layout() -> void:
+	if _inline_queued or not is_inside_tree(): return
+	_inline_queued = true
+	call_deferred("sync_inline_layout")
+func sync_inline_layout() -> void:
+	_inline_queued = false
+	if not is_instance_valid(_requirements) or not is_instance_valid(_information) or not is_inside_tree(): return
+	var has_requirements := _requirements.get_child_count() > 0
+	var right_column := has_requirements and size.x >= 330
+	var inner_width := maxf(1,size.x-_inline_padding.x-_inline_padding.z)
+	var requirement_width := floorf((inner_width-8)/2) if right_column else inner_width
+	_requirements.size.x = requirement_width
+	var requirement_height: float = _requirements.get_combined_minimum_size().y if has_requirements else 0.0
+	_information.size = Vector2(48,48)
+	_information.position = Vector2(size.x-_inline_padding.z-48,_inline_padding.y)
+	var reserve_right := requirement_width+8 if right_column else 56.0
+	var reserve_bottom := requirement_height+6 if has_requirements and not right_column else 0.0
+	for style in _inline_styles.values():
+		var right: float = _inline_padding.z+reserve_right
+		var bottom: float = _inline_padding.w+reserve_bottom
+		if style.content_margin_right != right: style.content_margin_right = right
+		if style.content_margin_bottom != bottom: style.content_margin_bottom = bottom
+	_requirements.position = Vector2(size.x-_inline_padding.z-requirement_width if right_column else _inline_padding.x,_inline_padding.y+54 if right_column else maxf(_inline_padding.y,size.y-_inline_padding.w-requirement_height))
+	_requirements.size.y = requirement_height
+	var height: float = _inline_padding.y+48+_inline_padding.w+(requirement_height+6 if right_column else 0)
+	if custom_minimum_size.y != height: custom_minimum_size.y = height
 func present(option: Dictionary, summary_text: String = "") -> void:
 	_option = option.duplicate(true)
 	set_meta("semantic_id",str(option.get("option_id","")))
+	icon = Icons.texture_for(Icons.icon_id_for(option))
 	var parts: Array[String] = [str(option.get("name","성장"))]
 	if str(option.get("kind","")) == "evolution":
-		parts.append("궁극 진화 · "+("진화 완료" if str(option.get("status","")) == "evolved" else ("선행조건 충족" if bool(option.get("can_select",true)) else "선행조건 확인")))
+		parts.append("진화 · "+level_change_text(option)+" · "+("진화 완료" if str(option.get("status","")) == "evolved" else ("선행조건 충족" if bool(option.get("can_select",true)) else "선행조건 확인")))
 	elif option.has("level"):
 		parts.append(level_change_text(option))
 	var description := str(option.get("description",""))
@@ -39,7 +88,9 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 	var delta := effect_text(option.get("effect_delta",{}))
 	if not delta.is_empty() and not description.contains(delta): parts.append(delta)
 	var requirements := requirements_text(option.get("requirements",[]))
-	if not requirements.is_empty(): parts.append("진화 선행조건\n"+requirements)
+	if not requirements.is_empty():
+		var heading := "진화 선행조건" if str(option.get("kind","")) == "evolution" else "목표 진화 조건"
+		parts.append(heading+"\n"+requirements)
 	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))
 	if not warning.is_empty(): parts.append(warning)
 	var tradeoff := str(option.get("tradeoff_text",""))
@@ -50,12 +101,13 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 	else:
 		parts.append("A · 선택")
 	_display = player_text("\n\n".join(parts))
-	text = _display if summary_text.is_empty() else summary_text
+	text = summary(option) if summary_text.is_empty() else summary_text
 	tooltip_text = _display
 func clear() -> void:
 	_option = {}
 	_display = ""
 	text = ""
+	icon = null
 	tooltip_text = ""
 	set_meta("semantic_id","")
 	disabled = true
@@ -68,8 +120,9 @@ static func requirements_text(requirements: Array) -> String:
 	for requirement in requirements:
 		var id := str(requirement.get("item_id",""))
 		var item_name := str(requirement.get("name",ITEM_NAMES.get(id,id)))
-		var status := "충족" if bool(requirement.get("met",false)) else "부족"
-		var line := "%s %d/%d · %s" % [item_name,int(requirement.get("current",0)),int(requirement.get("required",0)),status]
+		var named: Dictionary = requirement.duplicate()
+		named.name = item_name
+		var line := Icons.requirement_text(named)
 		var reason := str(requirement.get("blocked_reason",""))
 		if reason in ["equipment_slots","passive_slots","chapter_not_allowed","missing_weapon","missing_passive"]: line += "\n"+reason_text(reason)
 		lines.append(line)
@@ -77,14 +130,39 @@ static func requirements_text(requirements: Array) -> String:
 static func reason_text(reason: String) -> String:
 	return str(REASONS.get(reason,"선택할 수 없습니다" if not reason.is_empty() else ""))
 static func level_change_text(option: Dictionary) -> String:
-	var level := int(option.get("level",0))
-	var next := int(option.get("next_level",level))
+	var level := int(option.get("display_level",option.get("level",0)))
+	var next := int(option.get("display_next_level",option.get("next_level",level)))
 	# Older DTO fixtures remain readable; UI never invents a catalog cap.
-	if not option.has("max_level"): return "Lv %d → %d" % [level,next]
-	var cap := int(option.max_level)
-	if level == 0: return "신규 습득 · Lv %d/%d" % [next,cap]
-	if next == cap: return "Lv %d → MAX %d/%d" % [level,next,cap]
-	return "Lv %d → %d/%d" % [level,next,cap]
+	if not option.has("display_max_level") and not option.has("max_level"): return "Lv %d → %d" % [level,next]
+	var cap := int(option.get("display_max_level",option.get("max_level",0)))
+	if level == 0: return "신규 습득 · Lv %d/%d → %d/%d" % [level,cap,next,cap]
+	if next == cap: return "Lv %d/%d → MAX %d/%d" % [level,cap,next,cap]
+	return "Lv %d/%d → %d/%d" % [level,cap,next,cap]
+static func summary(option: Dictionary) -> String:
+	var parts: Array[String] = [str(option.get("name","성장"))]
+	var levels := level_change_text(option).replace("신규 습득 · Lv ","신규 습득 ").replace("MAX ","")
+	if str(option.get("kind","")) == "evolution": parts.append(levels.trim_prefix("Lv "))
+	elif option.has("level"): parts.append(levels)
+	var effect := brief_effect_text(option.get("effect_delta",{}))
+	if not effect.is_empty(): parts.append(effect)
+	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))
+	if not warning.is_empty(): parts.append("주의 · "+warning)
+	for requirement in option.get("requirements",[]):
+		if requirement.get("kind","") == "seal" and int(requirement.get("required",0)) > 0:
+			parts.append("개조권 %d개 소비" % int(requirement.required))
+	var done := str(option.get("status","")) == "evolved"
+	var blocked := done or not bool(option.get("can_select",true))
+	if blocked: parts.append("진화 완료" if done else reason_text(str(option.get("blocked_reason",""))))
+	return player_text("\n".join(parts))
+static func brief_effect_text(delta: Dictionary) -> String:
+	# The selection face names one real change. Complete effect geometry and
+	# authored descriptions stay in display_text() and the information modal.
+	if delta.has("stat") and delta.has("before") and delta.has("after"):
+		var names := {"damage_multiplier":"피해","cooldown_multiplier":"간격","move_multiplier":"이동","max_hp":"체력","regen_per_second":"회복/초","pickup_radius":"수집 반경","range_multiplier":"공격 범위","armor":"피해 감소"}
+		return "%s %s→%s" % [names.get(str(delta.stat),str(delta.stat)),str(delta.before).trim_suffix(".0"),str(delta.after).trim_suffix(".0")]
+	if delta.has("damage_before") and delta.has("damage_after"):
+		return "피해 %s→%s" % [str(delta.damage_before).trim_suffix(".0"),str(delta.damage_after).trim_suffix(".0")]
+	return effect_text(delta).split("\n")[0]
 static func effect_text(delta: Dictionary) -> String:
 	if delta.has("text"): return str(delta.text)
 	var names := {"damage":"피해", "cooldown_ticks":"공격 간격", "cooldown":"공격 간격", "range":"공격 범위", "radius":"반경", "move_speed":"이동 속도", "max_hp":"최대 체력", "value":"효과", "attack_range":"공격 범위", "pickup_radius":"수집 반경"}
@@ -105,11 +183,15 @@ static func effect_text(delta: Dictionary) -> String:
 		var times: Array[String] = []
 		for tick in delta.stage_delays: times.append(seconds_text(tick))
 		lines.append("타격 시점 "+" / ".join(times))
-	if delta.has("radius"): lines.append("반경 %s" % str(delta.radius))
+	if delta.has("radius") and (not delta.has("length") or float(delta.radius) > 0): lines.append("반경 %s" % str(delta.radius))
+	for field in ["length","width","advance_step","radius_step"]:
+		if delta.has(field):
+			var label: String = {"length":"직선 길이","width":"직선 폭","advance_step":"타격당 전진","radius_step":"타격당 반경 증가"}[field]
+			lines.append(label+" "+str(delta[field]))
 	if delta.has("cooldown_ticks"): lines.append("공격 간격 "+seconds_text(delta.cooldown_ticks))
 	if delta.has("acquisition_range"): lines.append("목표 탐색 범위 %s" % str(delta.acquisition_range))
 	if delta.has("arc_degrees"): lines.append("베기 범위 %s도" % str(delta.arc_degrees))
-	if delta.has("point_offset"): lines.append("포격 지점 간격 ±%s" % str(delta.point_offset))
+	if delta.has("point_offset"): lines.append("좌우 지점 간격 ±%s" % str(delta.point_offset))
 	return "\n".join(lines)
 static func seconds_text(ticks: float) -> String:
 	return String.num(ticks/60.0,2)+"초"

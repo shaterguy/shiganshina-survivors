@@ -14,14 +14,14 @@ class UncoveredCore:
 			_role_query(state).sweep(_vec(state.player.position),Vector2(8000,0),22)
 func run(t) -> void:
 	var cases := [
-		{"name":"right","point":Vector2(640,0),"move":Vector2.RIGHT,"origin":Vector2(470,0)},
-		{"name":"left","point":Vector2(128,0),"move":Vector2.LEFT,"origin":Vector2(298,0)},
+		{"name":"right","point":Vector2(640,96),"move":Vector2.RIGHT,"origin":Vector2(470,96)},
+		{"name":"left","point":Vector2(128,96),"move":Vector2.LEFT,"origin":Vector2(298,96)},
 		{"name":"down","point":Vector2(0,640),"move":Vector2.DOWN,"origin":Vector2(0,470)},
 		{"name":"up","point":Vector2(0,128),"move":Vector2.UP,"origin":Vector2(0,298)},
 		{"name":"down_right","point":Vector2(640,-128),"move":Vector2(1,1).normalized(),"origin":Vector2(470,-128)},
 		{"name":"down_left","point":Vector2(128,-128),"move":Vector2(-1,1).normalized(),"origin":Vector2(298,-128)},
 		{"name":"up_right","point":Vector2(640,128),"move":Vector2(1,-1).normalized(),"origin":Vector2(470,128)},
-		{"name":"up_left","point":Vector2(128,128),"move":Vector2(-1,-1).normalized(),"origin":Vector2(298,128)}]
+		{"name":"up_left","point":Vector2(128,128),"move":Vector2(-1,-1).normalized(),"origin":Vector2(298,128),"world_origin":["-1","0"]}]
 	for item in cases:
 		for before_tick in [0,1,61,77]:
 			_cross(t,item,before_tick)
@@ -31,6 +31,9 @@ func _cross(t, item: Dictionary, before_tick: int) -> void:
 	var f := G.new().fixture(t)
 	var sim = f.sim
 	var state: Dictionary = f.state
+	# Current authored terraces occupy three old lanes. Keep each original
+	# face/corner threshold and real seed42 city; only choose a clear fixture lane.
+	if item.has("world_origin"): state.world.origin_chunk = item.world_origin.duplicate()
 	state.player.position = [item.point.x,item.point.y]
 	var command: Dictionary = G.new().command([item.origin.x,item.origin.y])
 	var needed := H.requirements(state,[command])

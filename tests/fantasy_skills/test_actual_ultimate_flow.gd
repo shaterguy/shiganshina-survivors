@@ -16,24 +16,24 @@ func _evolve(t,sim,recipe: String) -> Dictionary:
 	var state: Dictionary = sim.new_run(X.chapter(),27,config)
 	t.check(not state.has("error_code"),"new ultimate can be an actual run target")
 	if state.has("error_code"): return {}
-	var base := "chain_lightning" if recipe == "evo_storm_chain" else "fire_zone"
-	var other := "fire_zone" if base == "chain_lightning" else "chain_lightning"
+	var definition: Dictionary = Catalog.new().evolutions.definition(recipe)
+	var base: String = definition.base_item_id
 	var choices := 0
-	while (int(state.equipment.get(base,0)) < 5 or int(state.equipment.get(other,0)) < 3) and choices < 60:
+	while not _ready_for_final(state,definition) and choices < 60:
 		var needed := Catalog.xp_to_next(int(state.player.level),state.rules.progression)-int(state.player.xp)
 		F.drop_xp(sim,state,needed,"xp-"+str(choices))
 		t.check(not state.upgrade_offer.is_empty(),"actual level gain materializes a selectable offer")
 		if state.upgrade_offer.is_empty(): return {}
-		var option := _choose(state,base,other)
+		var option := _choose(state,definition)
 		t.check(not option.is_empty(),"real offers retain a route to cross-skill prerequisites")
 		if option.is_empty(): return {}
 		var picked: Dictionary = sim.choose_upgrade(state,state.upgrade_offer.offer_id,option)
 		t.check(picked.get("ok",false),"real offer choice passes transactional Core validation")
 		if not picked.get("ok",false): return {}
 		choices += 1
-	t.check(state.equipment.get(base) == 5 and int(state.equipment.get(other,0)) >= 3,"actual selection sequence reaches Lv5 plus other attack Lv3 within four slots")
-	if state.equipment.get(base) != 5 or int(state.equipment.get(other,0)) < 3: return {}
-	t.check(not Catalog.new().evolutions.evaluate(state,recipe).can_evolve,"max and cross skill still require earned seal")
+	t.check(_ready_for_final(state,definition),"actual selection sequence reaches base five plus its approved attack or support owned at one")
+	if not _ready_for_final(state,definition): return {}
+	t.check(Catalog.new().evolutions.evaluate(state,recipe).can_evolve and state.tactical_seals == 0,"base five plus owned partner is ready before any boss or seal")
 	state.active_tick = 17999
 	state.survival_tick = 17999
 	for id in state.equipment: state.player.attack_ready_ticks[id] = 18001
@@ -46,16 +46,28 @@ func _evolve(t,sim,recipe: String) -> Dictionary:
 	var option := "evolution:"+recipe
 	t.check(state.upgrade_offer.get("options",[]).any(func(o): return o.option_id == option),"ready new ultimate is included in actual boss offer")
 	var picked: Dictionary = sim.choose_upgrade(state,state.upgrade_offer.get("offer_id",""),option)
-	t.check(picked.get("ok",false) and state.evolutions.get(base) == recipe and state.tactical_seals == 0,"actual ultimate selection consumes seal without exceeding Lv5")
+	t.check(picked.get("ok",false) and state.evolutions.get(base) == recipe and state.tactical_seals == 1,"actual final selection preserves the independently earned boss seal and internal base five")
 	if not picked.get("ok",false): return {}
 	for id in state.equipment: state.player.attack_ready_ticks[id] = 20000
 	state.player.attack_ready_ticks[base] = state.active_tick
 	return state
-func _choose(state: Dictionary, base: String, other: String) -> String:
-	for item in [base,other]:
-		if int(state.equipment.get(item,0)) >= (5 if item == base else 3): continue
+func _material_rows(recipe: Dictionary) -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for required in recipe.get("required_equipment",[]): rows.append({"kind":"equipment","owned":"equipment","id":required.equipment_id,"level":int(required.level)})
+	for required in recipe.required_passives: rows.append({"kind":"passive","owned":"passives","id":required.passive_id,"level":int(required.level)})
+	return rows
+func _ready_for_final(state: Dictionary, recipe: Dictionary) -> bool:
+	if int(state.equipment.get(recipe.base_item_id,0)) != 5: return false
+	for material in _material_rows(recipe):
+		if int(state[material.owned].get(material.id,0)) < int(material.level): return false
+	return true
+func _choose(state: Dictionary, recipe: Dictionary) -> String:
+	var wanted := [{"kind":"equipment","owned":"equipment","id":recipe.base_item_id,"level":5}]
+	wanted.append_array(_material_rows(recipe))
+	for material in wanted:
+		if int(state[material.owned].get(material.id,0)) >= int(material.level): continue
 		for option in state.upgrade_offer.options:
-			if option.item_id == item: return option.option_id
+			if option.kind == material.kind and option.item_id == material.id: return option.option_id
 	for option in state.upgrade_offer.options:
 		if (option.kind == "equipment" and state.equipment.has(option.item_id)) or option.kind == "passive": return option.option_id
 	return ""
