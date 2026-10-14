@@ -281,6 +281,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 	if candidate.settled_through_serial != current.settled_through_serial:
 		operation = "settlement"
 		if not candidate.checkpoint is Dictionary: return false
+		service = _settlement_service()
 		var settled: Dictionary = service.prepare_settlement(current,candidate.checkpoint)
 		if not settled.ok or settled.get("already_applied",false): return false
 		expected = settled.candidate
@@ -319,6 +320,23 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 			if current.checkpoint.phase in ["won","dead","abandoned"] and not _same(candidate.checkpoint,current.checkpoint): return false
 	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
 	return true
+func _settlement_service():
+	# Recompute settlement using the same trusted content authority that already
+	# admitted both checkpoints. Never take recipe costs from saved fields.
+	var service = Service.new(Callable())
+	var validator: Callable = _contracts._validator
+	var owner = validator.get_object()
+	if owner != null and owner.get_script() == load("res://game/app/world_checkpoint_adapter.gd") and validator.get_method() == "validate_checkpoint":
+		validator = owner._core_restore
+		owner = validator.get_object()
+	if owner != null and owner.get_script() == load("res://game/app/prepared_city_runtime.gd") and validator.get_method() in ["validate_checkpoint","_restore_checkpoint"]:
+		if owner._content_router != null: return Service.new(Callable(owner,"new_run"))
+		# Explicit test/custom providers have one pinned Core rather than a router.
+		owner = owner._validator
+		validator = Callable(owner,"restore")
+	if owner != null and owner.get_script() == load("res://game/core/run_simulation.gd") and validator.get_method() == "restore":
+		service._upgrades = owner._catalog
+	return service
 func _economy(save: Dictionary) -> Dictionary:
 	return {"next_run_serial":save.next_run_serial,"settled_through_serial":save.settled_through_serial,"purchase_receipts":save.purchase_receipts,"settlement_receipts":save.settlement_receipts,"supply_credits":save.profile.supply_credits,"permanent_upgrades":save.profile.get("permanent_upgrades",{}),"owned_doctrine_ids":save.profile.owned_doctrine_ids,"consumables":save.profile.consumables,"best_runs":save.profile.best_runs,"cleared_chapter_ids":save.profile.cleared_chapter_ids,"unlocked_character_ids":save.profile.unlocked_character_ids,"selected_character_id":save.profile.get("selected_character_id",Characters.DEFAULT_CHARACTER),"checkpoint_recovery_receipt":save.get("checkpoint_recovery_receipt")}
 func _same(a: Variant, b: Variant) -> bool:

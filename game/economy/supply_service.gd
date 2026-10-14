@@ -322,7 +322,18 @@ func _settlement_evidence_valid(state: Dictionary) -> bool:
 			if serial.length() > 10 or not serial.is_valid_int() or str(serial.to_int()) != serial or serial.to_int() < 1 or serial.to_int() > state.offer_seq: return false
 		else: return false
 	if bosses.size() != int(state.stats.minibosses_defeated): return false
-	if not _counter(state.get("tactical_seals")) or not state.get("evolutions") is Dictionary or state.tactical_seals+state.evolutions.size() != bosses.size(): return false
+	if not _counter(state.get("tactical_seals")) or not state.get("evolutions") is Dictionary: return false
+	# Settlement follows the checkpoint's immutable recipe costs, just as Core
+	# does. Current evolutions cost zero; preserved schema1 recipes still cost one.
+	var selected = _upgrades
+	if _content_resolver.is_valid():
+		var route: Dictionary = _content_resolver.call(state)
+		if not route.get("ok",false): return false
+		var definitions: Dictionary = route.immutable_inputs
+		selected = Upgrades.new(definitions["data/equipment.json"],definitions["data/passives.json"],definitions["data/evolutions.json"])
+	if not selected.validate().is_empty(): return false
+	var spent: int = selected.evolutions.spent_seals(state)
+	if spent < 0 or state.tactical_seals+spent != bosses.size(): return false
 	if state.phase == "won":
 		if state.get("evacuation_ready") != true or not _counter(state.get("final_started_tick")) or state.survival_tick < 108000: return false
 		if not state.get("rules") is Dictionary or not _counter(state.rules.get("evacuation_ticks")) or state.rules.evacuation_ticks != 4500: return false

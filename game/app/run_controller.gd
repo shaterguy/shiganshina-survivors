@@ -668,12 +668,28 @@ func apply_upgrade(offer_id: String, option_id: String) -> void:
 		_action_failed("upgrade","retry_pending_choice")
 		return
 	var next_state := state.duplicate(true)
-	var result: Dictionary = simulation.choose_upgrade(next_state,offer_id,option_id)
+	var choice_core = simulation
+	var result: Dictionary = choice_core.choose_upgrade(next_state,offer_id,option_id)
+	if not result.get("ok",false) and result.get("error_code") == "world_not_ready" and _city_runtime != null:
+		# A movement/XP tick can open the offer at a new coverage boundary.
+		# No following combat tick runs while it is paused, so prepare the same
+		# authority here. Keep the replacement private until durable adoption.
+		var generation := _lifecycle_generation
+		var refreshed: Dictionary = _city_runtime.refresh_coverage(state)
+		if generation != _lifecycle_generation or _lifecycle_blocked():
+			_action_failed("upgrade","lifecycle_changed")
+			return
+		if not refreshed.get("ok",false):
+			_action_failed("upgrade",str(refreshed.get("error_code","world_not_ready")))
+			return
+		choice_core = refreshed.simulation
+		next_state = refreshed.state
+		result = choice_core.choose_upgrade(next_state,offer_id,option_id)
 	if not result.ok:
 		_action_failed("upgrade",result.error_code)
 		return
 	var candidate := game_save.duplicate(true)
-	candidate.checkpoint = simulation.snapshot(next_state)
+	candidate.checkpoint = choice_core.snapshot(next_state)
 	_failed_growth = {"offer_id":offer_id,"option_id":option_id}
 	_commit_candidate(candidate,"upgrade",{},true,result.events)
 func set_user_pause(enabled: bool) -> void:
