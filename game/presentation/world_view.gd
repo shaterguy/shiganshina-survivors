@@ -1,5 +1,6 @@
 class_name WorldView
 extends Node2D
+const RasterAlpha = preload("res://game/presentation/raster_alpha_mask.gd")
 const CityDepth = preload("res://game/presentation/city_render.gd")
 const CityAddress = preload("res://game/world/world_address.gd")
 const MobilitySample = preload("res://game/core/player_mobility.gd")
@@ -26,6 +27,8 @@ var _city_active := false
 var _city_view: Dictionary = {}
 var _city_draw_data: Dictionary = {}
 var _outline_textures: Dictionary = {}
+var _player_alpha_bounds: Dictionary = {}
+var _raster_bytes: Dictionary = {}
 var _mobility_textures: Dictionary = {}
 var _raster_images: Dictionary = {}
 var _corpse_serial := 0
@@ -89,6 +92,8 @@ func load_manifest() -> void:
 		_assets = manifest.get("assets",{})
 		_combat_bridge.set_asset_metadata(_assets)
 		_textures.clear(); _outline_textures.clear(); _raster_images.clear()
+		_player_alpha_bounds.clear(); _raster_bytes.clear()
+		_prepare_player_outlines()
 func frame_rect(asset_id: String, animation: String, seconds: float) -> Rect2:
 	if not _assets.has(asset_id): return Rect2()
 	var record: Dictionary = _assets[asset_id]
@@ -748,23 +753,30 @@ func _draw_city_ground(command: Dictionary) -> void:
 			var index := posmod(int(command.ground_variant)*4+posmod(x*7+y*11,4),count)
 			var region := Rect2(Vector2(index%columns,index/columns)*cell,cell)
 			_world_region(texture,Rect2(_screen(command.position+Vector2(x,y)*cell),cell),region,Color(0.48,0.56,0.52))
+func _prepare_player_outlines() -> void:
+	# The fixed player atlas is prepared before play, never on an airborne draw.
+	var texture := _texture("garrison_01")
+	if texture == null: return
+	_raster_images["garrison_01"] = texture.get_image()
+	var record: Dictionary = _assets.get("garrison_01",{})
+	var width := int(record.get("cell_w",64))
+	var height := int(record.get("cell_h",64))
+	var columns := int(record.get("columns",1))
+	if width <= 0 or height <= 0 or columns <= 0: return
+	var frames := {}
+	for animation in record.get("animations",{}).values():
+		for frame in animation.get("frames",[]): frames[int(frame)] = true
+	for frame in frames:
+		_player_outline_texture(Rect2((int(frame)%columns)*width,(int(frame)/columns)*height,width,height))
 func _player_outline_texture(region: Rect2) -> Texture2D:
 	var key := str(region)
 	if _outline_textures.has(key): return _outline_textures[key]
-	var source := _texture("garrison_01")
-	if source == null: return null
-	var image := source.get_image().get_region(Rect2i(region))
-	var outline := Image.create(image.get_width(),image.get_height(),false,Image.FORMAT_RGBA8)
-	# Outline only: derive the contour from approved source alpha, never repaint
-	# the opaque body. Cyan separates location feedback from red/yellow danger.
-	for y in image.get_height():
-		for x in image.get_width():
-			if image.get_pixel(x,y).a > 0.1: continue
-			var edge := false
-			for dy in range(-2,3):
-				for dx in range(-2,3):
-					if x+dx >= 0 and x+dx < image.get_width() and y+dy >= 0 and y+dy < image.get_height() and image.get_pixel(x+dx,y+dy).a > 0.1: edge = true
-			if edge: outline.set_pixel(x,y,Color(0.24,0.94,1.0,0.95))
+	if not _raster_images.has("garrison_01"):
+		var source := _texture("garrison_01")
+		if source == null: return null
+		_raster_images["garrison_01"] = source.get_image()
+	var outline := RasterAlpha.build(_raster_images["garrison_01"],Rect2i(region))
+	_player_alpha_bounds[key] = RasterAlpha.opaque_bounds(_raster_images["garrison_01"],Rect2i(region))
 	var texture := ImageTexture.create_from_image(outline)
 	_outline_textures[key] = texture
 	return texture
@@ -777,25 +789,69 @@ func _draw_player_outline(command: Dictionary, style: Dictionary) -> void:
 	_world_texture(texture,-Vector2(anchor[0],anchor[1]))
 	_world_transform(Vector2.ZERO)
 
+func _raster_data(asset_id: String) -> Dictionary:
+	if _raster_bytes.has(asset_id): return _raster_bytes[asset_id]
+	if not _raster_images.has(asset_id):
+		var texture := _texture(asset_id)
+		if texture == null: return {}
+		_raster_images[asset_id] = texture.get_image()
+	var image: Image = _raster_images[asset_id]
+	if image.get_format() != Image.FORMAT_RGBA8:
+		image = image.duplicate()
+		image.convert(Image.FORMAT_RGBA8)
+	var result := {"pixels":image.get_data(),"width":image.get_width()}
+	_raster_bytes[asset_id] = result
+	return result
 func _city_rasters_overlap(player: Dictionary, occluder: Dictionary) -> bool:
 	var other: Dictionary = _city_draw_data[occluder.id.get_slice(":",0)][occluder.source_id] if occluder.has("source_id") else {}
 	var player_region := frame_rect(player.asset_id,player.pose,player.seconds)
 	var other_region := frame_rect(occluder.asset_id,occluder.pose,float(other.get("seconds",_clock)))
-	var overlap: Rect2 = player.render_bounds.intersection(occluder.render_bounds)
+	var player_bounds: Rect2 = player.render_bounds
+	var other_bounds: Rect2 = occluder.render_bounds
+	if not player_region.has_area() or not other_region.has_area(): return false
+	var overlap := player_bounds.intersection(other_bounds)
+	# Broad phase uses the exact precomputed player silhouette, not a guessed
+	# smaller hitbox. Pixel-centre alpha tests below remain the final authority.
+	var alpha_key := str(player_region)
+	var armored: bool = other.get("armored_raster",false)
+	if not armored and player.asset_id == "garrison_01" and _player_alpha_bounds.has(alpha_key):
+		var opaque := Rect2(_player_alpha_bounds[alpha_key])
+		if not opaque.has_area(): return false
+		if player.flip: opaque.position.x = player_region.size.x-opaque.end.x
+		opaque = Rect2(player_bounds.position+opaque.position/player_region.size*player_bounds.size,opaque.size/player_region.size*player_bounds.size)
+		overlap = overlap.intersection(opaque)
+	if not overlap.has_area(): return false
+	var player_data := _raster_data(player.asset_id)
+	if player_data.is_empty(): return false
+	var other_data := {} if armored else _raster_data(occluder.asset_id)
+	if not armored and other_data.is_empty(): return false
+	var player_pixels: PackedByteArray = player_data.pixels
+	var other_pixels: PackedByteArray = other_data.get("pixels",PackedByteArray())
+	var other_flip: bool = other.get("flip",false)
 	for y in range(int(floor(overlap.position.y)),int(ceil(overlap.end.y))):
 		for x in range(int(floor(overlap.position.x)),int(ceil(overlap.end.x))):
 			var pixel := Vector2(x+0.5,y+0.5)
-			if _raster_opaque(player.asset_id,player_region,player.render_bounds,player.flip,pixel) and (_armored_opaque(pixel) if other.get("armored_raster",false) else _raster_opaque(occluder.asset_id,other_region,occluder.render_bounds,other.get("flip",false),pixel)): return true
+			if not player_bounds.has_point(pixel) or (not armored and not other_bounds.has_point(pixel)): continue
+			var local := Vector2i(((pixel-player_bounds.position)/player_bounds.size*player_region.size).floor())
+			if player.flip: local.x = int(player_region.size.x)-1-local.x
+			var at := Vector2i(player_region.position)+local
+			if player_pixels[(at.y*int(player_data.width)+at.x)*4+3] <= 25: continue
+			if armored:
+				if _armored_opaque(pixel): return true
+				continue
+			local = Vector2i(((pixel-other_bounds.position)/other_bounds.size*other_region.size).floor())
+			if other_flip: local.x = int(other_region.size.x)-1-local.x
+			at = Vector2i(other_region.position)+local
+			if other_pixels[(at.y*int(other_data.width)+at.x)*4+3] > 25: return true
 	return false
 func _raster_opaque(asset_id: String, region: Rect2, bounds: Rect2, flip: bool, point: Vector2) -> bool:
 	if not bounds.has_point(point) or not region.has_area(): return false
-	if not _raster_images.has(asset_id):
-		var texture := _texture(asset_id)
-		if texture == null: return false
-		_raster_images[asset_id] = texture.get_image()
+	var data := _raster_data(asset_id)
+	if data.is_empty(): return false
 	var local := Vector2i(((point-bounds.position)/bounds.size*region.size).floor())
 	if flip: local.x = int(region.size.x)-1-local.x
-	return _raster_images[asset_id].get_pixelv(Vector2i(region.position)+local).a > 0.1
+	var at := Vector2i(region.position)+local
+	return data.pixels[(at.y*int(data.width)+at.x)*4+3] > 25
 
 # Only known-distance horizontal charge is connected in this candidate. The
 # bounds/query/frame pair is derived together from the last accepted snapshot.

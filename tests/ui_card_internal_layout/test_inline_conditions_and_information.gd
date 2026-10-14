@@ -4,6 +4,7 @@ const F = preload("res://tests/core/new_current_regression_fixture.gd")
 const Catalog = preload("res://game/progression/upgrade_catalog.gd")
 const View = preload("res://game/progression/progression_view.gd")
 const UI = preload("res://game/ui/game_ui.gd")
+const Card = preload("res://game/ui/growth_card.gd")
 func _settle(t) -> void:
 	for frame in range(8): await t.process_frame
 func _mouse(point: Vector2, down: bool) -> InputEventMouseButton:
@@ -68,7 +69,23 @@ func run(t) -> void:
 				var native_style: StyleBox = card.get_theme_stylebox("normal")
 				var body := Rect2(card.get_global_rect().position+Vector2(native_style.get_margin(SIDE_LEFT),native_style.get_margin(SIDE_TOP)),card.size-native_style.get_minimum_size())
 				t.check(not body.intersects(info.get_global_rect()),"native skill identity and benefit area cannot sit behind the internal information target: "+context)
-				t.check(rows.get_child_count() == (2 if option.kind == "evolution" else 0),"only evolution carries its two actual combination criteria: "+context)
+				var expected_rows: int = option.requirements.size() if option.kind == "evolution" else 0
+				for preview in option.get("evolution_previews",[]): expected_rows += 1+preview.requirements.size()
+				t.check(rows.get_child_count() == expected_rows,"cards show exactly their actual evolution criteria or early recipe title and criteria: "+context)
+				var preview_row := 0
+				for preview in option.get("evolution_previews",[]):
+					var heading: Label = rows.get_child(preview_row)
+					t.check(heading.text == "궁극 · "+preview.name,"early recipe heading names the exact ultimate for this skill: "+context)
+					preview_row += 1
+					for required in preview.requirements:
+						var row: Control = rows.get_child(preview_row)
+						var icon: TextureRect = row.get_node("Icon")
+						var label: Label = row.get_node("Text")
+						t.check(icon.texture != null and label.text == Card.evolution_requirement_text(required),"early criterion preserves its actual icon, name, current level, required level and fulfilment: "+context)
+						t.check(card.get_global_rect().encloses(icon.get_global_rect()) and card.get_global_rect().encloses(label.get_global_rect()),"early recipe icon and wrapped text stay inside the card border: "+context)
+						preview_row += 1
+				if expected_rows > 0:
+					t.check(not info.get_global_rect().intersects(rows.get_global_rect()) and not body.intersects(rows.get_global_rect()),"early and final recipe rows cannot obscure the information target or native skill text: "+context)
 				if option.kind == "evolution":
 					var level_row: String = card.text.split("\n")[1] if card.text.split("\n").size() >= 2 else ""
 					var level_width: float = card.get_theme_font("font").get_string_size(level_row,HORIZONTAL_ALIGNMENT_LEFT,-1,card.get_theme_font_size("font_size")).x

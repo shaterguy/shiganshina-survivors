@@ -12,11 +12,13 @@ const Icons = preload("res://game/ui/skill_icons.gd")
 const DetailPanel = preload("res://game/ui/evolution_detail_panel.gd")
 const ShopPanel = preload("res://game/ui/supply_shop_panel.gd")
 const PreparationPanel = preload("res://game/ui/loadout_panel.gd")
+const Characters = preload("res://game/progression/character_catalog.gd")
 signal audio_requested(id: String)
 signal upgrade_chosen(offer_id: String, option_id: String)
 signal upgrade_focus_changed(option_id: String)
 signal pause_changed(enabled: bool)
 signal new_run_requested
+signal new_run_replacement_confirmed(run_id: String)
 signal resume_requested
 signal settings_changed(values: Dictionary)
 signal end_run_requested
@@ -89,6 +91,9 @@ var _growth_waiting_result := false
 var _notice: Label
 var _dev_notice: Label
 var _checkpoint_available := false
+var _checkpoint_run_id := ""
+var _scenario_page := ""
+var _new_run_waiting := false
 var _settings_open := false
 var _art: Dictionary = {}
 var _layout_generation := 0
@@ -260,7 +265,7 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	var width := _menu_width(safe.size.x)
 	if geometry_changed and _mode == "upgrade":
 		_prepare_growth_widths(_growth_view.get("active_offer",{}).get("options",[]).size())
-	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
+	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause","scenario_select","scenario_briefing","new_run_confirm"] else 310))
 	var short_supply := _mode in ["shop","loadout"] and _screen_size.x > _screen_size.y and safe.size.y < 360
 	var height := minf(desired_height, safe.size.y - (12 if short_supply else (32 if _mode == "shop" else 36)))
 	if _mode == "shop":
@@ -278,7 +283,7 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	_choices.columns = _menu_columns()
 	# Keep the choice viewport large enough for the summary itself. Full recipe
 	# prose belongs to the explicit detail view, never an oversized focus target.
-	var compact_menu := _mode in ["title","pause","settings","won","dead","abandoned"]
+	var compact_menu := _mode in ["title","pause","settings","won","dead","abandoned","scenario_select","scenario_briefing","new_run_confirm"]
 	_panel.get_node("Body").add_theme_constant_override("separation",4 if short_supply else (8 if _mode in ["upgrade","shop"] or compact_menu else 14))
 	_choices.add_theme_constant_override("v_separation",6 if compact_menu else 10)
 	_title.add_theme_font_size_override("font_size",20 if short_supply else (24 if _mode in ["upgrade","shop"] else 28))
@@ -352,11 +357,14 @@ func present(snapshot: Dictionary) -> void:
 		if snapshot.phase == "evacuation":
 			var remaining := _evacuation_seconds(snapshot)
 			_hud.text = "주민 대피 %d초" % remaining if remaining > 0 else "대피 완료 · 출구에 도착하면 탈출"
+	if not _scenario_page.is_empty(): mode = _scenario_page
 	if not _supply_mode.is_empty(): mode = _supply_mode
 	if _owned_open: mode = "owned_skills"
 	if not _detail_id.is_empty(): mode = "evolution_detail"
 	if _settings_open: mode = "settings"
 	if not _recovery_view.is_empty(): mode = "save_recovery"
+	if mode in ["scenario_select","scenario_briefing","new_run_confirm"]:
+		for control in [_hud,_owned_hud,_health,_xp,_boss_health,_boss_name,_objective,get_node("Pause")]: control.hide()
 	_stick_base.visible = mode == "play" and _input_kind != "gamepad"
 	_stick_knob.visible = _stick_base.visible
 	_hint.hide()
@@ -382,12 +390,32 @@ func present(snapshot: Dictionary) -> void:
 			_render_recovery_panel()
 		"title":
 			_title.text = "진격의 거인 인류의 날개"
-			_subtitle.text = "시나리오 1 · %s · 845\n성벽은 무너졌다. 주민이 떠날 때까지 버텨라.\n30분 생존 · 다섯 강적 · 마지막 탈출" % _chapter_title()
+			_subtitle.text = ""
 			if _checkpoint_available: _add_button("이어서 출격",func(): resume_requested.emit())
-			_add_button("새로 출격" if _checkpoint_available else "출격",func(): new_run_requested.emit())
+			_add_button("새로 출격",open_scenario_selection).set_meta("semantic_id","new_run_open")
 			_add_button("설정",open_settings)
 			if not _supply_view.is_empty():
 				_add_button("상점 · 영구 강화",open_supply_shop).set_meta("semantic_id","shop_open")
+		"scenario_select":
+			_title.text = "시나리오 선택"
+			_subtitle.text = ""
+			for id in Characters.SCENARIOS:
+				var available: bool = Characters.SCENARIOS[id].implementation_status == "implemented"
+				var label := "시나리오 1 · "+_chapter_title() if id == Characters.DEFAULT_CHAPTER else "시나리오 2 · 준비 중"
+				var button := _add_button(label,open_scenario_briefing.bind(id))
+				button.set_meta("semantic_id","scenario:"+id)
+				button.disabled = not available
+			_add_button("뒤로",close_scenario_page).set_meta("semantic_id","scenario_back")
+		"scenario_briefing":
+			_title.text = "시나리오 1 · "+_chapter_title()
+			_subtitle.text = "845년, 성벽이 무너졌다. 주민이 떠날 때까지 버텨라.\n30분 생존 · 다섯 강적 · 마지막 탈출"
+			_add_button("출격",_request_new_run).set_meta("semantic_id","scenario_start")
+			_add_button("뒤로",close_scenario_page).set_meta("semantic_id","scenario_back")
+		"new_run_confirm":
+			_title.text = "새로 출격"
+			_subtitle.text = "진행 중인 전투를 종료하고 새로 출격할까요?"
+			_add_button("종료하고 출격",_confirm_new_run).set_meta("semantic_id","new_run_confirm")
+			_add_button("취소",close_scenario_page).set_meta("semantic_id","scenario_back")
 		"upgrade":
 			_title.text = "전열을 가다듬어라"
 			_subtitle.text = _growth_subtitle()
@@ -421,10 +449,52 @@ func present(snapshot: Dictionary) -> void:
 		"won","dead","abandoned":
 			_title.text = {"won":"주민 대피 완료","dead":"끝까지 싸웠다","abandoned":"전열에서 퇴각"}[mode]
 			_subtitle.text = {"won":"당신이 확보한 시간이 생명을 구했습니다.","dead":"다른 성장 조합으로 다시 도전하세요.","abandoned":"이번 출격을 종료했습니다. 보급소에서 다음 출격을 준비하세요."}[mode]
-			_add_button("다시 출격",func(): new_run_requested.emit())
+			_add_button("다시 출격",open_scenario_selection).set_meta("semantic_id","new_run_open")
 			if not _supply_view.is_empty(): _add_button("상점 · 영구 강화",open_supply_shop).set_meta("semantic_id","shop_open")
+	if _new_run_waiting and not _scenario_page.is_empty():
+		for button in _buttons: button.disabled = true
 	reflow(_screen_size,_safe_rect)
 	if not _buttons.is_empty(): _buttons[_focus_index].grab_focus()
+func open_scenario_selection() -> void:
+	if _new_run_waiting: return
+	_scenario_page = "scenario_select"
+	_arm_transition_gate()
+	_mode = ""
+	present(_snapshot)
+func open_scenario_briefing(id: String) -> void:
+	if _new_run_waiting or id != Characters.DEFAULT_CHAPTER or Characters.SCENARIOS[id].implementation_status != "implemented": return
+	_scenario_page = "scenario_briefing"
+	_arm_transition_gate()
+	_mode = ""
+	present(_snapshot)
+func close_scenario_page() -> void:
+	if _new_run_waiting: return
+	_scenario_page = {"new_run_confirm":"scenario_briefing","scenario_briefing":"scenario_select"}.get(_scenario_page,"")
+	_arm_transition_gate()
+	_mode = ""
+	present(_snapshot)
+func _request_new_run() -> void:
+	if _new_run_waiting or _scenario_page != "scenario_briefing": return
+	if _checkpoint_available:
+		_scenario_page = "new_run_confirm"
+		_arm_transition_gate()
+		_mode = ""
+		present(_snapshot)
+		return
+	_set_new_run_waiting(true)
+	new_run_requested.emit()
+func _confirm_new_run() -> void:
+	if _new_run_waiting or _scenario_page != "new_run_confirm": return
+	_set_new_run_waiting(true)
+	new_run_replacement_confirmed.emit(_checkpoint_run_id)
+func _set_new_run_waiting(waiting: bool) -> void:
+	_new_run_waiting = waiting
+	_mode = ""
+	present(_snapshot)
+func finish_new_run_navigation() -> void:
+	_scenario_page = ""
+	_new_run_waiting = false
+	_mode = ""
 func present_recovery(view: Dictionary) -> void:
 	if _recovery_view == view: return
 	var previous_focus := focused_semantic_id()
@@ -548,6 +618,9 @@ func navigate(action: String) -> void:
 		if _mode == "shop":
 			close_supply_shop()
 			return
+		if not _scenario_page.is_empty():
+			close_scenario_page()
+			return
 		if _mode == "play": pause_changed.emit(true)
 		elif _mode == "pause": resume_requested.emit()
 		return
@@ -615,7 +688,7 @@ func _clear_choices() -> void:
 			_choices.remove_child(child)
 			child.queue_free()
 	_buttons.clear()
-func reset_obsolete_presentation(snapshot: Dictionary, checkpoint_available: bool) -> void:
+func reset_obsolete_presentation(snapshot: Dictionary, checkpoint_available: bool, checkpoint_run_id: String = "") -> void:
 	# Authority replacement invalidates cached run views and their modal return
 	# paths. This is presentation-only and must not emit gameplay/shop intents.
 	reset_progression_feedback()
@@ -636,10 +709,12 @@ func reset_obsolete_presentation(snapshot: Dictionary, checkpoint_available: boo
 	_supply_lock_revision = -1
 	_last_action_result = {}
 	_settings_open = false
+	finish_new_run_navigation()
 	_snapshot = {}
 	_mode = ""
 	_offer_id = ""
 	_checkpoint_available = checkpoint_available
+	_checkpoint_run_id = checkpoint_run_id
 	_arm_transition_gate()
 	cancel_touch()
 	set_save_notice("")
@@ -791,7 +866,7 @@ func _render_growth_cards(offer: Dictionary) -> void:
 		var option: Dictionary = options[index]
 		var card = _growth_cards[index]
 		card.present(option,_growth_summary(option))
-		Icons.append_requirements(card.get_node("Requirements"),option.get("requirements",[]) if option.get("kind","") == "evolution" else [])
+		Card.append_evolution_requirements(card.get_node("Requirements"),option)
 		# Keep Card's complete display/tooltip available, but make the selectable
 		# face small enough that focus scrolling cannot hide its name or action.
 		_register_button(card)
@@ -865,7 +940,7 @@ func _render_evolution_detail() -> void:
 			_choices.add_child(content)
 			var requirements := VBoxContainer.new()
 			requirements.name = "Requirements"
-			Icons.append_requirements(requirements,option.get("requirements",[]))
+			Card.append_evolution_requirements(requirements,option)
 			_choices.add_child(requirements)
 			break
 	else:
@@ -1033,9 +1108,10 @@ func _publish_settings() -> void:
 	present(_snapshot)
 	_focus_index = mini(previous_focus,_buttons.size()-1)
 	_buttons[_focus_index].grab_focus()
-func set_checkpoint_available(available: bool) -> void:
-	if _checkpoint_available == available: return
+func set_checkpoint_available(available: bool, run_id: String = "") -> void:
+	if _checkpoint_available == available and _checkpoint_run_id == run_id: return
 	_checkpoint_available = available
+	_checkpoint_run_id = run_id
 	_mode = ""
 	present(_snapshot)
 func set_save_notice(message: String) -> void:
@@ -1102,7 +1178,7 @@ func _settle_panel() -> void:
 	if not is_inside_tree() or is_queued_for_deletion() or not is_instance_valid(_panel): return
 	var safe := Rect2(Vector2(_safe_rect.position),Vector2(_safe_rect.size))
 	var width := _menu_width(safe.size.x)
-	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause"] else 310))
+	var desired_height := 490 if _mode == "settings" else ((650 if _screen_size.y > _screen_size.x else 410) if _mode in ["upgrade","shop","loadout","owned_skills","evolution_detail","save_recovery"] else (430 if _mode in ["title","pause","scenario_select","scenario_briefing","new_run_confirm"] else 310))
 	# After width propagation, wrapped text has its real minimum height.
 	var short_supply := _mode in ["shop","loadout"] and _screen_size.x > _screen_size.y and safe.size.y < 360
 	_panel.size = Vector2(width,minf(desired_height,safe.size.y-(12 if short_supply else (32 if _mode == "shop" else 36))))
@@ -1295,6 +1371,11 @@ func _request_run_start() -> void:
 	_lock_supply_request()
 	run_start_requested.emit()
 func present_action_result(result: Dictionary) -> void:
+	var action := str(result.get("action",""))
+	if _new_run_waiting and action in ["new_run","run_start","settlement"]:
+		if not result.get("ok",false) and result.get("error_code","") != "commit_outcome_unknown":
+			_scenario_page = "scenario_briefing"
+			_set_new_run_waiting(false)
 	if str(result.get("action","")) == "upgrade":
 		set_upgrade_pending(false)
 		if result.get("ok",false): set_save_notice("")

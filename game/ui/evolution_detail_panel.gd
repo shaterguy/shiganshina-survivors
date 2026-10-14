@@ -36,7 +36,6 @@ func present(detail: Dictionary) -> void:
 	if not effect.is_empty(): parts.append("실제 변화\n"+effect)
 	var tradeoff := str(detail.get("tradeoff_text",""))
 	if not tradeoff.is_empty(): parts.append("대가 · "+tradeoff)
-	parts.append("조건을 갖춘 뒤 성장 카드에서 선택합니다.")
 	_display = Card.player_text("\n\n".join(parts))
 	_label.text = _display
 func display_text() -> String:
@@ -50,7 +49,12 @@ func present_owned(row: Dictionary, evolution: Dictionary) -> void:
 	if row.get("is_evolved",false): title = str(row.get("evolution_name",evolution.get("name",row.get("name",""))))+" · "+level
 	_icon.texture = Icons.texture_for(Icons.icon_id_for(row))
 	var parts: Array[String] = [title,str(row.get("attack_summary","")),current_effect_text(row.get("effect_stats",{}))]
-	if evolution.is_empty(): parts.append(("MAX · " if row.get("is_max",false) else "")+"추가 진화 없음")
+	if evolution.is_empty():
+		var previews: Array = row.get("evolution_previews",[])
+		if previews.is_empty(): parts.append(("MAX · " if row.get("is_max",false) else "")+"추가 진화 없음")
+		else:
+			parts.append(Card.evolution_previews_text(previews))
+			Card.append_evolution_requirements(_requirements,row)
 	else: parts.append(recipe_text)
 	_display = Card.player_text("\n\n".join(parts))
 	_label.text = _display

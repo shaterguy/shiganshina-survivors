@@ -1,0 +1,46 @@
+extends RefCounted
+const UI = preload("res://game/ui/game_ui.gd")
+func _button(ui, id: String):
+	for button in ui._buttons:
+		if button.get_meta("semantic_id","") == id: return button
+	return null
+func run(t) -> void:
+	var ui := UI.new()
+	t.root.add_child(ui)
+	var starts: Array = []
+	var replacements: Array = []
+	ui.new_run_requested.connect(func(): starts.append(true))
+	ui.new_run_replacement_confirmed.connect(func(id): replacements.append(id))
+	t.check(not ui._subtitle.text.contains("시나리오") and not ui._subtitle.text.contains("성벽"),"common main has no chapter-specific introduction")
+	_button(ui,"new_run_open").pressed.emit()
+	t.check(ui._mode == "scenario_select" and starts.is_empty(),"new sortie opens scenario selection without starting or saving")
+	t.check(_button(ui,"scenario:chapter_02").disabled,"unimplemented scenario stays unavailable")
+	_button(ui,"scenario:chapter_01_shiganshina").pressed.emit()
+	t.check(ui._mode == "scenario_briefing" and ui._subtitle.text.contains("성벽") and starts.is_empty(),"scenario selection opens its own short briefing")
+	ui.navigate("cancel")
+	t.check(ui._mode == "scenario_select","Back from briefing returns one navigation level")
+	ui.navigate("cancel")
+	t.check(ui._mode == "title" and starts.is_empty(),"Back from selection returns to common main without starting")
+	ui.set_checkpoint_available(true,"career:1")
+	ui.open_scenario_selection()
+	ui.open_scenario_briefing("chapter_01_shiganshina")
+	_button(ui,"scenario_start").pressed.emit()
+	t.check(ui._mode == "new_run_confirm" and replacements.is_empty(),"existing run requires explicit replacement confirmation")
+	ui.navigate("cancel")
+	t.check(ui._mode == "scenario_briefing" and replacements.is_empty(),"cancelling replacement preserves the current run")
+	_button(ui,"scenario_start").pressed.emit()
+	var confirm = _button(ui,"new_run_confirm")
+	confirm.pressed.emit()
+	confirm.pressed.emit()
+	t.check(replacements == ["career:1"] and starts.is_empty(),"repeated confirmation binds one replacement to the shown run identity")
+	ui.present_action_result({"ok":false,"action":"new_run","error_code":"write_failed","message":"저장 실패"})
+	t.check(not ui._new_run_waiting,"definite failure allows an explicit new attempt")
+	ui.finish_new_run_navigation()
+	ui.set_checkpoint_available(false)
+	ui.open_scenario_selection()
+	ui.open_scenario_briefing("chapter_01_shiganshina")
+	var start = _button(ui,"scenario_start")
+	start.pressed.emit()
+	start.pressed.emit()
+	t.check(starts.size() == 1,"fresh-run final action emits once even with repeated input")
+	ui.free()

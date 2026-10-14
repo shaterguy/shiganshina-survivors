@@ -32,6 +32,7 @@ var game_save: Dictionary = {}
 # Compatibility rendering copy only. All writes go through game_save.
 var profile: Dictionary = {}
 var pending_checkpoint: Dictionary = {}
+var _new_run_intent: Dictionary = {}
 var _pending_transaction: Dictionary = {}
 var _failed_growth: Dictionary = {}
 var _presented_supply_revision := -1
@@ -113,7 +114,8 @@ func _ready() -> void:
 	ui.recovery_retry_requested.connect(retry_save_recovery)
 	ui.recovery_continue_requested.connect(request_recovery_continue)
 	ui.recovery_supply_toggled.connect(toggle_recovery_supply)
-	ui.new_run_requested.connect(func(): start_run(randi() & 0x7fffffff))
+	ui.new_run_requested.connect(func(): request_new_run(randi() & 0x7fffffff))
+	ui.new_run_replacement_confirmed.connect(func(run_id: String): request_new_run(randi() & 0x7fffffff,true,run_id))
 	ui.run_start_requested.connect(func(): start_run(randi() & 0x7fffffff))
 	ui.resume_requested.connect(request_resume)
 	ui.pause_changed.connect(set_user_pause)
@@ -241,7 +243,7 @@ func _complete_startup_load(loaded: Dictionary) -> void:
 				state = terminal_pair.state
 			else: state = game_save.checkpoint.duplicate(true)
 		else: pending_checkpoint = game_save.checkpoint.duplicate(true)
-	ui.set_checkpoint_available(not pending_checkpoint.is_empty())
+	ui.set_checkpoint_available(not pending_checkpoint.is_empty(),str(pending_checkpoint.get("run_id","")))
 	_apply_lifecycle_pause(state)
 	_install_settings(profile.settings)
 	if loaded.get("recovered",false): ui.set_save_notice("이전 안전 저장 지점에서 복구했습니다.")
@@ -424,6 +426,71 @@ func apply_character_selection(character_id: String, view_revision: int) -> void
 		_action_failed("character_selection",prepared.error_code)
 		return
 	_commit_candidate(prepared.candidate,"character_selection")
+func request_new_run(seed: int, replace_existing: bool = false, expected_run_id: String = "") -> void:
+	# The UI's replacement confirmation is bound to the run it displayed. A
+	# repeated/late confirmation can never abandon a newer run.
+	if not _new_run_intent.is_empty(): return
+	if not _foreground:
+		_action_failed("new_run","lifecycle_changed")
+		return
+	if not _pending_transaction.is_empty():
+		resolve_pending_transaction()
+		_action_failed("new_run","retry_pending_choice")
+		return
+	if _defer_worker_command("new_run",[seed,replace_existing,expected_run_id]): return
+	if not _command_ready("new_run"): return
+	var saved = game_save.checkpoint
+	if replace_existing and (expected_run_id.is_empty() or not saved is Dictionary or saved.get("run_id") != expected_run_id):
+		_action_failed("new_run","stale_pending_request")
+		return
+	var already_ended: bool = saved is Dictionary and state.get("run_id") == saved.run_id and state.get("phase","") in TERMINAL
+	if saved is Dictionary and not saved.phase in TERMINAL and not already_ended and not replace_existing:
+		_action_failed("new_run","active_run")
+		return
+	if not _final_intent.is_empty() or not _final_error.is_empty():
+		_action_failed("new_run","transition_pending")
+		return
+	# A fresh, explicit foreground sortie request also releases ambient pause.
+	# Deferred requests must first pass their original lifecycle-generation check.
+	_lifecycle_generation += 1
+	_lifecycle_pause_intent = {"background":false,"controller_lost":false}
+	if saved == null or (saved.phase in TERMINAL and int(saved.run_serial) <= int(game_save.settled_through_serial)):
+		start_run(seed)
+		return
+	if state.is_empty():
+		# Cold startup keeps the active checkpoint offscreen. Prepare it without
+		# resuming combat or changing environmental pause ownership.
+		var prepared: Dictionary = _prepare_city_load(game_save) if _city_runtime != null else simulation.restore(pending_checkpoint)
+		if not prepared.get("ok",false):
+			_action_failed("new_run",str(prepared.get("error_code","invalid_snapshot")))
+			return
+		if _city_runtime != null: _adopt_city_simulation(prepared.simulation)
+		state = prepared.state
+		pending_checkpoint.clear()
+		ui.set_checkpoint_available(false)
+	if state.get("run_id") != saved.run_id:
+		_action_failed("new_run","stale_pending_request")
+		return
+	_new_run_intent = {"seed":seed,"run_id":saved.run_id,"run_serial":int(saved.run_serial),"lifecycle_generation":_lifecycle_generation}
+	if state.phase in TERMINAL: _record_result()
+	else: request_end_run()
+	_continue_new_run()
+func _continue_new_run() -> void:
+	if _new_run_intent.is_empty(): return
+	if _lifecycle_blocked() or _new_run_intent.lifecycle_generation != _lifecycle_generation:
+		_new_run_intent.clear()
+		_action_failed("new_run","lifecycle_changed")
+		return
+	if not _pending_transaction.is_empty() or not _startup_view.is_empty() or _worker_reserved(): return
+	var intent := _new_run_intent
+	if state.get("run_id") != intent.run_id or game_save.checkpoint.get("run_id") != intent.run_id:
+		_new_run_intent.clear()
+		_action_failed("new_run","stale_pending_request")
+		return
+	if not state.phase in TERMINAL or int(game_save.settled_through_serial) < int(intent.run_serial): return
+	var seed: int = intent.seed
+	_new_run_intent.clear()
+	start_run(seed)
 func start_run(seed: int) -> void:
 	if _defer_worker_command("run_start",[seed]): return
 	if not game_save.is_empty() and not state.is_empty() and state.phase in TERMINAL and int(state.run_serial) > int(game_save.settled_through_serial):
@@ -453,6 +520,7 @@ func advance_frame(delta: float) -> void:
 		_poll_autosave_worker()
 		_retry_worker_terminal()
 		_retry_worker_command()
+	_continue_new_run()
 	if _worker_recovery_active() and not _autosave_retry_held_tick:
 		_accumulator = 0
 		_present()
@@ -938,6 +1006,7 @@ func _publish_transaction(authority: Dictionary, transaction: Dictionary, prepar
 	if _city_runtime != null or transaction.replace_state or transaction.lifecycle_generation != _lifecycle_generation:
 		_apply_lifecycle_pause(state)
 	if transaction.reset_presentation:
+		ui.finish_new_run_navigation()
 		ui.reset_progression_feedback()
 		ui.set_save_notice("")
 		world.reset_presentation()
@@ -968,6 +1037,7 @@ func _publish_transaction(authority: Dictionary, transaction: Dictionary, prepar
 	elif not transaction.action in ["checkpoint","settings"]: _action_succeeded(transaction.action,transaction.receipt)
 	else: _present()
 func _quarantine_authority(authority: Dictionary, prepared_pair: Dictionary = {}) -> void:
+	_new_run_intent.clear()
 	_final_intent.clear()
 	_final_error = ""
 	# A changed disk authority invalidates every writable checkpoint derived from
@@ -999,7 +1069,7 @@ func _quarantine_authority(authority: Dictionary, prepared_pair: Dictionary = {}
 	world.reset_presentation()
 	audio.reset_presentation()
 	_shop_open = false
-	ui.reset_obsolete_presentation(simulation.snapshot(state) if not state.is_empty() else {},not pending_checkpoint.is_empty())
+	ui.reset_obsolete_presentation(simulation.snapshot(state) if not state.is_empty() else {},not pending_checkpoint.is_empty(),str(pending_checkpoint.get("run_id","")))
 	_install_settings(profile.settings)
 func _install_authority(authority: Dictionary) -> void:
 	_observed_save_source = true
@@ -1013,6 +1083,7 @@ func _action_succeeded(action: String, receipt: Dictionary) -> void:
 	if is_instance_valid(ui): ui.present_action_result({"ok":true,"action":action,"receipt":receipt.duplicate(true),"message":"" if action == "upgrade" else "저장했습니다."})
 	_refresh_view()
 func _action_failed(action: String, code: String) -> void:
+	if action in ["settlement","new_run"] and code != "commit_outcome_unknown": _new_run_intent.clear()
 	if action in ["passage_selection","dock_transition"]: _final_error = code
 	if action == "settings" and not profile.is_empty() and is_instance_valid(ui): _install_settings(profile.settings)
 	if is_instance_valid(ui): ui.present_action_result({"ok":false,"action":action,"error_code":code,"message":"저장/요청을 완료하지 못했습니다 (%s)." % code})
@@ -1362,13 +1433,13 @@ func _retry_worker_command() -> void:
 	if _autosave_intent.is_empty() or _worker_reserved() or not _foreground or not _pending_transaction.is_empty() or not _startup_view.is_empty(): return
 	# Current explicit Continue is what releases lifecycle pauses. All other
 	# retained actions still wait; generation validation below remains mandatory.
-	if _lifecycle_blocked() and _autosave_intent.action != "resume": return
+	if _lifecycle_blocked() and not _autosave_intent.action in ["resume","new_run"]: return
 	var intent := _autosave_intent
 	_autosave_intent = {}
 	if intent.generation != _autosave_generation or intent.career_id != game_save.career_id or intent.run_id != state.get("run_id","") or intent.run_serial != state.get("run_serial",0) or not _same_json(intent.economy,save_store._economy(game_save)):
 		_action_failed(intent.action,"stale_pending_request")
 		return
-	if intent.action == "resume" and intent.lifecycle_generation != _lifecycle_generation:
+	if intent.action in ["resume","new_run"] and intent.lifecycle_generation != _lifecycle_generation:
 		_action_failed(intent.action,"lifecycle_changed")
 		return
 	match str(intent.action):
@@ -1376,6 +1447,7 @@ func _retry_worker_command() -> void:
 		"loadout": apply_loadout(intent.arguments[0],_view_revision)
 		"character_selection": apply_character_selection(intent.arguments[0],_view_revision)
 		"run_start": start_run(intent.arguments[0])
+		"new_run": request_new_run(intent.arguments[0],intent.arguments[1],intent.arguments[2])
 		"upgrade": apply_upgrade(intent.arguments[0],intent.arguments[1])
 		"settings": _apply_settings(intent.arguments[0])
 		"end_run": request_end_run()

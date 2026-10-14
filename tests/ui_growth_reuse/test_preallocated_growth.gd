@@ -53,6 +53,10 @@ func run(t) -> void:
 			ui.present_progression(view)
 			await _settle(t)
 			var old: Button = ui._buttons[1 if detail else 0]
+			# Early recipe rows can require scrolling while semantic focus stays
+			# on another slot. Exercise a visible pointer target, as a player does.
+			ui._scroll.ensure_control_visible(old)
+			await _settle(t)
 			var point := old.get_global_rect().get_center()
 			events.clear()
 			vp.push_input(_mouse(point,true),true)
@@ -76,6 +80,8 @@ func run(t) -> void:
 			var current_semantic := str(current.get_meta("semantic_id",""))
 			var slot := int(ui._buttons.find(current)/2)
 			t.check(ui._buttons[slot*2]._option == next.active_offer.options[slot],kind+": visible slot has the complete current option DTO")
+			ui._scroll.ensure_control_visible(current)
+			await _settle(t)
 			point = current.get_global_rect().get_center()
 			vp.push_input(_mouse(point,true),true)
 			await _settle(t)

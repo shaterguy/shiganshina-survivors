@@ -47,6 +47,9 @@ func attach_inline_controls(requirements: VBoxContainer, information: Button) ->
 	_inline_padding = Vector4(base.get_margin(SIDE_LEFT),base.get_margin(SIDE_TOP),base.get_margin(SIDE_RIGHT),base.get_margin(SIDE_BOTTOM))
 	resized.connect(_queue_inline_layout)
 	_requirements.minimum_size_changed.connect(_queue_inline_layout)
+	# Wrapped prerequisite rows settle after native container sorting. A reused
+	# card must release the temporary narrow-width height from its first bind.
+	_requirements.sort_children.connect(_queue_inline_layout)
 	sync_inline_layout()
 func _queue_inline_layout() -> void:
 	if _inline_queued or not is_inside_tree(): return
@@ -87,10 +90,14 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 	if not description.is_empty(): parts.append(description)
 	var delta := effect_text(option.get("effect_delta",{}))
 	if not delta.is_empty() and not description.contains(delta): parts.append(delta)
-	var requirements := requirements_text(option.get("requirements",[]))
-	if not requirements.is_empty():
-		var heading := "진화 선행조건" if str(option.get("kind","")) == "evolution" else "목표 진화 조건"
-		parts.append(heading+"\n"+requirements)
+	if option.has("evolution_previews"):
+		var preview := evolution_previews_text(option.evolution_previews)
+		if not preview.is_empty(): parts.append(preview)
+	else:
+		var requirements := requirements_text(option.get("requirements",[]))
+		if not requirements.is_empty():
+			var heading := "진화 선행조건" if str(option.get("kind","")) == "evolution" else "목표 진화 조건"
+			parts.append(heading+"\n"+requirements)
 	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))
 	if not warning.is_empty(): parts.append(warning)
 	var tradeoff := str(option.get("tradeoff_text",""))
@@ -115,6 +122,46 @@ func display_text() -> String:
 	return _display
 func _choose() -> void:
 	if not disabled: chosen.emit(str(_option.get("option_id","")))
+static func evolution_requirement_text(requirement: Dictionary) -> String:
+	var title := str(requirement.get("name",requirement.get("item_id","조건")))
+	var required := int(requirement.get("required",0))
+	if not requirement.has("current"): return "%s · 필요 Lv %d" % [title,required]
+	var current := int(requirement.current)
+	var status := "충족 ✓" if requirement.get("met",false) else ("미보유" if current == 0 else "부족")
+	if requirement.get("kind","") == "seal": return "%s · %d/%d · %s" % [title,current,required,status]
+	return "%s · Lv %d/%d · %s" % [title,current,required,status]
+static func evolution_previews_text(previews: Array) -> String:
+	var parts: Array[String] = []
+	for detail in previews:
+		var lines: Array[String] = ["궁극 · "+str(detail.get("name",""))]
+		for required in detail.get("requirements",[]): lines.append(evolution_requirement_text(required))
+		if detail.get("status","") == "unavailable": lines.append(reason_text("chapter_not_allowed"))
+		elif detail.get("status","") == "evolved": lines.append("진화 완료")
+		parts.append("\n".join(lines))
+	return "\n\n".join(parts)
+static func append_evolution_requirements(container: VBoxContainer, option: Dictionary) -> void:
+	if not option.has("evolution_previews"):
+		Icons.append_requirements(container,option.get("requirements",[]))
+		return
+	Icons.append_requirements(container,[])
+	for detail in option.evolution_previews:
+		var title := Label.new()
+		title.text = "궁극 · "+str(detail.get("name",""))
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		title.add_theme_font_size_override("font_size",13)
+		title.add_theme_color_override("font_color",Color("f0dfba"))
+		container.add_child(title)
+		var rows := VBoxContainer.new()
+		Icons.append_requirements(rows,detail.get("requirements",[]))
+		var index := 0
+		for row in rows.get_children():
+			row.get_node("Text").text = evolution_requirement_text(detail.requirements[index])
+			rows.remove_child(row)
+			container.add_child(row)
+			index += 1
+		rows.free()
+	container.visible = not option.evolution_previews.is_empty()
 static func requirements_text(requirements: Array) -> String:
 	var lines: Array[String] = []
 	for requirement in requirements:
@@ -147,9 +194,10 @@ static func summary(option: Dictionary) -> String:
 	if not effect.is_empty(): parts.append(effect)
 	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))
 	if not warning.is_empty(): parts.append("주의 · "+warning)
-	for requirement in option.get("requirements",[]):
-		if requirement.get("kind","") == "seal" and int(requirement.get("required",0)) > 0:
-			parts.append("개조권 %d개 소비" % int(requirement.required))
+	if option.get("kind","") == "evolution":
+		for requirement in option.get("requirements",[]):
+			if requirement.get("kind","") == "seal" and int(requirement.get("required",0)) > 0:
+				parts.append("개조권 %d개 소비" % int(requirement.required))
 	var done := str(option.get("status","")) == "evolved"
 	var blocked := done or not bool(option.get("can_select",true))
 	if blocked: parts.append("진화 완료" if done else reason_text(str(option.get("blocked_reason",""))))

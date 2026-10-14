@@ -10,6 +10,8 @@ func build(state: Dictionary) -> Dictionary:
 	var source: Dictionary = state.upgrade_offer
 	# Bound only our DTO fragment. A large valid combat state is not a catalog.
 	if not Upgrades.json_data_valid(source): return {}
+	var evolution_views: Array[Dictionary] = []
+	for id in _catalog.evolutions.ids(): evolution_views.append(_catalog.evolutions.evaluate(state,id,true))
 	var offer := {}
 	if not source.is_empty():
 		if not source.get("options") is Array or source.options.is_empty() or source.options.size() > 3: return {}
@@ -22,16 +24,27 @@ func build(state: Dictionary) -> Dictionary:
 			if not original is Dictionary: return {}
 			var option: Dictionary = _catalog.decorate_option(state,original,true)
 			if option.is_empty() or identities.has(option.option_id): return {}
+			if option.kind != "evolution": option.evolution_previews = _skill_evolutions(option.item_id,option.kind,evolution_views)
 			identities[option.option_id] = true
 			options.append(option)
 		if not identities.has(source.selected_option_id): return {}
 		offer = {"offer_id":source.offer_id,"source":source.source,"level_ordinal":source.level_ordinal,"selected_option_id":source.selected_option_id,"options":options}
-	var evolution_views: Array[Dictionary] = []
-	for id in _catalog.evolutions.ids(): evolution_views.append(_catalog.evolutions.evaluate(state,id,true))
 	var target: Dictionary = _catalog.evolutions.evaluate(state,state.run_config.target_evolution_id,true)
-	return {"view_revision":int(state.view_revision),"slots":{"equipment":{"used":state.equipment.size(),"max":4},"passive":{"used":state.passives.size(),"max":4}},"target":target,"evolutions":evolution_views,"active_offer":offer,"owned":_owned(state)}
+	return {"view_revision":int(state.view_revision),"slots":{"equipment":{"used":state.equipment.size(),"max":4},"passive":{"used":state.passives.size(),"max":4}},"target":target,"evolutions":evolution_views,"active_offer":offer,"owned":_owned(state,evolution_views)}
 
-func _owned(state: Dictionary) -> Dictionary:
+func _skill_evolutions(item_id: String, kind: String, evolution_views: Array) -> Array[Dictionary]:
+	# These are read-only previews, never new offers or eligibility rules.
+	var result: Array[Dictionary] = []
+	for detail in evolution_views:
+		if kind == "equipment" and detail.base_item_id == item_id:
+			result.append(detail.duplicate(true))
+		elif kind == "passive":
+			for required in detail.requirements:
+				if required.kind == kind and required.item_id == item_id:
+					result.append(detail.duplicate(true))
+					break
+	return result
+func _owned(state: Dictionary, evolution_views: Array) -> Dictionary:
 	var result := {"equipment":[],"passives":[]}
 	for kind in ["equipment","passives"]:
 		var definitions: Dictionary = _catalog.equipment if kind == "equipment" else _catalog.passives
@@ -41,11 +54,10 @@ func _owned(state: Dictionary) -> Dictionary:
 			var definition: Dictionary = definitions[id]
 			var level := int(state[kind][id])
 			var row := {"item_id":str(id),"name":definition.name,"level":level,"base_level":level,"max_level":int(definition.max_level),"display_level":level,"display_max_level":int(definition.max_level),"icon_id":"skill_"+str(id),"evolution_name":"","evolution_icon_id":"","is_max":level == int(definition.max_level),"evolution_id":"","evolution_status":"unavailable","is_evolved":false,"requirements":[],"attack_summary":"","effect_stats":{}}
+			row.evolution_previews = _skill_evolutions(str(id),"equipment" if kind == "equipment" else "passive",evolution_views)
 			if kind == "equipment":
-				for recipe_id in _catalog.evolutions.ids():
-					var detail: Dictionary = _catalog.evolutions.evaluate(state,recipe_id,true)
-					if detail.base_item_id != id: continue
-					row.evolution_id = recipe_id
+				for detail in row.evolution_previews:
+					row.evolution_id = detail.evolution_id
 					row.max_level = 6
 					row.display_max_level = 6
 					row.evolution_name = detail.name

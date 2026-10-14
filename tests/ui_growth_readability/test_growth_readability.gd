@@ -58,7 +58,11 @@ func run(t) -> void:
 				if child is Label: detail_text += child.text
 			t.check(detail_text.contains(option.description),"detail preserves complete authored description")
 			t.check(detail_text.contains(Card.effect_text(option.effect_delta)),"detail preserves every measured effect")
-			t.check(detail_text.contains(Card.requirements_text(option.requirements)),"detail preserves named requirement progress and missing reasons")
+			if option.has("evolution_previews"):
+				for recipe in option.evolution_previews:
+					t.check(detail_text.contains(Card.evolution_previews_text([recipe])),"detail preserves this skill's own ultimate and actual requirement progress")
+			else:
+				t.check(detail_text.contains(Card.requirements_text(option.requirements)),"evolution detail preserves named requirement progress and missing reasons")
 			ui.accept_released()
 			ui.navigate("down")
 			await _settle(t)
@@ -75,3 +79,4 @@ func run(t) -> void:
 	t.check(selected == [[view.active_offer.offer_id,chosen_id]],"one controller accept emits exactly the current offer and semantic option")
 	t.check(state == before,"layout, detail and selection presentation never mutate Core state")
 	ui.free()
+
