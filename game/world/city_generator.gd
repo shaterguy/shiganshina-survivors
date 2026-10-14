@@ -2,6 +2,9 @@ class_name CityGenerator
 extends RefCounted
 const Address = preload("res://game/world/world_address.gd")
 const Catalog = preload("res://game/world/world_prop_catalog.gd")
+const CONNECTED_CACHE_CAPACITY := 16
+static var _connected_success_cache: Dictionary = {}
+static var _connected_cache_mutex := Mutex.new()
 var _templates: Dictionary
 var _props: Dictionary
 var _catalog
@@ -69,6 +72,34 @@ func hydrate(chunk: Dictionary, deltas: Array) -> Dictionary:
 		if not found: return {"ok":false,"error_code":"unknown_prop_slot"}
 	return {"ok":true,"chunk":result}
 static func _connected(solids: Array[Rect2], radius: float) -> bool:
+	# Only this pure flood-fill result is reused; all definition checks still run.
+	# Own the value array so the key and calculation observe the same geometry.
+	if solids.size() > 24: return _connected_uncached(solids,radius)
+	var owned: Array[Rect2] = solids.duplicate()
+	var key := _connected_cache_key(owned,radius)
+	if key.is_empty(): return _connected_uncached(owned,radius)
+	_connected_cache_mutex.lock()
+	var hit := _connected_success_cache.has(key)
+	_connected_cache_mutex.unlock()
+	if hit: return true
+	if not _connected_uncached(owned,radius): return false
+	# Main and autosave workers may compute the same miss independently. Publish
+	# only successful exact inputs, with no callback or calculation under the lock.
+	_connected_cache_mutex.lock()
+	if not _connected_success_cache.has(key):
+		if _connected_success_cache.size() >= CONNECTED_CACHE_CAPACITY:
+			_connected_success_cache.erase(_connected_success_cache.keys()[0])
+		_connected_success_cache[key] = true
+	_connected_cache_mutex.unlock()
+	return true
+static func _connected_cache_key(solids: Array[Rect2], radius: float) -> String:
+	if solids.size() > 24 or not is_finite(radius): return ""
+	for solid in solids:
+		for value in [solid.position.x,solid.position.y,solid.size.x,solid.size.y,solid.end.x,solid.end.y]:
+			if not is_finite(value): return ""
+	# Exact typed bytes, not JSON, a lossy coordinate bucket or a digest collision.
+	return var_to_bytes([solids,radius]).hex_encode()
+static func _connected_uncached(solids: Array[Rect2], radius: float) -> bool:
 	var flags := PackedByteArray()
 	var distances := PackedInt32Array()
 	flags.resize(576)

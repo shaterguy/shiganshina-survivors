@@ -63,6 +63,8 @@ func _command(effect: Dictionary, layer: Dictionary, component: String, asset: D
 	var direction := _vec(effect.get("direction",geometry.get("direction",[1,0])))
 	if direction.is_zero_approx(): direction = Vector2.RIGHT
 	if shape == "targeted": anchor = _vec(geometry.get("position",geometry.get("origin",anchor)))
+	if effect.get("projectile_binding","") == "core" and context.get("projectile_positions",{}).has(effect.get("projectile_id")):
+		anchor = _vec(context.projectile_positions[effect.projectile_id])
 	if effect.get("coordinate_space","world") == "actor":
 		var actors: Dictionary = context.get("actor_positions",{})
 		var id := str(effect.get("actor_id","player"))
@@ -81,6 +83,8 @@ func _command(effect: Dictionary, layer: Dictionary, component: String, asset: D
 		contact_size = _vec(effect.presentation_size_px)
 	if component == "wire":
 		var endpoint := _vec(geometry.wire_anchor)
+		if not effect.has("contact_position") and effect.get("base_item_id","") != "chain_lightning" and context.get("target_positions",{}).has(geometry.get("target_id")):
+			endpoint = _vec(context.target_positions[geometry.target_id])
 		contact_size = Vector2(maxf(0.001,anchor.distance_to(endpoint)),2.0)
 		rotation = anchor.direction_to(endpoint).angle()
 	elif component == "tip":

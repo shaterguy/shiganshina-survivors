@@ -8,10 +8,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class AndroidVersionIdentityTests(unittest.TestCase):
-    def test_candidate_uses_unused_dev5_and_increased_code(self):
+    def test_candidate_uses_unused_dev7_and_increased_code(self):
         pin = json.loads((ROOT / 'tools/build/toolchain.json').read_text())['android']
-        self.assertEqual(pin['version_name'], '0.1.0-dev6')
-        self.assertEqual(pin['version_code'], 6)
+        self.assertEqual(pin['version_name'], '0.1.0-dev7')
+        self.assertEqual(pin['version_code'], 7)
         self.assertGreater(pin['version_code'], 4)  # Preserved dev4 build baseline.
 
     def test_project_and_export_preset_match_pin(self):

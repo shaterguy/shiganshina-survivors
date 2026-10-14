@@ -563,7 +563,9 @@ func advance_frame(delta: float) -> void:
 			var commands: Array[Dictionary] = director.plan(state,chapter)
 			events = simulation.step(state,input_router.sample_move(),commands)
 		audio.consume_events(events)
-		world.consume_combat_events(events,simulation.snapshot(state))
+		var successful_snapshot: Dictionary = simulation.snapshot(state)
+		world.observe_render_tick(successful_snapshot)
+		world.consume_combat_events(events,successful_snapshot)
 		world.consume_events(events)
 		for event in events:
 			if event.type == "run_ended": _record_result()
@@ -1112,7 +1114,10 @@ func _present() -> void:
 	if not recovery_view.is_empty():
 		recovery_view.lifecycle_blocked = _lifecycle_blocked()
 		recovery_view.foreground = _foreground
+	var render_active: bool = not state.is_empty() and state.get("phase","") in ["survival","evacuation"] and state.get("pause_reasons",[]).is_empty() and not _shop_open and not _lifecycle_blocked() and _startup_view.is_empty() and _pending_transaction.is_empty() and not _worker_recovery_active() and _final_intent.is_empty() and _final_error.is_empty() and _city_step_error.is_empty() and _city_render_error.is_empty() and _pending_city_tick.is_empty()
+	world.begin_render_frame(_accumulator/TICK_DURATION,not render_active)
 	_present_world(view)
+	if not _city_render_error.is_empty(): world.set_render_alpha(1.0,true)
 	if not view.is_empty() and (not _city_step_error.is_empty() or not _city_render_error.is_empty()): view.pause_reasons.append("world_not_ready")
 	ui.present_recovery(recovery_view)
 	ui.present(view)

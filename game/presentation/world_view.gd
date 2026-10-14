@@ -17,6 +17,8 @@ var _armored_display: Dictionary = {"supported":false,"reason":"no_actor"}
 var _armored_setup_attempted := false
 var _armored_setup_error := ""
 var _armored_input_bytes := PackedByteArray()
+var _armored_render_id: Variant = null
+var _armored_render_root := Vector2.ZERO
 var _combat_bridge = VfxBridge.new()
 var _combat_snapshot: Dictionary = {}
 # Last successful Core sample only; this is not a second combat clock.
@@ -56,7 +58,113 @@ const MAX_GAIT_TICK_GAP := 8
 var _gait_tracks: Dictionary = {}
 var _gait_run_key: Array = []
 var _gait_tick := -1
+# Spatial presentation history only. Core ticks, event clocks and save DTOs stay
+# authoritative. A frame opts in before present; ordinary callers remain alpha=1.
+var _render_previous: Dictionary = {}
+var _render_current: Dictionary = {}
+var _render_alpha := 1.0
+var _render_frame_pending := false
+var _render_frame_alpha := 1.0
+var _render_frame_frozen := false
+func begin_render_frame(alpha: float, frozen: bool = false) -> void:
+	_render_frame_pending = true
+	_render_frame_alpha = clampf(alpha,0.0,1.0) if is_finite(alpha) else 1.0
+	_render_frame_frozen = frozen
+func _prepare_render_frame(snapshot: Dictionary) -> void:
+	if not _render_frame_pending or snapshot.is_empty():
+		_render_previous.clear(); _render_current.clear(); _render_alpha = 1.0
+	else:
+		# Only successful ticks change spatial authority in the controller. Reuse
+		# that owned compact map on no-tick frames; transitions seed a snapped map.
+		if not _render_frame_matches(snapshot): _accept_render_sample(snapshot)
+		_render_alpha = _render_frame_alpha
+		if _render_frame_frozen:
+			_render_previous = _render_current
+			_render_alpha = 1.0
+	_render_frame_pending = false
+	if not snapshot.is_empty():
+		var point: Array = snapshot.player.position
+		_camera = _render_position("player","player",Vector2(point[0],point[1]))
+func _render_frame_matches(snapshot: Dictionary) -> bool:
+	if _render_current.is_empty(): return false
+	var world: Dictionary = snapshot.get("world",{})
+	return _render_current.identity == _render_identity(snapshot) and _render_current.tick == int(snapshot.get("active_tick",0)) and _render_current.event_seq == int(snapshot.get("event_seq",0)) and _render_current.view_revision == int(snapshot.get("view_revision",0)) and _render_current.origin == world.get("origin_chunk",[]) and _render_current.origin_revision == int(world.get("origin_revision",0)) and _render_current.paused == (not snapshot.get("pause_reasons",[]).is_empty() or snapshot.get("phase","") not in ["survival","evacuation"]) and _render_current.player.player.position == Vector2(snapshot.player.position[0],snapshot.player.position[1])
+func _render_identity(snapshot: Dictionary) -> Array:
+	var world: Dictionary = snapshot.get("world",{})
+	return [snapshot.get("run_id",""),snapshot.get("seed",0),snapshot.get("chapter_id",""),snapshot.get("content_revision",""),world.get("mode","finite"),world.get("stage",""),world.get("scene_id",""),world.get("content_fingerprint","")]
+func observe_render_tick(snapshot: Dictionary) -> void:
+	_accept_render_sample(snapshot,true)
+func _accept_render_sample(snapshot: Dictionary, successful_tick: bool = false) -> void:
+	if snapshot.is_empty():
+		_render_previous.clear(); _render_current.clear(); _render_alpha = 1.0
+		return
+	var sample := _render_sample(snapshot)
+	if sample == _render_current: return
+	var adjacent: bool = successful_tick and not _render_current.is_empty() and sample.identity == _render_current.identity and int(sample.tick) == int(_render_current.tick)+1 and int(sample.event_seq) >= int(_render_current.event_seq) and not sample.paused and not _render_current.paused
+	_render_previous = _render_current if adjacent else sample
+	if adjacent and (sample.origin != _render_previous.origin or sample.origin_revision != _render_previous.origin_revision):
+		var shift := CityAddress.relative(_render_previous.origin,Vector2.ZERO,sample.origin) if sample.origin.size() == 2 and _render_previous.origin.size() == 2 and sample.origin_revision > _render_previous.origin_revision else {"ok":false}
+		if shift.get("ok",false):
+			_render_previous = _render_previous.duplicate(true)
+			for group in ["player","entities","projectiles","drops"]:
+				for record in _render_previous[group].values(): record.position += shift.local
+			_render_previous.origin = sample.origin.duplicate()
+			_render_previous.origin_revision = sample.origin_revision
+		else: _render_previous = sample
+	_render_current = sample
+func _render_sample(snapshot: Dictionary) -> Dictionary:
+	var world: Dictionary = snapshot.get("world",{})
+	var mobility: Dictionary = MobilitySample.visual_sample(snapshot)
+	var sample := {"identity":_render_identity(snapshot),"view_revision":int(snapshot.get("view_revision",0)),"tick":int(snapshot.get("active_tick",0)),"event_seq":int(snapshot.get("event_seq",0)),"origin":world.get("origin_chunk",[]).duplicate(),"origin_revision":int(world.get("origin_revision",0)),"paused":not snapshot.get("pause_reasons",[]).is_empty() or snapshot.get("phase","") not in ["survival","evacuation"],"height":float(mobility.height),"cast_id":snapshot.get("player_mobility",{}).get("cast_id",0),"player":{},"entities":{},"projectiles":{},"drops":{}}
+	sample.player.player = _render_record(snapshot.player,[])
+	for group in ["entities","projectiles","drops"]:
+		for actor in snapshot.get(group,[]):
+			var identity: Array = [actor.get("spawned_tick",actor.get("created_tick",0)),actor.get("enemy_id",""),actor.get("attack_id",""),actor.get("item_id","")]
+			var record := _render_record(actor,identity)
+			# Core pickup attraction has a fixed 240px/s presentation bound.
+			if group == "drops": record.speed = 240.0
+			sample[group][actor.id] = record
+	return sample
+func _render_record(actor: Dictionary, identity: Array) -> Dictionary:
+	var point: Array = actor.position
+	var velocity: Array = actor.get("velocity",[0.0,0.0])
+	return {"position":Vector2(point[0],point[1]),"speed":Vector2(velocity[0],velocity[1]).length(),"identity":identity}
+func _render_pair_valid(group: String, id: Variant) -> bool:
+	if _render_previous.is_empty() or _render_current.is_empty() or not _render_previous[group].has(id) or not _render_current[group].has(id): return false
+	var a: Dictionary = _render_previous[group][id]
+	var b: Dictionary = _render_current[group][id]
+	return a.identity == b.identity and a.position.distance_to(b.position) <= maxf(a.speed,b.speed)/60.0+0.01
+func _render_position(group: String, id: Variant, point: Vector2) -> Vector2:
+	if _render_alpha >= 1.0 or not _render_pair_valid(group,id): return point
+	var current: Dictionary = _render_current[group][id]
+	if current.position != point: return point
+	return _render_previous[group][id].position.lerp(point,_render_alpha)
+func set_render_alpha(alpha: float, frozen: bool = false) -> void:
+	_render_alpha = clampf(alpha,0.0,1.0) if is_finite(alpha) else 1.0
+	if frozen:
+		_render_previous = _render_current
+		_render_alpha = 1.0
+	if not _snapshot.is_empty():
+		var point: Array = _snapshot.player.position
+		_camera = _render_position("player","player",Vector2(point[0],point[1]))
+	_refresh_armored_render_root()
+	_update_armored_visibility()
+	queue_redraw()
+func _render_vfx_positions() -> Dictionary:
+	if _render_alpha >= 1.0 or _render_current.is_empty(): return {}
+	var actors := {}
+	var projectiles := {}
+	var targets := {}
+	for id in _render_current.player: actors[str(id)] = _render_position("player",id,_render_current.player[id].position)
+	for id in _render_current.entities:
+		var point := _render_position("entities",id,_render_current.entities[id].position)
+		actors["entity:"+str(id)] = point
+		targets[id] = point
+	for id in _render_current.projectiles: projectiles[id] = _render_position("projectiles",id,_render_current.projectiles[id].position)
+	return {"actor_positions":actors,"projectile_positions":projectiles,"target_positions":targets}
 func reset_presentation(reset_combat := true) -> void:
+	_render_frame_pending = false
+	_render_previous.clear(); _render_current.clear(); _render_alpha = 1.0
 	_enemy_attack_packet.clear()
 	_reset_armored_display()
 	if reset_combat:
@@ -114,7 +222,7 @@ func present(snapshot: Dictionary) -> void:
 	_update_gait(snapshot)
 	_armored_motion.present(snapshot)
 	_snapshot = snapshot
-	if not snapshot.is_empty(): _camera = Vector2(snapshot.player.position[0],snapshot.player.position[1])
+	_prepare_render_frame(snapshot)
 	_sync_armored_display()
 	queue_redraw()
 func present_enemy_attacks(packet: Dictionary) -> Dictionary:
@@ -308,9 +416,10 @@ func combat_vfx_commands(snapshot: Dictionary = {}) -> Array[Dictionary]:
 	if snapshot.is_empty() and not _combat_snapshot.is_empty() and (current.is_empty() or _combat_snapshot.get("run_id") != current.get("run_id") or int(_combat_snapshot.get("active_tick",0)) > int(current.get("active_tick",0))):
 		current = _combat_snapshot
 	var camera := _camera
-	if not current.is_empty() and current.get("player",{}).has("position"):
+	var visual := _render_vfx_positions() if snapshot.is_empty() and is_same(current,_snapshot) else {}
+	if visual.is_empty() and not current.is_empty() and current.get("player",{}).has("position"):
 		camera = Vector2(current.player.position[0],current.player.position[1])
-	return _combat_bridge.present(current,reduce_effects,Rect2(camera-_viewport_size*0.5,_viewport_size))
+	return _combat_bridge.present(current,reduce_effects,Rect2(camera-_viewport_size*0.5,_viewport_size),visual)
 func consume_events(events: Array[Dictionary]) -> void:
 	for event in events:
 		if event.type == "damage" and str(event.payload.get("target_id","")) == "player":
@@ -380,7 +489,7 @@ func _draw() -> void:
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
 	for drop in _snapshot.get("drops",[]):
-		_sprite("xp_pickup",Vector2(drop.position[0],drop.position[1]),"idle",1.0)
+		_sprite("xp_pickup",_render_position("drops",drop.id,Vector2(drop.position[0],drop.position[1])),"idle",1.0)
 	if _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
@@ -486,6 +595,8 @@ func present_city(snapshot: Dictionary, derived_terrain_view: Dictionary) -> Dic
 	elif valid:
 		valid = world.stage == "city" and derived_terrain_view.get("scene_id") == "city" and derived_terrain_view.get("chunks") is Array
 	if not valid:
+		_render_frame_pending = false
+		_render_previous.clear(); _render_current.clear(); _render_alpha = 1.0
 		_reset_armored_display()
 		_city_active = true; _city_view = {}; queue_redraw()
 		return {"ok":false,"error_code":code}
@@ -496,7 +607,7 @@ func present_city(snapshot: Dictionary, derived_terrain_view: Dictionary) -> Dic
 	# No duplicate, regeneration, serialization or authority mutation here.
 	_city_view = derived_terrain_view
 	_snapshot = snapshot
-	_camera = Vector2(snapshot.player.position[0],snapshot.player.position[1])
+	_prepare_render_frame(snapshot)
 	_sync_armored_display()
 	queue_redraw()
 	return {"ok":true}
@@ -520,7 +631,7 @@ func _actor_view(id: Variant, asset_id: String, point: Vector2, pose: String, sc
 	var corner := Vector2(-float(anchor[0])*scale_value,-float(anchor[1])*scale_value)
 	if flip: corner.x = float(anchor[0])*scale_value-size.x
 	var result := {"id":id,"asset_id":asset_id,"position":point,"depth_y":point.y,"render_bounds":Rect2(point+corner,size),"pose":pose,"scale":scale_value,"flip":flip,"seconds":seconds,"tint":Color(1.55,1.40,1.15) if float(_enemy_hits.get(str(id),-1.0))-_clock > 0.14-5.0/60.0 else Color.WHITE}
-	if asset_id == "armored_titan" and _armored_display.get("supported",false) and str(id) == _armored_display.actor_id and point == _armored_display.root_position:
+	if asset_id == "armored_titan" and _armored_display.get("supported",false) and str(id) == _armored_display.actor_id and point == _render_armored_root():
 		result.armored_raster = true
 		result.flip = _armored_display.flip
 		result.scale = _armored_display.display_scale
@@ -558,13 +669,13 @@ func _city_render_packet() -> Dictionary:
 		var actor_scale := 1.5 if asset_id == "armored_titan" else 1.0
 		if pose == "move": seconds = movement_seconds(asset_id,"entity:"+str(entity.id),actor_scale,seconds)
 		var facing: Array = entity.get("facing",entity.velocity)
-		actors.append(_actor_view(entity.id,asset_id,Vector2(entity.position[0],entity.position[1]),pose,actor_scale,float(facing[0]) < 0,seconds))
+		actors.append(_actor_view(entity.id,asset_id,_render_position("entities",entity.id,Vector2(entity.position[0],entity.position[1])),pose,actor_scale,float(facing[0]) < 0,seconds))
 	for corpse in _corpses:
 		corpses.append(_actor_view(corpse.id,corpse.asset,Vector2(corpse.position[0],corpse.position[1]),"death",1.0,false,_clock-float(corpse.started)))
 	for projectile in _snapshot.get("projectiles",[]):
 		if _projectile_has_drawable_vfx(projectile.id,vfx_commands): continue
 		var ally: bool = projectile.item_id == "ally_cover"
-		projectiles.append(_actor_view(projectile.id,"garrison_01" if ally else "debris_fx",Vector2(projectile.position[0],projectile.position[1]),"attack",0.8 if ally else 0.35,ally and float(projectile.velocity[0]) < 0,_clock))
+		projectiles.append(_actor_view(projectile.id,"garrison_01" if ally else "debris_fx",_render_position("projectiles",projectile.id,Vector2(projectile.position[0],projectile.position[1])),"attack",0.8 if ally else 0.35,ally and float(projectile.velocity[0]) < 0,_clock))
 	for group in [["actor",actors],["corpse",corpses],["projectile",projectiles]]:
 		for record in group[1]: _city_draw_data[group[0]][record.id] = record
 	var terrain := _city_view if _city_active else {"stage":"finite"}
@@ -584,12 +695,14 @@ func _city_render_packet() -> Dictionary:
 			_city_draw_data.actor.player.position = command.position
 			_city_draw_data.actor.player.render_bounds = command.render_bounds
 	return packet
-# All values are freshly derived from the accepted Core snapshot. No renderer
-# history, candidate selection, probability, path integration or physics lives here.
+# Discrete attachment/depth decisions come from the current Core sample. Only
+# accepted planar coordinates and height blend; no path planning or physics.
 func mobility_commands() -> Dictionary:
 	var sample: Dictionary = MobilitySample.visual_sample(_snapshot)
 	var point: Array = sample.ground_position
-	var ground: Vector2 = Vector2(point[0],point[1])
+	var ground := _render_position("player","player",Vector2(point[0],point[1]))
+	if _render_alpha < 1.0 and _render_pair_valid("player","player") and _render_previous.cast_id == _render_current.cast_id:
+		sample.height = lerpf(float(_render_previous.height),float(sample.height),_render_alpha)
 	var result: Dictionary = {"height":float(sample.height),"phase":sample.phase,"ground_position":ground,"wire":{},"roof_prop_id":str(sample.get("roof_prop_id","")),"landing_position":null}
 	var anchor: Dictionary = sample.anchor
 	if not anchor.is_empty():
@@ -654,7 +767,7 @@ func _draw_streamed_city() -> void:
 		if command.kind == "shadow": _draw_ground_shadow(command)
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
-	for drop in _snapshot.get("drops",[]): _sprite("xp_pickup",Vector2(drop.position[0],drop.position[1]),"idle",1.0)
+	for drop in _snapshot.get("drops",[]): _sprite("xp_pickup",_render_position("drops",drop.id,Vector2(drop.position[0],drop.position[1])),"idle",1.0)
 	if _city_view.stage == "dock" and _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
@@ -856,6 +969,8 @@ func _raster_opaque(asset_id: String, region: Rect2, bounds: Rect2, flip: bool, 
 # Only known-distance horizontal charge is connected in this candidate. The
 # bounds/query/frame pair is derived together from the last accepted snapshot.
 func _reset_armored_display() -> void:
+	_armored_render_id = null
+	_armored_render_root = Vector2.ZERO
 	_armored_input_bytes.clear()
 	_armored_pose.reset()
 	_armored_display = {"supported":false,"reason":"no_actor"}
@@ -888,6 +1003,7 @@ func _sync_armored_display() -> void:
 	for entity in _snapshot.get("entities",[]):
 		if entity.get("enemy_id") == "armored_titan": actor = entity; break
 	if actor.is_empty(): _reset_armored_display(); return
+	_armored_render_id = actor.id
 	if not _ensure_armored_resources():
 		_armored_display = {"supported":false,"reason":_armored_setup_error if not _armored_setup_error.is_empty() else "not_in_tree"}
 		return
@@ -897,6 +1013,7 @@ func _sync_armored_display() -> void:
 	# deliberately outside the key and visibility is always updated below.
 	var input_bytes := var_to_bytes([observation,actor])
 	if input_bytes == _armored_input_bytes:
+		_refresh_armored_render_root()
 		_update_armored_visibility()
 		return
 	_armored_input_bytes.clear()
@@ -906,7 +1023,7 @@ func _sync_armored_display() -> void:
 		_armored_display = prepared
 		_armored_raster.set_actor_visible(false)
 		return
-	var transform := Transform2D(0,prepared.root_position).scaled_local(Vector2(-1 if prepared.flip else 1,1)*prepared.display_scale) * Transform2D(0,Vector2(-144,-280))
+	var transform := Transform2D(0,_render_position("entities",_armored_render_id,prepared.root_position)).scaled_local(Vector2(-1 if prepared.flip else 1,1)*prepared.display_scale) * Transform2D(0,Vector2(-144,-280))
 	var next_bounds: Rect2 = transform * prepared.packet.bounds
 	if not next_bounds.intersects(Rect2(_camera-_viewport_size*.5,_viewport_size)):
 		_armored_raster.set_actor_visible(false)
@@ -917,6 +1034,7 @@ func _sync_armored_display() -> void:
 	prepared.erase("packet")
 	_armored_display = prepared
 	_armored_input_bytes = input_bytes
+	_refresh_armored_render_root()
 	_update_armored_visibility()
 func _update_armored_visibility() -> void:
 	if not _armored_display.get("supported",false): return
@@ -928,14 +1046,21 @@ func armored_raster_status() -> Dictionary:
 	result.native_gpu_verified = false
 	return result
 func _armored_world_transform() -> Transform2D:
-	var result := Transform2D(0,_armored_display.root_position).scaled_local(Vector2(-1 if _armored_display.flip else 1,1)*_armored_display.display_scale)
+	var result := Transform2D(0,_render_armored_root()).scaled_local(Vector2(-1 if _armored_display.flip else 1,1)*_armored_display.display_scale)
 	return result * Transform2D(0,Vector2(-144,-280))
+func _refresh_armored_render_root() -> void:
+	if _armored_display.get("supported",false):
+		_armored_render_root = _render_position("entities",_armored_render_id,_armored_display.root_position)
+func _render_armored_root() -> Vector2:
+	# Pixel overlap queries must be O(1), independent of entity count. The null
+	# fallback also preserves callers that supply a standalone raster fixture.
+	return _armored_render_root if _armored_render_id != null else _armored_display.root_position
 func _armored_opaque(world_point: Vector2) -> bool:
 	if not _armored_display.get("supported",false): return false
 	return _armored_raster.is_opaque_local(_armored_world_transform().affine_inverse() * world_point)
 func _draw_armored_raster() -> bool:
 	if not _armored_display.get("supported",false) or not is_instance_valid(_armored_split): return false
-	var transform := Transform2D(0,_screen(_armored_display.root_position)).scaled_local(Vector2(-1 if _armored_display.flip else 1,1)*_armored_display.display_scale)
+	var transform := Transform2D(0,_screen(_render_armored_root())).scaled_local(Vector2(-1 if _armored_display.flip else 1,1)*_armored_display.display_scale)
 	return _armored_split.insert_actor(_armored_raster.get_raster_texture(),transform,Rect2(-144,-280,288,288),_actor_draw_tint)
 func _world_transform(position: Vector2, rotation:=0.0, scale_value:=Vector2.ONE) -> void:
 	if is_instance_valid(_armored_split) and _armored_split.routing_tail():

@@ -57,7 +57,7 @@ func consume(events: Array[Dictionary], current_snapshot: Dictionary) -> bool:
 	_tick = tick
 	_event_seq = seq
 	return true
-func present(snapshot: Dictionary, reduce_effects := false, visible_rect := Rect2()) -> Array[Dictionary]:
+func present(snapshot: Dictionary, reduce_effects := false, visible_rect := Rect2(), visual_positions: Dictionary = {}) -> Array[Dictionary]:
 	if snapshot.is_empty(): reset(); return []
 	if not _snapshot_valid(snapshot): return []
 	_sync(snapshot,false,[])
@@ -67,6 +67,12 @@ func present(snapshot: Dictionary, reduce_effects := false, visible_rect := Rect
 	for entity in snapshot.get("entities",[]):
 		actors["entity:"+str(entity.get("id",""))] = _vec(entity.get("position",[0,0]))
 	var context := {"tick":int(snapshot.active_tick),"reduce_effects":reduce_effects,"asset_metadata":_metadata,"actor_positions":actors,"origin_revision":_origin_revision}
+	# Spatial overrides never enter Director, change its clocks, or replace Core
+	# contact geometry. Missing identities retain the current accepted position.
+	for id in actors:
+		if visual_positions.get("actor_positions",{}).has(id): actors[id] = visual_positions.actor_positions[id]
+	context.projectile_positions = visual_positions.get("projectile_positions",{})
+	context.target_positions = visual_positions.get("target_positions",{})
 	if visible_rect.has_area(): context.visible_rect = visible_rect
 	var output: Array[Dictionary] = []
 	for command in _renderer.commands(_director.present(snapshot),context):

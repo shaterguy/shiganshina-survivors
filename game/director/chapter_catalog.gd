@@ -10,6 +10,25 @@ const MAX_DEFINITION_BYTES := 4 * 1024 * 1024
 const MAX_DEFINITION_NODES := 100000
 const PATHS := [MANIFEST,MAP,"data/equipment.json","data/passives.json","data/evolutions.json","data/doctrines.json","data/supply_shop.json","data/enemies.json","chapters/chapter_01/city_templates.json","data/world_props.json","data/enemy_roles_ch01_3.json"]
 
+# Private, instance-local success proof. Published packets are never mutated.
+const MAX_SOURCE_PROOF_BYTES := 1024 * 1024
+var _source_mutex := Mutex.new()
+var _file_proof: Dictionary = {}
+var _file_proof_hits := 0
+var _file_proof_builds := 0
+
+func source_proof_cache_status() -> Dictionary:
+	_source_mutex.lock()
+	var status := {"entries":0 if _file_proof.is_empty() else 1,"hits":_file_proof_hits,"builds":_file_proof_builds,"payload_bytes":_file_proof.get("payload_bytes",0)}
+	_source_mutex.unlock()
+	return status
+
+func _file_failure(code: String) -> Dictionary:
+	_source_mutex.lock()
+	_file_proof = {}
+	_source_mutex.unlock()
+	return _fail(code)
+
 func definition_paths() -> Array:
 	return PATHS.duplicate()
 
@@ -34,16 +53,48 @@ func _canonical_numbers(value: Variant) -> Variant:
 	return value
 
 func load_chapter(chapter_id: String) -> Dictionary:
-	if chapter_id != CHAPTER_ID: return _fail("unknown_chapter")
+	if chapter_id != CHAPTER_ID: return _file_failure("unknown_chapter")
+	var enabled: bool = get_script() == load("res://game/director/chapter_catalog.gd")
+	var domain := ProjectSettings.globalize_path("res://")
+	_source_mutex.lock()
+	var prior := _file_proof
+	_source_mutex.unlock()
+	var same: bool = enabled and not prior.is_empty() and prior.domain == domain
+	var sources := {}
 	var definitions := {}
 	for path in PATHS:
 		var file := FileAccess.open("res://"+path,FileAccess.READ)
-		if file == null: return _fail("chapter_missing" if path == MANIFEST else "definition_missing")
-		if file.get_length() > MAX_DEFINITION_BYTES: return _fail("invalid_content_definition")
-		var parser := JSON.new()
-		if parser.parse(file.get_as_text()) != OK or not parser.data is Dictionary: return _fail("invalid_content_definition")
-		definitions[path] = parser.data
-	return from_definitions(chapter_id,definitions)
+		if file == null: return _file_failure("chapter_missing" if path == MANIFEST else "definition_missing")
+		if file.get_length() > MAX_DEFINITION_BYTES: return _file_failure("invalid_content_definition")
+		# Keep get_as_text and immediate parsing/error order, including short reads.
+		var source := file.get_as_text()
+		sources[path] = source
+		same = same and prior.sources[path] == source
+		if same:
+			definitions[path] = prior.definitions[path].duplicate(true)
+		else:
+			var parser := JSON.new()
+			if parser.parse(source) != OK or not parser.data is Dictionary: return _file_failure("invalid_content_definition")
+			definitions[path] = parser.data
+	if same:
+		_source_mutex.lock()
+		_file_proof_hits += 1
+		_source_mutex.unlock()
+		return prior.result.duplicate(true)
+	var result := from_definitions(chapter_id,definitions)
+	if enabled:
+		var packet := {}
+		if result.get("ok",false):
+			packet = {"domain":domain,"sources":sources,"definitions":definitions,"result":result.duplicate(true)}
+			packet.payload_bytes = 0
+			var size := var_to_bytes(packet).size()
+			if size <= MAX_SOURCE_PROOF_BYTES: packet.payload_bytes = size
+			else: packet = {}
+		_source_mutex.lock()
+		_file_proof = packet
+		if not packet.is_empty(): _file_proof_builds += 1
+		_source_mutex.unlock()
+	return result
 
 func from_definitions(chapter_id: String, definitions: Dictionary) -> Dictionary:
 	if chapter_id != CHAPTER_ID: return _fail("unknown_chapter")
