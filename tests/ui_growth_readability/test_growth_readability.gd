@@ -60,9 +60,9 @@ func run(t) -> void:
 			t.check(detail_text.contains(Card.effect_text(option.effect_delta)),"detail preserves every measured effect")
 			if option.has("evolution_previews"):
 				for recipe in option.evolution_previews:
-					t.check(detail_text.contains(Card.evolution_previews_text([recipe])),"detail preserves this skill's own ultimate and actual requirement progress")
+					t.check(detail_text.contains(Card.evolution_previews_text([recipe],str(option.item_id) if option.kind == "equipment" else "")),"detail preserves this skill's own ultimate and actual requirement progress")
 			else:
-				t.check(detail_text.contains(Card.requirements_text(option.requirements)),"evolution detail preserves named requirement progress and missing reasons")
+				t.check(detail_text.contains(Card.requirements_text(option.requirements.filter(func(required): return required.item_id != option.item_id))),"evolution detail preserves named requirement progress and missing reasons")
 			ui.accept_released()
 			ui.navigate("down")
 			await _settle(t)

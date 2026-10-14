@@ -2,13 +2,15 @@ extends RefCounted
 const Fixture = preload("res://tests/core/new_current_regression_fixture.gd")
 const View = preload("res://game/progression/progression_view.gd")
 const UI = preload("res://game/ui/game_ui.gd")
+const Card = preload("res://game/ui/growth_card.gd")
 func run(t) -> void:
 	var sim = Fixture.simulation(t)
 	var state := Fixture.earn_offer(sim,21,24)
 	var view := View.new().build(state)
 	var option: Dictionary = view.active_offer.options[0]
 	option.icon_id = "skill_"+str(option.item_id)
-	option.requirements = [{"kind":"equipment","item_id":"odm_dash","name":"입체기동 돌진","current":1,"required":1,"met":true,"owned":true,"requirement_type":"owned_skill","icon_id":"skill_odm_dash"}]
+	var recipe: Dictionary = option.evolution_previews[0]
+	var required: Dictionary = recipe.requirements[1]
 	var ui := UI.new()
 	t.root.add_child(ui)
 	ui.present(sim.snapshot(state))
@@ -22,8 +24,9 @@ func run(t) -> void:
 		var requirements := card.get_node_or_null("Requirements")
 		t.check(requirements != null,"growth card owns its small icon+named requirement rows")
 		if requirements != null and requirements.get_child_count() > 0:
-			var row := requirements.get_child(0)
-			t.check(row.get_node("Icon").texture != null and row.get_node("Text").text.contains("입체기동 돌진 · 보유 ✓"),"requirement icon is accompanied by full name and ownership marker")
+			t.check(requirements.get_child_count() == 2 and requirements.get_child(0).text == "궁극 · "+recipe.name,"real early recipe shows its heading and one distinct companion")
+			var row := requirements.get_child(1)
+			t.check(row.get_node("Icon").texture != null and row.get_node("Text").text == Card.evolution_requirement_text(required),"real companion icon keeps its full name, needed level and actual ownership marker")
 		card.grab_focus()
 		for frame in range(6): await t.process_frame
 		t.check(ui._scroll.get_global_rect().grow(1).encloses(card.get_global_rect()),"icon growth choice remains fully visible after controller focus")

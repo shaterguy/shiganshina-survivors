@@ -69,15 +69,17 @@ func run(t) -> void:
 				var native_style: StyleBox = card.get_theme_stylebox("normal")
 				var body := Rect2(card.get_global_rect().position+Vector2(native_style.get_margin(SIDE_LEFT),native_style.get_margin(SIDE_TOP)),card.size-native_style.get_minimum_size())
 				t.check(not body.intersects(info.get_global_rect()),"native skill identity and benefit area cannot sit behind the internal information target: "+context)
-				var expected_rows: int = option.requirements.size() if option.kind == "evolution" else 0
-				for preview in option.get("evolution_previews",[]): expected_rows += 1+preview.requirements.size()
+				var selected_attack := str(option.item_id) if option.kind in ["equipment","evolution"] else ""
+				var final_requirements: Array = option.requirements.filter(func(required): return required.item_id != selected_attack)
+				var expected_rows: int = final_requirements.size() if option.kind == "evolution" else 0
+				for preview in option.get("evolution_previews",[]): expected_rows += 1+preview.requirements.filter(func(required): return required.item_id != selected_attack).size()
 				t.check(rows.get_child_count() == expected_rows,"cards show exactly their actual evolution criteria or early recipe title and criteria: "+context)
 				var preview_row := 0
 				for preview in option.get("evolution_previews",[]):
 					var heading: Label = rows.get_child(preview_row)
 					t.check(heading.text == "궁극 · "+preview.name,"early recipe heading names the exact ultimate for this skill: "+context)
 					preview_row += 1
-					for required in preview.requirements:
+					for required in preview.requirements.filter(func(required): return required.item_id != selected_attack):
 						var row: Control = rows.get_child(preview_row)
 						var icon: TextureRect = row.get_node("Icon")
 						var label: Label = row.get_node("Text")
@@ -95,14 +97,14 @@ func run(t) -> void:
 					t.check(rows.is_visible_in_tree() and card.get_global_rect().encloses(rows.get_global_rect()),"all combination requirements stay inside the evolution border: "+context)
 					t.check(not info.get_global_rect().intersects(rows.get_global_rect()),"internal information never overlaps named combination requirements: "+context)
 					t.check(not body.intersects(rows.get_global_rect()),"native skill name and benefit area cannot be covered by internal requirements: "+context)
-					if card.size.x >= 330:
+					if card.size.x >= 480:
 						t.check(rows.get_global_rect().position.x >= card.get_global_rect().get_center().x-1,"roomy cards use their right-side space for requirements: "+context)
 					for row_index in rows.get_child_count():
 						var row: Control = rows.get_child(row_index)
 						var icon: TextureRect = row.get_node("Icon")
 						var label: Label = row.get_node("Text")
 						t.check(row.is_visible_in_tree() and icon.is_visible_in_tree() and label.is_visible_in_tree() and icon.texture != null and icon.size.x >= 18 and icon.size.y >= 18,"actual requirement silhouette and text remain visible: "+context)
-						t.check(label.text.contains(str(option.requirements[row_index].name)) and label.text.contains("보유 ✓"),"complete skill name and held check remain together inside the card: "+context)
+						t.check(label.text.contains(str(final_requirements[row_index].name)) and label.text.contains("보유 ✓"),"complete skill name and held check remain together inside the card: "+context)
 						t.check(card.get_global_rect().encloses(icon.get_global_rect()) and card.get_global_rect().encloses(label.get_global_rect()),"actual requirement icon and wrapped text cannot escape the card border: "+context)
 				for focused in [card,info]:
 					focused.grab_focus()

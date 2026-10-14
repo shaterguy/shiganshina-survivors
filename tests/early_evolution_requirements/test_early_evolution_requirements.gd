@@ -33,8 +33,8 @@ func run(t) -> void:
 	if card.has_method("append_evolution_requirements"):
 		var rows := VBoxContainer.new()
 		card.call("append_evolution_requirements",rows,option)
-		t.check(_labels(rows).contains("Lv 0/5") and _labels(rows).contains("Lv 0/1"),"icon rows include actual and required levels at acquisition")
-		t.check(_icon_count(rows) >= 2,"base and companion requirements retain skill icons")
+		t.check(not _labels(rows).contains("Lv 0/5") and _labels(rows).contains("가벼운 발걸음 · Lv 0/1 · 미보유"),"acquisition omits redundant own level but keeps the named companion level and fulfilment")
+		t.check(_icon_count(rows) == 1,"the other required skill retains its icon without a duplicate selected-attack icon")
 		rows.free()
 	else: t.check(false,"shared early requirement icon rows exist")
 	card.free()

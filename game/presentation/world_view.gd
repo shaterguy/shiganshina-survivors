@@ -775,12 +775,7 @@ func _draw_streamed_city() -> void:
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
 	for marker in packet.visibility_markers:
-		var behind := false
-		for command in packet.upright:
-			if command.id == marker.actor_id: behind = true; continue
-			if behind and command.render_bounds.intersects(marker.render_bounds) and _city_rasters_overlap(_city_draw_data.actor["player"],command):
-				_draw_player_outline(marker,_city_draw_data.actor["player"])
-				break
+		if _city_draw_data.outline_needed: _draw_player_outline(marker,_city_draw_data.actor["player"])
 	_draw_enemy_attacks()
 	# Danger is the final raster pass; a cyan outline never substitutes for it.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
@@ -811,16 +806,27 @@ func _draw_upright_with_vfx(upright: Array, vfx: Array[Dictionary]) -> void:
 		if not command.has("diagnostic") and command.render_pass == "world":
 			ordered.append({"id":"vfx:"+command.stable_id,"depth_y":command.depth_y,"vfx":command})
 	ordered.sort_custom(func(a,b): return a.depth_y < b.depth_y or (a.depth_y == b.depth_y and a.id < b.id))
+	var player_drawn := false
+	_city_draw_data.outline_needed = false
 	for command in ordered:
 		if command.has("vfx"):
 			_draw_vfx_command(command.vfx)
 		else:
 			var style: Dictionary = _city_draw_data[command.id.get_slice(":",0)][command.source_id] if command.has("source_id") else {}
 			_actor_draw_tint = style.get("tint",Color.WHITE)
+			# Reuse this depth traversal and cached source alpha for both fading
+			# and visibility. Never rescan the city or test a pair a second time.
+			var fade_building: bool = _city_active and _city_draw_data.mobility.phase == "boost" and not command.has("source_id") and str(command.asset_id).begins_with("house_")
+			if _city_active and player_drawn and (fade_building or not _city_draw_data.outline_needed):
+				var player: Dictionary = _city_draw_data.actor.player
+				if command.render_bounds.intersects(player.render_bounds) and _city_rasters_overlap(player,command):
+					if fade_building: _actor_draw_tint.a = 0.28
+					else: _city_draw_data.outline_needed = true
 			if style.get("armored_raster",false) and _draw_armored_raster():
 				_actor_draw_tint = Color.WHITE
 				continue
 			if command.id == "actor:s:player":
+				player_drawn = true
 				var mobility: Dictionary = _city_draw_data.mobility
 				if not mobility.travel.is_empty(): _draw_mobility_travel(mobility.travel)
 			_sprite(command.asset_id,command.position,command.pose,float(style.get("scale",1.0)),style.get("flip",false),float(style.get("seconds",_clock)))

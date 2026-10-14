@@ -59,7 +59,9 @@ func sync_inline_layout() -> void:
 	_inline_queued = false
 	if not is_instance_valid(_requirements) or not is_instance_valid(_information) or not is_inside_tree(): return
 	var has_requirements := _requirements.get_child_count() > 0
-	var right_column := has_requirements and size.x >= 330
+	# Narrow landscape grid cells need a full-width summary; reserving half
+	# of a 338px card leaves only ~103px after the native skill icon.
+	var right_column := has_requirements and size.x >= 480
 	var inner_width := maxf(1,size.x-_inline_padding.x-_inline_padding.z)
 	var requirement_width := floorf((inner_width-8)/2) if right_column else inner_width
 	_requirements.size.x = requirement_width
@@ -91,10 +93,10 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 	var delta := effect_text(option.get("effect_delta",{}))
 	if not delta.is_empty() and not description.contains(delta): parts.append(delta)
 	if option.has("evolution_previews"):
-		var preview := evolution_previews_text(option.evolution_previews)
+		var preview := evolution_previews_text(option.evolution_previews,_selected_attack_id(option))
 		if not preview.is_empty(): parts.append(preview)
 	else:
-		var requirements := requirements_text(option.get("requirements",[]))
+		var requirements := requirements_text(visible_requirements(option.get("requirements",[]),_selected_attack_id(option)))
 		if not requirements.is_empty():
 			var heading := "진화 선행조건" if str(option.get("kind","")) == "evolution" else "목표 진화 조건"
 			parts.append(heading+"\n"+requirements)
@@ -130,18 +132,24 @@ static func evolution_requirement_text(requirement: Dictionary) -> String:
 	var status := "충족 ✓" if requirement.get("met",false) else ("미보유" if current == 0 else "부족")
 	if requirement.get("kind","") == "seal": return "%s · %d/%d · %s" % [title,current,required,status]
 	return "%s · Lv %d/%d · %s" % [title,current,required,status]
-static func evolution_previews_text(previews: Array) -> String:
+static func _selected_attack_id(option: Dictionary) -> String:
+	return str(option.get("item_id","")) if option.get("kind","") in ["equipment","evolution"] else ""
+static func visible_requirements(requirements: Array, selected_attack_id: String = "") -> Array:
+	# Presentation only: keep the authoritative base-level gate in the DTO.
+	# Other attacks, passives and costs still show their exact required progress.
+	return requirements.filter(func(required): return selected_attack_id.is_empty() or required.get("kind","") != "equipment" or required.get("item_id","") != selected_attack_id or required.get("requirement_type","") != "base_level")
+static func evolution_previews_text(previews: Array, selected_attack_id: String = "") -> String:
 	var parts: Array[String] = []
 	for detail in previews:
 		var lines: Array[String] = ["궁극 · "+str(detail.get("name",""))]
-		for required in detail.get("requirements",[]): lines.append(evolution_requirement_text(required))
+		for required in visible_requirements(detail.get("requirements",[]),selected_attack_id): lines.append(evolution_requirement_text(required))
 		if detail.get("status","") == "unavailable": lines.append(reason_text("chapter_not_allowed"))
 		elif detail.get("status","") == "evolved": lines.append("진화 완료")
 		parts.append("\n".join(lines))
 	return "\n\n".join(parts)
 static func append_evolution_requirements(container: VBoxContainer, option: Dictionary) -> void:
 	if not option.has("evolution_previews"):
-		Icons.append_requirements(container,option.get("requirements",[]))
+		Icons.append_requirements(container,visible_requirements(option.get("requirements",[]),_selected_attack_id(option)))
 		return
 	Icons.append_requirements(container,[])
 	for detail in option.evolution_previews:
@@ -153,10 +161,11 @@ static func append_evolution_requirements(container: VBoxContainer, option: Dict
 		title.add_theme_color_override("font_color",Color("f0dfba"))
 		container.add_child(title)
 		var rows := VBoxContainer.new()
-		Icons.append_requirements(rows,detail.get("requirements",[]))
+		var requirements := visible_requirements(detail.get("requirements",[]),_selected_attack_id(option))
+		Icons.append_requirements(rows,requirements)
 		var index := 0
 		for row in rows.get_children():
-			row.get_node("Text").text = evolution_requirement_text(detail.requirements[index])
+			row.get_node("Text").text = evolution_requirement_text(requirements[index])
 			rows.remove_child(row)
 			container.add_child(row)
 			index += 1

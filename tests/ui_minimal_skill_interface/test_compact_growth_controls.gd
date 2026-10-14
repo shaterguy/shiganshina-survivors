@@ -64,7 +64,10 @@ func run(t) -> void:
 			t.check(info.text.strip_edges() == "i" and info.size.x >= 48 and info.size.y >= 48 and info.size.x <= 50,"information is a small glyph with a full independent 48px hit target")
 			t.check(card.get_global_rect().encloses(info.get_global_rect()) and info.mouse_filter == Control.MOUSE_FILTER_STOP,"internal information keeps an independent pointer target inside the choice border")
 			var rows: VBoxContainer = card.get_node("Requirements")
-			t.check(rows.get_child_count() == (2 if option.kind == "evolution" else 0),"only the actual evolution choice displays its named combination conditions")
+			var selected_attack := str(option.item_id) if option.kind in ["equipment","evolution"] else ""
+			var expected_rows: int = option.requirements.filter(func(required): return required.item_id != selected_attack).size() if option.kind == "evolution" else 0
+			for preview in option.get("evolution_previews",[]): expected_rows += 1+preview.requirements.filter(func(required): return required.item_id != selected_attack).size()
+			t.check(rows.get_child_count() == expected_rows,"early and final choices show their actual other conditions without repeating the selected attack")
 			card.grab_focus()
 			await _settle(t)
 			var viewport: Rect2 = ui._scroll.get_global_rect().grow(1)

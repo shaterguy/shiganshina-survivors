@@ -1,4 +1,13 @@
 extends RefCounted
+func _a(t, pressed: bool) -> void:
+	var event := InputEventJoypadButton.new()
+	event.button_index = JOY_BUTTON_A
+	event.pressed = pressed
+	Input.parse_input_event(event)
+	await t.process_frame
+func _focus(ui, semantic: String) -> void:
+	for button in ui._buttons:
+		if button.get_meta("semantic_id","") == semantic: button.grab_focus(); return
 func run(t) -> void:
 	var root := Node.new()
 	t.root.add_child(root)
@@ -10,16 +19,19 @@ func run(t) -> void:
 	ui.new_run_requested.connect(func(): calls.append("start"))
 	router.ui_action.connect(ui.navigate)
 	await t.process_frame
-	ui._buttons[0].grab_focus()
-	var down := InputEventJoypadButton.new()
-	down.button_index = JOY_BUTTON_A
-	down.pressed = true
-	Input.parse_input_event(down)
-	await t.process_frame
-	var up := InputEventJoypadButton.new()
-	up.button_index = JOY_BUTTON_A
-	up.pressed = false
-	Input.parse_input_event(up)
-	await t.process_frame
-	t.check(calls.size() == 1,"one gamepad A press produces one UI accept")
+	_focus(ui,"new_run_open")
+	await _a(t,true)
+	t.check(ui._mode == "scenario_select" and calls.is_empty(),"first real A opens scenario selection without prematurely starting")
+	await _a(t,true)
+	t.check(ui._mode == "scenario_select" and calls.is_empty(),"held A cannot advance a second navigation step")
+	await _a(t,false)
+	_focus(ui,"scenario:chapter_01_shiganshina")
+	await _a(t,true)
+	t.check(ui._mode == "scenario_briefing" and calls.is_empty(),"next released A opens the actual selected scenario briefing")
+	await _a(t,false)
+	_focus(ui,"scenario_start")
+	await _a(t,true)
+	await _a(t,true)
+	await _a(t,false)
+	t.check(calls == ["start"],"one final gamepad A press produces exactly one new-run request")
 	root.free()

@@ -7,9 +7,9 @@ const View = preload("res://game/progression/progression_view.gd")
 const UI = preload("res://game/ui/game_ui.gd")
 func _settle(t) -> void:
 	for frame in range(6): await t.process_frame
-func _visible_rows(t, ui, rows: VBoxContainer, context: String) -> void:
+func _visible_rows(t, ui, rows: VBoxContainer, context: String, expected_rows: int = 1) -> void:
 	var viewport: Rect2 = ui._scroll.get_global_rect().grow(1)
-	t.check(rows.get_child_count() == 2,"actual final evolution has base and combination-material rows: "+context)
+	t.check(rows.get_child_count() == expected_rows,"selection omits its own base row while full target details preserve both actual gates: "+context)
 	t.check(rows.is_visible_in_tree(),"actual prerequisite rows are visible in the current modal tree: "+context)
 	for row in rows.get_children():
 		var icon: TextureRect = row.get_node("Icon")
@@ -78,7 +78,7 @@ func run(t) -> void:
 					ui.navigate("down")
 					await _settle(t)
 					if ui._scroll.scroll_vertical == before_scroll: break
-				_visible_rows(t,ui,detail_rows,"target detail "+str(id)+str(screen))
+				_visible_rows(t,ui,detail_rows,"target detail "+str(id)+str(screen),2)
 			ui.close_evolution_details()
 			await _settle(t)
 			t.check(state == before,"all actual icon/condition/detail presentation remains read-only")

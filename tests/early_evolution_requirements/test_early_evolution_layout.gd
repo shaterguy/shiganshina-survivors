@@ -37,8 +37,11 @@ func run(t) -> void:
 			var rows: VBoxContainer = card.get_node("Requirements")
 			var recipe: Dictionary = option.evolution_previews[0]
 			t.check(rows.visible and text_reader._labels(rows).contains(recipe.name),"early ultimate is visible directly on the selection card: "+str(screen)+" "+option.item_id)
-			t.check(text_reader._labels(rows).contains("Lv %d/5" % int(recipe.requirements[0].current)),"selection card shows the base level progress without opening details")
-			t.check(text_reader._icon_count(rows) == recipe.requirements.size(),"every authored prerequisite has its icon")
+			var shown: Array = recipe.requirements.filter(func(required): return option.kind != "equipment" or required.item_id != option.item_id)
+			t.check(text_reader._labels(rows).contains("Lv %d/5" % int(recipe.requirements[0].current)) == (option.kind != "equipment"),"only a different attack's base requirement remains on a passive preview")
+			t.check(text_reader._icon_count(rows) == shown.size(),"every nonredundant prerequisite retains its icon")
+			for required in shown:
+				t.check(text_reader._labels(rows).contains(required.name) and text_reader._labels(rows).contains("Lv %d/%d" % [required.current,required.required]),"other required skills preserve full name and actual level progress")
 			t.check(card.get_global_rect().grow(1).encloses(rows.get_global_rect()),"requirement block stays within its card at "+str(screen))
 			t.check(not rows.get_global_rect().intersects(ui._growth_details[index].get_global_rect()),"prerequisite block never covers the independent i hit target")
 			t.check(ui._scroll.get_global_rect().grow(1).encloses(card.get_global_rect()),"focused early-recipe card is fully visible at "+str(screen))

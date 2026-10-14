@@ -140,18 +140,19 @@ func _write_screen_orientation(value: int) -> void:
 func _update_controller_orientation(device: int, connected: bool) -> void:
 	# Input may be disabled by a modal or lifecycle pause. Connection policy is
 	# still active, and no gameplay state, input hint or save is changed here.
+	# Fixed reverse landscape: portrait phone top is on the right, not sensor-selected.
 	if not _supports_controller_orientation(): return
 	if connected:
 		if _connected_controllers.has(device): return
 		if _connected_controllers.is_empty():
 			_orientation_before_controller = _read_screen_orientation()
-			if _orientation_before_controller != DisplayServer.SCREEN_SENSOR_LANDSCAPE:
-				_write_screen_orientation(DisplayServer.SCREEN_SENSOR_LANDSCAPE)
+			if _orientation_before_controller != DisplayServer.SCREEN_REVERSE_LANDSCAPE:
+				_write_screen_orientation(DisplayServer.SCREEN_REVERSE_LANDSCAPE)
 		_connected_controllers[device] = true
 	elif _connected_controllers.has(device):
 		_connected_controllers.erase(device)
 		if _connected_controllers.is_empty():
-			if _orientation_before_controller != DisplayServer.SCREEN_SENSOR_LANDSCAPE:
+			if _orientation_before_controller != DisplayServer.SCREEN_REVERSE_LANDSCAPE:
 				_write_screen_orientation(_orientation_before_controller)
 			_orientation_before_controller = -1
 func _hint(kind: String) -> void:
