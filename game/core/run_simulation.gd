@@ -38,6 +38,35 @@ const MAX_PROJECTILES := 256
 const MAX_DROPS := 256
 const COMMAND_HISTORY_COMPACT_AT := 1024
 const GAMEPLAY_PATHS := ["data/equipment.json","data/passives.json","data/evolutions.json","data/doctrines.json","data/supply_shop.json"]
+# Static provenance is issued by this exact Core, never by a snapshot flag.
+# Data is frozen at constructor validation; admission is published separately.
+class LiveConfiguration:
+	extends RefCounted
+	var _owner: WeakRef
+	var _nonce: RefCounted
+	var _data: Dictionary
+	var _provider_owner: WeakRef
+	var _helper_owner: WeakRef
+	var owner: WeakRef:
+		get: return _owner
+		set(_value): pass
+	var nonce: RefCounted:
+		get: return _nonce
+		set(_value): pass
+	var data: Dictionary:
+		get: return _data
+		set(_value): pass
+	func _init(issuer, key: RefCounted, values: Dictionary) -> void:
+		_owner = weakref(issuer); _nonce = key; _data = values
+		_provider_owner = weakref(issuer._chapter_provider)
+		_helper_owner = weakref(issuer._world_template)
+	func owns(issuer, key: RefCounted) -> bool:
+		return _owner != null and _owner.get_ref() == issuer and _nonce == key and issuer._issued_configuration_proof == self and _provider_owner != null and _provider_owner.get_ref() == issuer._chapter_provider and _helper_owner != null and _helper_owner.get_ref() == issuer._world_template
+var _configuration_nonce := RefCounted.new()
+var _configuration_proof
+var _issued_configuration_proof: LiveConfiguration
+var _configuration_admitted := false
+var _live_parent: WeakRef
 var _catalog: UpgradeCatalog
 var _supplies: SupplyCatalog
 var _evolved
@@ -61,7 +90,11 @@ var _role_admission: Dictionary = {}
 var _attack_view_cache: Dictionary = {}
 var _role_tick_query
 var _role_tick_state: Dictionary = {}
-func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dictionary = {}) -> void:
+func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dictionary = {}, configuration_source = null) -> void:
+	if configuration_source != null:
+		_content_error = "content_mismatch"
+		_clone_live_configuration(configuration_source)
+		return
 	_chapter_provider = Chapters.new() if chapter_provider == null else chapter_provider
 	var definitions := {}
 	for path in GAMEPLAY_PATHS:
@@ -106,6 +139,83 @@ func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dicti
 			return
 		_world_template = supplied.fresh()
 		if not _helper_matches(_world_template,_chapter) or _world_template == supplied: _content_error = "content_mismatch"
+	_capture_constructor_configuration()
+func _capture_constructor_configuration() -> void:
+	if _issued_configuration_proof != null: return
+	# Catalog validate() returns cached errors, so only call here immediately
+	# after the original constructor validated the input rows, never at refresh.
+	if get_script() != load("res://game/core/run_simulation.gd") or not _content_error.is_empty() or not _catalog.validate().is_empty() or not _supplies.validate().is_empty(): return
+	if not _chapter_provider is Object or _chapter_provider.get_script() != load("res://game/director/streamed_chapter_provider.gd") or _world_template == null or _world_template.get_script() != Streamed: return
+	var data := {"domain":ProjectSettings.globalize_path("res://"),"version":_chapter_provider.rules_version(),"definitions":_gameplay_definitions,"hashes":_definition_hashes,"chapter":_chapter,"equipment":_catalog._equipment,"passives":_catalog._passives,"progression":_catalog._progression,"evolutions":_catalog.evolutions._items,"evolution_schema":_catalog.evolutions._schema_version,"supplies":_supplies._items,"doctrines":_supplies._doctrines}
+	data = data.duplicate(true)
+	_freeze_configuration(data)
+	_configuration_proof = LiveConfiguration.new(self,_configuration_nonce,data)
+	_issued_configuration_proof = _configuration_proof
+static func _freeze_configuration(value: Variant) -> void:
+	if value is Dictionary:
+		for key in value: _freeze_configuration(value[key])
+		value.make_read_only()
+	elif value is Array:
+		for item in value: _freeze_configuration(item)
+		value.make_read_only()
+func _has_live_configuration(require_admitted: bool = true) -> bool:
+	if get_script() != load("res://game/core/run_simulation.gd") or not _configuration_proof is LiveConfiguration or (require_admitted and not _configuration_admitted): return false
+	if not _configuration_proof.owns(self,_configuration_nonce) or not _configuration_proof.data.is_read_only(): return false
+	if not _chapter_provider is Object or _chapter_provider.get_script() != load("res://game/director/streamed_chapter_provider.gd"): return false
+	return _content_error.is_empty() and _configuration_proof.data.domain == ProjectSettings.globalize_path("res://") and _configuration_proof.data.version == _chapter_provider.rules_version()
+func _can_prepare_live_coverage(state: Dictionary) -> bool:
+	if not _has_live_configuration() or _streamed == null or _streamed.get_script() != Streamed or _world_template == null or _world_template.get_script() != Streamed: return false
+	if _configuration_proof.data.version != "dev5": return false
+	if not Streamed.validate_world(state).get("ok",false) or state.world.stage != "city": return false
+	if state.has("player_mobility") and (not state.player_mobility is Dictionary or not state.player_mobility.get("schema_version") is int or state.player_mobility.schema_version != 2): return false
+	return _streamed._query_failure.is_empty() and _streamed.matches(state) and _streamed._world != null and _streamed._world.get_script() == Streamed.Stream and _streamed._generator.get_script() == Streamed.Generator
+func _fork_live_configuration():
+	if not _has_live_configuration(): return null
+	var result = get_script().new(null,null,{},self)
+	return result if result._has_live_configuration(false) else null
+func _clone_live_configuration(source) -> void:
+	if get_script() != load("res://game/core/run_simulation.gd") or not source is Object or source.get_script() != get_script() or not source._has_live_configuration(): return
+	var proof: LiveConfiguration = source._configuration_proof
+	var data: Dictionary = proof.data
+	# This branch creates fresh services, not a serialized constructor cache.
+	_chapter_provider = source._chapter_provider
+	_gameplay_definitions = data.definitions.duplicate(true)
+	_definition_hashes = data.hashes.duplicate(true)
+	_chapter = data.chapter.duplicate(true)
+	_catalog = Catalog.new({},{},{})
+	_catalog._equipment = data.equipment.duplicate(true)
+	_catalog._passives = data.passives.duplicate(true)
+	_catalog._progression = data.progression.duplicate(true)
+	_catalog._base_errors.clear()
+	_catalog.evolutions._items = data.evolutions.duplicate(true)
+	_catalog.evolutions._schema_version = int(data.evolution_schema)
+	_catalog.evolutions._errors.clear()
+	_catalog.evolutions._owner = weakref(_catalog)
+	_supplies = Supplies.new({},{},{},{})
+	_supplies._items = data.supplies.duplicate(true)
+	_supplies._doctrines = data.doctrines.duplicate(true)
+	_supplies._errors.clear()
+	_evolved = Evolved.new(_catalog); _signature = Signature.new(_catalog)
+	_world_template = source._world_template._fork_live_configuration()
+	if _world_template == null: return
+	_configuration_proof = LiveConfiguration.new(self,_configuration_nonce,data)
+	_issued_configuration_proof = _configuration_proof
+	_live_parent = weakref(source)
+	_content_error = ""
+func _prepare_live_world(value: Dictionary, hydration: Dictionary, commands: Array, source_helper) -> Dictionary:
+	if not _has_live_configuration(false) or _configuration_admitted or _live_parent == null or _live_parent.get_ref() == null or _streamed != null: return _failure("world_not_ready")
+	var preamble := _restore_preamble(value)
+	if not preamble.get("ok",false): return preamble
+	var prepared := []
+	var current := {"ok":true,"chapter":_chapter}
+	var checked := _restore_admitted_body(value,hydration,commands,prepared,current,source_helper)
+	if not checked.get("ok",false): return checked
+	if prepared.is_empty(): return _failure("world_not_ready")
+	_streamed = prepared[0]
+	_attack_view_cache = checked.attack_view.duplicate(true)
+	_configuration_admitted = true
+	_live_parent = null
+	return {"ok":true,"state":checked.state}
 func _load_provider_chapter() -> Dictionary:
 	if not _chapter_provider is Object or not _chapter_provider.has_method("load_chapter"): return _failure("content_mismatch")
 	var result = _chapter_provider.load_chapter("chapter_01_shiganshina")
@@ -436,6 +546,7 @@ func prepare_world(state: Dictionary, verified_hydration: Dictionary, commands: 
 	if state.has("player_mobility") and state.player_mobility.schema_version == 1: return _failure("mobility_migration_required")
 	_streamed = prepared[0]
 	_attack_view_cache = checked.attack_view.duplicate(true)
+	if _has_live_configuration(false): _configuration_admitted = true
 	return {"ok":true}
 func world_status() -> Dictionary:
 	return {"ok":false,"error_code":"world_not_ready","resident_chunks":0} if _streamed == null else _streamed.status()
@@ -444,13 +555,19 @@ func world_render_view(state: Dictionary) -> Dictionary:
 	# identity changes, not per actor/frame: helper localizes copied chunks.
 	if _streamed == null or not Streamed.enabled(state): return _failure("world_not_ready")
 	return _streamed.render_view(state)
-func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: Array = [], prepared: Array = []) -> Dictionary:
+func _restore_preamble(value: Dictionary) -> Dictionary:
 	var errors: Array[String] = Contracts.new().validate_snapshot(value)
 	if not errors.is_empty(): return {"ok":false,"error_code":"unsupported_schema" if "unsupported_schema" in errors else "invalid_snapshot","errors":errors}
 	if value.has("player_mobility") and not _mobility_rules_enabled(): return _failure("content_mismatch")
 	if value.content_revision != CONTENT_REVISION or value.chapter_id != "chapter_01_shiganshina" or not Characters.new().runtime_available(value.character_id): return _failure("content_mismatch")
+	return {"ok":true}
+func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: Array = [], prepared: Array = []) -> Dictionary:
+	var preamble := _restore_preamble(value)
+	if not preamble.get("ok",false): return preamble
 	var current: Dictionary = _current_chapter()
 	if not current.get("ok",false): return current
+	return _restore_admitted_body(value,hydrated_deltas,commands,prepared,current)
+func _restore_admitted_body(value: Dictionary, hydrated_deltas: Dictionary, commands: Array, prepared: Array, current: Dictionary, source_helper = null) -> Dictionary:
 	var city: bool = current.chapter.get("world_mode","") == "streamed_city"
 	if city != value.has("world"): return _failure("world_not_ready")
 	if not city and not hydrated_deltas.is_empty(): return _failure("invalid_hydration")
@@ -475,9 +592,10 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 		# rather than becoming generic integer-valued world-definition data.
 		if int(restored.world.schema_version) == 2: restored.world.dormant = dormant
 		if restored.world.stage == "dock" and not _same_json(restored.world.escape_rect,current.chapter.authored_dock.escape_rect): return _failure("invalid_core_state")
-		validation_helper = _world_template.fresh()
-		if not _helper_matches(validation_helper,current.chapter) or validation_helper == _world_template or validation_helper == _streamed: return _failure("content_mismatch")
-		var ready: Dictionary = validation_helper.prepare(restored,hydrated_deltas,commands)
+		validation_helper = _world_template._fork_live_configuration() if source_helper != null else _world_template.fresh()
+		if validation_helper == null or validation_helper == _world_template or validation_helper == _streamed: return _failure("content_mismatch")
+		if source_helper == null and not _helper_matches(validation_helper,current.chapter): return _failure("content_mismatch")
+		var ready: Dictionary = validation_helper._prepare_live(restored,hydrated_deltas,commands,source_helper) if source_helper != null else validation_helper.prepare(restored,hydrated_deltas,commands)
 		if not ready.get("ok",false): return ready
 	if not _core_payload_valid(restored,current.chapter,validation_helper):
 		if validation_helper != null and not validation_helper.query_status().get("ok",false): return validation_helper.query_status()

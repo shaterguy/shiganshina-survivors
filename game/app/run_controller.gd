@@ -599,14 +599,24 @@ func _step_city_tick() -> Dictionary:
 	var status: Dictionary = simulation.step_status()
 	if status.get("error_code") == "world_not_ready":
 		var generation := _lifecycle_generation
-		var refreshed: Dictionary = _city_runtime.refresh_coverage(state,commands)
+		var refreshed: Variant = _city_runtime.refresh_live_coverage(simulation,state,commands)
 		if generation != _lifecycle_generation or _lifecycle_blocked(): return {"ok":false,"error_code":"lifecycle_pause"}
-		if refreshed.get("ok",false):
+		if not _city_coverage_result_valid(refreshed):
+			refreshed = {"ok":false,"error_code":"world_not_ready"}
+		if refreshed.ok:
 			# Keep the replacement private until its one retry actually succeeds.
 			# A false-ready result cannot displace the last live Core/state A.
-			events = refreshed.simulation.step(refreshed.state,move,commands)
-			status = refreshed.simulation.step_status()
+			var retry_events: Variant = refreshed.simulation.step(refreshed.state,move,commands)
+			var retry_status: Variant = refreshed.simulation.step_status()
+			status = retry_status if retry_status is Dictionary and retry_status.get("ok") is bool else {"ok":false,"error_code":"world_not_ready"}
 			if status.get("ok",false):
+				# A default/stale success status after a callee fault is not an
+				# accepted tick. Core publishes its caller state only on success.
+				if not retry_events is Array or not retry_events.all(func(event): return event is Dictionary) or not Simulation.Catalog.integer_valid(refreshed.state.get("active_tick")) or refreshed.state.active_tick != state.active_tick+1:
+					status = {"ok":false,"error_code":"world_not_ready"}
+			if status.get("ok",false):
+				if generation != _lifecycle_generation or _lifecycle_blocked(): return {"ok":false,"error_code":"lifecycle_pause"}
+				events.assign(retry_events)
 				_adopt_city_simulation(refreshed.simulation)
 				state = refreshed.state
 				_apply_lifecycle_pause(state)
@@ -620,6 +630,19 @@ func _step_city_tick() -> Dictionary:
 		return status
 	_clear_city_tick()
 	return {"ok":true,"events":events}
+func _city_coverage_result_valid(value: Variant) -> bool:
+	if not value is Dictionary or not value.get("ok") is bool: return false
+	if not value.ok: return value.get("error_code") is String and not value.error_code.is_empty()
+	var core: Variant = value.get("simulation")
+	if not core is Object or not is_instance_valid(core) or not value.get("state") is Dictionary: return false
+	var candidate: Dictionary = value.state
+	# A coverage callback may canonicalize numeric representation, but may not
+	# change gameplay authority or return a malformed state for the retry.
+	if not candidate.has("world") or not Simulation.Contracts.new().validate_snapshot(candidate).is_empty(): return false
+	if not _same_json(candidate,state): return false
+	# Preserve derived/custom Core callbacks; only require the retry/adoption
+	# interface, never an exact script identity at this consumer boundary.
+	return core.has_method("step") and core.has_method("step_status") and core.get("_catalog") is Object and core.get("_chapter") is Dictionary
 func _clear_city_tick() -> void:
 	_pending_city_tick.clear()
 	_city_step_error = ""

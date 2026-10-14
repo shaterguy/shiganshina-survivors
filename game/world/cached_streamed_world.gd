@@ -50,3 +50,17 @@ func _cacheable_rectangle(value: Rect2) -> bool:
 	return true
 func coverage_cache_stats() -> Dictionary:
 	return {"cells":_covered_cells.size(),"cell_checks":_coverage_cell_checks,"hits":_coverage_hits,"fallbacks":_coverage_fallbacks,"coverage_revision":_covered_revision,"origin":_covered_origin.duplicate()}
+
+func _fork_retained(generator, required: Array):
+	# Only an exact private helper calls this after binding all persistent inputs.
+	# Copy the requested intersection, not the whole old pool. Fresh metadata and
+	# the normal prepare/apply path produce the same revisions as a cold build.
+	if get_script() != CachedStreamedWorld: return null
+	var candidate = get_script().new(generator,_seed)
+	for address in required:
+		var key := Address.key(address)
+		if not _chunks.has(key): continue
+		var chunk: Dictionary = _chunks[key].duplicate(true)
+		chunk.geometry_revision = 0
+		candidate._chunks[key] = chunk
+	return candidate

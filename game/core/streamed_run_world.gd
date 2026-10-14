@@ -24,6 +24,25 @@ const LIMITS := {"entities":512,"projectiles":256,"drops":256,"telegraphs":512,"
 const POSITION_FIELDS := ["position","previous_position","origin","target","locked_origin","locked_target","landing_target"]
 const GEOMETRY_POSITIONS := ["position","origin","target","center"]
 const WORLD_FIELDS := ["schema_version","mode","stage","scene_id","generator_revision","template_revision","content_fingerprint","origin_chunk","origin_revision","world_revision","delta_root","dirty_chunks","next_structure_strike_tick","evacuation"]
+class LiveDefinitions:
+	extends RefCounted
+	var _owner: WeakRef
+	var _nonce: RefCounted
+	var _data: Dictionary
+	var owner: WeakRef:
+		get: return _owner
+		set(_value): pass
+	var nonce: RefCounted:
+		get: return _nonce
+		set(_value): pass
+	var data: Dictionary:
+		get: return _data
+		set(_value): pass
+	func _init(issuer, key: RefCounted, values: Dictionary) -> void:
+		_owner = weakref(issuer); _nonce = key; _data = values
+var _definition_nonce := RefCounted.new()
+var _definition_proof
+var _issued_definition_proof: LiveDefinitions
 var _definitions: Dictionary
 var _generator
 var _world
@@ -44,6 +63,32 @@ func _init(definitions: Dictionary = {}) -> void:
 	if not Props.validate(_definitions.props,_definitions.asset_manifest).is_empty(): return
 	_generator = Generator.new(_definitions.templates,_definitions.props)
 	_valid = _generator.validate().is_empty()
+	if _valid and get_script() == load("res://game/core/streamed_run_world.gd"):
+		var data := _definitions.duplicate(true)
+		_freeze_live_definitions(data)
+		_definition_proof = LiveDefinitions.new(self,_definition_nonce,data)
+		_issued_definition_proof = _definition_proof
+static func _freeze_live_definitions(value: Variant) -> void:
+	if value is Dictionary:
+		for key in value: _freeze_live_definitions(value[key])
+		value.make_read_only()
+	elif value is Array:
+		for item in value: _freeze_live_definitions(item)
+		value.make_read_only()
+func _fork_live_configuration():
+	if get_script() != load("res://game/core/streamed_run_world.gd") or not _valid or not _definition_proof is LiveDefinitions: return null
+	if _definition_proof != _issued_definition_proof or _definition_proof.owner == null or _definition_proof.owner.get_ref() != self or _definition_proof.nonce != _definition_nonce or not _definition_proof.data.is_read_only(): return null
+	var result = get_script().new()
+	result._definitions = _definition_proof.data.duplicate(true)
+	result._generator = Generator.new(result._definitions.templates,result._definitions.props)
+	result._valid = true
+	result._definition_proof = LiveDefinitions.new(result,result._definition_nonce,_definition_proof.data)
+	result._issued_definition_proof = result._definition_proof
+	return result
+func _prepare_live(state: Dictionary, hydration: Dictionary, commands: Array, source) -> Dictionary:
+	# Only a new unpublished helper can prepare in place; failed callers discard it.
+	if _world != null or not _prepared_identity.is_empty() or not _definition_proof is LiveDefinitions: return failure("world_not_ready")
+	return _prepare_candidate(state,hydration,commands,source)
 func valid() -> bool: return _valid
 func fresh(): return get_script().new(_definitions)
 static func enabled(state: Dictionary) -> bool:
@@ -183,6 +228,8 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 	chunks.sort_custom(Address.less)
 	return {"ok":true,"chunks":chunks,"stage":"city","origin_chunk":normalized.chunk,"offset":[normalized.offset.x,normalized.offset.y]}
 func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> Dictionary:
+	return _prepare_candidate(state,hydration,commands)
+func _prepare_candidate(state: Dictionary, hydration: Dictionary, commands: Array, source = null) -> Dictionary:
 	if not _valid: return failure("invalid_generator")
 	var needed := requirements(state,commands)
 	if not needed.ok: return needed
@@ -200,15 +247,18 @@ func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> 
 		if not hydration[key] is Array: return failure("invalid_hydration")
 		var checked := Codec.normalize_records([{"chunk":chunk,"props":hydration[key]}])
 		if not checked.ok: return checked
-	var candidate = Stream.new(_generator,int(state.seed))
+	var candidate = _retained_candidate(source,state,hydration,needed.chunks) if source != null else null
+	var retained: bool = candidate != null
+	if candidate == null: candidate = Stream.new(_generator,int(state.seed))
 	var prepared: Dictionary = candidate.prepare(needed.chunks,[],hydration,state.world.origin_chunk,needed.origin_chunk)
 	if not prepared.ok: return prepared
+	if retained: candidate._coverage_revision = 1
 	if state.world.world_revision > 0:
 		var applied: Dictionary = candidate.apply_props(state.world.dirty_chunks,int(state.world.world_revision))
 		if not applied.ok: return applied
 	if state.has("player_mobility") and state.player_mobility.phase != "ground":
 		# Validate privately; failed preparation must preserve the installed cache.
-		var probe = fresh()
+		var probe = self if source != null else fresh()
 		probe._world = candidate
 		probe._stage = "city"
 		probe._remember_identity(state)
@@ -224,6 +274,19 @@ func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> 
 	_blocked_routes.clear()
 	_remember_identity(state); _stage = "city"; _query_failure.clear(); _last_status = prepared.duplicate(true)
 	return prepared
+func _retained_candidate(source, state: Dictionary, hydration: Dictionary, required: Array):
+	# A weak hint is never authority. Retain only exact, already prepared geometry
+	# with the same source hydration; all admission and delta validation still run.
+	if get_script() != load("res://game/core/streamed_run_world.gd") or source == null or source.get_script() != get_script() or source == self: return null
+	if not _valid or not source._valid or source._stage != "city" or state.world.stage != "city" or source._world == null or source._world.get_script() != Stream: return null
+	if not source._query_failure.is_empty() or not source.matches(state) or not _same_json(_definitions,source._definitions): return null
+	if source._world._generator != source._generator or source._world._world_revision != int(state.world.world_revision): return null
+	if source._generator.get_script() != Generator or _generator.get_script() != Generator or source._world._seed != int(state.seed) or not _same_json(source._world._origin,state.world.origin_chunk): return null
+	if state.has("player_mobility") and state.player_mobility.schema_version != 2: return null
+	for chunk in required:
+		var key := Address.key(chunk)
+		if source._world._chunks.has(key) and (not source._hydration.has(key) or not hydration.has(key) or not _same_json(source._hydration[key],hydration[key])): return null
+	return source._world._fork_retained(_generator,required)
 func _remember_identity(state: Dictionary) -> void:
 	# One private snapshot at successful publication. No per-tick deep copy, and
 	# callers cannot mutate the installed authority through shared dictionaries.

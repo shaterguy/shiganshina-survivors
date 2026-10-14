@@ -91,6 +91,24 @@ func _confirm_candidate(game_save_store, scope = null) -> Dictionary:
 	var result := {"ok":true,"simulation":_pending.simulation,"state":_pending.state,"game_save":canonical,"source_sha256":observed.get("source_sha256",""),"recovered":observed.get("recovered",false)}
 	_pending = {}
 	return result
+func refresh_live_coverage(current_core, current_state: Dictionary, commands: Array = []) -> Dictionary:
+	# Public cold APIs and injected callbacks remain unchanged. This entry is
+	# used only by the Controller's ordinary fixed-tick coverage continuation.
+	if get_script() != load("res://game/app/prepared_city_runtime.gd") or _content_router == null or _content_router.get_script() != Router or _provider.get_script() != City or not _world_store is Disk or _world_store.get_script() != Disk or not current_core is Object or current_core.get_script() != Core or current_core._chapter_provider != _provider or not current_core._can_prepare_live_coverage(current_state):
+		return refresh_coverage(current_state,commands)
+	var needed := Helper.requirements(current_state,commands)
+	if not needed.get("ok",false): return needed
+	_world_store.begin_verified_read()
+	var verified: Dictionary = _world_store.verify_root(current_state.world.delta_root)
+	if not verified.get("ok",false): return verified
+	var hydration: Dictionary = _world_store.hydrate(current_state.world.delta_root,needed.chunks)
+	if not hydration.get("ok",false): return hydration
+	var core = current_core._fork_live_configuration()
+	if core == null: return refresh_coverage(current_state,commands)
+	var prepared: Variant = core._prepare_live_world(current_state,hydration.deltas,commands,current_core._streamed)
+	if not prepared is Dictionary: return _fail("world_not_ready")
+	if not prepared.get("ok",false): return prepared
+	return {"ok":true,"simulation":core,"state":prepared.state}
 func refresh_coverage(current_state: Dictionary, commands: Array = []) -> Dictionary:
 	# Derived-cache replacement only. The caller supplies its current state and
 	# must swap the returned pair synchronously, without consuming a refused tick.
