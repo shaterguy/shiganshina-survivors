@@ -1,5 +1,5 @@
-# DEV8 PREPARATION ONLY. UNSET input pins block execution. Reuse the existing sign-dev4.yml path.
-name: Sign the approved local DEV8 APK
+# DEV9 PREPARATION ONLY. UNSET input pins block execution. Reuse the existing sign-dev4.yml path.
+name: Sign the approved local DEV9 APK
 on:
   workflow_dispatch:
 
@@ -7,21 +7,21 @@ permissions:
   contents: read
 
 concurrency:
-  group: wings-of-humanity-dev8-signing
+  group: wings-of-humanity-dev9-signing
   cancel-in-progress: false
 
 env:
-  SOURCE_COMMIT: 5bb8fe28908407c21652179ae75dcb01064d141a
-  INPUT_SHA256: 6a2bd8fb0dba38df51d2420dac35f5cbba5abf6e3b21785d9ace82c5d3cbf0ab
-  INPUT_BYTES: 52601015
-  SOURCE_SHA256: 9ffc556ed6a8381f517a7d363775956fed1f1f07ed35b0044bab3c59d581fd01
-  BUILD_REPORT_SHA256: 63fed9cee3220fd8b366a94217b78b06d616e50d3645f9f27e76278c9d9c3f79
+  SOURCE_COMMIT: ea3bfe46e652d743e89563c4e3db7c1fdfc5f2eb
+  INPUT_SHA256: c5273b4dc3cc5361064de36d508dfe45cfa1765c25dd245c5771f76fbf978d60
+  INPUT_BYTES: 52602703
+  SOURCE_SHA256: 237672f584ae1f1fd7b4170401850c4fd3efcd925415268432e19255cfb3b503
+  BUILD_REPORT_SHA256: 6baf42281b0d65823cb5ea227e6558d15be1fd1e516d9f187e0187b9e9e90c6f
   BUILD_REPORT_BYTES: 1920
   TEMPLATE_SHA256: 5cd4cfc1a8fc23ed45be5f0a36a6cc279d15b50a40c6ef69c89276895441cd1d
-  RELEASE_ID: 412609742
-  APK_ASSET_ID: 640085020
-  REPORT_ASSET_ID: 640085253
-  RELEASE_TAG: wings-of-humanity-dev8-signing
+  RELEASE_ID: 412668695
+  APK_ASSET_ID: 640254315
+  REPORT_ASSET_ID: 640254643
+  RELEASE_TAG: wings-of-humanity-dev9-signing
   GH_HOST: github.com
   GH_DEBUG: ''
   GH_PROMPT_DISABLED: '1'
@@ -95,7 +95,7 @@ jobs:
           printf 'JAVA_HOME=%s\nANDROID_BUILD_TOOLS_VERSION=35.0.0\nWINGS_GH_VERSION=%s\nWINGS_JDK_RUNTIME=%s\n' "$java_home" "$gh_version" "$jdk_runtime" >> "$GITHUB_ENV"
           echo 'TOOL_PREFLIGHT_PASS'
 
-      - name: Read the exact approved DEV8 commit
+      - name: Read the exact approved DEV9 commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: shaterguy/wings-of-humanity
@@ -140,8 +140,8 @@ jobs:
 
           def input_specs(env):
               return [
-                  (int(env['APK_ASSET_ID']), 'WingsOfHumanity-v0.1.0-dev8-unsigned.apk', int(env['INPUT_BYTES']), env['INPUT_SHA256'], 'unsigned.apk'),
-                  (int(env['REPORT_ASSET_ID']), 'WingsOfHumanity-v0.1.0-dev8-unsigned.apk.build.json', int(env['BUILD_REPORT_BYTES']), env['BUILD_REPORT_SHA256'], 'build.json'),
+                  (int(env['APK_ASSET_ID']), 'WingsOfHumanity-v0.1.0-dev9-unsigned.apk', int(env['INPUT_BYTES']), env['INPUT_SHA256'], 'unsigned.apk'),
+                  (int(env['REPORT_ASSET_ID']), 'WingsOfHumanity-v0.1.0-dev9-unsigned.apk.build.json', int(env['BUILD_REPORT_BYTES']), env['BUILD_REPORT_SHA256'], 'build.json'),
               ]
 
           def check_asset(asset, aid, name, size, digest):
@@ -165,9 +165,9 @@ jobs:
           def output_specs(env, folder):
               run, attempt = env['GITHUB_RUN_ID'], env['GITHUB_RUN_ATTEMPT']
               require(run.isdecimal() and attempt.isdecimal(), 'Invalid run/attempt')
-              base = f'WingsOfHumanity-v0.1.0-dev8-run{run}-attempt{attempt}'
-              return [(folder/'WingsOfHumanity-v0.1.0-dev8.apk', base + '.apk'),
-                      (folder/'WingsOfHumanity-v0.1.0-dev8.apk.signing.json', base + '.apk.signing.json')]
+              base = f'WingsOfHumanity-v0.1.0-dev9-run{run}-attempt{attempt}'
+              return [(folder/'WingsOfHumanity-v0.1.0-dev9.apk', base + '.apk'),
+                      (folder/'WingsOfHumanity-v0.1.0-dev9.apk.signing.json', base + '.apk.signing.json')]
 
           def check_output_receipt(folder, env):
               apk, receipt = [item[0] for item in output_specs(env, folder)]
@@ -228,8 +228,8 @@ jobs:
           if (work/'unsigned.apk').stat().st_size != int(os.environ['INPUT_BYTES']):
               raise SystemExit('Unsigned APK size mismatch')
           report = json.loads((work/'build.json').read_text())
-          expected = {'package': 'com.shaterguy.wingsofhumanity.dev', 'version_name': '0.1.0-dev8',
-                      'version_code': 8, 'abi': 'arm64-v8a', 'signed': False,
+          expected = {'package': 'com.shaterguy.wingsofhumanity.dev', 'version_name': '0.1.0-dev9',
+                      'version_code': 9, 'abi': 'arm64-v8a', 'signed': False,
                       'development_only': True, 'final_export_allowed': False, 'build_mode': 'development-validation',
                       'sha256': os.environ['INPUT_SHA256'], 'source_sha256': os.environ['SOURCE_SHA256'],
                       'template_sha256': os.environ['TEMPLATE_SHA256']}
@@ -360,12 +360,12 @@ jobs:
           PY
           python3 source/tools/build/sign_android.py --github-new-dev --development-validation --verified-input-only \
             --input "$RUNNER_TEMP/shigan-input/unsigned.apk" \
-            --output "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev8.apk" \
+            --output "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev9.apk" \
             --expected-input-sha256 "$INPUT_SHA256" --expected-source-sha256 "$SOURCE_SHA256"
           python3 - <<'PY'
           import hashlib, json, os
           from pathlib import Path
-          output = Path(os.environ['RUNNER_TEMP'])/'shigan-output/WingsOfHumanity-v0.1.0-dev8.apk'
+          output = Path(os.environ['RUNNER_TEMP'])/'shigan-output/WingsOfHumanity-v0.1.0-dev9.apk'
           receipt = output.with_suffix('.apk.signing.json')
           report = json.loads(receipt.read_text())
           identity = json.loads((Path(os.environ['RUNNER_TEMP'])/'shigan-input/public-identity.json').read_text())
@@ -375,7 +375,7 @@ jobs:
               or report['certificate_sha256'] != os.environ['EXPECTED_CERT_SHA256']
               or report['source_sha256'] != os.environ['SOURCE_SHA256']
               or report.get('package') != {'package': 'com.shaterguy.wingsofhumanity.dev',
-                                           'version_name': '0.1.0-dev8', 'version_code': 8, 'abi': 'arm64-v8a'}
+                                           'version_name': '0.1.0-dev9', 'version_code': 9, 'abi': 'arm64-v8a'}
               or report.get('build_mode') != 'development-validation'
               or report.get('development_only') is not True
               or report.get('final_export_allowed') is not False
@@ -405,15 +405,15 @@ jobs:
           set +x
           gh api --hostname github.com --method GET "https://api.github.com/repos/shaterguy/wings-of-humanity/releases/$RELEASE_ID" > "$RUNNER_TEMP/shigan-input/release.json"
           python3 "$RUNNER_TEMP/release-check.py" before-output
-          base="WingsOfHumanity-v0.1.0-dev8-run${GITHUB_RUN_ID}-attempt${GITHUB_RUN_ATTEMPT}"
+          base="WingsOfHumanity-v0.1.0-dev9-run${GITHUB_RUN_ID}-attempt${GITHUB_RUN_ATTEMPT}"
           # POST creates a new unique asset. No PATCH/DELETE/clobber, no release publish.
           gh api --hostname github.com --method POST -H 'Content-Type: application/vnd.android.package-archive' \
             "https://uploads.github.com/repos/shaterguy/wings-of-humanity/releases/$RELEASE_ID/assets?name=$base.apk" \
-            --input "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev8.apk" > "$RUNNER_TEMP/shigan-input/$base.apk.uploaded.json"
+            --input "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev9.apk" > "$RUNNER_TEMP/shigan-input/$base.apk.uploaded.json"
           gh api --hostname github.com --method GET "https://api.github.com/repos/shaterguy/wings-of-humanity/releases/$RELEASE_ID" > "$RUNNER_TEMP/shigan-input/release.json"
           python3 "$RUNNER_TEMP/release-check.py" metadata
           gh api --hostname github.com --method POST -H 'Content-Type: application/json' \
             "https://uploads.github.com/repos/shaterguy/wings-of-humanity/releases/$RELEASE_ID/assets?name=$base.apk.signing.json" \
-            --input "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev8.apk.signing.json" > "$RUNNER_TEMP/shigan-input/$base.apk.signing.json.uploaded.json"
+            --input "$RUNNER_TEMP/shigan-output/WingsOfHumanity-v0.1.0-dev9.apk.signing.json" > "$RUNNER_TEMP/shigan-input/$base.apk.signing.json.uploaded.json"
           gh api --hostname github.com --method GET "https://api.github.com/repos/shaterguy/wings-of-humanity/releases/$RELEASE_ID" > "$RUNNER_TEMP/shigan-input/release.json"
           python3 "$RUNNER_TEMP/release-check.py" after-output
