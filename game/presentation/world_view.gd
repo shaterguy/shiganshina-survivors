@@ -496,8 +496,6 @@ func _draw() -> void:
 	_draw_upright_with_vfx(packet.upright,vfx)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
-	var landing: Variant = mobility_commands().landing_position
-	if landing is Vector2: _draw_landing_marker(landing)
 	# Enemy warnings and the exact player-location feedback stay above effects.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 	_draw_enemy_attacks()
@@ -647,15 +645,14 @@ func _city_render_packet() -> Dictionary:
 	var seconds := _clock-_attack_started if animation == "attack" else _clock
 	if animation == "move": seconds = movement_seconds("garrison_01","player",1.0,seconds)
 	var mobility: Dictionary = mobility_commands()
-	# Reuse existing reviewed poses; actual hit/death/attack retain precedence.
-	if animation not in ["hit","death","attack"]:
-		if mobility.phase == "rise": animation = "move"; seconds = 0.3
-		elif mobility.phase == "over": animation = "move"; seconds = 0.5
-		elif mobility.phase == "land": animation = "windup"; seconds = 0.0
+	_city_draw_data.mobility = mobility
+	# A fixed reviewed travel pose reads as a dash rather than a roof jump.
+	# Actual hit/death/attack retain precedence.
+	if mobility.phase == "boost" and animation not in ["hit","death","attack"]:
+		animation = "move"; seconds = 0.3
 	var player := _actor_view("player","garrison_01",mobility.ground_position,animation,1.0,float(_snapshot.player.facing[0]) < 0,seconds)
 	player.is_player = true
 	player.visual_height = float(mobility.height)
-	player.roof_prop_id = mobility.roof_prop_id
 	actors.append(player)
 	for entity in _snapshot.get("entities",[]):
 		var definition: Dictionary = _snapshot.get("rules",{}).get("enemy_catalog",{}).get(entity.enemy_id,{})
@@ -695,43 +692,36 @@ func _city_render_packet() -> Dictionary:
 			_city_draw_data.actor.player.position = command.position
 			_city_draw_data.actor.player.render_bounds = command.render_bounds
 	return packet
-# Discrete attachment/depth decisions come from the current Core sample. Only
-# accepted planar coordinates and height blend; no path planning or physics.
+# Attachment decisions come from the current Core sample. Only accepted planar
+# coordinates blend; presentation never creates a roof arc or depth privilege.
 func mobility_commands() -> Dictionary:
 	var sample: Dictionary = MobilitySample.visual_sample(_snapshot)
 	var point: Array = sample.ground_position
 	var ground := _render_position("player","player",Vector2(point[0],point[1]))
-	if _render_alpha < 1.0 and _render_pair_valid("player","player") and _render_previous.cast_id == _render_current.cast_id:
-		sample.height = lerpf(float(_render_previous.height),float(sample.height),_render_alpha)
-	var result: Dictionary = {"height":float(sample.height),"phase":sample.phase,"ground_position":ground,"wire":{},"roof_prop_id":str(sample.get("roof_prop_id","")),"landing_position":null}
-	var anchor: Dictionary = sample.anchor
-	if not anchor.is_empty():
+	var result: Dictionary = {"height":0.0,"phase":sample.phase,"ground_position":ground,"wires":[],"travel":{},"wire":{},"roof_prop_id":"","landing_position":null}
+	if sample.phase != "boost": return result
+	var anchors: Array = sample.get("anchors",[])
+	if anchors.size() != 2: return result
+	var wires: Array = []
+	for anchor in anchors:
+		if not anchor is Dictionary or not anchor.get("chunk") is Array or not MobilitySample.vector(anchor.get("local")) or not MobilitySample.number(anchor.get("roof_height")): return result
 		var relative: Dictionary = CityAddress.relative(anchor.chunk,Vector2(anchor.local[0],anchor.local[1]),_snapshot.get("world",{}).get("origin_chunk",[]))
-		if relative.get("ok",false):
-			result.wire = {"from":ground-Vector2(0,float(sample.height)+18.0),"to":relative.local-Vector2(0,float(anchor.roof_height))}
+		if not relative.get("ok",false): return result
+		wires.append({"from":ground-Vector2(0,18.0),"to":relative.local-Vector2(0,float(anchor.roof_height))})
 	var mobility: Dictionary = _snapshot.get("player_mobility",{})
-	if sample.phase in ["rise","over","land"] and float(sample.height) > 0.0 and not mobility.get("cancelled",false) and mobility.get("landing") is Dictionary:
-		var landing: Dictionary = mobility.landing
-		if landing.get("chunk") is Array and landing.get("local") is Array and landing.local.size() == 2:
-			var local: Array = landing.local
-			if (local[0] is int or local[0] is float) and (local[1] is int or local[1] is float) and is_finite(float(local[0])) and is_finite(float(local[1])):
-				var relative: Dictionary = CityAddress.relative(landing.chunk,Vector2(local[0],local[1]),_snapshot.world.get("origin_chunk",[]))
-				if relative.get("ok",false): result.landing_position = relative.local
+	var direction: Array = mobility.get("direction",[0.0,0.0])
+	result.wires = wires
+	result.travel = {"position":ground-Vector2(0,10.0),"direction":Vector2(direction[0],direction[1])}
 	return result
 func _mobility_texture(kind: String) -> Texture2D:
 	if _mobility_textures.has(kind): return _mobility_textures[kind]
-	var size: Vector2i = Vector2i(36,12) if kind == "shadow" else (Vector2i(33,33) if kind == "landing" else Vector2i.ONE)
+	var size: Vector2i = Vector2i(36,12) if kind == "shadow" else Vector2i.ONE
 	var raster: Image = Image.create(size.x,size.y,false,Image.FORMAT_RGBA8)
 	if kind == "shadow":
 		for y in 12:
 			for x in 36:
 				var normalized: Vector2 = Vector2((float(x)+0.5-18.0)/18.0,(float(y)+0.5-6.0)/6.0)
 				if normalized.length_squared() <= 1.0: raster.set_pixel(x,y,Color.WHITE)
-	elif kind == "landing":
-		for y in 33:
-			for x in 33:
-				var distance: float = Vector2(x-16,y-16).length_squared()
-				if (distance >= 196.0 and distance <= 256.0) or distance <= 6.25: raster.set_pixel(x,y,Color.WHITE)
 	else: raster.fill(Color.WHITE)
 	var texture: Texture2D = ImageTexture.create_from_image(raster)
 	_mobility_textures[kind] = texture
@@ -749,12 +739,16 @@ func _draw_mobility_wire(wire: Dictionary) -> void:
 	_world_rect(texture,Rect2(0,-1.5,delta.length(),3.0),false,Color(0.04,0.08,0.10,0.95))
 	_world_rect(texture,Rect2(0,-0.75,delta.length(),1.5),false,Color(0.60,0.91,0.94,1.0))
 	_world_transform(Vector2.ZERO)
-func _draw_landing_marker(point: Vector2) -> void:
+func _draw_mobility_travel(travel: Dictionary) -> void:
+	var direction: Vector2 = travel.direction
+	if direction.length_squared() <= 0.000001: return
+	_world_transform(_screen(travel.position),direction.angle())
+	var texture: Texture2D = _mobility_texture("wire")
+	_world_rect(texture,Rect2(-36,-1.5,30,3),false,Color(0.16,0.88,1.0,0.82))
+	if not reduce_effects:
+		for side in [-1.0,1.0]:
+			_world_rect(texture,Rect2(-26,side*7.0-1.0,18,2),false,Color(0.24,0.94,1.0,0.58))
 	_world_transform(Vector2.ZERO)
-	var texture: Texture2D = _mobility_texture("landing")
-	var center: Vector2 = _screen(point)
-	_world_rect(texture,Rect2(center-Vector2(18,18),Vector2(36,36)),false,Color(0.04,0.08,0.10,0.95))
-	_world_rect(texture,Rect2(center-Vector2(16,16),Vector2(32,32)),false,Color(0.24,0.94,1.0,1.0))
 func _draw_streamed_city() -> void:
 	if _city_view.is_empty(): return
 	var packet := _city_render_packet()
@@ -775,6 +769,9 @@ func _draw_streamed_city() -> void:
 		var passage_position: Variant = selected_passage_world_position()
 		if passage_position is Vector2: _sprite("escape_marker",passage_position,"idle",2.0)
 	_draw_upright_with_vfx(packet.upright,vfx)
+	# Connections attach above side roofs, independently of the grounded body's
+	# depth. Keep the complete pair visible, below damage and danger overlays.
+	for wire in _city_draw_data.mobility.wires: _draw_mobility_wire(wire)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
 	for marker in packet.visibility_markers:
@@ -784,8 +781,6 @@ func _draw_streamed_city() -> void:
 			if behind and command.render_bounds.intersects(marker.render_bounds) and _city_rasters_overlap(_city_draw_data.actor["player"],command):
 				_draw_player_outline(marker,_city_draw_data.actor["player"])
 				break
-	var landing: Variant = mobility_commands().landing_position
-	if landing is Vector2: _draw_landing_marker(landing)
 	_draw_enemy_attacks()
 	# Danger is the final raster pass; a cyan outline never substitutes for it.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
@@ -826,8 +821,8 @@ func _draw_upright_with_vfx(upright: Array, vfx: Array[Dictionary]) -> void:
 				_actor_draw_tint = Color.WHITE
 				continue
 			if command.id == "actor:s:player":
-				var wire: Dictionary = mobility_commands().wire
-				if not wire.is_empty(): _draw_mobility_wire(wire)
+				var mobility: Dictionary = _city_draw_data.mobility
+				if not mobility.travel.is_empty(): _draw_mobility_travel(mobility.travel)
 			_sprite(command.asset_id,command.position,command.pose,float(style.get("scale",1.0)),style.get("flip",false),float(style.get("seconds",_clock)))
 			_actor_draw_tint = Color.WHITE
 func _draw_hit_fallbacks() -> void:

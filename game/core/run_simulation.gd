@@ -433,6 +433,7 @@ func prepare_world(state: Dictionary, verified_hydration: Dictionary, commands: 
 	var checked := _restore_checked(state,verified_hydration,commands,prepared)
 	if not checked.get("ok",false): return checked
 	if prepared.is_empty(): return _failure("world_not_ready")
+	if state.has("player_mobility") and state.player_mobility.schema_version == 1: return _failure("mobility_migration_required")
 	_streamed = prepared[0]
 	_attack_view_cache = checked.attack_view.duplicate(true)
 	return {"ok":true}
@@ -509,6 +510,23 @@ func _restore_checked(value: Dictionary, hydrated_deltas: Dictionary, commands: 
 	if not Fantasy.canonicalize(restored,_catalog): return _failure("invalid_core_state")
 	_signature.canonicalize(restored)
 	_canonicalize_saved_vectors(restored)
+	if restored.has("player_mobility") and restored.player_mobility.schema_version == 1:
+		var legacy_roles := _role_samples_checked(restored,validation_helper)
+		if not legacy_roles.get("ok",false): return legacy_roles
+		var ground_query := Callable()
+		if restored.world.stage == "dock":
+			# The authored dock uses finite geometry; its helper intentionally
+			# owns no streamed chunks. Keep the existing collision authority.
+			ground_query = func(position: Vector2) -> Dictionary: return {"ok":true,"walkable":_validation_walkable(restored,position,8.0,validation_helper)}
+		var migrated := Mobility.migrate_legacy(restored,validation_helper,ground_query)
+		if not migrated.get("ok",false): return migrated
+		if not Contracts.new().validate_snapshot(restored).is_empty(): return _failure("invalid_snapshot")
+		var migrated_helper = _world_template.fresh()
+		if not _helper_matches(migrated_helper,current.chapter) or migrated_helper == _world_template or migrated_helper == _streamed or migrated_helper == validation_helper: return _failure("content_mismatch")
+		var ready: Dictionary = migrated_helper.prepare(restored,hydrated_deltas,commands)
+		if not ready.get("ok",false): return ready
+		if not _core_payload_valid(restored,current.chapter,migrated_helper): return _failure("invalid_core_state")
+		validation_helper = migrated_helper
 	if validation_helper != null:
 		var status: Dictionary = validation_helper.query_status()
 		if not status.get("ok",false): return status
@@ -744,16 +762,17 @@ func _move_player(state: Dictionary, input: Vector2) -> void:
 	if not move.is_zero_approx(): state.player.facing = _array(move.normalized())
 func _apply_mobility_damage(state: Dictionary, events: Array[Dictionary]) -> void:
 	if _mobility_sweeps.is_empty() or _mobility_cast.is_empty() or _mobility_cast.cancelled or float(state.player.hp) <= 0.0: return
-	# Enemy movement can damage the roof after our proposal. A stale wire must
+	# Enemy movement can damage either side anchor after our proposal. A stale wire must
 	# stop path damage in this same tick, not one tick later.
 	var route := Mobility.route_sample(_mobility_cast,state.world.origin_chunk)
 	if not route.get("ok",false):
 		_role_error = _failure("invalid_mobility_path")
 		return
-	var fresh: Dictionary = _streamed.mobility_sweep(state,route.points[1],Vector2.ZERO,8.0,_mobility_cast.anchor,float(_mobility_cast.anchor.roof_height))
+	var fresh: Dictionary = _streamed.mobility_pair_check(state,_mobility_cast.anchors)
 	if not fresh.get("ok",false):
 		if fresh.get("error_code") == "stale_mobility_anchor":
-			if state.player_mobility.phase != "ground": state.player_mobility.cancelled = true
+			state.player_mobility = Mobility.grounded(state.player_mobility)
+			state.player.velocity = [0.0,0.0]
 		else: _role_error = fresh
 		return
 	var rewards: Array[Dictionary] = []
@@ -770,7 +789,7 @@ func _apply_mobility_damage(state: Dictionary, events: Array[Dictionary]) -> voi
 			var id := str(entity.id)
 			if entity.hp <= 0 or id in _mobility_cast.hit_ids or not Geometry.overlaps(shape,_vec(entity.position),float(entity.radius)): continue
 			_mobility_cast.hit_ids.append(id)
-			if state.player_mobility.phase != "ground": state.player_mobility.hit_ids.append(id)
+			state.player_mobility.hit_ids.append(id)
 			_hit_entity(state,entity,float(_mobility_cast.damage),"player_mobility",events,rewards,attack_id)
 	# Existing combat order is untouched. Settle only newly accepted path kills
 	# before publishing this tick or opening its upgrade offer.
@@ -1958,7 +1977,9 @@ func _canonicalize_saved_vectors(state: Dictionary) -> void:
 		# Recover real_t representation only; never translate absolute chunks,
 		# choose another path, change progress or force an airborne landing.
 		for point in mobility.path: point.local = _array(_vec(point.local))
-		if not mobility.anchor.is_empty():
+		if mobility.schema_version == 2:
+			for anchor in mobility.anchors: anchor.local = _array(_vec(anchor.local))
+		elif not mobility.anchor.is_empty():
 			mobility.anchor.local = _array(_vec(mobility.anchor.local))
 			for field in ["pass_start","pass_end"]:
 				mobility.anchor[field].local = _array(_vec(mobility.anchor[field].local))

@@ -22,3 +22,23 @@ static func changed(s: Dictionary, slots: Array) -> Dictionary:
 	next.world.world_revision = int(next.world.world_revision)+1
 	next.world.dirty_chunks = [{"chunk":next.world.origin_chunk.duplicate(),"props":slots}]
 	return next
+
+# Live v2 tests use the shared paired-anchor Core fixture. Keep make() unchanged
+# because captured v1 checkpoints depend on its exact one-roof fingerprint.
+static func corridor(t, slots: Array = [], origin: Array = ["0","0"]) -> Dictionary:
+	var fixture = load("res://tests/corridor_mobility/corridor_fixture.gd")
+	var s: Dictionary = fixture.make(t,slots,[180.0,256.0],origin)
+	t.check(not s.is_empty(),"paired geometry fixture constructs genuine Core state")
+	if s.is_empty(): return s
+	s.helper = s.core._streamed
+	s.definitions = F.definitions()
+	for template in s.definitions.templates.templates: template.slots = (fixture.slots() if slots.is_empty() else slots).duplicate(true)
+	s.prepared = {"ok":true}
+	return s
+static func legacy(phase := "over") -> Dictionary:
+	var packet: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/corridor_mobility/fixtures/legacy_"+phase+".json"))
+	var s := make()
+	s.state = packet.state
+	s.hydration = packet.hydration
+	s.prepared = s.helper.prepare(s.state,s.hydration)
+	return s

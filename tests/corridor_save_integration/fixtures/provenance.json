@@ -1,0 +1,46 @@
+{
+  "baseline_dependency_sha256": {
+    "chapters/chapter_01/city_templates.json": "75689f5e4951213cf89d823e7e7279f93ad422fdb62752cdcfc55a1b43f305a2",
+    "data/world_props.json": "cbb5ecc097aca8e2878842523098a61f183da16e34ed1ae5cdc7559c00886a19",
+    "game/app/autosave_worker.gd": "2588d9e5b821220e51aa8123c709c3dd52f5fabaa052785fc8af9aee7ab0a439",
+    "game/app/prepared_city_runtime.gd": "65759ea2ccd851d6f607a89729b976dd71927a6c18e708fd2837d907f37f2f17",
+    "game/app/run_controller.gd": "93d472e15f293993a3f38ea52285af78f0c4818e65a2edf2b834b217133036d9",
+    "game/app/save_validation_scope.gd": "3aeb32a16fd1d9f3ab1991db6a6318f1493c3eedc1babe65e983fdd1d808464f",
+    "game/app/world_checkpoint_adapter.gd": "181849fe6103378d1aa03738dbecbfd9982ad282342659f79908dd77978e3ee3",
+    "game/contracts/game_save_contracts.gd": "755d85dd9c904acd649c85653f55911475c7ac0294cdacad87b6db0d60254a8f",
+    "game/core/player_mobility.gd": "7ab1a070d77ba7421bebdb5473863d62a851a033409655aeb945943b3ca58ca0",
+    "game/core/run_simulation.gd": "ed24a71172c5c574d8a4c464220c0a6f8ee217849dd433b681a8fe7c109ffa0c",
+    "game/core/streamed_run_world.gd": "6fbb80520b50e39494164597a93b04d9df55c2e2d0b7c0e521e7e6dcf4803a10",
+    "game/director/streamed_chapter_provider.gd": "8b64dff1886d892fe5b347e75c6c051ac5624957619691a14431b49d0bbf36e7",
+    "game/persistence/game_save_store.gd": "380483f2d7eb680bbed6bbc30875166cac20a05fb5b080163463b8ca90f7f160",
+    "game/persistence/world_delta_store.gd": "947cc69dae75ac9873722e9b367185384f3e7cf1ad571bc06a6f0a3d92944211",
+    "game/world/mobility_anchor_query.gd": "c20db8417074fb66c7773dfd3d85454c3faa7e87720243ee8e82fe52f6dbda99",
+    "tests/dev5_mobility_autosave/mobility_app_fixture.gd": "f4f390737bca8a9a856f2e0b4e451869a8561218e3674a5c56143f8e257e2a4a",
+    "tests/terrain_mobility/motion_fixture.gd": "0f5fa8a7b6e748673f113613b8a3c83caa05789c866aaef18cc40a254c752728"
+  },
+  "baseline_final_manifest_matches": 19,
+  "baseline_final_manifest_mismatches": [],
+  "baseline_final_manifest_sha256": "86c48f4694581a49a85036c9c5f22ac030f7319f91f98e6705a2012f890caae6",
+  "capture_method": "Unmodified dev7 product copy plus four exact final version files; separate XDG profile; normal Core ticks and actual synchronous RunController -> GameSaveStore save. The candidate product was never used to generate legacy motion.",
+  "fixture_scope": {
+    "legacy_city_*.json": "Real shipped City provider and stored GameSave envelope. Geometry, mobility, clock and RNG originate from actual dev7 Core ticks.",
+    "legacy_custom_over_interior.json": "Real dev7 Core with existing authored one-roof test Provider; two genuine over ticks past first over state."
+  },
+  "fixture_sha256": {
+    "legacy_city_glide.json": "256740e4bb1ca6ae8cd10b179723dc86da8e7d94e580cd36a917bbc64c390132",
+    "legacy_city_ground.json": "300091d84b93ee7ef0e861b10bd6f90039836482e933e6fbaf439c1d4720fc62",
+    "legacy_city_land.json": "a39eab2c57e2098a87235b35e4fda679c3b54f781596bcbdd813bd3776eb1fdc",
+    "legacy_city_over.json": "5bce1afcfc8393a01394cdf50561cbd365db1d905025f96b9ab720db8be55b39",
+    "legacy_city_over_interior.json": "c66360365ff029d46fc8d193ad0a2e4c88e8160641b2857bad5f1e61fcd7de2a",
+    "legacy_city_rise.json": "78ea3c655d761ed3f4727406a64fa9ccb15bc002203505ff3bfbde3637190a29",
+    "legacy_custom_over_interior.json": "8e9621f27078f4717c016ce6f4d1729d2aa0e15b74da6eb7aed276bed1ab1a52"
+  },
+  "generation_scripts_sha256": {
+    "generate_legacy_city.gd": "242284d5bd9ce4237fc54de4d9b561633e3ab586480d8c71d0a00f525c5e704d",
+    "generate_legacy_interior.gd": "1637fe3b779a421ead9a8ed074905e4c9676a059e0004d253644979016ace119"
+  },
+  "godot_version": "4.6.3.stable.official.7d41c59c4",
+  "source_commit": "38b0cb1e70ef7c04a952568597a3ffc983d91945",
+  "source_ref": "refs/heads/v0.1.0-dev7",
+  "test_sentinels": "Only after capture, integration tests set valid nonzero supply_credits=431, stats.kills=3, stats.damage_dealt=37.5 and hit_ids=[migration-previous-hit]. Both old baseline and candidate admit these sentinels; they are test arrangement, not natural play claims."
+}

@@ -28,18 +28,11 @@ static func seed_for_cast(tick := 1) -> int:
 		if float(hash_value)/4294967296.0 < 1.0-pow(0.25,1.0/60.0): return seed
 	return -1
 static func make(t, version := "dev5", tick := 0) -> Dictionary:
-	var provider := Provider.new(version)
-	var core := Core.new(provider)
-	var state: Dictionary = core.new_run(provider.chapter,seed_for_cast(tick+1),F.run_config())
-	t.check(not state.has("error_code"),"motion fixture constructs genuine Core state")
-	if state.has("error_code"): return {}
-	state.active_tick = tick
-	state.survival_tick = tick
-	state.player.position = [144.0,256.0]
-	state.player.attack_ready_ticks.blade_slash = 200000
-	var hydration: Dictionary = HF.hydration(H.requirements(state))
-	t.check(core.prepare_world(state,hydration).get("ok",false),"motion fixture passes full restore and real city hydration")
-	return {"core":core,"state":state,"provider":provider,"hydration":hydration}
+	# Runtime-load avoids a preload cycle; the canonical fixture uses Provider.
+	var fixture = load("res://tests/corridor_mobility/corridor_fixture.gd")
+	var result: Dictionary = fixture.make(t,[],[180.0,256.0],["0","0"],version,tick)
+	t.check(not result.is_empty() and not result.get("state",{}).has("error_code"),"motion fixture constructs genuine Core state")
+	return result
 static func available(t) -> bool:
 	t.check(FileAccess.file_exists(PATH),"directional mobility authority exists")
 	if not FileAccess.file_exists(PATH): return false

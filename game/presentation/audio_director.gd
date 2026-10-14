@@ -244,12 +244,11 @@ func _present_foley(snapshot: Dictionary) -> void:
 		_player_position = position
 		return
 	if tick <= _foley_tick: return
-	if cast != _mobility_cast and phase != "ground":
+	if cast != _mobility_cast and phase == "boost":
 		play_sound("wire_launch")
 		play_sound("gas")
-	if phase == "land" and _mobility_phase not in ["land","ground"]: play_sound("wire_release")
-	if phase == "ground" and _mobility_phase != "ground": play_sound("land")
-	if phase == "ground" and tick-_player_step_tick >= 18 and position.distance_squared_to(_player_position) > 0.01:
+	if phase == "ground" and _mobility_phase == "boost": play_sound("wire_release")
+	if phase == "ground" and _mobility_phase != "boost" and tick-_player_step_tick >= 18 and position.distance_squared_to(_player_position) > 0.01:
 		play_sound("step")
 		_player_step_tick = tick
 	if tick-_titan_step_tick >= 30:

@@ -1,0 +1,22 @@
+extends RefCounted
+const F = preload("res://tests/corridor_mobility/corridor_fixture.gd")
+const M = preload("res://game/core/player_mobility.gd")
+const P = preload("res://game/world/mobility_anchor_query.gd")
+func run(t) -> void:
+	t.check(M.initial().schema_version == 2,"new mobility starts schema v2")
+	var s := F.make(t)
+	var planned: Dictionary = P.plan(s.state,Vector2.UP,s.core._streamed)
+	t.check(planned.get("ok",false) and planned.get("anchors",[]).size() == 2,"opposite side anchors define a straight corridor")
+	F.step(s)
+	t.check(s.state.player_mobility.phase == "boost","real eligible Core cast activates paired corridor boost")
+	if s.state.player_mobility.phase != "boost": return
+	t.check(s.state.player.position == [180.0,248.0],"boost advances exactly 8px on ground with no lateral attraction")
+	t.check(M.visual_sample(s.state).height == 0.0,"corridor never elevates player above ground")
+	F.step(s,Vector2(0.5,-1).normalized())
+	t.check(s.state.player_mobility.phase == "boost" and s.state.player.position[0] == 180.0,"joystick noise preserves original heading beyond 15 degrees")
+	var before: Array = s.state.player.position.duplicate()
+	F.step(s,Vector2.ZERO)
+	t.check(s.state.player_mobility.phase == "ground" and s.state.player.position == before,"release ends boost immediately at current safe ground point")
+	var single := F.make(t,[F.AF.slot("only","house_narrow",[180,224])])
+	F.step(single)
+	t.check(single.state.player_mobility.cast_id == 0,"single frontal roof never triggers a roof crossing")

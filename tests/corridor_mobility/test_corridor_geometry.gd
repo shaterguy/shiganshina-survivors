@@ -1,0 +1,42 @@
+extends RefCounted
+const F = preload("res://tests/corridor_mobility/corridor_fixture.gd")
+const P = preload("res://game/world/mobility_anchor_query.gd")
+const M = preload("res://game/core/player_mobility.gd")
+func run(t) -> void:
+	var horizontal := F.make(t,[F.AF.slot("above","house_narrow",[144,160]),F.AF.slot("below","house_narrow",[144,272])],[64.0,190.0])
+	var plan: Dictionary = P.plan(horizontal.state,Vector2.RIGHT,horizontal.core._streamed)
+	t.check(plan.get("ok",false) and plan.get("anchors",[]).size() == 2,"horizontal road pairs above and below hooks")
+	F.step(horizontal,Vector2.RIGHT)
+	t.check(horizontal.state.player_mobility.phase == "boost" and horizontal.state.player.position == [72.0,190.0],"horizontal boost preserves exact heading")
+	var same_side := F.make(t,[F.AF.slot("a","house_narrow",[144,224]),F.AF.slot("b","house_narrow",[144,144])])
+	t.check(not P.plan(same_side.state,Vector2.UP,same_side.core._streamed).get("ok",false),"two same-side buildings never qualify")
+	for obstacle in ["house_narrow","refugee_wagon","cannon_prop","house_ruined"]:
+		var slots: Array = F.slots()+[F.AF.slot("blocker",obstacle,[180,160])]
+		var s := F.make(t,slots)
+		var path: Dictionary = P.plan(s.state,Vector2.UP,s.core._streamed)
+		if path.get("ok",false):
+			var route := M.route_sample({"schema_version":2,"path":path.path},s.state.world.origin_chunk)
+			var sweep: Dictionary = s.core._streamed.sweep(route.points[0],route.points[1]-route.points[0],8.0)
+			t.check(sweep.ok and sweep.fraction == 1.0,"planned boost respects normal collision for "+obstacle)
+		for tick in 45: F.step(s)
+		t.check(s.core._streamed.walkable(M.vec(s.state.player.position),8.0).get("walkable",false),"boost never enters obstacle "+obstacle)
+	var huge := F.make(t,[],[180.0,256.0],["9007199254740993","-9007199254740994"])
+	F.step(huge)
+	t.check(huge.state.player_mobility.phase == "boost" and huge.state.player_mobility.anchors[0].chunk == ["9007199254740993","-9007199254740994"],"paired absolute anchors preserve huge signed chunk coordinates")
+	var reverse := F.make(t)
+	F.step(reverse)
+	var before: Array = reverse.state.player.position.duplicate()
+	F.step(reverse,Vector2.DOWN)
+	t.check(reverse.state.player.position == before and reverse.state.player_mobility.phase == "ground","clear reversal ends cast at current safe point")
+	var source := FileAccess.get_file_as_string("res://game/world/mobility_anchor_query.gd")
+	t.check(not "render_view" in source and not "chunk_keys" in source and not "_props.values" in source,"planner only requests bounded cached spatial candidates")
+	var definitions: Dictionary = F.HF.definitions()
+	definitions.props.definitions.house_narrow.mobility_anchor.kind = "tree"
+	for template in definitions.templates.templates: template.slots = F.slots()
+	var helper := F.H.new(definitions)
+	var state := F.HF.state(helper)
+	state.player.position = [180.0,256.0]
+	var hydration := F.HF.hydration(F.H.requirements(state))
+	t.check(helper.valid() and helper.prepare(state,hydration).get("ok",false),"authored future tree metadata validates without changing shipped definitions")
+	var tree_plan: Dictionary = P.plan(state,Vector2.UP,helper)
+	t.check(tree_plan.get("ok",false) and tree_plan.anchors[0].kind == "tree" and tree_plan.anchors[1].kind == "tree","future authored tree hooks participate in the same side-pair runtime")

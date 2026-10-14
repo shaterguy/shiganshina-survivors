@@ -3,6 +3,7 @@ extends RefCounted
 # NEW 2026-10-10 adapter, not a reconstruction of the missing latest helper.
 # Owns only replaceable derived caches. Every persistent change is a proposal.
 const Mobility = preload("res://game/core/player_mobility.gd")
+const LegacyMobility = preload("res://game/core/legacy_player_mobility_v1.gd")
 const Address = preload("res://game/world/world_address.gd")
 const Population = preload("res://game/core/city_population.gd")
 const Generator = preload("res://game/world/city_generator.gd")
@@ -127,7 +128,7 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 		if state.player_mobility.phase != "ground":
 			var mobility_route := Mobility.route_sample(state.player_mobility,origin)
 			if not mobility_route.get("ok",false): return mobility_route
-			for index in range(1,4): rectangles.append(segment_rect(mobility_route.points[index-1],mobility_route.points[index],float(state.player.radius)))
+			for index in range(1,mobility_route.points.size()): rectangles.append(segment_rect(mobility_route.points[index-1],mobility_route.points[index],float(state.player.radius)))
 	for collection in LIMITS:
 		if not state.get(collection) is Array or state[collection].size() > LIMITS[collection]: return failure("invalid_snapshot")
 		for index in state[collection].size():
@@ -400,7 +401,7 @@ func mobility_geometry(state: Dictionary, rectangle: Rect2) -> Dictionary:
 func _mobility_anchor_record(state: Dictionary, prop: Dictionary) -> Dictionary:
 	if prop.get("destroyed",true) or prop.get("hp",0) <= 0 or prop.get("hp") != prop.get("max_hp") or not prop.get("mobility_anchor") is Dictionary: return {}
 	var data: Dictionary = prop.mobility_anchor
-	if data.get("kind") != "roof" or (int(prop.get("collision_mask",0)) & Props.PLAYER) == 0: return {}
+	if not data.get("kind") in ["roof","tree"] or (int(prop.get("collision_mask",0)) & Props.PLAYER) == 0: return {}
 	var position: Vector2 = prop.position
 	var placed := Address.normalize(state.world.origin_chunk,position)
 	var connected := Address.normalize(state.world.origin_chunk,position+vec(data.connection))
@@ -412,6 +413,25 @@ func _mobility_anchor_record(state: Dictionary, prop: Dictionary) -> Dictionary:
 	# unchanged roof stale after cold hydration, a save receipt or another hit.
 	var identity := [prop.prop_id,prop.slot_id,prop.definition_id,fingerprint,placed.chunk,[placed.local.x,placed.local.y],[relative.x,relative.y,ground.size.x,ground.size.y],int(prop.collision_mask),int(prop.hp),int(prop.max_hp),data.kind,[float(data.connection[0]),float(data.connection[1])],float(data.roof_height),[float(data.pass_range[0]),float(data.pass_range[1]),float(data.pass_range[2]),float(data.pass_range[3])]]
 	return {"prop_id":prop.prop_id,"slot_id":prop.slot_id,"definition_id":prop.definition_id,"kind":data.kind,"chunk":connected.chunk.duplicate(),"local":[connected.local.x,connected.local.y],"connection":[float(data.connection[0]),float(data.connection[1])],"roof_height":float(data.roof_height),"pass_range":[float(data.pass_range[0]),float(data.pass_range[1]),float(data.pass_range[2]),float(data.pass_range[3])],"content_fingerprint":fingerprint,"geometry_revision":JSON.stringify(identity).sha256_text()}
+func mobility_pair_check(state: Dictionary, anchors: Array, admit_stale := false) -> Dictionary:
+	if _stage != "city" or not matches(state): return _query_result(failure("world_not_ready"))
+	if anchors.size() != 2: return failure("stale_mobility_anchor")
+	for anchor in anchors:
+		if not anchor is Dictionary or not anchor.get("prop_id") is String: return failure("stale_mobility_anchor")
+		# Exact resident spatial identity lookup, never a world scan.
+		var prop: Dictionary = _world._props.get(anchor.prop_id,{})
+		if prop.is_empty(): return failure("stale_mobility_anchor")
+		var actual := _mobility_anchor_record(state,prop)
+		if admit_stale and actual.is_empty():
+			# Save admission proves the original authored pair even after a real
+			# damage/destruction delta. Runtime still detaches on the next tick.
+			var original := Props.new(_definitions.props).place(prop.prop_id,prop.definition_id,prop.position,{})
+			if original.is_empty() or prop.max_hp != original.max_hp or not _same_json(prop.get("mobility_anchor"),original.get("mobility_anchor")): return failure("stale_mobility_anchor")
+			if not prop.destroyed and (prop.ground_footprint != original.ground_footprint or prop.collision_mask != original.collision_mask): return failure("stale_mobility_anchor")
+			actual = _mobility_anchor_record(state,original)
+		if actual.is_empty() or not _same_json(actual,anchor): return failure("stale_mobility_anchor")
+	return {"ok":true}
+# Legacy v1 admission only; v2 runtime never calls roof mask exemptions.
 func mobility_sweep(state: Dictionary, position: Vector2, delta: Vector2, radius: float, anchor: Dictionary, height: float) -> Dictionary:
 	return _mobility_sweep_checked(state,position,delta,radius,anchor,height,false)
 func mobility_cancel_sweep(state: Dictionary, position: Vector2, delta: Vector2, radius: float, anchor: Dictionary, height: float) -> Dictionary:
@@ -492,6 +512,13 @@ func mobility_player_clearance(state: Dictionary, validate_contract := true) -> 
 	var m: Dictionary = state.player_mobility
 	var route := Mobility.route_sample(m,state.world.origin_chunk)
 	if not route.get("ok",false): return route
+	if m.schema_version == 2:
+		var pair := mobility_pair_check(state,m.anchors,true)
+		if not pair.get("ok",false): return pair
+		var path := sweep(route.points[0],route.points[1]-route.points[0],8.0)
+		if not path.get("ok",false): return path
+		if path.fraction < 1.0: return failure("blocked_mobility_path")
+		return walkable(vec(state.player.position),8.0)
 	# Proof of the entire stored path, including descent and ground landing.
 	var rise := sweep(route.points[0],route.points[1]-route.points[0],8.0)
 	if not rise.get("ok",false): return rise
@@ -502,7 +529,7 @@ func mobility_player_clearance(state: Dictionary, validate_contract := true) -> 
 	var final_point := walkable(route.points[3],8.0)
 	if not final_point.get("ok",false): return final_point
 	if rise.fraction < 1.0 or over.fraction < 1.0 or land.fraction < 1.0 or not final_point.walkable: return failure("blocked_mobility_path")
-	var height := float(Mobility.visual_sample(state).height)
+	var height := float(LegacyMobility.visual_sample(state).height)
 	if float(m.progress) >= route.distances[1] and float(m.progress) <= route.distances[2] and height >= float(m.anchor.roof_height):
 		var actual := mobility_cancel_sweep(state,vec(state.player.position),Vector2.ZERO,8.0,m.anchor,height)
 		if not actual.get("ok",false): return actual

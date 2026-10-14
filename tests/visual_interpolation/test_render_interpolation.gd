@@ -1,7 +1,7 @@
 extends RefCounted
 const World = preload("res://game/presentation/world_view.gd")
 const City = preload("res://tests/city_presentation/test_world_view_city.gd")
-const Mobility = preload("res://tests/terrain_mobility/motion_fixture.gd")
+const Mobility = preload("res://tests/corridor_mobility_presentation/presentation_fixture.gd")
 const MobilitySample = preload("res://game/core/player_mobility.gd")
 
 # These renderer fixtures exercise real projection, not a replacement interpolator.
@@ -112,7 +112,7 @@ func _boundaries(t,view) -> void:
 
 func _mobility(t,view) -> void:
 	var s: Dictionary = Mobility.make(t)
-	if s.is_empty() or not Mobility.reach(s,"rise"): return
+	if s.is_empty() or not Mobility.reach(s,"boost"): return
 	view.reset_presentation()
 	var a: Dictionary = s.core.snapshot(s.state)
 	view.observe_render_tick(a)
@@ -123,21 +123,21 @@ func _mobility(t,view) -> void:
 	var terrain: Dictionary = s.core.world_render_view(s.state)
 	terrain.world_revision = s.core.world_status().world_revision
 	view.begin_render_frame(0.5)
-	t.check(view.present_city(b,terrain).get("ok",false),"real airborne Core sample enters prepared city renderer")
+	t.check(view.present_city(b,terrain).get("ok",false),"real corridor Core sample enters prepared city renderer")
 	view.set_render_alpha(0.5)
 	var first: Dictionary = MobilitySample.visual_sample(a)
 	var last: Dictionary = MobilitySample.visual_sample(b)
 	var expected_ground := Mobility.vec(first.ground_position).lerp(Mobility.vec(last.ground_position),0.5)
 	var expected_height := lerpf(float(first.height),float(last.height),0.5)
 	var command: Dictionary = view.mobility_commands()
-	t.check(command.ground_position.is_equal_approx(expected_ground) and is_equal_approx(command.height,expected_height),"ground and mobility height share adjacent-tick alpha")
-	t.check(view._camera.is_equal_approx(expected_ground),"camera tracks interpolated ground instead of airborne height")
-	t.check(command.wire["from"].is_equal_approx(expected_ground-Vector2(0,expected_height+18.0)),"wire starts at the same interpolated elevated hand")
+	t.check(command.ground_position.is_equal_approx(expected_ground) and is_equal_approx(command.height,expected_height),"corridor ground interpolation preserves zero Core height")
+	t.check(view._camera.is_equal_approx(expected_ground),"camera tracks interpolated corridor ground")
+	t.check(command.wires.size() == 2 and command.wires.all(func(w):return w["from"].is_equal_approx(expected_ground-Vector2(0,18.0))),"both wires start at the same interpolated grounded hand")
 	var packet: Dictionary = view._city_render_packet()
 	var actors: Array = packet.upright.filter(func(c): return c.id == "actor:s:player")
-	t.check(actors.size() == 1 and actors[0].position.is_equal_approx(expected_ground-Vector2(0,expected_height)),"visible body and shadow use consistent mobility projection")
-	t.check(var_to_bytes(b) == bytes,"height interpolation leaves Core mobility and path bytes intact")
+	t.check(actors.size() == 1 and actors[0].position.is_equal_approx(expected_ground-Vector2(0,expected_height)),"visible body stays on the interpolated corridor plane")
+	t.check(var_to_bytes(b) == bytes,"corridor interpolation leaves Core mobility and path bytes intact")
 	Mobility.step(s,Vector2.ZERO)
 	var cancelled: Dictionary = s.core.snapshot(s.state)
 	view.observe_render_tick(cancelled); view.begin_render_frame(0.0); view.present(cancelled)
-	t.check(view.mobility_commands().wire.is_empty(),"authoritative cancellation removes the wire without one-tick delay")
+	t.check(view.mobility_commands().wires.is_empty(),"authoritative interruption removes both wires without one-tick delay")

@@ -5,6 +5,7 @@ func run(t) -> void:
 	_automatic_rebase(t)
 	_inactive_attack_anchors(t)
 	_active_anchors(t)
+	_active_anchors(t,true)
 	_many_chunks(t)
 	var helper := H.new(F.definitions())
 	var state := F.state(helper)
@@ -72,39 +73,74 @@ func _inactive_attack_anchors(t) -> void:
 	state.entities[0].action_state = "windup"
 	t.check(H.requirements(state).get("error_code") == "outside_working_set","active attack anchors still require complete physical coverage")
 
-func _active_anchors(t) -> void:
+func _active_anchors(t, with_boost := false) -> void:
 	var provider := City.new()
 	var chapter: Dictionary = provider.load_chapter("chapter_01_shiganshina").chapter
 	var core := Core.new(provider)
 	var state := core.new_run(chapter,42,C.run_config())
+	# Keep the supported optional-field-absent checkpoint as the independent
+	# locked-anchor control, then run the same runner against genuine v2 boost
+	# and the normal caller's hydration/retry boundary. Neither is a synthetic
+	# injected movement phase or a claim of captured historical provenance.
+	if not with_boost: state.erase("player_mobility")
 	state.player.position = [384.0,384.0]
 	state.player.attack_ready_ticks = {"blade_slash":10000}
 	var command := {"command_id":"active-anchor-spawn","kind":"spawn_enemy","origin_revision":0,"payload":{"entity_id":"active-runner","enemy_id":"runner","position":[500,384],"spawned_tick":0}}
 	var hydration := F.hydration(H.requirements(state,[command]))
 	t.check(core.prepare_world(state,hydration,[command]).get("ok",false),"active anchor fixture is fully verified")
+	var admitted: Dictionary = core.restore(state,hydration)
+	t.check(admitted.get("ok",false) and admitted.get("state",{}).has("player_mobility") == with_boost,"anchor fixture explicitly admits its selected optional-mobility checkpoint shape")
 	C.step(core,state,Vector2.ZERO,[command])
 	t.check(state.entities.size() == 1 and state.entities[0].action_state == "windup","real runner enters its authored attack")
 	if state.entities.is_empty(): return
 	var anchors := [state.entities[0].locked_origin.duplicate(),state.entities[0].locked_target.duplicate()]
 	var observed := {}
+	var saw_boost := false
+	var coverage_refreshes := 0
 	for i in 100:
 		var action: String = state.entities[0].action_state
 		if action == "move": break
 		observed[action] = true
 		t.check([state.entities[0].locked_origin,state.entities[0].locked_target] == anchors,"active attack/recovery anchors remain immutable: "+action)
+		var before: Dictionary = core.snapshot(state)
+		var before_tick: int = state.active_tick
 		C.step(core,state,Vector2.LEFT*0.1)
+		if not core.step_status().get("ok",false):
+			t.check(core.step_status().get("error_code") == "world_not_ready" and state == before,"boost coverage refusal preserves the entire pre-tick authority")
+			if core.step_status().get("error_code") != "world_not_ready": break
+			var needed: Dictionary = H.requirements(state)
+			hydration = F.hydration(needed)
+			var prepared: Dictionary = core.prepare_world(state,hydration)
+			t.check(needed.get("ok",false) and prepared.get("ok",false),"genuine boost refreshes newly required runner/route coverage")
+			if not prepared.get("ok",false): break
+			coverage_refreshes += 1
+			C.step(core,state,Vector2.LEFT*0.1)
+		saw_boost = saw_boost or state.get("player_mobility",{}).get("phase") == "boost"
+		t.check(core.step_status().get("ok",false) and state.active_tick == before_tick+1,"locked-anchor invariant advances a real accepted tick exactly once: "+action)
+		if state.active_tick != before_tick+1: break
 	t.check(observed.has_all(["windup","attack","recover"]),"immutable anchor check crosses real windup, attack and recovery")
-	t.check(core.restore(state,hydration).get("ok",false),"active motion remains cold-restorable after city anchor maintenance")
+	if with_boost:
+		t.check(saw_boost and coverage_refreshes > 0,"runner locked-anchor invariant crosses genuine v2 activation and terrain refresh")
+	hydration = F.hydration(H.requirements(state))
+	var cold := Core.new(provider)
+	var restored: Dictionary = cold.restore(JSON.parse_string(JSON.stringify(state,"",true,true)),hydration)
+	t.check(restored.get("ok",false) and restored.get("state",{}) == state and cold.prepare_world(restored.get("state",{}),hydration).get("ok",false),"active motion remains exactly cold-restorable after city anchor maintenance")
 
 func _many_chunks(t) -> void:
 	var provider := City.new()
 	var chapter: Dictionary = provider.load_chapter("chapter_01_shiganshina").chapter
 	var core := Core.new(provider)
 	var state := core.new_run(chapter,42,C.run_config())
+	# The exact 13-rebase oracle intentionally measures 4000 normal 2.5px
+	# steps, using the supported optional-mobility-absent checkpoint shape.
+	# Boost distance/rebase replay has its own genuine corridor regression.
+	state.erase("player_mobility")
 	state.player.position = [384.0,384.0]
 	state.world.origin_chunk = ["9007199254740993","-9007199254740994"]
 	var hydration := F.hydration(H.requirements(state))
 	t.check(core.prepare_world(state,hydration).get("ok",false),"multi-chunk control retains exact int64 addresses")
+	var admitted: Dictionary = core.restore(state,hydration)
+	t.check(admitted.get("ok",false) and not admitted.get("state",{}).has("player_mobility"),"fixed-speed address fixture explicitly admits the optional-mobility-absent checkpoint")
 	var max_resident := 0
 	var failed := {}
 	for i in 4000:
