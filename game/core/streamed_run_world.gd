@@ -89,6 +89,36 @@ func _prepare_live(state: Dictionary, hydration: Dictionary, commands: Array, so
 	# Only a new unpublished helper can prepare in place; failed callers discard it.
 	if _world != null or not _prepared_identity.is_empty() or not _definition_proof is LiveDefinitions: return failure("world_not_ready")
 	return _prepare_candidate(state,hydration,commands,source)
+# An ordinary Core rebase changes only localization, never absolute terrain.
+# Bind retention to the real pre-step witness; generic matches remains exact.
+func _rebase_eligible(previous: Dictionary, proposed: Dictionary, hydration: Dictionary) -> bool:
+	if get_script() != load("res://game/core/streamed_run_world.gd") or not _valid or _stage != "city" or _world == null or _world.get_script() != Stream: return false
+	if not _query_failure.is_empty() or not _world._last_error.is_empty() or not _definition_proof is LiveDefinitions: return false
+	if _definition_proof != _issued_definition_proof or _definition_proof.owner == null or _definition_proof.owner.get_ref() != self or _definition_proof.nonce != _definition_nonce or not _definition_proof.data.is_read_only(): return false
+	if _generator == null or _generator.get_script() != Generator or _world._generator != _generator: return false
+	if not _same_json(_definitions,_definition_proof.data): return false
+	if not validate_world(previous).get("ok",false) or not validate_world(proposed).get("ok",false): return false
+	if previous.world.stage != "city" or proposed.world.stage != "city" or not matches(previous): return false
+	if not _same_json(previous.get("run_id"),proposed.get("run_id")) or not _same_json(previous.get("seed"),proposed.get("seed")) or not _same_json(previous.get("run_config"),proposed.get("run_config")): return false
+	if _world._seed != int(previous.seed) or _world._world_revision != int(previous.world.world_revision) or not _same_json(_world._origin,previous.world.origin_chunk): return false
+	for value in [previous,proposed]:
+		if value.has("player_mobility") and (not value.player_mobility is Dictionary or not value.player_mobility.get("schema_version") is int or value.player_mobility.schema_version != 2): return false
+	if not previous.get("player") is Dictionary or not point_valid(previous.player.get("position")): return false
+	var normalized: Dictionary = Address.normalize(previous.world.origin_chunk,vec(previous.player.position))
+	if not normalized.get("ok",false) or normalized.offset == Vector2.ZERO or previous.world.origin_revision >= Codec.MAX_JSON_INTEGER: return false
+	var expected: Dictionary = _geometry_identity(previous.world).duplicate()
+	expected.origin_chunk = normalized.chunk
+	expected.origin_revision = int(previous.world.origin_revision)+1
+	if not _same_json(expected,_geometry_identity(proposed.world)): return false
+	for key in _hydration:
+		if not hydration.has(key) or not _same_json(_hydration[key],hydration[key]): return false
+	return true
+func _prepare_rebased(previous: Dictionary, proposed: Dictionary, hydration: Dictionary, commands: Array = []) -> Dictionary:
+	var result = _fork_live_configuration()
+	if result == null: return failure("world_not_ready")
+	var prepared: Dictionary = result._prepare_candidate(proposed,hydration,commands,self,previous)
+	if not prepared.get("ok",false): return prepared
+	return {"ok":true,"helper":result}
 func valid() -> bool: return _valid
 func fresh(): return get_script().new(_definitions)
 static func enabled(state: Dictionary) -> bool:
@@ -229,8 +259,13 @@ static func requirements(state: Dictionary, commands: Array = []) -> Dictionary:
 	return {"ok":true,"chunks":chunks,"stage":"city","origin_chunk":normalized.chunk,"offset":[normalized.offset.x,normalized.offset.y]}
 func prepare(state: Dictionary, hydration: Dictionary, commands: Array = []) -> Dictionary:
 	return _prepare_candidate(state,hydration,commands)
-func _prepare_candidate(state: Dictionary, hydration: Dictionary, commands: Array, source = null) -> Dictionary:
+func _prepare_candidate(state: Dictionary, hydration: Dictionary, commands: Array, source = null, rebase_previous: Dictionary = {}) -> Dictionary:
 	if not _valid: return failure("invalid_generator")
+	if not rebase_previous.is_empty():
+		# Only a newly forked unpublished helper may consume this private witness.
+		if get_script() != load("res://game/core/streamed_run_world.gd") or source == null or source == self or source.get_script() != get_script() or _world != null or not _prepared_identity.is_empty(): return failure("world_not_ready")
+		if not _definition_proof is LiveDefinitions or _definition_proof != _issued_definition_proof or _definition_proof.owner == null or _definition_proof.owner.get_ref() != self or _definition_proof.nonce != _definition_nonce: return failure("world_not_ready")
+		if not source._rebase_eligible(rebase_previous,state,hydration) or _definition_proof.data != source._definition_proof.data: return failure("world_not_ready")
 	var needed := requirements(state,commands)
 	if not needed.ok: return needed
 	if needed.stage == "dock":
@@ -247,7 +282,11 @@ func _prepare_candidate(state: Dictionary, hydration: Dictionary, commands: Arra
 		if not hydration[key] is Array: return failure("invalid_hydration")
 		var checked := Codec.normalize_records([{"chunk":chunk,"props":hydration[key]}])
 		if not checked.ok: return checked
-	var candidate = _retained_candidate(source,state,hydration,needed.chunks) if source != null else null
+	var candidate
+	if rebase_previous.is_empty():
+		candidate = _retained_candidate(source,state,hydration,needed.chunks) if source != null else null
+	else:
+		candidate = source._world._fork_retained(_generator,needed.chunks)
 	var retained: bool = candidate != null
 	if candidate == null: candidate = Stream.new(_generator,int(state.seed))
 	var prepared: Dictionary = candidate.prepare(needed.chunks,[],hydration,state.world.origin_chunk,needed.origin_chunk)

@@ -2189,8 +2189,13 @@ func _step_streamed(state: Dictionary, move: Vector2, commands: Array[Dictionary
 			tick_commands.assign(proposal.commands)
 			rebased = true
 	if rebased or not _streamed.matches(candidate):
-		next_helper = _streamed.fresh()
-		var prepared: Dictionary = next_helper.prepare(candidate,_streamed._hydration,tick_commands)
+		var prepared: Dictionary
+		if rebased and _can_prepare_live_coverage(state) and _streamed._rebase_eligible(state,candidate,_streamed._hydration):
+			prepared = _streamed._prepare_rebased(state,candidate,_streamed._hydration,tick_commands)
+			if prepared.get("ok",false): next_helper = prepared.helper
+		else:
+			next_helper = _streamed.fresh()
+			prepared = next_helper.prepare(candidate,_streamed._hydration,tick_commands)
 		if not prepared.get("ok",false):
 			_last_step_status = prepared
 			return []

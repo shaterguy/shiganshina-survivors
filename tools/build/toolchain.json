@@ -10,8 +10,8 @@
   },
   "android": {
     "package": "com.shaterguy.wingsofhumanity.dev",
-    "version_name": "0.1.0-dev10",
-    "version_code": 10,
+    "version_name": "0.1.0-dev11",
+    "version_code": 11,
     "abi": "arm64-v8a"
   }
 }
