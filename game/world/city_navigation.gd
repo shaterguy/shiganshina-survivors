@@ -157,13 +157,25 @@ func _build_grid(chunk: Dictionary, clearance: int) -> Dictionary:
 	_grid_builds += 1
 	var flags := PackedByteArray()
 	flags.resize(576)
-	for id in 576:
-		var point: Vector2 = _center(id,chunk.local_origin)
-		flags[id] = 1
-		for prop in chunk.props:
-			if prop.collision_mask == 0: continue
-			var box: Rect2 = prop.ground_footprint.grow(clearance)
-			if point.x > box.position.x and point.x < box.end.x and point.y > box.position.y and point.y < box.end.y: flags[id] = 0; break
+	flags.fill(1)
+	# Evaluate the original float32 centers and strict bounds unchanged.
+	# A rectangle blocks the Cartesian product of its matching x/y cells;
+	# grow each rectangle once rather than once for every candidate cell.
+	var xs: Array[float] = []
+	var ys: Array[float] = []
+	for axis in SIDE:
+		xs.append(_center(axis,chunk.local_origin).x)
+		ys.append(_center(axis*SIDE,chunk.local_origin).y)
+	for prop in chunk.props:
+		if prop.collision_mask == 0: continue
+		var box: Rect2 = prop.ground_footprint.grow(clearance)
+		var columns: Array[int] = []
+		for x in SIDE:
+			if xs[x] > box.position.x and xs[x] < box.end.x: columns.append(x)
+		if columns.is_empty(): continue
+		for y in SIDE:
+			if ys[y] > box.position.y and ys[y] < box.end.y:
+				for x in columns: flags[y*SIDE+x] = 0
 	return {"chunk_id":chunk.chunk_id,"revision":chunk.geometry_revision,"local_origin":chunk.local_origin,"flags":flags}
 func _distances(grid: Dictionary, target: int, goal: Vector2, radius: float, tick: int) -> void:
 	_route_builds += 1
