@@ -40,6 +40,7 @@ var _map: Dictionary = {}
 var _effects: Array[Dictionary] = []
 var _shake_until := 0.0
 var _textures: Dictionary = {}
+var _town_floor_texture: Texture2D
 var _snapshot: Dictionary = {}
 var _clock := 0.0
 var _attack_until := 0.0
@@ -194,6 +195,7 @@ func _ready() -> void:
 	var map_data = JSON.parse_string(FileAccess.get_file_as_string("res://chapters/chapter_01/map.json"))
 	if map_data is Dictionary: _map = map_data
 func load_manifest() -> void:
+	_town_floor_texture = null
 	if not FileAccess.file_exists("res://assets/manifest.json"): return
 	var manifest = JSON.parse_string(FileAccess.get_file_as_string("res://assets/manifest.json"))
 	if manifest is Dictionary:
@@ -202,6 +204,7 @@ func load_manifest() -> void:
 		_textures.clear(); _outline_textures.clear(); _raster_images.clear()
 		_player_alpha_bounds.clear(); _raster_bytes.clear()
 		_prepare_player_outlines()
+		_prepare_town_floor()
 func frame_rect(asset_id: String, animation: String, seconds: float) -> Rect2:
 	if not _assets.has(asset_id): return Rect2()
 	var record: Dictionary = _assets[asset_id]
@@ -851,8 +854,42 @@ func _damage_has_drawable_vfx(event: Dictionary) -> bool:
 		if command.get("target_id") == target and target != null: return true
 		if not attack_id.is_empty() and command.get("attack_id","") == attack_id and command.get("role","") in ["cast","impact"]: return true
 	return false
-func _draw_city_ground(command: Dictionary) -> void:
+func _prepare_town_floor() -> void:
+	# Fixed presentation cache, built only at manifest initialization.
+	_town_floor_texture = null
+	var record: Dictionary = _assets.get("city_tiles",{})
+	if record.get("width") != 128 or record.get("height") != 128 or record.get("cell_w") != 32 or record.get("cell_h") != 32 or record.get("columns") != 4: return
 	var texture := _texture("city_tiles")
+	if texture == null: return
+	var original := texture.get_image()
+	if original == null or original.is_empty() or original.get_width() != 128 or original.get_height() != 128: return
+	var stone: Image = original.duplicate()
+	if stone.is_compressed() and stone.decompress() != OK: return
+	stone.convert(Image.FORMAT_RGBA8)
+	for y in range(128):
+		for x in range(128):
+			var original_color: Color = stone.get_pixel(x,y)
+			var luminance: float = 0.06+0.94*(0.2126*original_color.r+0.7152*original_color.g+0.0722*original_color.b)
+			stone.set_pixel(x,y,Color(clampf(luminance*1.04,0.0,1.0),luminance,clampf(luminance*0.94,0.0,1.0),original_color.a))
+	var atlas := Image.create(128,160,false,Image.FORMAT_RGBA8)
+	atlas.blit_rect(stone,Rect2i(0,0,128,128),Vector2i.ZERO)
+	var base := Color("#896345")
+	var shade := base.lerp(Color("#624a3a"),0.22)
+	var highlight := base.lerp(Color("#b18b60"),0.25)
+	for variant in range(4):
+		atlas.fill_rect(Rect2i(variant*32,128,32,32),base)
+		for y in range(2,30):
+			for x in range(2,30):
+				# Translations of one fixed pattern retain equal average color.
+				var px := posmod(x-2+variant*7,28)
+				var py := posmod(y-2+variant*11,28)
+				var color := base
+				if px >= 4 and px < 12 and py >= 6 and py < 10: color = shade
+				elif px >= 18 and px < 24 and py >= 18 and py < 21: color = highlight
+				atlas.set_pixel(variant*32+x,128+y,color)
+	_town_floor_texture = ImageTexture.create_from_image(atlas)
+func _draw_city_ground(command: Dictionary) -> void:
+	var texture := _town_floor_texture if _town_floor_texture != null else _texture("city_tiles")
 	if texture == null: return
 	var record: Dictionary = _assets.city_tiles
 	var cell := Vector2(record.cell_w,record.cell_h)
@@ -865,8 +902,13 @@ func _draw_city_ground(command: Dictionary) -> void:
 	for y in range(start.y,end.y):
 		for x in range(start.x,end.x):
 			var index := posmod(int(command.ground_variant)*4+posmod(x*7+y*11,4),count)
+			var tint := Color(0.48,0.56,0.52)
+			if _town_floor_texture != null:
+				var paved: bool = (x >= 9 and x < 15) or (y >= 9 and y < 15)
+				tint = Color.WHITE
+				if not paved: index = 16+posmod(int(command.ground_variant)+x*7+y*11,4)
 			var region := Rect2(Vector2(index%columns,index/columns)*cell,cell)
-			_world_region(texture,Rect2(_screen(command.position+Vector2(x,y)*cell),cell),region,Color(0.48,0.56,0.52))
+			_world_region(texture,Rect2(_screen(command.position+Vector2(x,y)*cell),cell),region,tint)
 func _prepare_player_outlines() -> void:
 	# The fixed player atlas is prepared before play, never on an airborne draw.
 	var texture := _texture("garrison_01")
