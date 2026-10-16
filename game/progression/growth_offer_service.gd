@@ -1,6 +1,7 @@
 class_name GrowthOfferService
 extends RefCounted
 # NEW pure materialization. The caller activates this result exactly once.
+const Loot = preload("res://game/loot/loot_rules.gd")
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 var _catalog
 func _init(upgrade_catalog = null) -> void:
@@ -55,10 +56,20 @@ func _target_option(state: Dictionary) -> String:
 		if int(state.equipment[required.equipment_id]) < int(required.level): return "equipment:"+required.equipment_id
 	return ""
 func _descriptor_valid(state: Dictionary, descriptor: Dictionary) -> bool:
-	if descriptor.size() != 3 or not descriptor.has_all(["offer_id","source","level_ordinal"]): return false
-	if not descriptor.source is String or not descriptor.source in ["level","boss"] or not descriptor.offer_id is String: return false
+	if state.get("run_config") is Dictionary and state.run_config.has("loot_rules_version") and not Loot.enabled(state): return false
+	if not descriptor.has_all(["offer_id","source","level_ordinal"]) or not descriptor.source is String: return false
+	if descriptor.size() != (4 if descriptor.source == "chest" else 3): return false
+	if not descriptor.source is String or not descriptor.source in ["level","boss","chest"] or not descriptor.offer_id is String: return false
 	if not Upgrades.integer_valid(descriptor.level_ordinal,1) or not Upgrades.integer_valid(state.get("offer_seq"),1): return false
 	if not state.get("player") is Dictionary or not Upgrades.integer_valid(state.player.get("level"),1) or descriptor.level_ordinal > state.player.level: return false
+	if descriptor.source == "chest":
+		if not Loot.enabled(state) or not descriptor.get("chest_id") is String: return false
+		var chest: Dictionary = Loot.find_chest(state,descriptor.chest_id)
+		if chest.is_empty(): return false
+		for field in ["status","reward","offer_id"]:
+			if not chest.get(field) is String: return false
+		if chest.status != "queued" or chest.reward != "skill" or chest.offer_id != descriptor.offer_id: return false
+	elif descriptor.source == "boss" and Loot.enabled(state): return false
 	if not _run_id_valid(state.get("run_id")): return false
 	var prefix: String = state.run_id+":offer:"
 	if not descriptor.offer_id.begins_with(prefix): return false
@@ -75,3 +86,4 @@ static func _run_id_valid(value: Variant) -> bool:
 static func _rng_valid(value: Variant) -> bool:
 	return value is String and value.length() <= 20 and value.is_valid_int() and str(value.to_int()) == value
 static func _failure(code: String) -> Dictionary: return {"ok":false,"error_code":code}
+

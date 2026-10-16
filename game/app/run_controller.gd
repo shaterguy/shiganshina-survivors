@@ -567,6 +567,7 @@ func advance_frame(delta: float) -> void:
 		world.observe_render_tick(successful_snapshot)
 		world.consume_combat_events(events,successful_snapshot)
 		world.consume_events(events)
+		ui.consume_loot_events(events,str(state.get("run_id","")))
 		for event in events:
 			if event.type == "run_ended": _record_result()
 		var final_boundary := _advance_final_flow()
@@ -599,9 +600,12 @@ func _step_city_tick() -> Dictionary:
 	var status: Dictionary = simulation.step_status()
 	if status.get("error_code") == "world_not_ready":
 		var generation := _lifecycle_generation
-		var refreshed: Variant = _city_runtime.refresh_live_coverage(simulation,state,commands)
+		var starting_tick: int = int(state.active_tick)
+		var native: bool = get_script() == load("res://game/app/run_controller.gd") and _city_runtime.get_script() == CityRuntime and _city_runtime._can_continue_controller(self)
+		var refreshed: Variant = _city_runtime._refresh_controller_coverage(self,commands) if native else _city_runtime.refresh_live_coverage(simulation,state,commands)
 		if generation != _lifecycle_generation or _lifecycle_blocked(): return {"ok":false,"error_code":"lifecycle_pause"}
-		if not _city_coverage_result_valid(refreshed):
+		var valid: bool = _city_continuation_result_valid(refreshed,starting_tick) if native else _city_coverage_result_valid(refreshed)
+		if not valid:
 			refreshed = {"ok":false,"error_code":"world_not_ready"}
 		if refreshed.ok:
 			# Keep the replacement private until its one retry actually succeeds.
@@ -612,7 +616,7 @@ func _step_city_tick() -> Dictionary:
 			if status.get("ok",false):
 				# A default/stale success status after a callee fault is not an
 				# accepted tick. Core publishes its caller state only on success.
-				if not retry_events is Array or not retry_events.all(func(event): return event is Dictionary) or not Simulation.Catalog.integer_valid(refreshed.state.get("active_tick")) or refreshed.state.active_tick != state.active_tick+1:
+				if not retry_events is Array or not retry_events.all(func(event): return event is Dictionary) or not Simulation.Catalog.integer_valid(refreshed.state.get("active_tick")) or refreshed.state.active_tick != starting_tick+1:
 					status = {"ok":false,"error_code":"world_not_ready"}
 			if status.get("ok",false):
 				if generation != _lifecycle_generation or _lifecycle_blocked(): return {"ok":false,"error_code":"lifecycle_pause"}
@@ -630,6 +634,16 @@ func _step_city_tick() -> Dictionary:
 		return status
 	_clear_city_tick()
 	return {"ok":true,"events":events}
+# Called only after the exact synchronous Runtime method selected above.
+# External/custom returned pairs still use the full validator below.
+func _city_continuation_result_valid(value: Variant, starting_tick: int) -> bool:
+	if not value is Dictionary or not value.get("ok") is bool: return false
+	if not value.ok: return value.get("error_code") is String and not value.error_code.is_empty()
+	var core: Variant = value.get("simulation")
+	var candidate: Variant = value.get("state")
+	if not core is Object or not is_instance_valid(core) or core.get_script() != Simulation or core == simulation: return false
+	if not candidate is Dictionary or is_same(candidate,state) or not candidate.get("world") is Dictionary: return false
+	return Simulation.Catalog.integer_valid(candidate.get("active_tick")) and candidate.active_tick == starting_tick and core._streamed != null and core._configuration_admitted
 func _city_coverage_result_valid(value: Variant) -> bool:
 	if not value is Dictionary or not value.get("ok") is bool: return false
 	if not value.ok: return value.get("error_code") is String and not value.error_code.is_empty()

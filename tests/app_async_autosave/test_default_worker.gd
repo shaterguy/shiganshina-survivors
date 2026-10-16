@@ -5,6 +5,7 @@ const City = preload("res://game/director/streamed_chapter_provider.gd")
 const Runtime = preload("res://game/app/prepared_city_runtime.gd")
 const Disk = preload("res://game/persistence/world_delta_store.gd")
 const Save = preload("res://game/persistence/game_save_store.gd")
+const Loot = preload("res://game/loot/loot_rules.gd")
 const Helper = preload("res://game/core/streamed_run_world.gd")
 func run(t) -> void:
 	var available: bool = await _default_save(t)
@@ -88,6 +89,7 @@ func _schema_two_ack(t) -> void:
 	app.state.player.position = [384.0,384.0]
 	app.state.player.attack_ready_ticks = {"blade_slash":1000000}
 	app.state.active_tick = 17999; app.state.survival_tick = 17999
+	app.simulation._add_loot(app.state,Loot.field_spec(0),Vector2(384.0,384.0))
 	app.state.drops = [{"id":100,"position":[-1152.0,384.0],"xp":7}]
 	app.state.next_entity_id = 101
 	var command := {"command_id":"async-product-far-boss","kind":"spawn_boss","origin_revision":0,"payload":{"entity_id":"async-product-far-boss","enemy_id":"boss_charger","boss_id":"ch01_b05","position":[-1154.0,384.0],"scheduled_tick":18000}}
@@ -128,3 +130,4 @@ func _schema_two_ack(t) -> void:
 	app.advance_frame(1.0/60.0)
 	t.check(app.state.active_tick == tick+1 and app.simulation == core and app._city_render_error.is_empty(),"next real schema2 tick needs no repair or Core replacement")
 	app.free()
+

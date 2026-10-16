@@ -1,4 +1,5 @@
 extends RefCounted
+const Loot = preload("res://game/loot/loot_rules.gd")
 const City = preload("res://game/director/streamed_chapter_provider.gd")
 const Runtime = preload("res://game/app/prepared_city_runtime.gd")
 const Disk = preload("res://game/persistence/world_delta_store.gd")
@@ -49,6 +50,9 @@ static func boundary(f: Dictionary, position: Array = [384.0,280.0]) -> void:
 	f.app.state.world.schema_version = 2
 	f.app.state.world.dormant = {"entities":[],"drops":[]}
 	f.app.state.player.position = position.duplicate()
+	if Loot.enabled(f.app.state):
+		for index in range(Loot.FIELD_TICKS.size()):
+			f.app.simulation._add_loot(f.app.state,Loot.field_spec(index),Vector2(position[0],position[1]))
 	f.app.advance_frame(1.0/60.0)
 static func count_events(app, type: String) -> int:
 	return app.recorded_events.filter(func(event): return event.type == type).size()

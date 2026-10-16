@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="진격의 거인 인류의 날개"
-config/version="0.1.0-dev13"
+config/version="0.1.0-dev14"
 ; Keep pre-rename desktop user:// saves in their existing location.
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot/app_userdata/진격의 거인- 인류의 날개"

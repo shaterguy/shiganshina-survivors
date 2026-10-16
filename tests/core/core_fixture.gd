@@ -1,4 +1,5 @@
 extends RefCounted
+const Loot = preload("res://game/loot/loot_rules.gd")
 const EQUIPMENT_IDS := ["blade_slash", "spin_slash", "odm_dash", "reentry_combo", "wall_cannon", "ally_cover"]
 static func chapter() -> Dictionary:
 	return {"chapter_id":"chapter_01_shiganshina", "content_revision":"ch01.1", "spawn_position":[0.0, 0.0], "character_availability":[{"character_id":"garrison_01", "unlock_condition":"default"}], "allowed_equipment_ids":EQUIPMENT_IDS.duplicate(), "initial_equipment":{"blade_slash":1}, "progression":{"base_xp":6,"xp_per_level":4}, "enemy_catalog":{"slow_titan":{"hp":8.0,"speed":0.0,"radius":10.0,"contact_damage":10.0,"xp":2}, "test_boss":{"hp":8.0,"speed":0.0,"radius":12.0,"contact_damage":15.0,"xp":6}}}
@@ -44,6 +45,22 @@ static func evolution_ready_state(sim, chapter_data: Dictionary, config: Diction
 	for required in recipe.get("required_equipment",[]): state.equipment[required.equipment_id] = int(required.level)
 	state.passives = {"movement":3}
 	for required in recipe.required_passives: state.passives[required.passive_id] = int(required.level)
+	if Loot.enabled(state):
+		# New-rule fixture only: create due source evidence before the old clock
+		# jump. A matching resident helper is required before any city query.
+		# This is arranged fixture time, not evidence of natural spawn cadence.
+		state.active_tick = 10800
+		state.survival_tick = 10800
+		var geometry_ready: bool = not state.has("world") or state.world.stage != "city"
+		if not geometry_ready:
+			geometry_ready = sim._streamed != null and sim._streamed.matches(state) and sim._streamed.readiness(state).get("ok",false) and sim._streamed.query_status().get("ok",false)
+		if geometry_ready:
+			var due_events: Array[Dictionary] = []
+			sim._update_loot(state,due_events)
+		else:
+			# Source creation is geometry-free. Preserve pending state rather than
+			# querying unrelated/unprepared city coverage or forcing placement.
+			sim._add_loot(state,Loot.field_spec(0),Vector2(state.player.position[0],state.player.position[1]))
 	state.active_tick = 17999
 	state.survival_tick = 17999
 	state.player.attack_ready_ticks = {"blade_slash":18001}
@@ -56,7 +73,23 @@ static func evolution_ready_state(sim, chapter_data: Dictionary, config: Diction
 	state.entities[0].hp = 36.0
 	if not sim.restore(state).get("ok",false): return {}
 	step(sim,state,Vector2.ZERO)
-	if state.tactical_seals != 1 or state.stats.minibosses_defeated != 1 or state.upgrade_offer.get("source") != "boss": return {}
+	if Loot.enabled(state):
+		# The actual lethal hit now earns a chest. Collect its actual placement
+		# without a combat/XP tick, forced reward, status change or moved chest.
+		var id := Loot.chest_id(state.run_id,"boss","ch01_b05")
+		var chest := Loot.find_chest(state,id)
+		if chest.is_empty() or chest.status not in ["placed","queued"]: return {}
+		var pickup_events: Array[Dictionary] = []
+		if chest.status == "placed":
+			var local := Loot.local_position(state,chest)
+			if not local.get("ok",false): return {}
+			var player := Vector2(state.player.position[0],state.player.position[1])
+			if not sim._loot_path_clear(state,player,local.position): return {}
+			state.player.position = [local.position.x,local.position.y]
+			sim._update_loot(state,pickup_events)
+		if not sim._activate_next_offer(state,pickup_events): return {}
+		if state.tactical_seals != 1 or state.stats.minibosses_defeated != 1 or state.upgrade_offer.get("source") != "chest" or state.upgrade_offer.get("chest_id") != id: return {}
+	elif state.tactical_seals != 1 or state.stats.minibosses_defeated != 1 or state.upgrade_offer.get("source") != "boss": return {}
 	var restored: Dictionary = sim.restore(state)
 	return restored.state if restored.get("ok",false) else {}
 

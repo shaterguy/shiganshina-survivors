@@ -23,6 +23,7 @@ func run(t) -> void:
 	if not initial.get("ok",false): return
 	var config := F.run_config()
 	config.run_id = initial.game_save.career_id+":1"
+	config.loot_rules_version = 1 # Newly committed departures require the current optional rule marker.
 	var core_a := Core.new(provider)
 	var state_a := core_a.new_run(chapter,42,config)
 	var staged: Dictionary = disk.prepare(state_a.world.delta_root,[],0)

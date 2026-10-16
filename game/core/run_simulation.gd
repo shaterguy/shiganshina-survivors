@@ -1,5 +1,6 @@
 class_name RunSimulation
 extends RefCounted
+const Loot = preload("res://game/loot/loot_rules.gd")
 const Characters = preload("res://game/progression/character_catalog.gd")
 const Contracts = preload("res://game/contracts/game_contracts.gd")
 const SpatialHash = preload("res://game/combat/spatial_hash.gd")
@@ -216,6 +217,35 @@ func _prepare_live_world(value: Dictionary, hydration: Dictionary, commands: Arr
 	_configuration_admitted = true
 	_live_parent = null
 	return {"ok":true,"state":checked.state}
+# Internal ordinary-tick trust contract, not an external snapshot validator.
+# Fresh owners and copied state retain failure atomicity without a rollback log.
+func _prepare_controller_world(source, value: Dictionary, hydration: Dictionary, commands: Array) -> Dictionary:
+	if not _has_live_configuration(false) or _configuration_admitted or _streamed != null or _live_parent == null or _live_parent.get_ref() != source or source == self: return _failure("world_not_ready")
+	if not source is Object or source.get_script() != get_script() or not source._can_prepare_live_coverage(value): return _failure("world_not_ready")
+	var restored: Dictionary = value.duplicate(true)
+	# Autosave acknowledgements can carry JSON-derived world numeric forms.
+	# Preserve the existing world canonicalization, not the full save graph walk.
+	var dormant: Dictionary = restored.world.get("dormant",{})
+	restored.world = Chapters.new()._canonical_numbers(restored.world)
+	if int(restored.world.schema_version) == 2: restored.world.dormant = dormant
+	var helper = _world_template._fork_live_configuration()
+	if helper == null or helper == _world_template or helper == source._streamed: return _failure("world_not_ready")
+	var ready: Dictionary = helper._prepare_live(restored,hydration,commands,source._streamed)
+	if not ready.get("ok",false): return ready
+	# Keep cast-time and vector normalization in its original post-prepare order.
+	if float(restored.rules.get("permanent_damage_bonus",0.0)) > 0.0:
+		if not _evolved.canonicalize_damage(_legacy_attack_state(restored)): return _failure("invalid_core_state")
+		for projectile in restored.projectiles:
+			var canonical_damage: Array[float] = []
+			if not _projectile_valid(restored,projectile,canonical_damage): return _failure("invalid_core_state")
+			projectile.damage = canonical_damage[0]
+	if not Fantasy.canonicalize(restored,_catalog): return _failure("invalid_core_state")
+	_signature.canonicalize(restored)
+	_canonicalize_saved_vectors(restored)
+	_streamed = helper
+	_configuration_admitted = true
+	_live_parent = null
+	return {"ok":true,"state":restored}
 func _load_provider_chapter() -> Dictionary:
 	if not _chapter_provider is Object or not _chapter_provider.has_method("load_chapter"): return _failure("content_mismatch")
 	var result = _chapter_provider.load_chapter("chapter_01_shiganshina")
@@ -286,6 +316,7 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	config.run_serial = int(config.run_serial)
 	var rules := _rules_for(current.chapter,doctrine,config)
 	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":config.get("character_id",Characters.DEFAULT_CHARACTER),"seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
+	if Loot.enabled(state): state.loot = Loot.initial()
 	if Signature.enabled(state): state.character_skill = Signature.initial_state()
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
@@ -353,13 +384,13 @@ func step(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Arra
 	for command in commands:
 		if command.get("kind") == "spawn_enemy" and command.get("payload") is Dictionary and command.payload.get("enemy_id") in LIVE_ROLE_IDS: role_transaction = true
 	var counter_transaction := _needs_counter_transaction(state,commands)
-	var candidate: Dictionary = _tick_candidate(state) if role_transaction or counter_transaction else state
+	var candidate: Dictionary = _tick_candidate(state) if role_transaction or counter_transaction or Loot.enabled(state) else state
 	var staged := _step_running(candidate,move,commands)
 	if not _role_error.is_empty():
 		_last_step_status = _role_error.duplicate(true)
 		return []
 	if counter_transaction:
-		var earned: int = int(candidate.player.level)-int(state.player.level)+int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated)
+		var earned: int = int(candidate.player.level)-int(state.player.level)+(Loot.earned_offer_count(candidate)-Loot.earned_offer_count(state) if Loot.enabled(state) else int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated))
 		if int(candidate.offer_seq)-int(state.offer_seq) != earned:
 			_final_sweeps.clear()
 			_last_step_status = _failure("counter_exhausted")
@@ -434,8 +465,9 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 	_advance_projectiles(state,events,boss_rewards,existing_projectiles)
 	_remove_dead(state)
 	_attract_drops(state)
-	_collect_drops(state,events,boss_rewards.size())
+	_collect_drops(state,events,0 if Loot.enabled(state) else boss_rewards.size())
 	for reward in boss_rewards: _claim_boss_reward(state,reward,events)
+	if Loot.enabled(state): _update_loot(state,events)
 	_player_damage(state,events)
 	if state.player.hp <= 0.0:
 		_end_run(state,"dead","damage",events)
@@ -475,6 +507,11 @@ func choose_upgrade(state: Dictionary, offer_id: String, option_id: String) -> D
 			candidate.player.max_hp = _catalog.stat(candidate,"max_hp",float(candidate.rules.base_hp))
 			candidate.player.hp = minf(float(candidate.player.max_hp),float(candidate.player.hp)+float(_catalog.passives.max_health.increment))
 	_emit(candidate,events,"upgrade_applied",{"offer_id":offer_id,"option_id":option_id,"item_id":selected.item_id,"kind":selected.kind})
+	if candidate.upgrade_offer.source == "chest":
+		var chest: Dictionary = Loot.find_chest(candidate,candidate.upgrade_offer.chest_id)
+		if chest.is_empty() or chest.status != "queued": return _failure("invalid_offer")
+		chest.status = "claimed"
+		chest.result = "skill"
 	_claim_id(candidate.reward_ids_claimed,"offer:"+offer_id)
 	candidate.upgrade_offer = {}
 	candidate.pause_reasons.erase("upgrade")
@@ -671,7 +708,9 @@ func _v2_relationships_valid(state: Dictionary, chapter: Dictionary) -> bool:
 			if state.survival_tick != FINAL_TICK: return false
 		elif not id in REAL_BOSS_IDS or state.survival_tick < (REAL_BOSS_IDS.find(id)+1)*18000: return false
 	if boss_rewards != state.stats.minibosses_defeated or boss_rewards != int(state.tactical_seals)+_catalog.evolutions.spent_seals(state): return false
-	if not Catalog.integer_valid(state.player.get("level"),1) or int(state.offer_seq) > int(state.player.level)-1+boss_rewards: return false
+	var growth_rewards: int = Loot.earned_offer_count(state) if Loot.enabled(state) else boss_rewards
+	if not Catalog.integer_valid(state.player.get("level"),1) or int(state.offer_seq) > int(state.player.level)-1+growth_rewards: return false
+	if Loot.enabled(state) and int(state.offer_seq) != int(state.player.level)-1+growth_rewards: return false
 	if not Catalog.integer_valid(state.stats.get("kills")) or state.stats.kills < boss_rewards: return false
 	if not _number_valid(state.player.get("hp")): return false
 	if state.phase == "dead" and state.player.hp != 0: return false
@@ -1462,7 +1501,10 @@ func _hit_entity(state: Dictionary, entity: Dictionary, damage: float, source: S
 	if entity.hp > 0.0: return
 	state.stats.kills = int(state.stats.kills)+1
 	_add_drop(state,entity.position,int(entity.xp))
-	if not str(entity.boss_id).is_empty(): boss_rewards.append({"boss_id":entity.boss_id,"entity_id":entity.id})
+	if not str(entity.boss_id).is_empty():
+		var reward := {"boss_id":entity.boss_id,"entity_id":entity.id}
+		if Loot.enabled(state): reward.position = entity.position.duplicate()
+		boss_rewards.append(reward)
 func _remove_dead(state: Dictionary) -> void:
 	var alive: Array = []
 	var defeated: Array[String] = []
@@ -1511,6 +1553,109 @@ func _add_drop(state: Dictionary, position: Array, xp: int) -> void:
 		nearest.xp = int(nearest.xp)+xp
 		return
 	state.drops.append({"id":_new_id(state),"position":position.duplicate(),"xp":xp})
+func _add_loot(state: Dictionary, spec: Dictionary, anchor: Vector2) -> void:
+	if spec.is_empty(): return
+	var id: String = Loot.chest_id(state.run_id,spec.source,spec.source_id)
+	if not Loot.find_chest(state,id).is_empty() or state.loot.chests.size() >= Loot.MAX_CHESTS: return
+	var chest := {"id":id,"source":spec.source,"source_id":spec.source_id,"reward":spec.reward,"status":"pending","stage":"finite","position":[0.0,0.0],"address":{},"offer_id":"","result":""}
+	if not Loot.set_position(state,chest,anchor):
+		_role_error = _failure("invalid_loot_position")
+		return
+	state.loot.chests.append(chest)
+
+func _loot_coverage_present(state: Dictionary, aabb: Rect2) -> bool:
+	# covered() records world_not_ready on a miss. Placement probes must not
+	# poison the live world's query status or generate absent terrain.
+	if _streamed == null or _streamed._world == null: return false
+	if _streamed._world._origin != state.world.origin_chunk: return false
+	var keys: Array = _streamed._world.chunk_keys()
+	var low_x := int(floor(aabb.position.x/768))
+	var high_x := int(floor((aabb.end.x-0.0001 if aabb.size.x > 0 else aabb.end.x)/768))
+	var low_y := int(floor(aabb.position.y/768))
+	var high_y := int(floor((aabb.end.y-0.0001 if aabb.size.y > 0 else aabb.end.y)/768))
+	if high_x-low_x > 8 or high_y-low_y > 8: return false
+	for y in range(low_y,high_y+1):
+		for x in range(low_x,high_x+1):
+			var point: Dictionary = Loot.Address.normalize(state.world.origin_chunk,Vector2(x*768,y*768))
+			if not point.get("ok",false) or not keys.has(Loot.Address.key(point.chunk)): return false
+	return true
+
+func _loot_path_clear(state: Dictionary, origin: Vector2, target: Vector2) -> bool:
+	if origin.distance_squared_to(target) > 512.0*512.0: return false
+	# A successful swept straight walking path proves same connected component.
+	# Do not invoke a failing public query for a point outside resident coverage.
+	if state.has("world") and state.world.stage == "city":
+		if not _loot_coverage_present(state,Streamed.segment_rect(origin,target,8.0)): return false
+	if not _walkable_world(state,origin,8.0) or not _walkable_world(state,target,8.0): return false
+	return _move_world(state,origin,target-origin,8.0,true).distance_squared_to(target) <= 0.0001
+
+func _update_loot(state: Dictionary, events: Array[Dictionary]) -> void:
+	for index in range(Loot.FIELD_TICKS.size()):
+		var spec: Dictionary = Loot.field_spec(index)
+		if int(state.survival_tick) >= int(spec.due_tick):
+			_add_loot(state,spec,_vec(state.player.position))
+	var pending: Array = []
+	for chest in state.loot.chests:
+		if chest.status == "pending": pending.append(chest)
+	if not pending.is_empty() and Loot.retry_due(int(state.active_tick),int(state.loot.next_retry_tick)):
+		state.loot.next_retry_tick = mini(MAX_COUNTER,int(state.active_tick)+Loot.PLACEMENT_RETRY_TICKS)
+		var budget: int = Loot.MAX_PLACEMENT_CANDIDATES
+		# Rotate the first pending source so one blocked chest cannot starve others.
+		var first: int = int(state.active_tick/Loot.PLACEMENT_RETRY_TICKS)%pending.size()
+		for offset in range(pending.size()):
+			var chest: Dictionary = pending[(first+offset)%pending.size()]
+			var anchor := _vec(state.player.position)
+			if chest.source == "boss":
+				var local: Dictionary = Loot.local_position(state,chest)
+				if not local.get("ok",false): continue
+				anchor = local.position
+			for candidate_index in range(Loot.MAX_PLACEMENT_CANDIDATES):
+				if budget == 0: break
+				budget -= 1
+				var radius := 160.0+float(candidate_index%3)*40.0 if chest.source == "field" else float(candidate_index%4)*16.0
+				var point := anchor+Vector2.from_angle(TAU*float(candidate_index)/16.0)*radius
+				var occupied := false
+				for other in state.loot.chests:
+					if other.status != "placed": continue
+					var local: Dictionary = Loot.local_position(state,other)
+					if local.get("ok",false) and point.distance_squared_to(local.position) < 576.0: occupied = true; break
+				if occupied or not _loot_path_clear(state,_vec(state.player.position),point): continue
+				if not Loot.set_position(state,chest,point): continue
+				chest.status = "placed"
+				break
+			if budget == 0: break
+	if state.has("player_mobility") and state.player_mobility.phase != "ground": return
+	var pickup: float = _catalog.stat(state,"pickup_radius",float(state.rules.pickup_radius))
+	# Stable creation order defines simultaneous field/boss collection order.
+	for chest in state.loot.chests:
+		if chest.status != "placed": continue
+		var local: Dictionary = Loot.local_position(state,chest)
+		if not local.get("ok",false) or local.position.distance_to(_vec(state.player.position)) > pickup: continue
+		if not _loot_path_clear(state,_vec(state.player.position),local.position): continue
+		if chest.reward == "skill":
+			if state.pending_offers.size() >= 256 or int(state.offer_seq) >= MAX_COUNTER: continue
+			_queue_offer(state,"chest")
+			var descriptor: Dictionary = state.pending_offers.back()
+			descriptor.chest_id = chest.id
+			chest.offer_id = descriptor.offer_id
+			chest.status = "queued"
+		else:
+			chest.status = "claimed"
+			chest.result = "gold"
+			state.loot.gold = int(state.loot.gold)+Loot.GOLD_PER_CHEST
+		_emit(state,events,"loot_collected",{"chest_id":chest.id,"reward":chest.reward,"amount":Loot.GOLD_PER_CHEST if chest.reward == "gold" else 1})
+
+func transfer_loot_to_dock(state: Dictionary) -> void:
+	# Called on the private dock-transition candidate, never the live authority.
+	if not Loot.enabled(state): return
+	for chest in state.loot.chests:
+		if chest.status not in ["pending","placed"]: continue
+		if chest.source == "field": chest.status = "expired"
+		else:
+			chest.status = "pending"
+			Loot.set_position(state,chest,_vec(state.player.position))
+	state.loot.next_retry_tick = maxi(int(state.loot.next_retry_tick),int(state.active_tick))
+
 func _collect_drops(state: Dictionary, events: Array[Dictionary], reserved_boss_offers: int = 0) -> void:
 	var pickup := _catalog.stat(state,"pickup_radius",float(state.rules.pickup_radius))
 	var drop_grid = SpatialHash.new()
@@ -1543,7 +1688,9 @@ func _claim_boss_reward(state: Dictionary, reward: Dictionary, events: Array[Dic
 	state.tactical_seals = int(state.tactical_seals)+1
 	state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.25)
 	_emit(state,events,"boss_defeated",reward.duplicate(true))
-	_queue_offer(state,"boss")
+	if Loot.enabled(state):
+		_add_loot(state,Loot.boss_spec(boss),_vec(reward.get("position",state.player.position)))
+	else: _queue_offer(state,"boss")
 func _queue_offer(state: Dictionary, source: String) -> void:
 	if int(state.offer_seq) >= MAX_COUNTER or state.pending_offers.size() >= 256: return
 	state.offer_seq = int(state.offer_seq)+1
@@ -1558,7 +1705,14 @@ func _activate_next_offer(state: Dictionary, events: Array[Dictionary]) -> bool:
 		state.progression_rng_state = result.next_rng_state
 		state.view_revision = int(state.view_revision)+1
 		if result.offer.is_empty():
-			state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.10)
+			if descriptor.source == "chest":
+				var chest: Dictionary = Loot.find_chest(state,descriptor.chest_id)
+				if chest.is_empty() or chest.status != "queued": return false
+				chest.status = "claimed"
+				chest.result = "gold"
+				state.loot.gold = int(state.loot.gold)+Loot.GOLD_PER_CHEST
+				_emit(state,events,"loot_collected",{"chest_id":chest.id,"reward":"gold","amount":Loot.GOLD_PER_CHEST})
+			else: state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.10)
 			_claim_id(state.reward_ids_claimed,"offer:"+descriptor.offer_id)
 			continue
 		state.upgrade_offer = result.offer
@@ -1627,6 +1781,9 @@ func _end_run(state: Dictionary, result: String, reason: String, events: Array[D
 			entity.action_started_tick = int(state.active_tick)
 			entity.action_ends_tick = int(state.active_tick)
 			entity.next_action_tick = int(state.active_tick)
+	if Loot.enabled(state):
+		for chest in state.loot.chests:
+			if chest.status == "queued": chest.status = "expired"
 	state.upgrade_offer = {}
 	state.pending_offers.clear()
 	state.pause_reasons.erase("upgrade")
@@ -1658,9 +1815,13 @@ func _hazard_valid(payload: Dictionary) -> bool:
 	return true
 func _offer_valid(state: Dictionary, offer: Dictionary, applicable: bool) -> bool:
 	if offer.is_empty(): return true
-	if offer.size() != 5 or not offer.has_all(["offer_id","source","level_ordinal","options","selected_option_id"]) or not Catalog.json_data_valid(offer): return false
+	if not offer.get("source") is String: return false
+	if offer.size() != (6 if offer.get("source") == "chest" else 5) or not offer.has_all(["offer_id","source","level_ordinal","options","selected_option_id"]) or not Catalog.json_data_valid(offer): return false
 	if not offer.options is Array or offer.options.is_empty() or offer.options.size() > 3 or not offer.selected_option_id is String: return false
 	var descriptor := {"offer_id":offer.offer_id,"source":offer.source,"level_ordinal":offer.level_ordinal}
+	if offer.source == "chest":
+		if not offer.get("chest_id") is String: return false
+		descriptor.chest_id = offer.chest_id
 	if not Growth.new(_catalog)._descriptor_valid(state,descriptor) or (offer.source == "level" and offer.level_ordinal < 2): return false
 	var ids := {}
 	for option in offer.options:
@@ -1689,7 +1850,7 @@ func _normalize_saved_numbers(value: Variant, parent_key := "") -> bool:
 				var child = value[key]
 				value.erase(key)
 				value[str(key)] = child
-			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["character_skill_revision","ready_tick","next_probe_tick","cast_damage_level","recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
+			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["loot_rules_version","next_retry_tick","gold","character_skill_revision","ready_tick","next_probe_tick","cast_damage_level","recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
 				var number: float = value[key]
 				if not is_finite(number) or number != floor(number) or number < (-1.0 if key in ["final_started_tick","role_wait_since"] else 0.0) or number > MAX_COUNTER: return false
 				value[key] = int(number)
@@ -1905,11 +2066,11 @@ func _offer_queue_ids_valid(state: Dictionary) -> bool:
 		if offer.source == "level":
 			if level_ordinals.has(int(offer.level_ordinal)): return false
 			level_ordinals[int(offer.level_ordinal)] = true
-		else: boss_descriptors += 1
+		elif offer.source == "boss": boss_descriptors += 1
 		previous = serial
 		previous_level = int(offer.level_ordinal)
 		ids[id] = true
-	return boss_descriptors <= int(state.stats.minibosses_defeated)
+	return boss_descriptors == 0 if Loot.enabled(state) else boss_descriptors <= int(state.stats.minibosses_defeated)
 func _behavior_state_valid(state: Dictionary, entity: Dictionary, validation_helper = null) -> bool:
 	if _is_live_role(entity): return _role_owner_valid(state,entity)
 	for key in ["role_wait_since","role_retry_tick","role_hand_reach"]:
@@ -2102,6 +2263,10 @@ func _canonicalize_saved_vectors(state: Dictionary) -> void:
 			for field in ["pass_start","pass_end"]:
 				mobility.anchor[field].local = _array(_vec(mobility.anchor[field].local))
 		if not mobility.landing.is_empty(): mobility.landing.local = _array(_vec(mobility.landing.local))
+	if state.has("loot"):
+		for chest in state.loot.chests:
+			chest.position = _array(_vec(chest.position))
+			if chest.stage == "city": chest.address.local = _array(_vec(chest.address.local))
 	for collection in ["entities","projectiles","drops"]:
 		var records: Array = state[collection].duplicate()
 		if state.has("world") and state.world.get("schema_version") == 2 and collection in ["entities","drops"]:
@@ -2138,6 +2303,7 @@ func _validation_walkable(state: Dictionary, position: Vector2, radius: float, h
 # No per-tick restore, fresh helper, prepare or full-state recursive duplication.
 func _tick_candidate(state: Dictionary) -> Dictionary:
 	var candidate := state.duplicate()
+	if state.has("loot"): candidate.loot = state.loot.duplicate(true)
 	if state.has("character_skill"): candidate.character_skill = state.character_skill.duplicate()
 	if state.has("player_mobility"): candidate.player_mobility = state.player_mobility.duplicate(true)
 	candidate.player = state.player.duplicate()
@@ -2223,7 +2389,7 @@ func _step_streamed(state: Dictionary, move: Vector2, commands: Array[Dictionary
 		_last_step_status = status
 		return []
 	if _needs_counter_transaction(state,commands):
-		var earned: int = int(candidate.player.level)-int(state.player.level)+int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated)
+		var earned: int = int(candidate.player.level)-int(state.player.level)+(Loot.earned_offer_count(candidate)-Loot.earned_offer_count(state) if Loot.enabled(state) else int(candidate.stats.minibosses_defeated)-int(state.stats.minibosses_defeated))
 		if int(candidate.offer_seq)-int(state.offer_seq) != earned:
 			_final_sweeps.clear()
 			_streamed = previous_helper

@@ -1,5 +1,6 @@
 class_name GameUI
 extends Control
+const Loot = preload("res://game/loot/loot_rules.gd")
 const TOUCH_RADIUS := 36.0
 const TOUCH_DEADZONE := 4.0 / TOUCH_RADIUS
 const MOUSE_POINTER_ID := -2 # Touch indices are nonnegative; -1 means no owner.
@@ -72,6 +73,11 @@ var _scroll: ScrollContainer
 var _title: Label
 var _subtitle: Label
 var _owned_hud: Control
+var _loot_hud: Label
+var _xp_feedback_run := ""
+var _xp_feedback_seq := 0
+var _xp_feedback_amount := 0
+var _xp_feedback_seconds := 0.0
 var _hud: Label
 var _health: ProgressBar
 var _xp: ProgressBar
@@ -174,6 +180,12 @@ func _ready() -> void:
 	_objective.add_theme_constant_override("shadow_offset_y",1)
 	_objective.add_theme_constant_override("shadow_outline_size",0)
 	add_child(_objective)
+	_loot_hud = Label.new()
+	_loot_hud.name = "LootHUD"
+	_loot_hud.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_loot_hud.add_theme_font_size_override("font_size",11)
+	_loot_hud.add_theme_color_override("font_color",Color("f4c36b"))
+	add_child(_loot_hud)
 	_notice = Label.new()
 	_notice.add_theme_font_size_override("font_size",12)
 	_notice.add_theme_color_override("font_color",Color("f4c36b"))
@@ -298,18 +310,20 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	_health.size = Vector2(176,4)
 	_xp.position = safe.position + Vector2(8,46)
 	_xp.size = Vector2(176,3)
-	var boss_left := safe.position+Vector2(8,176+signature_height) if portrait else safe.position+Vector2(8,74)
+	var boss_left := safe.position+Vector2(8,194+signature_height) if portrait else safe.position+Vector2(8,92)
 	_boss_name.position = boss_left
 	_boss_name.size = Vector2(safe.size.x-16 if portrait else 176,20)
 	_boss_health.position = boss_left+Vector2(0,22)
 	_boss_health.size = Vector2(minf(250,safe.size.x-100) if portrait else 176,7)
 	_objective.position = safe.position + Vector2(8,162+signature_height if portrait else 52)
+	_loot_hud.position = _objective.position+Vector2(0,18)
+	_loot_hud.size = Vector2(safe.size.x-16 if portrait else 176,16)
 	if _notice.get_parent() == self:
-		_notice.position = safe.position + Vector2(8,202+signature_height if portrait else 130+signature_height)
+		_notice.position = safe.position + Vector2(8,220+signature_height if portrait else 148+signature_height)
 		_notice.size = Vector2(safe.size.x-40,40)
 	_notice.z_index = 2
 	if _growth_notice.get_parent() == self:
-		_growth_notice.position = safe.position+Vector2(8,208+signature_height if portrait else 130+signature_height)
+		_growth_notice.position = safe.position+Vector2(8,226+signature_height if portrait else 148+signature_height)
 		_growth_notice.size = Vector2(safe.size.x-16,44)
 	_growth_notice.z_index = 2
 	_hint.position = safe.position + Vector2(20,safe.size.y-28)
@@ -318,6 +332,11 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	cancel_touch()
 func present(snapshot: Dictionary) -> void:
 	if _snapshot.get("run_id","") != snapshot.get("run_id",""): reset_progression_feedback()
+	if _xp_feedback_run != snapshot.get("run_id",""):
+		_xp_feedback_run = snapshot.get("run_id","")
+		_xp_feedback_seq = 0
+		_xp_feedback_amount = 0
+		_xp_feedback_seconds = 0.0
 	_snapshot = snapshot.duplicate(true)
 	if _owned_hud.present_signature(Signature.presentation(snapshot)): reflow(_screen_size,_safe_rect)
 	_objective.text = objective_text(snapshot)
@@ -376,6 +395,11 @@ func present(snapshot: Dictionary) -> void:
 		_notice.reparent(notice_parent)
 		if notice_parent != self: notice_parent.move_child(_notice,2)
 	_sync_upgrade_notice(mode)
+	_loot_hud.visible = mode in ["play","pause","upgrade"] and not snapshot.is_empty()
+	var loot_text := "획득 골드 %d" % int(snapshot.get("loot",{}).get("gold",0)) if Loot.enabled(snapshot) else ""
+	if _xp_feedback_seconds > 0.0:
+		loot_text += (" · " if not loot_text.is_empty() else "")+"+%d XP" % _xp_feedback_amount
+	_loot_hud.text = loot_text
 	if mode == _mode and offer_id == _offer_id: return
 	_mode = mode
 	_scroll.follow_focus = mode != "evolution_detail"
@@ -390,7 +414,7 @@ func present(snapshot: Dictionary) -> void:
 			_render_recovery_panel()
 		"title":
 			_title.text = "진격의 거인 인류의 날개"
-			_subtitle.text = ""
+			_subtitle.text = "기존 진행은 경험치 표시만 개선됩니다. 보상함은 새 출격부터 적용됩니다."
 			if _checkpoint_available: _add_button("이어서 출격",func(): resume_requested.emit())
 			_add_button("새로 출격",open_scenario_selection).set_meta("semantic_id","new_run_open")
 			_add_button("설정",open_settings)
@@ -408,7 +432,7 @@ func present(snapshot: Dictionary) -> void:
 			_add_button("뒤로",close_scenario_page).set_meta("semantic_id","scenario_back")
 		"scenario_briefing":
 			_title.text = "시나리오 1 · "+_chapter_title()
-			_subtitle.text = "845년, 성벽이 무너졌다. 주민이 떠날 때까지 버텨라.\n30분 생존 · 다섯 강적 · 마지막 탈출"
+			_subtitle.text = "845년, 성벽이 무너졌다. 주민이 떠날 때까지 버텨라.\n30분 생존 · 다섯 강적 · 마지막 탈출\n새 출격: 경험치 등급 · 필드/강적 보상함 적용"
 			_add_button("출격",_request_new_run).set_meta("semantic_id","scenario_start")
 			_add_button("뒤로",close_scenario_page).set_meta("semantic_id","scenario_back")
 		"new_run_confirm":
@@ -689,6 +713,10 @@ func _clear_choices() -> void:
 			child.queue_free()
 	_buttons.clear()
 func reset_obsolete_presentation(snapshot: Dictionary, checkpoint_available: bool, checkpoint_run_id: String = "") -> void:
+	_xp_feedback_run = ""
+	_xp_feedback_seq = 0
+	_xp_feedback_amount = 0
+	_xp_feedback_seconds = 0.0
 	# Authority replacement invalidates cached run views and their modal return
 	# paths. This is presentation-only and must not emit gameplay/shop intents.
 	reset_progression_feedback()
@@ -1071,7 +1099,7 @@ func _sync_upgrade_notice(mode: String) -> void:
 		_growth_notice.reparent(parent)
 		if parent != self: parent.move_child(_growth_notice,2)
 		else:
-			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,(208 if _screen_size.y > _screen_size.x else 130)+(24 if _owned_hud.signature_visible() else 0))
+			_growth_notice.position = Vector2(_safe_rect.position)+Vector2(8,(226 if _screen_size.y > _screen_size.x else 148)+(24 if _owned_hud.signature_visible() else 0))
 			_growth_notice.size = Vector2(_safe_rect.size.x-16,44)
 	var compact_notice := mode == "upgrade" and _screen_size.x > _screen_size.y and _safe_rect.size.y < 400
 	var notice := _growth_notice_text.split("\n")[0] if compact_notice else _growth_notice_text
@@ -1079,8 +1107,28 @@ func _sync_upgrade_notice(mode: String) -> void:
 	_growth_notice.tooltip_text = _growth_notice_text
 	if _growth_notice.text != text: _growth_notice.text = text
 	_growth_notice.visible = not _growth_notice_text.is_empty() and mode in ["play","upgrade"]
+func consume_loot_events(events: Array, run_id: String) -> void:
+	if _xp_feedback_run != run_id:
+		_xp_feedback_run = run_id
+		_xp_feedback_seq = 0
+		_xp_feedback_amount = 0
+		_xp_feedback_seconds = 0.0
+	var gained := 0
+	for event in events:
+		if event.get("type","") != "xp_gained": continue
+		var prefix := run_id+":"
+		var id: String = event.get("event_id","")
+		if not id.begins_with(prefix): continue
+		var serial: int = id.trim_prefix(prefix).to_int()
+		if serial <= _xp_feedback_seq: continue
+		_xp_feedback_seq = serial
+		gained += int(event.get("payload",{}).get("amount",0))
+	if gained <= 0: return
+	_xp_feedback_amount = mini(2147483647,(_xp_feedback_amount if _xp_feedback_seconds > 0.0 else 0)+gained)
+	_xp_feedback_seconds = 0.7
 func _process(delta: float) -> void:
 	if _mode != "play": return
+	_xp_feedback_seconds = maxf(0.0,_xp_feedback_seconds-delta)
 	_growth_notice_seconds = maxf(0,_growth_notice_seconds-delta)
 	if _growth_notice_seconds == 0: reset_progression_feedback()
 func _confirm_end() -> void:
@@ -1390,7 +1438,7 @@ func present_action_result(result: Dictionary) -> void:
 	if not receipt.is_empty():
 		var lines: Array[String] = []
 		for key in receipt.get("breakdown",{}):
-			lines.append("%s %s" % [str({"kills":"처치","survival":"생존","elites":"강적","minibosses":"강적","clear":"탈출"}.get(key,key)),str(receipt.breakdown[key])])
+			lines.append("%s %s" % [str({"kills":"처치","survival":"생존","elites":"강적","minibosses":"강적","clear":"탈출","loot":"보상함"}.get(key,key)),str(receipt.breakdown[key])])
 		if receipt.has("total"): lines.append("획득 보급금 %s" % str(receipt.total))
 		if not lines.is_empty(): set_save_notice(" · ".join(lines))
 	elif not str(result.get("message","")).is_empty(): set_save_notice(str(result.message))

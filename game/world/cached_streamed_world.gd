@@ -64,3 +64,10 @@ func _fork_retained(generator, required: Array):
 		chunk.geometry_revision = 0
 		candidate._chunks[key] = chunk
 	return candidate
+
+func _validate_resident_hydration(chunk: Dictionary, deltas: Array) -> Dictionary:
+	# Exact empty hydration only copies the resident chunk and returns success.
+	# prepare discards that copy. Keep nonempty and callback behavior unchanged.
+	if get_script() == CachedStreamedWorld and _generator is RefCounted and _generator.get_script() == preload("res://game/world/city_generator.gd") and deltas.is_empty():
+		return {"ok":true}
+	return super._validate_resident_hydration(chunk,deltas)

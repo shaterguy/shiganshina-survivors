@@ -1,5 +1,8 @@
 class_name WorldView
 extends Node2D
+const LootRules = preload("res://game/loot/loot_rules.gd")
+const XP_COLORS := [Color("#55B8FF"),Color("#69E88C"),Color("#FF7185")]
+var _xp_outline := PackedVector2Array([Vector2(0,-9),Vector2(9,0),Vector2(0,9),Vector2(-9,0),Vector2(0,-9)])
 const RasterAlpha = preload("res://game/presentation/raster_alpha_mask.gd")
 const CityDepth = preload("res://game/presentation/city_render.gd")
 const CityAddress = preload("res://game/world/world_address.gd")
@@ -492,7 +495,8 @@ func _draw() -> void:
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
 	for drop in _snapshot.get("drops",[]):
-		_sprite("xp_pickup",_render_position("drops",drop.id,Vector2(drop.position[0],drop.position[1])),"idle",1.0)
+		_draw_xp_drop(drop)
+	_draw_loot()
 	if _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
@@ -504,6 +508,47 @@ func _draw() -> void:
 	_draw_enemy_attacks()
 	var player: Dictionary = _city_draw_data.actor["player"]
 	_sprite(player.asset_id,player.position,player.pose,player.scale,player.flip,player.seconds)
+func _draw_loot() -> void:
+	if not LootRules.enabled(_snapshot): return
+	for chest in _snapshot.loot.chests:
+		if chest.status != "placed": continue
+		var local: Dictionary = LootRules.local_position(_snapshot,chest)
+		if not local.get("ok",false): continue
+		var position: Vector2 = local.position
+		if not Rect2(_camera-_viewport_size*0.5,_viewport_size).grow(24.0).has_point(position): continue
+		var accent := Color("FFD56A") if chest.reward == "gold" else Color("C99BFF")
+		draw_set_transform(_screen(position))
+		draw_rect(Rect2(-11,-9,22,18),Color("352B3F"))
+		draw_rect(Rect2(-11,-9,22,18),accent,false,2.0)
+		draw_line(Vector2(-10,-2),Vector2(10,-2),accent,2.0)
+		draw_rect(Rect2(-2,-4,4,6),Color.WHITE)
+		if chest.reward == "gold": draw_circle(Vector2(0,-13),2.5,accent)
+		else:
+			draw_line(Vector2(-4,-13),Vector2(4,-13),accent,2.0)
+			draw_line(Vector2(0,-17),Vector2(0,-9),accent,2.0)
+			draw_line(Vector2(-3,-16),Vector2(3,-10),accent,1.0)
+			draw_line(Vector2(-3,-10),Vector2(3,-16),accent,1.0)
+		draw_set_transform(Vector2.ZERO)
+func _draw_xp_drop(drop: Dictionary) -> void:
+	var amount := int(drop.xp)
+	var tier: int = LootRules.xp_tier(amount)
+	var scale_value: float = LootRules.xp_scale(amount)
+	var position := _render_position("drops",drop.id,Vector2(drop.position[0],drop.position[1]))
+	if not Rect2(_camera-_viewport_size*0.5,_viewport_size).grow(24.0).has_point(position): return
+	var previous_tint := _actor_draw_tint
+	_actor_draw_tint = XP_COLORS[tier]
+	_sprite("xp_pickup",position,"idle",scale_value)
+	_actor_draw_tint = previous_tint
+	# Both callers are ground passes, before armored actor/tail routing begins.
+	# Static diamond marks distinguish tiers without color, nodes or particles.
+	draw_set_transform(_screen(position),0,Vector2.ONE*scale_value)
+	draw_polyline(_xp_outline,Color(0.94,0.98,1.0),1.0)
+	if tier == 1:
+		draw_set_transform(_screen(position),0,Vector2.ONE*scale_value*0.7)
+		draw_polyline(_xp_outline,Color(0.94,0.98,1.0),1.0)
+	elif tier == 2:
+		draw_circle(Vector2.ZERO,2.0,Color.WHITE)
+	draw_set_transform(Vector2.ZERO)
 func player_animation(snapshot: Dictionary) -> String:
 	if snapshot.phase == "dead": return "death"
 	if _clock < _hit_until: return "hit"
@@ -764,7 +809,8 @@ func _draw_streamed_city() -> void:
 		if command.kind == "shadow": _draw_ground_shadow(command)
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
-	for drop in _snapshot.get("drops",[]): _sprite("xp_pickup",_render_position("drops",drop.id,Vector2(drop.position[0],drop.position[1])),"idle",1.0)
+	for drop in _snapshot.get("drops",[]): _draw_xp_drop(drop)
+	_draw_loot()
 	if _city_view.stage == "dock" and _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)

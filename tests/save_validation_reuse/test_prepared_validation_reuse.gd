@@ -28,6 +28,7 @@ func run(t) -> void:
 	t.check(loaded.get("ok",false),"reuse real city fixture initializes whole authority")
 	if not loaded.get("ok",false): return
 	var config := F.run_config()
+	config.loot_rules_version = 1
 	config.run_id = loaded.game_save.career_id+":1"
 	var state := runtime.new_run(chapter,42,config)
 	var staged := disk.prepare(state.world.delta_root,[],0)
@@ -61,3 +62,4 @@ func run(t) -> void:
 	t.check(not runtime.refresh_coverage(state).get("ok",false),"fresh private pair boundary rejects poisoned root bytes in warmed coverage refresh")
 	var cold := Runtime.new(provider,Disk.new(directory.path_join("world")))
 	t.check(not cold.prepare_load(committed.game_save).get("ok",false),"reuse cold unchanged checkpoint must detect poisoned root bytes")
+

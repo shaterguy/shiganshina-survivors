@@ -3,6 +3,7 @@ extends RefCounted
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 const Characters = preload("res://game/progression/character_catalog.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
+const Loot = preload("res://game/loot/loot_rules.gd")
 const MAX_COUNTER := 2147483647
 const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
 const TERMINAL := ["dead","won","abandoned"]
@@ -65,6 +66,7 @@ func _validate(value: Variant, normalized: Variant = null, scope = null, context
 	if not counter(state.get("run_serial")) or state.run_serial < 1 or state.run_serial != value.next_run_serial-1 or not state.get("run_id") is String or state.run_id != "%s:%d" % [value.career_id,int(state.run_serial)]: return ["invalid_snapshot"]
 	if not state.get("run_config") is Dictionary: return ["invalid_snapshot"]
 	var config: Dictionary = state.run_config
+	if not Loot.validate(state): return ["invalid_snapshot"]
 	if not _catalog.run_upgrade_config_valid(config) or not config.get("run_id") is String or not counter(config.get("run_serial")): return ["invalid_snapshot"]
 	if state.get("character_id") != config.get("character_id",Characters.DEFAULT_CHARACTER): return ["invalid_snapshot"]
 	if state.character_id != Characters.new().protagonist_id(state.chapter_id) and not Characters.new().selection_error(value.profile,state.chapter_id,state.character_id).is_empty(): return ["invalid_snapshot"]
@@ -115,6 +117,7 @@ func validate_and_normalize(value: Variant, scope = null, context: Dictionary = 
 	for receipt in result.settlement_receipts:
 		for key in ["run_serial","total","balance_after"]: receipt[key] = int(receipt[key])
 		for key in receipt.breakdown: receipt.breakdown[key] = int(receipt.breakdown[key])
+		if receipt.has("loot_rules_version"): receipt.loot_rules_version = int(receipt.loot_rules_version)
 	if result.get("checkpoint_recovery_receipt") is Dictionary:
 		for key in ["source_store_revision","preserved_run_serial","replacement_run_serial"]: result.checkpoint_recovery_receipt[key] = int(result.checkpoint_recovery_receipt[key])
 	return {"ok":true,"game_save":result}
@@ -163,7 +166,12 @@ func _settlement_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 	var parts: Dictionary = receipt.breakdown
 	for key in ["kills","survival","minibosses","clear"]:
 		if not counter(parts.get(key)): return false
-	return parts.size() == 4 and parts.kills <= 40 and parts.survival <= 40 and int(parts.survival)%10 == 0 and parts.minibosses <= 75 and int(parts.minibosses)%15 == 0 and (parts.clear == 0 or parts.clear == 30) and receipt.total == parts.kills+parts.survival+parts.minibosses+parts.clear
+	var loot_gold := 0
+	if receipt.has("loot_rules_version"):
+		if not version_number(receipt.loot_rules_version) or receipt.loot_rules_version != Loot.VERSION or parts.size() != 5 or not Loot.gold_amount_valid(parts.get("loot")): return false
+		loot_gold = int(parts.loot)
+	elif parts.size() != 4: return false
+	return parts.kills <= 40 and parts.survival <= 40 and int(parts.survival)%10 == 0 and parts.minibosses <= 75 and int(parts.minibosses)%15 == 0 and (parts.clear == 0 or parts.clear == 30) and receipt.total == parts.kills+parts.survival+parts.minibosses+parts.clear+loot_gold
 func _career_valid(value: Variant) -> bool:
 	if not value is String or value.length() != 32: return false
 	for character in value:
@@ -244,3 +252,4 @@ func _recovery_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 		if not counter(receipt.get(key)): return false
 	if receipt.source_store_revision > save.store_revision or receipt.preserved_run_serial < 1 or receipt.replacement_run_serial != receipt.preserved_run_serial+1 or receipt.replacement_run_serial >= save.next_run_serial: return false
 	return receipt.request_id == "recover:%s:%s:%d" % [save.career_id,receipt.source_sha256,int(receipt.replacement_run_serial)]
+

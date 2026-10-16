@@ -1,5 +1,6 @@
 class_name GameSaveStore
 extends RefCounted
+const Loot = preload("res://game/loot/loot_rules.gd")
 const Characters = preload("res://game/progression/character_catalog.gd")
 const Contracts = preload("res://game/contracts/game_save_contracts.gd")
 const Service = preload("res://game/economy/supply_service.gd")
@@ -289,6 +290,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		operation = "start"
 		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
 		var config: Dictionary = candidate.checkpoint.run_config
+		if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial()): return false
 		var loadout: Dictionary = current.profile.loadout
 		var expected_character := Characters.new().run_character_id(current.profile,candidate.checkpoint.chapter_id)
 		if expected_character.is_empty() or config.get("character_id",Characters.DEFAULT_CHARACTER) != expected_character: return false
@@ -317,6 +319,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		if current.checkpoint is Dictionary:
 			for key in ["run_id","run_serial","run_config","seed","chapter_id","content_revision"]:
 				if not _same(candidate.checkpoint.get(key),current.checkpoint.get(key)): return false
+			if not Loot.transition_valid(current.checkpoint,candidate.checkpoint): return false
 			if current.checkpoint.phase in ["won","dead","abandoned"] and not _same(candidate.checkpoint,current.checkpoint): return false
 	if (service._has_unsettled_run(current) or operation in ["start","purchase","settlement"]) and not _same(candidate.profile.loadout,current.profile.loadout): return false
 	return true
@@ -592,6 +595,7 @@ func _commit_preserved_locked(candidate: Dictionary, source_hash: String, reques
 	canonical.store_revision = revision+1
 	return _write_verified(canonical,{"recovery_source":source.value},source_hash)
 func _recovery_transition_valid(source: Dictionary, candidate: Dictionary) -> bool:
+	if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial()): return false
 	var receipt: Dictionary = candidate.checkpoint_recovery_receipt
 	if receipt.preserved_run_serial != source.checkpoint.run_serial or receipt.replacement_run_serial != source.next_run_serial or candidate.next_run_serial != source.next_run_serial+1: return false
 	var state: Dictionary = candidate.checkpoint

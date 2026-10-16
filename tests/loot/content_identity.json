@@ -1,0 +1,15 @@
+{
+  "chapters/chapter_01/manifest.json": "8abaf97dc17261143691743619a29a06b70d6f84",
+  "chapters/chapter_01/map.json": "e3de2de0acd4c0e5bd6af7f9cb4e5a38549af9ea",
+  "chapters/chapter_01/city_templates.json": "01048cb365161ee72b50f62238d473a16d0654a7",
+  "chapters/chapter_01/authored_dock.json": "d818f9a41bcfca56ed33bfbcb64a39639315b018",
+  "data/equipment.json": "94ba24d11faa228af39a65e403fa8c183032f4e9",
+  "data/passives.json": "1d06e75c64cc4bba0091677c96e36b2d418d22b6",
+  "data/evolutions.json": "e250e5c2d47114d8784a581052394342ffb56732",
+  "data/doctrines.json": "93d4f94533cf37b3f77a8468e4c0f28e6a100004",
+  "data/supply_shop.json": "b69d46a944a6086d6b7dbbecdefe4dcd34344f54",
+  "data/enemies.json": "f960ec711614a8ee6bb226d463df508890526ede",
+  "data/world_props.json": "8b6a15690700b40d7ee97910dfaeb1f6832a4d4a",
+  "data/enemy_roles_ch01_3.json": "bb28d3246c341316a54b4825362664ba8c07b60a",
+  "assets/manifest.json": "9f50969c901740691d18e43d9aaf332488adf0aa"
+}

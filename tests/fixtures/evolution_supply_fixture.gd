@@ -1,6 +1,7 @@
 extends RefCounted
 # Transcript-backed helper, NEW case routing for NEW R0 DTOs.
 # Test-only fixtures, never an alternative production simulation/validator.
+const Loot = preload("res://game/loot/loot_rules.gd")
 const ROOT := "res://tests/fixtures/evolution_supply_grabber/"
 func _read(name: String) -> Dictionary:
 	var value = JSON.parse_string(FileAccess.get_file_as_string(ROOT+name))
@@ -36,6 +37,8 @@ func make_run(_chapter: Dictionary,seed: int,config: Dictionary) -> Dictionary:
 	result.run_config = config.duplicate(true)
 	result.run_id = config.run_id
 	result.run_serial = config.run_serial
+	# Only newly requested rules receive fresh loot; historical JSON stays exact.
+	if config.get("loot_rules_version",0) == Loot.VERSION: result.loot = Loot.initial()
 	return result
 func validate_checkpoint(value: Dictionary) -> Dictionary:
 	# SHAPE-ONLY FAKE: never evidence of semantic/streamed checkpoint validity.

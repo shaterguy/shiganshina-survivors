@@ -57,6 +57,7 @@ static func prepare(simulation, state: Dictionary, authority: Dictionary, chapte
 		checkpoint.world.dormant.entities = checkpoint.world.dormant.entities.filter(func(entry): return str(entry.record.id) != str(handoff.entity.id))
 	checkpoint.entities.append(handoff.entity.duplicate(true))
 	checkpoint.telegraphs.append_array(handoff.telegraphs.duplicate(true))
+	simulation.transfer_loot_to_dock(checkpoint)
 	candidate.checkpoint = checkpoint
 	# The helper's scene notice is not a Core event envelope. Do not invent an
 	# event sequence or submit it to combat/audio consumers. Present after commit.
@@ -68,3 +69,4 @@ static func _record_id(record: Dictionary) -> Variant:
 	return record.get("id",record.get("attack_instance_id",record.get("attack_id",record.get("entity_id",""))))
 static func _fail(code: String) -> Dictionary:
 	return {"ok":false,"error_code":code}
+

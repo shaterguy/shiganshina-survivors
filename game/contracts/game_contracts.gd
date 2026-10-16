@@ -1,6 +1,7 @@
 class_name GameContracts
 extends RefCounted
 # NEW v2 bounded structural boundary. Semantic combat validation is owned by Core.
+const Loot = preload("res://game/loot/loot_rules.gd")
 const Mobility = preload("res://game/core/player_mobility.gd")
 const SCHEMA_VERSION := 2
 const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
@@ -16,7 +17,7 @@ func validate_snapshot(value: Dictionary) -> Array[String]:
 	for key in REQUIRED:
 		if not value.has(key): return ["missing:"+key]
 	for key in value:
-		if not key in REQUIRED and not key in ["world","character_skill","player_mobility"]: return ["invalid_snapshot"]
+		if not key in REQUIRED and not key in ["world","character_skill","player_mobility","loot"]: return ["invalid_snapshot"]
 	for key in ["content_revision","chapter_id","character_id","phase","run_id","rng_state","progression_rng_state"]:
 		if not value[key] is String or value[key].is_empty(): return ["invalid_snapshot"]
 	if not value.phase in PHASES: return ["invalid_snapshot"]
@@ -31,6 +32,7 @@ func validate_snapshot(value: Dictionary) -> Array[String]:
 		if not value[key] is Dictionary: return ["invalid_snapshot"]
 	if value.has("world") and not value.world is Dictionary: return ["invalid_snapshot"]
 	if value.has("character_skill") and not value.character_skill is Dictionary: return ["invalid_snapshot"]
+	if not Loot.validate(value): return ["invalid_loot"]
 	if not Mobility.validate(value).is_empty(): return ["invalid_player_mobility"]
 	return []
 func _json_safe(value: Variant) -> bool:
@@ -56,3 +58,4 @@ static func _counter(value: Variant, minimum: int = 0) -> bool:
 	return (value is int or value is float) and is_finite(float(value)) and float(value) == floor(float(value)) and value >= minimum and value <= MAX_COUNTER
 static func _rng_state(value: Variant) -> bool:
 	return value is String and value.length() <= 20 and value.is_valid_int() and str(value.to_int()) == value
+

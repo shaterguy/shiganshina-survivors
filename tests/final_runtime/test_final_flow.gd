@@ -1,4 +1,5 @@
 extends RefCounted
+const Loot = preload("res://game/loot/loot_rules.gd")
 const S = preload("res://tests/app_city_controller/controller_city_support.gd")
 func run(t) -> void:
 	var path := "res://game/app/final_evacuation_flow.gd"
@@ -12,6 +13,8 @@ func run(t) -> void:
 	app.state.active_tick = 107999
 	app.state.survival_tick = 107999
 	app.state.player.position = [384.0,384.0]
+	for index in range(Loot.FIELD_TICKS.size()):
+		app.simulation._add_loot(app.state,Loot.field_spec(index),Vector2(384.0,384.0))
 	var staged: Dictionary = f.runtime.refresh_coverage(app.state)
 	t.check(staged.get("ok",false),"final flow fixture prepares real city geometry")
 	if not staged.get("ok",false): app.free(); return

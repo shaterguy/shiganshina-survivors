@@ -63,7 +63,7 @@ func prepare(required: Array, prefetch: Array, hydrated_deltas: Dictionary, orig
 		if _chunks.has(key):
 			# Validate the packet even when geometry is resident. A verified older
 			# disk state must never replace newer live/dirty prop state here.
-			var validated: Dictionary = _generator.hydrate(_chunks[key],hydrated_deltas[key])
+			var validated: Dictionary = _validate_resident_hydration(_chunks[key],hydrated_deltas[key])
 			if not validated.ok: return _failure(validated.error_code)
 			next[key] = _chunks[key]
 		else:
@@ -89,6 +89,8 @@ func prepare(required: Array, prefetch: Array, hydrated_deltas: Dictionary, orig
 	_rebuild()
 	_last_error = ""
 	return {"ok":true,"missing_delta_keys":[],"activated":activated,"retired":retired}
+func _validate_resident_hydration(chunk: Dictionary, deltas: Array) -> Dictionary:
+	return _generator.hydrate(chunk,deltas)
 func apply_props(changes: Array, world_revision: int) -> Dictionary:
 	if world_revision <= _world_revision: return _failure("stale_world_revision")
 	var candidates := {}
@@ -263,9 +265,14 @@ func chunk_at(position: Vector2) -> Dictionary:
 	return localized_chunk(key)
 func localized_chunk(key: String) -> Dictionary:
 	if not _chunks.has(key): return {}
-	var chunk: Dictionary = _chunks[key].duplicate(true)
+	# The raw props are replaced by localized props below; do not deep-copy
+	# the discarded array. Every returned nested value still has its own owner.
+	var chunk: Dictionary = _chunks[key].duplicate()
+	chunk.props = []
+	chunk = chunk.duplicate(true)
 	var translation: Vector2 = Address.relative(chunk.chunk,Vector2.ZERO,_origin).local
 	chunk.local_origin = translation
+	chunk.props = _chunks[key].props.duplicate()
 	for i in chunk.props.size(): chunk.props[i] = _props[chunk.props[i].prop_id].duplicate(true)
 	chunk.passage_rect.position += translation
 	for i in chunk.street_nodes.size(): chunk.street_nodes[i] += translation

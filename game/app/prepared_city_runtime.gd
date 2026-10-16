@@ -91,6 +91,32 @@ func _confirm_candidate(game_save_store, scope = null) -> Dictionary:
 	var result := {"ok":true,"simulation":_pending.simulation,"state":_pending.state,"game_save":canonical,"source_sha256":observed.get("source_sha256",""),"recovered":observed.get("recovered",false)}
 	_pending = {}
 	return result
+# Exact app tick continuation. Public preparation remains full save admission.
+# The caller selects this synchronous path locally; no returned trusted flag.
+func _can_continue_controller(controller) -> bool:
+	if get_script() != load("res://game/app/prepared_city_runtime.gd") or not controller is Object or controller.get_script() != load("res://game/app/run_controller.gd"): return false
+	if controller._city_runtime != self or controller._world_delta_store != _world_store or controller._city_provider != _provider: return false
+	if not controller.director is Object or controller.director.get_script() != load("res://game/director/spawn_director.gd") or not controller.input_router is Object or controller.input_router.get_script() != load("res://game/input/input_router.gd"): return false
+	if _content_router == null or _content_router.get_script() != Router or _provider.get_script() != City or not _world_store is Disk or _world_store.get_script() != Disk: return false
+	var core = controller.simulation
+	return core is Object and core.get_script() == Core and core._chapter_provider == _provider and core._can_prepare_live_coverage(controller.state)
+func _refresh_controller_coverage(controller, commands: Array) -> Dictionary:
+	# Never mix an injected/public fallback result into the native return lane.
+	if not _can_continue_controller(controller): return _fail("world_not_ready")
+	var source = controller.simulation
+	var current: Dictionary = controller.state
+	var needed := Helper.requirements(current,commands)
+	if not needed.get("ok",false): return needed
+	_world_store.begin_verified_read()
+	var verified: Dictionary = _world_store.verify_root(current.world.delta_root)
+	if not verified.get("ok",false): return verified
+	var hydration: Dictionary = _world_store.hydrate(current.world.delta_root,needed.chunks)
+	if not hydration.get("ok",false): return hydration
+	var core = source._fork_live_configuration()
+	if core == null: return _fail("world_not_ready")
+	var prepared: Dictionary = core._prepare_controller_world(source,current,hydration.deltas,commands)
+	if not prepared.get("ok",false): return prepared
+	return {"ok":true,"simulation":core,"state":prepared.state}
 func refresh_live_coverage(current_core, current_state: Dictionary, commands: Array = []) -> Dictionary:
 	# Public cold APIs and injected callbacks remain unchanged. This entry is
 	# used only by the Controller's ordinary fixed-tick coverage continuation.

@@ -5,6 +5,7 @@ var _characters = Characters.new()
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 const Catalog = preload("res://game/economy/supply_catalog.gd")
 const Contracts = preload("res://game/contracts/game_save_contracts.gd")
+const Loot = preload("res://game/loot/loot_rules.gd")
 const MAX_COUNTER := 2147483647
 # NEW E1 changes are recorded separately from the preserved transcript body.
 const CONTENT_REVISION := "ch01.3-rebuild.7-grabber-hand"
@@ -123,6 +124,7 @@ func _run_envelope_valid(state: Dictionary) -> bool:
 	if not state.get("run_config") is Dictionary: return false
 	var config: Dictionary = state.run_config
 	if not _catalog.run_upgrade_config_valid(config) or not _counter(config.get("run_serial")): return false
+	if not Loot.validate(state): return false
 	for key in ["run_id","doctrine_id","target_evolution_id","prepared_supply"]:
 		if not config.get(key) is String: return false
 	if config.run_id != state.run_id or config.run_serial != state.run_serial: return false
@@ -188,7 +190,7 @@ func prepare_run_start(game_save: Variant, chapter: Variant, seed: Variant, requ
 	var serial := int(game_save.next_run_serial)
 	return _prepare_start_candidate(game_save,chapter,seed,selection,serial,request_id)
 func _prepare_start_candidate(game_save: Dictionary, chapter: Dictionary, seed: int, selection: Dictionary, serial: int, request_id: String) -> Dictionary:
-	var config := {"run_id":"%s:%d" % [game_save.career_id,serial],"run_serial":serial,"doctrine_id":selection.doctrine_id,"target_evolution_id":selection.target_evolution_id,"prepared_supply":selection.supply_item_id}
+	var config := {"run_id":"%s:%d" % [game_save.career_id,serial],"run_serial":serial,"doctrine_id":selection.doctrine_id,"target_evolution_id":selection.target_evolution_id,"prepared_supply":selection.supply_item_id,"loot_rules_version":Loot.VERSION}
 	var character_id := _characters.run_character_id(game_save.profile,chapter.chapter_id)
 	if character_id.is_empty(): return _fail("invalid_character")
 	if character_id != Characters.DEFAULT_CHARACTER: config.character_id = character_id
@@ -245,7 +247,7 @@ func prepare_settlement(game_save: Variant, terminal_state: Variant) -> Dictiona
 	if not terminal_state.rules.get("content_fingerprint") is String or terminal_state.rules.content_fingerprint.is_empty() or terminal_state.rules.content_fingerprint != game_save.checkpoint.rules.get("content_fingerprint"): return _fail("invalid_snapshot")
 	if not _settlement_evidence_valid(terminal_state): return _fail("invalid_snapshot")
 	var breakdown := settlement_breakdown(terminal_state)
-	var total := int(breakdown.kills + breakdown.survival + breakdown.minibosses + breakdown.clear)
+	var total := int(breakdown.kills + breakdown.survival + breakdown.minibosses + breakdown.clear) + int(breakdown.get("loot",0))
 	if game_save.profile.supply_credits > MAX_COUNTER-total: return _fail("counter_exhausted")
 	var candidate: Dictionary = game_save.duplicate(true)
 	candidate.profile.supply_credits = int(candidate.profile.supply_credits)+total
@@ -253,6 +255,7 @@ func prepare_settlement(game_save: Variant, terminal_state: Variant) -> Dictiona
 	candidate.checkpoint = terminal_state.duplicate(true)
 	_record_result(candidate.profile,terminal_state)
 	var receipt := {"request_id":request_id,"run_id":terminal_state.run_id,"run_serial":int(serial),"breakdown":breakdown,"total":total,"balance_after":int(candidate.profile.supply_credits)}
+	if Loot.enabled(terminal_state): receipt.loot_rules_version = Loot.VERSION
 	candidate.settlement_receipts.append(receipt.duplicate(true))
 	while candidate.settlement_receipts.size() > 20: candidate.settlement_receipts.pop_front()
 	return {"ok":true,"candidate":candidate,"receipt":receipt,"already_applied":false}
@@ -260,7 +263,9 @@ func settlement_breakdown(state: Dictionary) -> Dictionary:
 	var survival := 0
 	for milestone in [10800,18000,36000,72000]:
 		if int(state.survival_tick) >= milestone: survival += 10
-	return {"kills":mini(int(state.stats.kills)/10,40),"survival":survival,"minibosses":mini(int(state.stats.minibosses_defeated),5)*15,"clear":30 if state.phase == "won" else 0}
+	var breakdown := {"kills":mini(int(state.stats.kills)/10,40),"survival":survival,"minibosses":mini(int(state.stats.minibosses_defeated),5)*15,"clear":30 if state.phase == "won" else 0}
+	if Loot.enabled(state): breakdown.loot = int(state.loot.gold)
+	return breakdown
 func _record_result(profile: Dictionary, state: Dictionary) -> void:
 	if state.phase == "won":
 		for id in _characters.unlocks_for_clear(profile,state.chapter_id): profile.unlocked_character_ids.append(id)
@@ -307,6 +312,7 @@ func _loadout_options(profile: Dictionary, active: bool) -> Dictionary:
 	return {"doctrines":doctrines,"targets":targets,"supplies":supplies}
 
 func _settlement_evidence_valid(state: Dictionary) -> bool:
+	if not Loot.validate(state): return false
 	if not state.get("reward_ids_claimed") is Array or not _counter(state.get("offer_seq")): return false
 	var bosses := {}
 	var seen := {}
@@ -378,3 +384,4 @@ func _archive_receipt_valid(receipt: Variant) -> bool:
 	return _contracts.hash_valid(receipt.get("source_sha256")) and _contracts.hash_valid(receipt.get("pins_sha256")) and _counter(receipt.get("source_store_revision")) and _counter(receipt.get("preserved_run_serial")) and receipt.preserved_run_serial >= 1
 func _recovery_payload_hash(career_id: String, source_hash: String, revision: int, serial: int, chapter: Dictionary, seed: int, selection: Dictionary) -> String:
 	return JSON.stringify({"career_id":career_id,"source_sha256":source_hash,"source_store_revision":revision,"replacement_run_serial":serial,"chapter_id":chapter.chapter_id,"content_revision":chapter.content_revision,"seed":seed,"selection":selection},"",true,true).sha256_text()
+

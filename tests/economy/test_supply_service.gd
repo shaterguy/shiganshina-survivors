@@ -3,6 +3,7 @@ extends RefCounted
 const Service = preload("res://game/economy/supply_service.gd")
 const Fixture = preload("res://tests/fixtures/evolution_supply_fixture.gd")
 const ProgressionFixture = preload("res://tests/progression/progression_test_fixture.gd")
+const Loot = preload("res://game/loot/loot_rules.gd")
 const MAX := 2147483647
 var _fixture = Fixture.new()
 func run(t) -> void:
@@ -185,6 +186,13 @@ func _terminal(save: Dictionary, phase: String = "dead") -> Dictionary:
 	state.reward_ids_claimed = ["boss:ch01_b05"]
 	state.tactical_seals = 1
 	state.player.hp = 0 if phase == "dead" else 50
+	if Loot.enabled(state):
+		# E1 economic arrangement only: earned but uncollected chests expire,
+		# preserving this test's original performance-only reward expectation.
+		state.loot = Loot.initial()
+		var specs := [Loot.field_spec(0),Loot.field_spec(1),Loot.boss_spec("ch01_b05")]
+		for spec in specs:
+			state.loot.chests.append({"id":Loot.chest_id(state.run_id,spec.source,spec.source_id),"source":spec.source,"source_id":spec.source_id,"reward":spec.reward,"status":"expired","stage":"finite","position":[0,0],"address":{},"offer_id":"","result":""})
 	return state
 func _settlement_cases(t) -> void:
 	var service = _service()

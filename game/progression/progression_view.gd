@@ -1,6 +1,7 @@
 class_name ProgressionView
 extends RefCounted
 # NEW derived view: no RNG, authority mutation or implicit choice/offer promotion.
+const Growth = preload("res://game/progression/growth_offer_service.gd")
 const Upgrades = preload("res://game/progression/upgrade_catalog.gd")
 var _catalog
 func _init(upgrade_catalog = null) -> void:
@@ -17,7 +18,10 @@ func build(state: Dictionary) -> Dictionary:
 		if not source.get("options") is Array or source.options.is_empty() or source.options.size() > 3: return {}
 		for field in ["offer_id","source","selected_option_id"]:
 			if not source.get(field) is String or source[field].is_empty(): return {}
-		if not source.source in ["level","boss"] or not Upgrades.integer_valid(source.get("level_ordinal"),1): return {}
+		if not source.source in ["level","boss","chest"] or not Upgrades.integer_valid(source.get("level_ordinal"),1): return {}
+		if source.source == "chest":
+			var descriptor := {"offer_id":source.offer_id,"source":source.source,"level_ordinal":source.level_ordinal,"chest_id":source.get("chest_id")}
+			if not Growth.new(_catalog)._descriptor_valid(state,descriptor): return {}
 		var options: Array[Dictionary] = []
 		var identities := {}
 		for original in source.options:
@@ -29,6 +33,7 @@ func build(state: Dictionary) -> Dictionary:
 			options.append(option)
 		if not identities.has(source.selected_option_id): return {}
 		offer = {"offer_id":source.offer_id,"source":source.source,"level_ordinal":source.level_ordinal,"selected_option_id":source.selected_option_id,"options":options}
+		if source.source == "chest": offer.chest_id = source.chest_id
 	var target: Dictionary = _catalog.evolutions.evaluate(state,state.run_config.target_evolution_id,true)
 	return {"view_revision":int(state.view_revision),"slots":{"equipment":{"used":state.equipment.size(),"max":4},"passive":{"used":state.passives.size(),"max":4}},"target":target,"evolutions":evolution_views,"active_offer":offer,"owned":_owned(state,evolution_views)}
 

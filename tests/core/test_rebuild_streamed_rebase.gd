@@ -29,6 +29,7 @@ func _disk_cut(t,origin: Array) -> void:
 	if not initial.get("ok",false): return
 	var config := F.run_config()
 	config.run_id = initial.game_save.career_id+":1"
+	config.loot_rules_version = 1 # Newly committed departures require the current optional rule marker.
 	var sim := Core.new(provider)
 	var source := sim.new_run(chapter,42,config)
 	source.player.position = [1152.0,384.0]
@@ -84,7 +85,13 @@ func _dock_exit(t,sim,source: Dictionary,hydration: Dictionary,chapter: Dictiona
 	var state := source.duplicate(true)
 	state.active_tick = 107999
 	state.survival_tick = 107999
-	t.check(sim.prepare_world(state,hydration).ok,"sentinel survives preparation immediately before final command")
+	# This historical source has not yet installed its matching resident terrain.
+	# Add due pending records without geometry queries; real placement runs after prepare.
+	for index in range(sim.Loot.FIELD_TICKS.size()):
+		sim._add_loot(state,sim.Loot.field_spec(index),Vector2(state.player.position[0],state.player.position[1]))
+	var final_prepared: Dictionary = sim.prepare_world(state,hydration)
+	if not final_prepared.get("ok",false): print("LOOT_REBASE_FINAL_PREPARE ",JSON.stringify({"result":final_prepared,"loot_valid":sim.Loot.validate(state),"loot":state.loot,"origin":state.world.origin_chunk,"player":state.player.position}))
+	t.check(final_prepared.ok,"sentinel survives preparation immediately before final command")
 	var command := {"command_id":"actual-final","kind":"begin_evacuation","origin_revision":state.world.origin_revision,"payload":{"boss_id":"ch01_final_armored","escape_zone":[0,0,0,0],"evacuation_ticks":4500}}
 	F.step(sim,state,Vector2.ZERO,[command])
 	t.check(state.phase == "evacuation" and state.escape_zone == [0.0,0.0,0.0,0.0] and sim.restore(state,hydration).get("ok",false),"actual city begin_evacuation preserves inactive city exit")
@@ -101,6 +108,7 @@ func _dock_exit(t,sim,source: Dictionary,hydration: Dictionary,chapter: Dictiona
 	state.world = proposal.candidate_world
 	state.player.position = [proposal.player_position.x,proposal.player_position.y]
 	state.escape_zone = chapter.authored_dock.escape_rect.duplicate()
+	sim.transfer_loot_to_dock(state)
 	t.check(sim.restore(state).get("ok",false),"dock checkpoint requires and accepts its actual authored exit rectangle")
 	state.escape_zone = [0,0,0,0]
 	t.check(not sim.restore(state).get("ok",false),"inactive city sentinel is forbidden after docking")
