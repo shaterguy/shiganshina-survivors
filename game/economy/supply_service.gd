@@ -255,7 +255,7 @@ func prepare_settlement(game_save: Variant, terminal_state: Variant) -> Dictiona
 	candidate.checkpoint = terminal_state.duplicate(true)
 	_record_result(candidate.profile,terminal_state)
 	var receipt := {"request_id":request_id,"run_id":terminal_state.run_id,"run_serial":int(serial),"breakdown":breakdown,"total":total,"balance_after":int(candidate.profile.supply_credits)}
-	if Loot.enabled(terminal_state): receipt.loot_rules_version = Loot.VERSION
+	if Loot.enabled(terminal_state): receipt.loot_rules_version = int(terminal_state.run_config.loot_rules_version)
 	candidate.settlement_receipts.append(receipt.duplicate(true))
 	while candidate.settlement_receipts.size() > 20: candidate.settlement_receipts.pop_front()
 	return {"ok":true,"candidate":candidate,"receipt":receipt,"already_applied":false}

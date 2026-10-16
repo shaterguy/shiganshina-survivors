@@ -168,7 +168,7 @@ func _settlement_receipt_valid(receipt: Variant, save: Dictionary) -> bool:
 		if not counter(parts.get(key)): return false
 	var loot_gold := 0
 	if receipt.has("loot_rules_version"):
-		if not version_number(receipt.loot_rules_version) or receipt.loot_rules_version != Loot.VERSION or parts.size() != 5 or not Loot.gold_amount_valid(parts.get("loot")): return false
+		if not version_number(receipt.loot_rules_version) or not Loot.version_valid(receipt.loot_rules_version) or parts.size() != 5 or not Loot.gold_amount_valid(parts.get("loot")): return false
 		loot_gold = int(parts.loot)
 	elif parts.size() != 4: return false
 	return parts.kills <= 40 and parts.survival <= 40 and int(parts.survival)%10 == 0 and parts.minibosses <= 75 and int(parts.minibosses)%15 == 0 and (parts.clear == 0 or parts.clear == 30) and receipt.total == parts.kills+parts.survival+parts.minibosses+parts.clear+loot_gold

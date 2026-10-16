@@ -326,12 +326,25 @@ def armored_runtime_sources(root: Path, manifest: dict) -> set[str]:
         selected.update((relative, relative + '.import'))
     return selected
 
+LOOT_ART_SOURCES = tuple('game/presentation/loot_art/' + name + '.svg'
+                         for name in ('chest_gold', 'chest_skill', 'gold', 'skill', 'potion'))
+
+def loot_art_sources(root: Path) -> tuple[str, ...]:
+    # Historical/minimal tooling fixtures have no reward UI. A product that
+    # loads the new UI must carry all five exact resources, never arbitrary SVG.
+    marker = root / 'game/ui/reward_feedback.gd'
+    if not marker.exists() and not marker.is_symlink(): return ()
+    source_file(root, 'game/ui/reward_feedback.gd')
+    for relative in LOOT_ART_SOURCES: source_file(root, relative)
+    return LOOT_ART_SOURCES
+
 def stage_project(root: Path, dest: Path, manifest: dict) -> dict:
     """Fresh allowlisted checkout; no .git, user cache, credentials, docs or old art."""
     selected = {'project.godot', 'assets/manifest.json', 'addons/chapter_export/plugin.cfg',
                 'addons/chapter_export/plugin.gd', 'tools/build/export_readiness.gd',
                 'tools/build/production_export_filter.gd'}
     selected.update(bundled_font_sources(root))
+    selected.update(loot_art_sources(root))
     selected.update(armored_runtime_sources(root, manifest))
     for folder, suffixes in [('game', {'.gd', '.uid', '.tres', '.tscn'}), ('scenes', {'.tscn', '.tres', '.uid'}),
                               ('data', {'.json'}), ('chapters', {'.json'})]:
@@ -491,9 +504,16 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
             allowed.add(member)
             if member not in name_set or archive.read(member) != source_file(root,relative).read_bytes():
                 raise BuildError('APK data missing or changed: ' + relative)
-    for asset in manifest['assets'].values():
+    loot_sources = loot_art_sources(root)
+    loot_imported_compared = 0
+    loot_assets = [{'path':'res://'+name,'sha256':sha256(source_file(root,name)),'kind':'image'} for name in loot_sources]
+    for asset in [*manifest['assets'].values(), *loot_assets]:
         relative = asset['path'][6:]; member = 'assets/'+relative
         allowed.update((member, member+'.import'))
+        if relative in loot_sources and member+'.import' not in name_set:
+            raise BuildError('APK loot imported resource missing: '+relative)
+        if relative in loot_sources and member in name_set and archive.read(member) != source_file(root,relative).read_bytes():
+            raise BuildError('APK loot original changed: '+relative)
         # The VFX bridge validates/decodes the raw PNG. An imported texture alone
         # is insufficient, and must not hide a changed original alongside it.
         if asset.get('kind') == 'effect' and vfx_render_enabled(asset):
@@ -509,10 +529,18 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
             imported = [ref for ref in refs if ref.startswith('.godot/imported/')]
             if not imported: raise BuildError('APK asset has no imported resource: ' + relative)
             suffixes = ('.oggvorbisstr',) if asset.get('kind') == 'audio' and relative.endswith('.ogg') else (('.sample',) if asset.get('kind') == 'audio' else ('.ctex', '.sample'))
+            if relative in loot_sources:
+                suffixes = ('.ctex',)
+                imported = list(dict.fromkeys(imported))
             for ref in imported:
                 if ref not in tuple(prefix+suffix for suffix in suffixes) or 'assets/'+ref not in name_set:
                     raise BuildError('APK unexpected imported resource: ' + relative)
                 allowed.add('assets/'+ref)
+                if relative in loot_sources:
+                    if not archive.read('assets/'+ref): raise BuildError('APK loot imported bytes empty: '+relative)
+                    if (root/ref).exists() or (root/ref).is_symlink():
+                        if archive.read('assets/'+ref) != source_file(root,ref).read_bytes(): raise BuildError('APK loot imported bytes changed: '+relative)
+                        loot_imported_compared += 1
         elif member in name_set:
             if hashlib.sha256(archive.read(member)).hexdigest() != asset['sha256']:
                 raise BuildError('APK original asset SHA-256 mismatch: ' + relative)
@@ -562,7 +590,7 @@ def validate_archive(archive: zipfile.ZipFile, template: zipfile.ZipFile, root: 
         if member + '.import' not in name_set and member not in name_set:
             raise BuildError('APK missing bundled font')
     if archive.testzip() is not None: raise BuildError('APK CRC integrity failure')
-    return {'package': package['package'], 'version_name': package['versionName'], 'version_code': package['versionCode'], 'abi': 'arm64-v8a', 'permissions': package['permissions'], 'archive_entries': len(names), 'armored_imported_payloads_compared': armored_compared}
+    return {'package': package['package'], 'version_name': package['versionName'], 'version_code': package['versionCode'], 'abi': 'arm64-v8a', 'permissions': package['permissions'], 'archive_entries': len(names), 'armored_imported_payloads_compared': armored_compared, 'loot_art_resources': len(loot_sources), 'loot_imported_payloads_compared': loot_imported_compared}
 
 def verify_apk(path: Path, template_path: Path, root: Path, manifest: dict, signed: bool = False, development_validation: bool = False) -> dict:
     check_readiness(manifest, development_validation=development_validation)

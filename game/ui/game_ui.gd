@@ -1,6 +1,8 @@
 class_name GameUI
 extends Control
 const Loot = preload("res://game/loot/loot_rules.gd")
+const RewardFeedback = preload("res://game/ui/reward_feedback.gd")
+var _reward_feedback: Control
 const TOUCH_RADIUS := 36.0
 const TOUCH_DEADZONE := 4.0 / TOUCH_RADIUS
 const MOUSE_POINTER_ID := -2 # Touch indices are nonnegative; -1 means no owner.
@@ -187,6 +189,9 @@ func _ready() -> void:
 	_loot_hud.add_theme_font_size_override("font_size",11)
 	_loot_hud.add_theme_color_override("font_color",Color("f4c36b"))
 	add_child(_loot_hud)
+	_reward_feedback = RewardFeedback.new()
+	_reward_feedback.name = "RewardFeedback"
+	add_child(_reward_feedback)
 	_notice = Label.new()
 	_notice.add_theme_font_size_override("font_size",12)
 	_notice.add_theme_color_override("font_color",Color("f4c36b"))
@@ -319,6 +324,9 @@ func reflow(size_px: Vector2i, safe_rect_px: Rect2i) -> void:
 	_objective.position = safe.position + Vector2(8,162+signature_height if portrait else 52)
 	_loot_hud.position = _objective.position+Vector2(0,18)
 	_loot_hud.size = Vector2(safe.size.x-16 if portrait else 176,16)
+	if is_instance_valid(_reward_feedback):
+		_reward_feedback.size = Vector2(minf(320.0,safe.size.x-16.0),200.0)
+		_reward_feedback.position = Vector2(safe.position.x+8.0,safe.end.y-350.0) if portrait else Vector2(safe.end.x-_reward_feedback.size.x-8.0,safe.position.y+48.0)
 	if _notice.get_parent() == self:
 		_notice.position = safe.position + Vector2(8,220+signature_height if portrait else 148+signature_height)
 		_notice.size = Vector2(safe.size.x-40,40)
@@ -338,6 +346,7 @@ func present(snapshot: Dictionary) -> void:
 		_xp_feedback_seq = 0
 		_xp_feedback_amount = 0
 		_xp_feedback_seconds = 0.0
+	_reward_feedback.sync_snapshot(snapshot)
 	_snapshot = snapshot.duplicate(true)
 	if _owned_hud.present_signature(Signature.presentation(snapshot)): reflow(_screen_size,_safe_rect)
 	_objective.text = objective_text(snapshot)
@@ -401,6 +410,8 @@ func present(snapshot: Dictionary) -> void:
 	if _xp_feedback_seconds > 0.0:
 		loot_text += (" · " if not loot_text.is_empty() else "")+"+%d XP" % _xp_feedback_amount
 	_loot_hud.text = loot_text
+	_reward_feedback.visible = mode == "play"
+	_reward_feedback.active = mode == "play"
 	if mode == _mode and offer_id == _offer_id: return
 	_mode = mode
 	_scroll.follow_focus = mode != "evolution_detail"
@@ -415,7 +426,7 @@ func present(snapshot: Dictionary) -> void:
 			_render_recovery_panel()
 		"title":
 			_title.text = "진격의 거인 인류의 날개"
-			_subtitle.text = "기존 진행은 경험치 표시만 개선됩니다. 보상함은 새 출격부터 적용됩니다."
+			_subtitle.text = "상자와 획득 표시를 개선했습니다. 회복 포션은 새 출격부터 나옵니다."
 			if _checkpoint_available: _add_button("이어서 출격",func(): resume_requested.emit())
 			_add_button("새로 출격",open_scenario_selection).set_meta("semantic_id","new_run_open")
 			_add_button("설정",open_settings)
@@ -1106,6 +1117,7 @@ func present_confirmed_upgrades(events: Array, view: Dictionary) -> void:
 						detail = Card.requirements_text([condition])
 						break
 			_growth_notice_seconds = 1.4
+		_reward_feedback.confirmed_skill(str(row.get("name",""))+" %d/%d" % [int(row.get("level",0)),int(row.get("max_level",5))],_art_texture(_item_icon(str(row.get("item_id","")))))
 		_growth_notice_text = title+"\n"+detail
 		_owned_hud.highlight(str(row.get("item_id","")))
 		_sync_upgrade_notice(_mode)
@@ -1125,6 +1137,7 @@ func _sync_upgrade_notice(mode: String) -> void:
 	if _growth_notice.text != text: _growth_notice.text = text
 	_growth_notice.visible = not _growth_notice_text.is_empty() and mode in ["play","upgrade"]
 func consume_loot_events(events: Array, run_id: String) -> void:
+	_reward_feedback.consume(events,run_id)
 	if _xp_feedback_run != run_id:
 		_xp_feedback_run = run_id
 		_xp_feedback_seq = 0
@@ -1143,11 +1156,13 @@ func consume_loot_events(events: Array, run_id: String) -> void:
 	if gained <= 0: return
 	_xp_feedback_amount = mini(2147483647,(_xp_feedback_amount if _xp_feedback_seconds > 0.0 else 0)+gained)
 	_xp_feedback_seconds = 0.7
+	set_process(true)
 func _process(delta: float) -> void:
 	if _mode != "play": return
 	_xp_feedback_seconds = maxf(0.0,_xp_feedback_seconds-delta)
 	_growth_notice_seconds = maxf(0,_growth_notice_seconds-delta)
-	if _growth_notice_seconds == 0: reset_progression_feedback()
+	if _growth_notice_seconds == 0 and not _growth_notice_text.is_empty(): reset_progression_feedback()
+	set_process(_xp_feedback_seconds > 0.0 or _growth_notice_seconds > 0.0)
 func _confirm_end() -> void:
 	_subtitle.text = "이번 판을 종료할까요? 진행 중인 전투는 끝납니다."
 	_buttons[0].text = "계속 싸우기"

@@ -6,9 +6,9 @@ func run(t) -> void:
 	t.check(not Loot.enabled({}),"LOOT marker missing config is safely disabled")
 	for config in [null,[],"bad"]:
 		t.check(not Loot.enabled({"run_config":config}),"LOOT marker rejects non-dictionary config without member access")
-	for marker in ["1",true,[],{},null,2,1.5]:
+	for marker in ["1","2",true,[],{},null,0,3,1.5,NAN,INF]:
 		t.check(not Loot.enabled({"run_config":{"loot_rules_version":marker}}),"LOOT marker rejects malformed type/value without comparison error")
-	for marker in [1,1.0]:
+	for marker in [1,1.0,2,2.0]:
 		t.check(Loot.enabled({"run_config":{"loot_rules_version":marker}}),"LOOT marker accepts integer and precise JSON form")
 	var sim = F.simulation(t)
 	if sim == null: return

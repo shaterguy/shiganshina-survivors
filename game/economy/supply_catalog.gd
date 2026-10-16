@@ -172,7 +172,7 @@ func permanent_levels_valid(value: Variant) -> bool:
 func run_upgrade_config_valid(config: Dictionary) -> bool:
 	var character_fields := 1 if config.has("character_id") else 0
 	if config.has("loot_rules_version"):
-		if not preload("res://game/progression/upgrade_catalog.gd").integer_valid(config.loot_rules_version,1,1): return false
+		if not preload("res://game/progression/upgrade_catalog.gd").integer_valid(config.loot_rules_version,1,2): return false
 		character_fields += 1
 	if config.has("character_skill_revision"):
 		if config.get("character_id","") != "mikasa_01" or not preload("res://game/progression/upgrade_catalog.gd").integer_valid(config.character_skill_revision,1,1): return false

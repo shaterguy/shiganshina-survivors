@@ -319,7 +319,7 @@ func new_run(chapter: Dictionary, seed: Variant, run_config: Dictionary) -> Dict
 	config.run_serial = int(config.run_serial)
 	var rules := _rules_for(current.chapter,doctrine,config)
 	var state := {"schema_version":2,"content_revision":CONTENT_REVISION,"chapter_id":current.chapter.chapter_id,"character_id":config.get("character_id",Characters.DEFAULT_CHARACTER),"seed":int(seed),"rng_state":str(rng.state),"active_tick":0,"survival_tick":0,"next_entity_id":1,"event_seq":0,"phase":"survival","pause_reasons":[],"player":{"id":"player","position":_array(_vec(current.chapter.spawn_position)),"velocity":[0.0,0.0],"facing":[1.0,0.0],"radius":8.0,"hp":float(rules.base_hp),"max_hp":float(rules.base_hp),"invulnerable_until":0,"xp":0,"level":1,"attack_ready_ticks":{}},"equipment":doctrine.initial_equipment.duplicate(true),"passives":doctrine.initial_passives.duplicate(true),"entities":[],"projectiles":[],"drops":[],"telegraphs":[],"boss_ids_fired":[],"reward_ids_claimed":[],"command_ids_applied":[],"upgrade_offer":{},"pending_offers":[],"final_started_tick":-1,"evacuation_ready":false,"escape_zone":current.chapter.escape_zone.duplicate(),"stats":{"kills":0,"damage_dealt":0.0,"minibosses_defeated":0},"rules":rules,"run_id":config.run_id,"run_serial":config.run_serial,"run_config":config,"evolutions":{},"tactical_seals":0,"progression_rng_state":str(growth_rng.state),"attack_seq":0,"offer_seq":0,"view_revision":1,"player_attack_instances":[],"enemy_attack_instances":[],"evolution_runtime":{},"supply_used":false}
-	if Loot.enabled(state): state.loot = Loot.initial()
+	if Loot.enabled(state): state.loot = Loot.initial(int(config.loot_rules_version))
 	if Signature.enabled(state): state.character_skill = Signature.initial_state()
 	if current.chapter.get("world_mode","") == "streamed_city":
 		state.world = Streamed.initial_world(current.chapter.content_fingerprint)
@@ -1651,6 +1651,25 @@ func _update_loot(state: Dictionary, events: Array[Dictionary]) -> void:
 			chest.result = "gold"
 			state.loot.gold = int(state.loot.gold)+Loot.GOLD_PER_CHEST
 		_emit(state,events,"loot_collected",{"chest_id":chest.id,"reward":chest.reward,"amount":Loot.GOLD_PER_CHEST if chest.reward == "gold" else 1})
+		if Loot.potions_enabled(state) and chest.source == "field":
+			state.loot.potions.append({"id":chest.id+":potion","chest_id":chest.id,"status":"placed","stage":chest.stage,"position":chest.position.duplicate(),"address":chest.address.duplicate(true),"born_tick":int(state.active_tick),"heal_amount":Loot.POTION_HEAL,"healed_amount":0.0})
+			_emit(state,events,"potion_dropped",{"potion_id":chest.id+":potion","amount":1})
+	_collect_potions(state,events)
+
+func _collect_potions(state: Dictionary, events: Array[Dictionary]) -> void:
+	if not Loot.potions_enabled(state) or state.phase not in ["survival","evacuation"] or float(state.player.hp) <= 0.0: return
+	if state.has("player_mobility") and state.player_mobility.phase != "ground": return
+	var pickup: float = _catalog.stat(state,"pickup_radius",float(state.rules.pickup_radius))
+	for potion in state.loot.potions:
+		if potion.status != "placed" or float(state.player.hp) >= float(state.player.max_hp): continue
+		var local: Dictionary = Loot.local_position(state,potion)
+		if not local.get("ok",false) or local.position.distance_squared_to(_vec(state.player.position)) > pickup*pickup: continue
+		if not _loot_path_clear(state,_vec(state.player.position),local.position): continue
+		var healed: float = minf(Loot.POTION_HEAL,float(state.player.max_hp)-float(state.player.hp))
+		state.player.hp = float(state.player.hp)+healed
+		potion.status = "claimed"
+		potion.healed_amount = healed
+		_emit(state,events,"potion_collected",{"potion_id":potion.id,"amount":1,"healed_amount":healed})
 
 func transfer_loot_to_dock(state: Dictionary) -> void:
 	# Called on the private dock-transition candidate, never the live authority.
@@ -1661,6 +1680,9 @@ func transfer_loot_to_dock(state: Dictionary) -> void:
 		else:
 			chest.status = "pending"
 			Loot.set_position(state,chest,_vec(state.player.position))
+	if Loot.potions_enabled(state):
+		for potion in state.loot.potions:
+			if potion.status == "placed": potion.status = "expired"
 	state.loot.next_retry_tick = maxi(int(state.loot.next_retry_tick),int(state.active_tick))
 
 func _collect_drops(state: Dictionary, events: Array[Dictionary], reserved_boss_offers: int = 0) -> void:
@@ -1718,7 +1740,7 @@ func _activate_next_offer(state: Dictionary, events: Array[Dictionary]) -> bool:
 				chest.status = "claimed"
 				chest.result = "gold"
 				state.loot.gold = int(state.loot.gold)+Loot.GOLD_PER_CHEST
-				_emit(state,events,"loot_collected",{"chest_id":chest.id,"reward":"gold","amount":Loot.GOLD_PER_CHEST})
+				_emit(state,events,"loot_collected",{"chest_id":chest.id,"reward":"gold","amount":Loot.GOLD_PER_CHEST,"reason":"skill_pool_empty"})
 			else: state.player.hp = minf(float(state.player.max_hp),float(state.player.hp)+float(state.player.max_hp)*0.10)
 			_claim_id(state.reward_ids_claimed,"offer:"+descriptor.offer_id)
 			continue
@@ -1857,7 +1879,7 @@ func _normalize_saved_numbers(value: Variant, parent_key := "") -> bool:
 				var child = value[key]
 				value.erase(key)
 				value[str(key)] = child
-			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["loot_rules_version","next_retry_tick","gold","character_skill_revision","ready_tick","next_probe_tick","cast_damage_level","recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
+			if value[key] is float and (parent_key in ["equipment","passives","attack_ready_ticks","permanent_upgrades"] or key in ["loot_rules_version","born_tick","next_retry_tick","gold","character_skill_revision","ready_tick","next_probe_tick","cast_damage_level","recovery_ticks","cooldown_ticks","airborne_ticks","threat_cost","started_tick","attack_ends_tick","recover_ends_tick","role_wait_since","role_retry_tick","schema_version","seed","active_tick","survival_tick","next_entity_id","event_seq","run_serial","tactical_seals","attack_seq","offer_seq","view_revision","level_ordinal","attack_started_tick","execute_tick","stage_index","stage_count","equipment_slots","passive_slots","final_started_tick","invulnerable_until","xp","level","next_level","kills","minibosses_defeated","evacuation_ticks","base_xp","xp_per_level","spawned_tick","action_started_tick","action_ends_tick","next_action_tick","pattern_index","created_tick","active_from_tick","expires_tick","warning_ticks","active_ticks","id","entity_id"]):
 				var number: float = value[key]
 				if not is_finite(number) or number != floor(number) or number < (-1.0 if key in ["final_started_tick","role_wait_since"] else 0.0) or number > MAX_COUNTER: return false
 				value[key] = int(number)
@@ -2271,7 +2293,7 @@ func _canonicalize_saved_vectors(state: Dictionary) -> void:
 				mobility.anchor[field].local = _array(_vec(mobility.anchor[field].local))
 		if not mobility.landing.is_empty(): mobility.landing.local = _array(_vec(mobility.landing.local))
 	if state.has("loot"):
-		for chest in state.loot.chests:
+		for chest in state.loot.chests + state.loot.get("potions",[]):
 			chest.position = _array(_vec(chest.position))
 			if chest.stage == "city": chest.address.local = _array(_vec(chest.address.local))
 	for collection in ["entities","projectiles","drops"]:

@@ -2,7 +2,9 @@ extends RefCounted
 const Address = preload("res://game/world/world_address.gd")
 # Draft only. Core must validate the run and perform candidate/commit/ACK.
 # Bounded state helpers; no RNG, geometry query or persistence here.
-const VERSION := 1
+const VERSION := 2
+const MAX_POTIONS := 5
+const POTION_HEAL := 20.0
 const MAX_CHESTS := 10
 const MAX_PLACEMENT_CANDIDATES := 16
 const PLACEMENT_RETRY_TICKS := 60
@@ -44,10 +46,18 @@ static func gold_amount_valid(amount: Variant) -> bool:
 
 static func enabled(state: Dictionary) -> bool:
 	var config: Variant = state.get("run_config")
-	return config is Dictionary and _integer(config.get("loot_rules_version"),VERSION,VERSION)
+	return config is Dictionary and version_valid(config.get("loot_rules_version"))
 
-static func initial() -> Dictionary:
-	return {"chests":[],"next_retry_tick":0,"gold":0}
+static func version_valid(value: Variant) -> bool:
+	return _integer(value,1,VERSION)
+
+static func potions_enabled(state: Dictionary) -> bool:
+	return enabled(state) and int(state.run_config.loot_rules_version) == 2
+
+static func initial(version: int = 1) -> Dictionary:
+	var value := {"chests":[],"next_retry_tick":0,"gold":0}
+	if version == 2: value.potions = []
+	return value
 
 static func find_chest(state: Dictionary, id: String) -> Dictionary:
 	var loot: Variant = state.get("loot")
@@ -92,9 +102,9 @@ static func validate(state: Dictionary) -> bool:
 	if not state.get("run_config") is Dictionary: return false
 	var marker: bool = state.run_config.has("loot_rules_version")
 	if not marker: return not state.has("loot")
-	if not _integer(state.run_config.loot_rules_version,1,1) or not state.get("loot") is Dictionary: return false
+	if not version_valid(state.run_config.loot_rules_version) or not state.get("loot") is Dictionary: return false
 	var loot: Dictionary = state.loot
-	if not _keys(loot,["chests","next_retry_tick","gold"]) or not loot.chests is Array or loot.chests.size() > MAX_CHESTS: return false
+	if not _keys(loot,["chests","next_retry_tick","gold","potions"] if potions_enabled(state) else ["chests","next_retry_tick","gold"]) or not loot.chests is Array or loot.chests.size() > MAX_CHESTS: return false
 	if not _integer(loot.next_retry_tick,0,2147483647) or not gold_amount_valid(loot.gold): return false
 	if not state.get("run_id") is String or not state.get("reward_ids_claimed") is Array or not state.get("pending_offers") is Array or not state.get("upgrade_offer") is Dictionary: return false
 	if not _integer(state.get("survival_tick"),0,108000) or not _integer(state.get("active_tick"),0,2147483647) or not _integer(state.get("offer_seq"),0,2147483647): return false
@@ -166,7 +176,7 @@ static func validate(state: Dictionary) -> bool:
 	for offer in state.pending_offers+([state.upgrade_offer] if not state.upgrade_offer.is_empty() else []):
 		if not offer is Dictionary: return false
 		if offer.get("source","") == "chest" and not offer_ids.has(offer.get("offer_id","")): return false
-	return total == int(loot.gold)
+	return total == int(loot.gold) and (not potions_enabled(state) or _potions_valid(state))
 
 static func _keys(value: Dictionary, keys: Array) -> bool:
 	return value.size() == keys.size() and value.has_all(keys)
@@ -183,7 +193,16 @@ static func _point(value: Variant) -> bool:
 static func transition_valid(before: Dictionary, after: Dictionary) -> bool:
 	# Both snapshots have already passed cold-boundary validation.
 	if not enabled(before): return not enabled(after)
-	if not enabled(after) or int(after.loot.gold) < int(before.loot.gold): return false
+	if not enabled(after) or after.run_config.loot_rules_version != before.run_config.loot_rules_version or int(after.loot.gold) < int(before.loot.gold): return false
+	if potions_enabled(before):
+		for previous in before.loot.potions:
+			var current := {}
+			for potion in after.loot.potions:
+				if potion.id == previous.id: current = potion; break
+			if current.is_empty(): return false
+			for key in ["id","chest_id","stage","position","address","born_tick","heal_amount"]:
+				if current[key] != previous[key]: return false
+			if previous.status in ["claimed","expired"] and current != previous: return false
 	for previous in before.loot.chests:
 		var current := find_chest(after,previous.id)
 		if current.is_empty(): return false
@@ -193,3 +212,35 @@ static func transition_valid(before: Dictionary, after: Dictionary) -> bool:
 		if previous.status in ["claimed","expired"] and current != previous: return false
 		if previous.status == "queued" and current.status not in ["queued","claimed","expired"]: return false
 	return true
+
+static func _potions_valid(state: Dictionary) -> bool:
+	var potions: Variant = state.loot.get("potions")
+	if not potions is Array or potions.size() > MAX_POTIONS: return false
+	var seen := {}
+	var terminal: bool = state.get("phase","") in ["dead","won","abandoned"]
+	var stage: String = state.get("world",{}).get("stage","finite")
+	for potion in potions:
+		if not potion is Dictionary or not _keys(potion,["id","chest_id","status","stage","position","address","born_tick","heal_amount","healed_amount"]): return false
+		for key in ["id","chest_id","status","stage"]:
+			if not potion[key] is String: return false
+		var chest := find_chest(state,potion.chest_id)
+		if chest.is_empty() or chest.source != "field" or chest.status not in ["queued","claimed","expired"]: return false
+		if chest.status == "expired" and chest.offer_id.is_empty(): return false
+		if potion.id != chest.id+":potion" or seen.has(potion.id): return false
+		seen[potion.id] = true
+		if not _integer(potion.born_tick,0,int(state.active_tick)) or potion.born_tick < int(chest.source_id): return false
+		if not _integer(potion.heal_amount,20,20) or not _number(potion.healed_amount,0.0,POTION_HEAL): return false
+		if potion.status not in ["placed","claimed","expired"] or potion.stage != chest.stage: return false
+		# Potions never move from the exact opened field chest location.
+		if not _point(potion.position) or potion.position != chest.position or not potion.address is Dictionary or potion.address != chest.address: return false
+		if potion.status == "placed" and (potion.stage != stage or float(potion.healed_amount) != 0.0): return false
+		if potion.status == "claimed" and float(potion.healed_amount) <= 0.0: return false
+		if potion.status == "expired" and (float(potion.healed_amount) != 0.0 or (not terminal and stage != "dock")): return false
+	for chest in state.loot.chests:
+		if chest.source != "field": continue
+		var opened: bool = chest.status in ["queued","claimed"] or (chest.status == "expired" and not chest.offer_id.is_empty())
+		if opened != seen.has(chest.id+":potion"): return false
+	return true
+
+static func _number(value: Variant, minimum: float, maximum: float) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value) >= minimum and float(value) <= maximum

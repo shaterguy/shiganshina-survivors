@@ -290,7 +290,7 @@ func _transition_valid(current: Dictionary, candidate: Dictionary) -> bool:
 		operation = "start"
 		if candidate.next_run_serial != current.next_run_serial+1 or service._has_unsettled_run(current) or not candidate.checkpoint is Dictionary: return false
 		var config: Dictionary = candidate.checkpoint.run_config
-		if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial()): return false
+		if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial(int(candidate.checkpoint.run_config.loot_rules_version))): return false
 		var loadout: Dictionary = current.profile.loadout
 		var expected_character := Characters.new().run_character_id(current.profile,candidate.checkpoint.chapter_id)
 		if expected_character.is_empty() or config.get("character_id",Characters.DEFAULT_CHARACTER) != expected_character: return false
@@ -595,7 +595,7 @@ func _commit_preserved_locked(candidate: Dictionary, source_hash: String, reques
 	canonical.store_revision = revision+1
 	return _write_verified(canonical,{"recovery_source":source.value},source_hash)
 func _recovery_transition_valid(source: Dictionary, candidate: Dictionary) -> bool:
-	if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial()): return false
+	if not Loot.enabled(candidate.checkpoint) or not _same(candidate.checkpoint.loot,Loot.initial(int(candidate.checkpoint.run_config.loot_rules_version))): return false
 	var receipt: Dictionary = candidate.checkpoint_recovery_receipt
 	if receipt.preserved_run_serial != source.checkpoint.run_serial or receipt.replacement_run_serial != source.next_run_serial or candidate.next_run_serial != source.next_run_serial+1: return false
 	var state: Dictionary = candidate.checkpoint

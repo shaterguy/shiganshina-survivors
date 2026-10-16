@@ -28,7 +28,7 @@ func _new_save() -> Dictionary:
 func _terminal(save: Dictionary, phase: String = "dead") -> Dictionary:
 	# Reuse the existing ten-minute / 100 kills / one-boss E1 arrangement.
 	var state: Dictionary = _existing._terminal(save,phase)
-	state.loot = Loot.initial()
+	state.loot = Loot.initial(int(state.run_config.get("loot_rules_version",1)))
 	for index in [0,1]:
 		state.loot.chests.append(_chest(state,Loot.field_spec(index)))
 	state.loot.chests.append(_chest(state,Loot.boss_spec("ch01_b05")))
@@ -46,6 +46,8 @@ func _claim_gold(state: Dictionary, index: int) -> void:
 		chest.offer_id = state.run_id+":offer:"+str(int(state.offer_seq))
 		state.reward_ids_claimed.append("offer:"+chest.offer_id)
 	state.loot.gold += 5
+	if Loot.potions_enabled(state) and chest.source == "field":
+		state.loot.potions.append({"id":chest.id+":potion","chest_id":chest.id,"status":"expired","stage":chest.stage,"position":chest.position.duplicate(),"address":chest.address.duplicate(true),"born_tick":int(chest.source_id),"heal_amount":20.0,"healed_amount":0.0})
 
 func _receipt_cases(t) -> void:
 	var contracts = Contracts.new(Callable())
@@ -63,7 +65,11 @@ func _receipt_cases(t) -> void:
 	good.loot_rules_version = 1
 	good.breakdown.loot = 5
 	good.total = 190
-	for marker in [0,2,true,"1",null,1.5]:
+	for marker in [1,1.0,2,2.0]:
+		var accepted := good.duplicate(true)
+		accepted.loot_rules_version = marker
+		t.check(contracts._settlement_receipt_valid(accepted,save),"LOOT receipt explicitly accepts v1/v2 precise integers: "+str(marker))
+	for marker in [0,3,true,"1",null,1.5,NAN,INF]:
 		var bad := good.duplicate(true)
 		bad.loot_rules_version = marker
 		t.check(not contracts._settlement_receipt_valid(bad,save),"LOOT receipt rejects marker "+str(marker))
@@ -189,4 +195,8 @@ func _fixture_cases(t) -> void:
 	var save: Dictionary = _fixture.game_save()
 	var service = Service.new(_fixture.make_run)
 	var started: Dictionary = service.prepare_run_start(save,_existing._chapter(),42,_existing._start_id(save),0)
-	t.check(started.get("ok",false) and started.candidate.checkpoint.run_config.get("loot_rules_version") == 1 and started.candidate.checkpoint.loot == Loot.initial(),"LOOT new start emits marker and paired empty loot")
+	t.check(started.get("ok",false) and started.candidate.checkpoint.run_config.get("loot_rules_version") == 2 and started.candidate.checkpoint.loot == Loot.initial(2),"LOOT new start emits marker and paired empty loot")
+
+	config.loot_rules_version = 2
+	var fresh_v2: Dictionary = _fixture.make_run(_existing._chapter(),42,config)
+	t.check(fresh_v2.get("loot") == Loot.initial(2) and Loot.validate(fresh_v2),"LOOT shape fixture explicitly creates version2 with empty potions")

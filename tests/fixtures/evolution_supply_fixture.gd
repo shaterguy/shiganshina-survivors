@@ -38,7 +38,7 @@ func make_run(_chapter: Dictionary,seed: int,config: Dictionary) -> Dictionary:
 	result.run_id = config.run_id
 	result.run_serial = config.run_serial
 	# Only newly requested rules receive fresh loot; historical JSON stays exact.
-	if config.get("loot_rules_version",0) == Loot.VERSION: result.loot = Loot.initial()
+	if Loot.version_valid(config.get("loot_rules_version")): result.loot = Loot.initial(int(config.loot_rules_version))
 	return result
 func validate_checkpoint(value: Dictionary) -> Dictionary:
 	# SHAPE-ONLY FAKE: never evidence of semantic/streamed checkpoint validity.

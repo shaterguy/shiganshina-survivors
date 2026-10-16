@@ -1,6 +1,12 @@
 class_name WorldView
 extends Node2D
 const LootRules = preload("res://game/loot/loot_rules.gd")
+const LOOT_GOLD = preload("res://game/presentation/loot_art/chest_gold.svg")
+const LOOT_SKILL = preload("res://game/presentation/loot_art/chest_skill.svg")
+const LOOT_POTION = preload("res://game/presentation/loot_art/potion.svg")
+var _loot_flashes: Array[Dictionary] = []
+var _loot_event_seq := 0
+var _loot_run := ""
 const XP_COLORS := [Color("#55B8FF"),Color("#69E88C"),Color("#FF7185")]
 var _xp_outline := PackedVector2Array([Vector2(0,-9),Vector2(9,0),Vector2(0,9),Vector2(-9,0),Vector2(0,-9)])
 const RasterAlpha = preload("res://game/presentation/raster_alpha_mask.gd")
@@ -167,6 +173,7 @@ func _render_vfx_positions() -> Dictionary:
 	for id in _render_current.projectiles: projectiles[id] = _render_position("projectiles",id,_render_current.projectiles[id].position)
 	return {"actor_positions":actors,"projectile_positions":projectiles,"target_positions":targets}
 func reset_presentation(reset_combat := true) -> void:
+	_loot_flashes.clear()
 	_render_frame_pending = false
 	_render_previous.clear(); _render_current.clear(); _render_alpha = 1.0
 	_enemy_attack_packet.clear()
@@ -427,7 +434,18 @@ func combat_vfx_commands(snapshot: Dictionary = {}) -> Array[Dictionary]:
 		camera = Vector2(current.player.position[0],current.player.position[1])
 	return _combat_bridge.present(current,reduce_effects,Rect2(camera-_viewport_size*0.5,_viewport_size),visual)
 func consume_events(events: Array[Dictionary]) -> void:
+	var run_id: String = _snapshot.get("run_id","")
+	if _loot_run != run_id:
+		_loot_run = run_id
+		_loot_event_seq = 0
+		_loot_flashes.clear()
 	for event in events:
+		if event.type == "loot_collected" and str(event.event_id).begins_with(run_id+":"):
+			var serial := int(str(event.event_id).trim_prefix(run_id+":"))
+			if serial > _loot_event_seq:
+				_loot_event_seq = serial
+				if _loot_flashes.size() >= 4: _loot_flashes.pop_front()
+				_loot_flashes.append({"chest_id":str(event.payload.get("chest_id","")),"started":_clock})
 		if event.type == "damage" and str(event.payload.get("target_id","")) == "player":
 			_shake_until = _clock+0.18
 			_hit_until = _clock+0.18
@@ -448,6 +466,8 @@ func consume_events(events: Array[Dictionary]) -> void:
 						_effects.append({"position":enemy.position.duplicate(),"started":_clock,"asset":"impact_fx"})
 func _process(delta: float) -> void:
 	if _snapshot.is_empty() or _snapshot.get("pause_reasons",[]).is_empty(): _clock += delta
+	for index in range(_loot_flashes.size()-1,-1,-1):
+		if _clock-float(_loot_flashes[index].started) >= 0.25: _loot_flashes.remove_at(index)
 	_corpses = _corpses.filter(func(corpse): return _clock-float(corpse.started) < 0.45)
 	for id in _enemy_hits.keys():
 		if float(_enemy_hits[id]) <= _clock: _enemy_hits.erase(id)
@@ -496,13 +516,14 @@ func _draw() -> void:
 	_draw_vfx_pass(vfx,"ground")
 	for drop in _snapshot.get("drops",[]):
 		_draw_xp_drop(drop)
-	_draw_loot()
 	if _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
 	_draw_upright_with_vfx(packet.upright,vfx)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
+	# Small item silhouettes remain visible over crowds, below danger/player cues.
+	_draw_loot()
 	# Enemy warnings and the exact player-location feedback stay above effects.
 	for hazard in _snapshot.get("telegraphs",[]): _draw_telegraph(hazard)
 	_draw_enemy_attacks()
@@ -512,23 +533,26 @@ func _draw_loot() -> void:
 	if not LootRules.enabled(_snapshot): return
 	for chest in _snapshot.loot.chests:
 		if chest.status != "placed": continue
-		var local: Dictionary = LootRules.local_position(_snapshot,chest)
+		_draw_loot_icon(chest,LOOT_GOLD if chest.reward == "gold" else LOOT_SKILL,Vector2(38,35))
+	for potion in _snapshot.loot.get("potions",[]):
+		if potion.status == "placed": _draw_loot_icon(potion,LOOT_POTION,Vector2(22,28))
+	for flash in _loot_flashes:
+		var record: Dictionary = LootRules.find_chest(_snapshot,flash.chest_id)
+		if record.is_empty(): continue
+		var local: Dictionary = LootRules.local_position(_snapshot,record)
 		if not local.get("ok",false): continue
-		var position: Vector2 = local.position
-		if not Rect2(_camera-_viewport_size*0.5,_viewport_size).grow(24.0).has_point(position): continue
-		var accent := Color("FFD56A") if chest.reward == "gold" else Color("C99BFF")
-		draw_set_transform(_screen(position))
-		draw_rect(Rect2(-11,-9,22,18),Color("352B3F"))
-		draw_rect(Rect2(-11,-9,22,18),accent,false,2.0)
-		draw_line(Vector2(-10,-2),Vector2(10,-2),accent,2.0)
-		draw_rect(Rect2(-2,-4,4,6),Color.WHITE)
-		if chest.reward == "gold": draw_circle(Vector2(0,-13),2.5,accent)
-		else:
-			draw_line(Vector2(-4,-13),Vector2(4,-13),accent,2.0)
-			draw_line(Vector2(0,-17),Vector2(0,-9),accent,2.0)
-			draw_line(Vector2(-3,-16),Vector2(3,-10),accent,1.0)
-			draw_line(Vector2(-3,-10),Vector2(3,-16),accent,1.0)
-		draw_set_transform(Vector2.ZERO)
+		var age: float = _clock-float(flash.started)
+		if age < 0.25:
+			var center := _screen(local.position)
+			if not Rect2(Vector2.ZERO,_viewport_size).grow(24.0).has_point(center): continue
+			draw_arc(center,14.0+age*24.0,0,TAU,16,Color(1.0,0.86,0.55,(1.0-age/0.25)*0.7),2.0)
+
+func _draw_loot_icon(record: Dictionary, texture: Texture2D, dimensions: Vector2) -> void:
+	var local: Dictionary = LootRules.local_position(_snapshot,record)
+	if not local.get("ok",false): return
+	if not Rect2(_camera-_viewport_size*0.5,_viewport_size).grow(32.0).has_point(local.position): return
+	draw_texture_rect(texture,Rect2(_screen(local.position)-dimensions*0.5,dimensions),false)
+
 func _draw_xp_drop(drop: Dictionary) -> void:
 	var amount := int(drop.xp)
 	var tier: int = LootRules.xp_tier(amount)
@@ -810,7 +834,6 @@ func _draw_streamed_city() -> void:
 	var vfx := combat_vfx_commands()
 	_draw_vfx_pass(vfx,"ground")
 	for drop in _snapshot.get("drops",[]): _draw_xp_drop(drop)
-	_draw_loot()
 	if _city_view.stage == "dock" and _snapshot.phase == "evacuation":
 		var zone: Array = _snapshot.escape_zone
 		_sprite("escape_marker",Vector2(zone[0]+zone[2]/2,zone[1]+zone[3]/2),"idle",2.0)
@@ -823,6 +846,8 @@ func _draw_streamed_city() -> void:
 	for wire in _city_draw_data.mobility.wires: _draw_mobility_wire(wire)
 	_draw_vfx_pass(vfx,"contact_overlay")
 	_draw_hit_fallbacks()
+	# Small item silhouettes remain visible over crowds, below danger/player cues.
+	_draw_loot()
 	for marker in packet.visibility_markers:
 		if _city_draw_data.outline_needed: _draw_player_outline(marker,_city_draw_data.actor["player"])
 	_draw_enemy_attacks()

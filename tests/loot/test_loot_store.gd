@@ -13,15 +13,18 @@ var _fixture = Fixture.new()
 var _existing = Existing.new()
 var _disk = StoreCases.new()
 var _loot = LootCases.new()
+var _version := 1
 
 func run(t) -> void:
 	print("LOOT STORE DRAFT: real disk/CAS/fault paths, SHAPE checkpoint validator; not executed at authoring")
-	_commit_and_race_cases(t)
-	_fault_cases(t)
+	for version in [1,2]:
+		_version = version
+		_commit_and_race_cases(t)
+		_fault_cases(t)
 	_legacy_receipt_case(t)
 
 func _prepare(t, label: String) -> Dictionary:
-	var directory: String = _disk._directory("loot_"+label)
+	var directory: String = _disk._directory("loot_v"+str(_version)+"_"+label)
 	var store = Store.new(directory,_fixture.validate_checkpoint)
 	var loaded: Dictionary = store.load_game()
 	t.check(loaded.get("ok",false),"LOOT Store initialized "+label)
@@ -31,6 +34,11 @@ func _prepare(t, label: String) -> Dictionary:
 	var start: Dictionary = service.prepare_run_start(source,_existing._chapter(),42,_existing._start_id(source),source.store_revision)
 	t.check(start.get("ok",false),"LOOT Store new run prepared "+label)
 	if not start.get("ok",false): return {}
+	if _version == 1:
+		# Explicit historical-v1 initial checkpoint arrangement for the same Store
+		# fault/CAS matrix. Production new-start still always selects v2.
+		start.candidate.checkpoint.run_config.loot_rules_version = 1
+		start.candidate.checkpoint.loot = load("res://game/loot/loot_rules.gd").initial(1)
 	var started: Dictionary = store.commit_game(start.candidate,source.store_revision)
 	t.check(started.get("ok",false),"LOOT Store new run committed "+label)
 	if not started.get("ok",false): return {}
@@ -48,7 +56,7 @@ func _check_paid(t, save: Dictionary, revision: int, label: String) -> void:
 	t.check(save.settlement_receipts.size() == 1,"LOOT Store one settlement receipt "+label)
 	if save.settlement_receipts.size() != 1: return
 	var receipt: Dictionary = save.settlement_receipts[0]
-	t.check(receipt.request_id == "settle:"+save.checkpoint.run_id and receipt.loot_rules_version == 1 and receipt.breakdown.size() == 5 and receipt.breakdown.loot == 10 and receipt.total == 65,"LOOT Store exact versioned receipt "+label)
+	t.check(receipt.request_id == "settle:"+save.checkpoint.run_id and receipt.loot_rules_version == int(save.checkpoint.run_config.loot_rules_version) and receipt.breakdown.size() == 5 and receipt.breakdown.loot == 10 and receipt.total == 65,"LOOT Store exact versioned receipt "+label)
 
 func _commit_and_race_cases(t) -> void:
 	var packet := _prepare(t,"cas")

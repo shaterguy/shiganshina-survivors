@@ -22,8 +22,8 @@ func make(t, label: String):
 	app.start_run(42)
 	t.check(not app.state.is_empty(),"LOOT CITY actual Controller starts new run: "+label)
 	if app.state.is_empty(): app.free(); return null
-	t.check(app.state.get("run_config",{}).get("loot_rules_version") == 1 and app.state.get("loot",{}) == Loot.initial(),"LOOT CITY new-run marker and empty ledger: "+label)
-	t.check(app.game_save.checkpoint.get("run_config",{}).get("loot_rules_version") == 1,"LOOT CITY new-run marker is durably committed: "+label)
+	t.check(app.state.get("run_config",{}).get("loot_rules_version") == Loot.VERSION and app.state.get("loot",{}) == Loot.initial(Loot.VERSION),"LOOT CITY new-run marker and empty ledger: "+label)
+	t.check(app.game_save.checkpoint.get("run_config",{}).get("loot_rules_version") == Loot.VERSION,"LOOT CITY new-run marker is durably committed: "+label)
 	if not Loot.enabled(app.state): app.free(); return null
 	app.state.player.position = [384.0,384.0]
 	if not refresh(t,app,"reserved street "+label): app.free(); return null
