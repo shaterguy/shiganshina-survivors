@@ -31,7 +31,7 @@ func visibility_query(position: Vector2, target: Vector2, radius: float) -> Dict
 	if get_script() != StreamedNavigationView or (_world.get_script() != ExactSmoothingStream and _world.get_script() != CachedSmoothingStream) or not _query_failure.is_empty() or not _world._last_error.is_empty() or not ExactSmoothingStream._valid_query(position,delta,radius):
 		return _visibility_full_sweep(position,delta,radius)
 	var bounds: Rect2 = ExactSmoothingStream._swept_rect(position,delta,radius)
-	if not _visibility_domain_ready(bounds): return _visibility_full_sweep(position,delta,radius)
+	if not _visibility_domain_ready(bounds,position,delta,radius): return _visibility_full_sweep(position,delta,radius)
 	# Exact World/CachedWorld borrow these same immutable collision records.
 	# Navigation needs only fraction==1, not nearest hit identity, corrected
 	# position or endpoint walkability. Mask4/8/16 alone must remain invisible
@@ -43,21 +43,28 @@ func visibility_query(position: Vector2, target: Vector2, radius: float) -> Dict
 func _visibility_full_sweep(position: Vector2, delta: Vector2, radius: float) -> Dictionary:
 	var hit: Dictionary = sweep(position,delta,radius)
 	return {"ok":hit.ok,"visible":hit.ok and hit.fraction == 1.0}
-func _visibility_domain_ready(bounds: Rect2) -> bool:
+func _visibility_domain_ready(bounds: Rect2, position: Vector2, delta: Vector2, radius: float) -> bool:
 	if _coverage_revision != _world._coverage_revision or _world_revision != _world._world_revision: _refresh(_world.diagnostics())
-	# Keep the original half-open/point span and its >8 refusal. A whole extra
-	# resident cell on every side conservatively contains every separately
-	# rounded endpoint/backoff walkable rectangle of the full sweep. The
-	# original valid-query limits bound coordinates below 100000 and radius32;
-	# float32 reconstruction error cannot approach a 768px padding cell.
-	# This proof is read-only: a failed proof must not itself latch last_error.
+	# Keep the original half-open/point span and its >8 refusal. Every native
+	# result/backoff point lies between position and position+delta. Using the
+	# same Vector2 operation order as walkable bounds its rounded upper edge;
+	# the original swept lower edge already bounds all those lower edges.
+	# Do not regroup the radius products or replace the reconstructed endpoint
+	# with target: float32 rounding and zero-size branches are part of the proof.
+	# This check is read-only; refusal falls back without latching last_error.
 	var low_x := int(floor(bounds.position.x/768))
 	var high_x := int(floor((bounds.end.x-0.0001 if bounds.size.x > 0 else bounds.end.x)/768))
 	var low_y := int(floor(bounds.position.y/768))
 	var high_y := int(floor((bounds.end.y-0.0001 if bounds.size.y > 0 else bounds.end.y)/768))
 	if high_x-low_x > 8 or high_y-low_y > 8: return false
-	for y in range(low_y-1,high_y+2):
-		for x in range(low_x-1,high_x+2):
+	var upper: Vector2 = position.max(position+delta)
+	var endpoint: Rect2 = Rect2(upper-Vector2.ONE*radius,Vector2.ONE*radius*2)
+	var endpoint_high_x := int(floor((endpoint.end.x-0.0001 if endpoint.size.x > 0 else endpoint.end.x)/768))
+	var endpoint_high_y := int(floor((endpoint.end.y-0.0001 if endpoint.size.y > 0 else endpoint.end.y)/768))
+	high_x = maxi(high_x,endpoint_high_x)
+	high_y = maxi(high_y,endpoint_high_y)
+	for y in range(low_y,high_y+1):
+		for x in range(low_x,high_x+1):
 			if not _by_origin.has(Vector2(x*768,y*768)): return false
 	return true
 func _observe_query(result: Dictionary) -> Dictionary:
