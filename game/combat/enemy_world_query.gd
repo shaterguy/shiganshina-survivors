@@ -11,6 +11,8 @@ var _prepared_identity: Dictionary = {}
 var _identity: Array = []
 var _failure: Dictionary = {}
 var _counts := {"walkable_calls":0,"sweep_calls":0,"visibility_calls":0,"cover_calls":0}
+var _admitted_tick := -1
+var _expired_status: Dictionary = {}
 static func for_finite(geometry: Dictionary) -> EnemyWorldQuery:
 	var query := EnemyWorldQuery.new()
 	query._geometry = geometry
@@ -31,18 +33,39 @@ static func for_streamed(helper: Streamed, state: Dictionary) -> EnemyWorldQuery
 	query._prepared_identity = helper._prepared_identity
 	query._identity = query._current_identity()
 	return query
+static func _for_admitted_tick(helper: Streamed, state: Dictionary, tick: int) -> EnemyWorldQuery:
+	# Core alone calls this after a successful native begin_query_batch, with no
+	# spatial writer before the pre-move bind. Public callers retain readiness.
+	var query := EnemyWorldQuery.new()
+	query._helper = helper
+	query._state = state
+	query._admitted_tick = tick
+	if helper == null or helper.get_script() != Streamed or helper._world == null or helper._world.get_script() != Streamed.Stream or helper._generator == null or helper._generator.get_script() != Streamed.Generator or not Streamed.enabled(state) or not state.world.get("stage") is String or not state.world.get("scene_id") is String or state.world.stage != "city" or state.world.scene_id != "city" or not state.get("active_tick") is int or state.active_tick != tick or tick < 1 or tick > Streamed.Mobility.MAX_COUNTER:
+		query._fail({"ok":false,"error_code":"world_not_ready"})
+		return query
+	var prior := helper.query_status()
+	if not prior.ok: query._fail(prior); return query
+	if not helper.matches(state): query._fail({"ok":false,"error_code":"world_not_ready"}); return query
+	query._prepared_identity = helper._prepared_identity
+	query._identity = query._current_identity()
+	return query
+func _expire_admitted_tick() -> void:
+	if _admitted_tick >= 0 and _expired_status.is_empty(): _expired_status = _guard().duplicate(true)
 func _current_identity() -> Array:
 	var world: Dictionary = _state.get("world",{})
 	return [_state.get("run_id"),_state.get("seed"),world.get("mode"),world.get("stage"),world.get("scene_id"),world.get("origin_revision"),world.get("world_revision"),world.get("origin_chunk",[]).duplicate()]
 func _guard() -> Dictionary:
 	if not _failure.is_empty(): return _failure
+	# Expiry blocks operations without overwriting the completed tick's status.
+	if not _expired_status.is_empty(): return {"ok":false,"error_code":"world_not_ready"}
 	if _helper != null:
 		var prior := _helper.query_status()
 		if not prior.ok: return _fail(prior)
+		if _admitted_tick >= 0 and (not _state.get("active_tick") is int or _state.active_tick != _admitted_tick): return _fail({"ok":false,"error_code":"world_not_ready"})
 		if not is_same(_prepared_identity,_helper._prepared_identity) or _identity != _current_identity(): return _fail({"ok":false,"error_code":"world_not_ready"})
 	return {"ok":true}
 func status() -> Dictionary:
-	var result := _guard().duplicate(true)
+	var result := (_expired_status if not _expired_status.is_empty() else _guard()).duplicate(true)
 	result.queries = _counts.duplicate()
 	return result
 func walkable(point: Vector2, radius: float) -> Dictionary:

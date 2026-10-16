@@ -91,6 +91,9 @@ var _role_admission: Dictionary = {}
 var _attack_view_cache: Dictionary = {}
 var _role_tick_query
 var _role_tick_state: Dictionary = {}
+# One-call admission from _step_streamed; never part of a saved state.
+var _role_batch_tick := -1
+var _role_batch_helper_id := 0
 func _init(chapter_provider = null, world_helper = null, immutable_inputs: Dictionary = {}, configuration_source = null) -> void:
 	if configuration_source != null:
 		_content_error = "content_mismatch"
@@ -428,6 +431,9 @@ func _needs_counter_transaction(state: Dictionary, commands: Array[Dictionary]) 
 		if enemy_id is String and state.rules.enemy_catalog.has(enemy_id): possible_xp += int(state.rules.enemy_catalog[enemy_id].xp)
 	return possible_xp > MAX_COUNTER-65536
 func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]) -> Array[Dictionary]:
+	var reuse_role_readiness: bool = _role_batch_tick >= 0 and state.get("active_tick") is int and _role_batch_tick == state.active_tick and _streamed != null and _role_batch_helper_id == _streamed.get_instance_id()
+	_role_batch_tick = -1
+	_role_batch_helper_id = 0
 	var events: Array[Dictionary] = []
 	if state.phase in ["won","dead","abandoned"] or not state.pause_reasons.is_empty() or not state.upgrade_offer.is_empty(): return events
 	_role_samples = {}
@@ -448,7 +454,8 @@ func _step_running(state: Dictionary, move: Vector2, commands: Array[Dictionary]
 	if state.has("world") and state.world.stage == "city":
 		for entity in state.entities:
 			if _is_live_role(entity):
-				_role_query(state)
+				if reuse_role_readiness: _role_tick_query = RoleQuery._for_admitted_tick(_streamed,state,int(state.active_tick))
+				else: _role_query(state)
 				break
 	_move_player(state,move)
 	if not _role_error.is_empty(): return events
@@ -2380,7 +2387,18 @@ func _step_streamed(state: Dictionary, move: Vector2, commands: Array[Dictionary
 				return []
 	_streamed = next_helper
 	_tick_navigation = {"target_adjustments":0,"target_waits":0,"route_queries":0,"route_blocked":0,"route_deferred":0,"max_route_wait_ticks":0,"deferred_attacks":0,"actors":[]}
+	# Only the exact native path can reuse the readiness admitted above. Between
+	# that check and the pre-move role query, this path changes no spatial input.
+	_role_batch_tick = -1
+	_role_batch_helper_id = 0
+	if get_script() == load("res://game/core/run_simulation.gd") and commands.is_empty() and candidate.phase == "survival" and candidate.world.stage == "city" and not population.get("changed",true) and not rebased and _streamed == previous_helper and _streamed.get_script() == Streamed and _streamed._world != null and _streamed._world.get_script() == Streamed.Stream and _streamed._generator != null and _streamed._generator.get_script() == Streamed.Generator and candidate.active_tick is int and candidate.active_tick >= 0 and candidate.active_tick < MAX_COUNTER-1:
+		if not candidate.has("player_mobility") or (candidate.player_mobility is Dictionary and candidate.player_mobility.get("schema_version") is int and candidate.player_mobility.schema_version == 2):
+			_role_batch_tick = int(candidate.active_tick)
+			_role_batch_helper_id = _streamed.get_instance_id()
 	var events := _step_running(candidate,move,tick_commands)
+	# The private candidate root can outlive commit. End the borrowed query now,
+	# before any failure/rollback path, while retaining its completed status.
+	if get_script() == load("res://game/core/run_simulation.gd") and _role_tick_query is RefCounted and _role_tick_query.get_script() == RoleQuery: _role_tick_query._expire_admitted_tick()
 	var status: Dictionary = _streamed.query_status()
 	if not _role_error.is_empty(): status = _role_error
 	if not status.get("ok",false):
