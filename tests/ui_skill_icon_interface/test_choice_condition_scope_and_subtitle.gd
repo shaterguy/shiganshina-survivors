@@ -28,7 +28,7 @@ func run(t) -> void:
 			var card: Button = ui._growth_cards[index]
 			var expected_rows := 0
 			for recipe in option.evolution_previews:
-				var shown: Array = recipe.requirements.filter(func(required): return option.kind != "equipment" or required.item_id != option.item_id)
+				var shown: Array = recipe.requirements.filter(func(required): return required.item_id != option.item_id)
 				expected_rows += 1+shown.size()
 				t.check(card.tooltip_text.contains("궁극 · "+recipe.name),"ordinary detail names this skill's own future ultimate")
 				for required in shown:

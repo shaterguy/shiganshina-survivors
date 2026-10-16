@@ -54,7 +54,7 @@ func run(t) -> void:
 			var card: Button = ui._growth_cards[index]
 			var details: Button = ui._growth_details[index]
 			t.check(rows.get_parent() == card and details.get_parent() == card and card.get_global_rect().encloses(rows.get_global_rect()) and card.get_global_rect().encloses(details.get_global_rect()),"all eight actual evolutions keep requirements and information inside their own choice border")
-			t.check(card.text.contains(recipe.name) and card.icon != null and card.text.contains("5/6") and card.text.contains("6/6"),"real final choice shows its authored name, icon and sixth stage")
+			t.check(card.face_text().contains(recipe.name) and card.icon != null and card.face_text().contains("5/6") and not card.face_text().contains("6/6"),"real final choice shows its authored name, icon and sixth stage")
 			for focused in [card,details]:
 				focused.grab_focus()
 				await _settle(t)

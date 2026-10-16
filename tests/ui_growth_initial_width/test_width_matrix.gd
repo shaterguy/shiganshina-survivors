@@ -49,7 +49,7 @@ func _offer(ui,t,view: Dictionary,snapshot: Dictionary,label: String,first := fa
 	if first:
 		for card in ui._growth_cards:
 			var observe := func():
-				if card.is_visible_in_tree() and not card.text.is_empty(): shows.append({"width":card.size.x,"style_min":card.get_theme_stylebox("normal").get_minimum_size().x})
+				if card.is_visible_in_tree() and not card.face_text().is_empty(): shows.append({"width":card.size.x,"style_min":card.get_theme_stylebox("normal").get_minimum_size().x})
 			card.visibility_changed.connect(observe)
 			callbacks.append([card,observe])
 	# Presentation-only content arrangements retain a matching snapshot offer ID.

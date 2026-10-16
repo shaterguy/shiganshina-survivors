@@ -2,6 +2,11 @@ class_name GrowthCard
 extends Button
 # Presentation only. Conditions and effects arrive from ProgressionView.
 signal chosen(option_id: String)
+signal layout_metrics_changed
+var _title_label: Label
+var _body_label: Label
+var _layout_metrics := Vector3.ZERO
+var _shared_metrics := Vector3.ZERO
 const Icons = preload("res://game/ui/skill_icons.gd")
 var _option: Dictionary = {}
 var _display := ""
@@ -35,6 +40,18 @@ func _init() -> void:
 	add_theme_constant_override("icon_max_width",40)
 	pressed.connect(_choose)
 func attach_inline_controls(requirements: VBoxContainer, information: Button) -> void:
+	_title_label = Label.new()
+	_title_label.name = "CardTitle"
+	_body_label = Label.new()
+	_body_label.name = "CardEffect"
+	for label in [_title_label,_body_label]:
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_font_size_override("font_size",15)
+		label.add_theme_color_override("font_color",Color("f0dfba"))
+		add_child(label)
+		label.minimum_size_changed.connect(_queue_inline_layout)
+	vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	_requirements = requirements
 	_information = information
 	# Each card owns its style copies; content reservation never changes the
@@ -58,26 +75,44 @@ func _queue_inline_layout() -> void:
 func sync_inline_layout() -> void:
 	_inline_queued = false
 	if not is_instance_valid(_requirements) or not is_instance_valid(_information) or not is_inside_tree(): return
-	var has_requirements := _requirements.get_child_count() > 0
-	# Narrow landscape grid cells need a full-width summary; reserving half
-	# of a 338px card leaves only ~103px after the native skill icon.
-	var right_column := has_requirements and size.x >= 480
 	var inner_width := maxf(1,size.x-_inline_padding.x-_inline_padding.z)
+	var right_column := size.x >= 480
 	var requirement_width := floorf((inner_width-8)/2) if right_column else inner_width
 	_requirements.size.x = requirement_width
-	var requirement_height: float = _requirements.get_combined_minimum_size().y if has_requirements else 0.0
+	var summary_width := inner_width-requirement_width-8 if right_column else inner_width-56
+	var icon_width := 40.0+get_theme_constant("h_separation")
+	for label in [_title_label,_body_label]: label.size.x = maxf(1,summary_width-icon_width)
+	var metrics := Vector3(_title_label.get_combined_minimum_size().y,_body_label.get_combined_minimum_size().y,_requirements.get_combined_minimum_size().y if _requirements.get_child_count() > 0 else 0.0)
+	if metrics != _layout_metrics:
+		_layout_metrics = metrics
+		layout_metrics_changed.emit()
+	apply_shared_layout(_shared_metrics if _shared_metrics != Vector3.ZERO else metrics)
+func layout_metrics() -> Vector3:
+	return _layout_metrics
+func apply_shared_layout(metrics: Vector3) -> void:
+	if not is_instance_valid(_title_label): return
+	_shared_metrics = metrics
+	for label in [_title_label,_body_label]:
+		var color := get_theme_color("font_disabled_color" if disabled else "font_color")
+		if label.get_theme_color("font_color") != color: label.add_theme_color_override("font_color",color)
+	var right_column := size.x >= 480
+	var icon_width := 40.0+get_theme_constant("h_separation")
+	_title_label.position = Vector2(_inline_padding.x+icon_width,_inline_padding.y)
+	_title_label.size.y = metrics.x
+	_body_label.position = Vector2(_title_label.position.x,_inline_padding.y+metrics.x+4)
+	_body_label.size.y = metrics.y
+	var summary_height := maxf(48,metrics.x+4+metrics.y)
+	var content_height: float = maxf(summary_height,54+metrics.z) if right_column else summary_height+(metrics.z+6 if metrics.z > 0 else 0)
 	_information.size = Vector2(48,48)
 	_information.position = Vector2(size.x-_inline_padding.z-48,_inline_padding.y)
-	var reserve_right := requirement_width+8 if right_column else 56.0
-	var reserve_bottom := requirement_height+6 if has_requirements and not right_column else 0.0
+	_requirements.position = Vector2(size.x-_inline_padding.z-_requirements.size.x if right_column else _inline_padding.x,_inline_padding.y+54 if right_column else _inline_padding.y+summary_height+6)
+	_requirements.size.y = metrics.z
 	for style in _inline_styles.values():
-		var right: float = _inline_padding.z+reserve_right
-		var bottom: float = _inline_padding.w+reserve_bottom
+		var right: float = _inline_padding.z+(_requirements.size.x+8 if right_column else 56.0)
+		var bottom: float = _inline_padding.w+content_height-summary_height
 		if style.content_margin_right != right: style.content_margin_right = right
 		if style.content_margin_bottom != bottom: style.content_margin_bottom = bottom
-	_requirements.position = Vector2(size.x-_inline_padding.z-requirement_width if right_column else _inline_padding.x,_inline_padding.y+54 if right_column else maxf(_inline_padding.y,size.y-_inline_padding.w-requirement_height))
-	_requirements.size.y = requirement_height
-	var height: float = _inline_padding.y+48+_inline_padding.w+(requirement_height+6 if right_column else 0)
+	var height: float = _inline_padding.y+content_height+_inline_padding.w
 	if custom_minimum_size.y != height: custom_minimum_size.y = height
 func present(option: Dictionary, summary_text: String = "") -> void:
 	_option = option.duplicate(true)
@@ -111,15 +146,29 @@ func present(option: Dictionary, summary_text: String = "") -> void:
 		parts.append("A · 선택")
 	_display = player_text("\n\n".join(parts))
 	text = summary(option) if summary_text.is_empty() else summary_text
+	accessibility_name = text
+	if is_instance_valid(_title_label):
+		var lines := text.split("\n",true,1)
+		_title_label.text = lines[0]
+		_body_label.text = lines[1] if lines.size() > 1 else ""
+		text = ""
+		_queue_inline_layout()
 	tooltip_text = _display
 func clear() -> void:
 	_option = {}
 	_display = ""
+	accessibility_name = ""
 	text = ""
+	if is_instance_valid(_title_label):
+		_title_label.text = ""
+		_body_label.text = ""
 	icon = null
 	tooltip_text = ""
 	set_meta("semantic_id","")
 	disabled = true
+func face_text() -> String:
+	if not is_instance_valid(_title_label): return text
+	return _title_label.text+("\n"+_body_label.text if not _body_label.text.is_empty() else "")
 func display_text() -> String:
 	return _display
 func _choose() -> void:
@@ -133,11 +182,11 @@ static func evolution_requirement_text(requirement: Dictionary) -> String:
 	if requirement.get("kind","") == "seal": return "%s · %d/%d · %s" % [title,current,required,status]
 	return "%s · Lv %d/%d · %s" % [title,current,required,status]
 static func _selected_attack_id(option: Dictionary) -> String:
-	return str(option.get("item_id","")) if option.get("kind","") in ["equipment","evolution"] else ""
+	return str(option.get("item_id","")) if option.get("kind","") in ["equipment","evolution","passive"] else ""
 static func visible_requirements(requirements: Array, selected_attack_id: String = "") -> Array:
-	# Presentation only: keep the authoritative base-level gate in the DTO.
-	# Other attacks, passives and costs still show their exact required progress.
-	return requirements.filter(func(required): return selected_attack_id.is_empty() or required.get("kind","") != "equipment" or required.get("item_id","") != selected_attack_id or required.get("requirement_type","") != "base_level")
+	# Presentation only: keep all authoritative gates in the DTO.
+	# Suppress this card's own skill; other skills and costs retain their progress.
+	return requirements.filter(func(required): return selected_attack_id.is_empty() or required.get("kind","") not in ["equipment","passive"] or required.get("item_id","") != selected_attack_id)
 static func evolution_previews_text(previews: Array, selected_attack_id: String = "") -> String:
 	var parts: Array[String] = []
 	for detail in previews:
@@ -195,10 +244,14 @@ static func level_change_text(option: Dictionary) -> String:
 	if next == cap: return "Lv %d/%d → MAX %d/%d" % [level,cap,next,cap]
 	return "Lv %d/%d → %d/%d" % [level,cap,next,cap]
 static func summary(option: Dictionary) -> String:
-	var parts: Array[String] = [str(option.get("name","성장"))]
-	var levels := level_change_text(option).replace("신규 습득 · Lv ","신규 습득 ").replace("MAX ","")
-	if str(option.get("kind","")) == "evolution": parts.append(levels.trim_prefix("Lv "))
-	elif option.has("level"): parts.append(levels)
+	var title := str(option.get("name","성장"))
+	if option.has("level") or option.has("display_level"):
+		var level := int(option.get("display_level",option.get("level",0)))
+		if option.has("display_max_level") or option.has("max_level"):
+			title += " %d/%d" % [level,int(option.get("display_max_level",option.get("max_level",0)))]
+		else:
+			title += " Lv %d" % level
+	var parts: Array[String] = [title]
 	var effect := brief_effect_text(option.get("effect_delta",{}))
 	if not effect.is_empty(): parts.append(effect)
 	var warning := str(option.get("slot_warning",option.get("last_slot_warning","")))

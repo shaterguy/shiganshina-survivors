@@ -29,11 +29,8 @@ func run(t) -> void:
 			var body := Rect2(card.get_global_rect().position+Vector2(style.get_margin(SIDE_LEFT),style.get_margin(SIDE_TOP)),card.size-style.get_minimum_size())
 			var available := body.size.x-card.get_theme_constant("icon_max_width")-card.get_theme_constant("h_separation")
 			var context := str(screen)+" "+str(card.get_meta("semantic_id"))
-			# Name, explicit level row and short measured benefit each fit once;
-			# half-width recipe reservation previously split all three repeatedly.
-			for line in card.text.split("\n"):
-				var measured := card.get_theme_font("font").get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,card.get_theme_font_size("font_size")).x
-				t.check(measured <= available,"authored short summary has a readable unbroken row: "+context+" "+line)
+			for label in [card.get_node("CardTitle"),card.get_node("CardEffect")]:
+				t.check(label.get_total_character_count() > 0 and label.size.x <= available+1 and body.grow(1).encloses(label.get_global_rect()),"visible wrapped title and benefit stay in the reserved summary: "+context)
 			t.check(card.get_global_rect().encloses(info.get_global_rect()) and info.size.x >= 48 and info.size.y >= 48,"independent 48px i stays inside card: "+context)
 			t.check(card.get_global_rect().encloses(rows.get_global_rect()),"conditions stay inside card: "+context)
 			t.check(not rows.get_global_rect().intersects(info.get_global_rect()) and not body.intersects(rows.get_global_rect()) and not body.intersects(info.get_global_rect()),"summary, conditions and i occupy separate regions: "+context)

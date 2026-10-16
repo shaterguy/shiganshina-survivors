@@ -20,7 +20,7 @@ func run(t) -> void:
 	var shown: Array = []
 	for card in ui._growth_cards:
 		card.visibility_changed.connect(func():
-			if card.is_visible_in_tree() and not card.text.is_empty():
+			if card.is_visible_in_tree() and not card.face_text().is_empty():
 				shown.append({"width":card.size.x,"style_min":card.get_theme_stylebox("normal").get_minimum_size().x}))
 	ui.present_progression(view)
 	ui.present(sim.snapshot(state))

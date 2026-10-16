@@ -35,12 +35,12 @@ func run(t) -> void:
 			await _settle(t)
 			var viewport: Rect2 = ui._scroll.get_global_rect()
 			t.check(viewport.grow(1).encloses(card.get_global_rect()),"%s selected card is fully visible including name and choice affordance: %s"%[str(screen),option.option_id])
-			t.check(card.text.begins_with(option.name),"card begins with its real name")
-			t.check(not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세") and not card.text.contains("A · 선택"),"readable identity and effects need no repeated manipulation instruction")
+			t.check(card.face_text().begins_with(option.name),"card begins with its real name")
+			t.check(not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세") and not card.face_text().contains("A · 선택"),"readable identity and effects need no repeated manipulation instruction")
 			var delta: Dictionary = option.effect_delta
 			var before_value := str(delta.get("before",delta.get("damage_before",""))).trim_suffix(".0")
 			var after_value := str(delta.get("after",delta.get("damage_after",""))).trim_suffix(".0")
-			var benefit: String = card.text.split("\n")[2] if card.text.split("\n").size() >= 3 else ""
+			var benefit: String = card.face_text().split("\n")[1] if card.face_text().split("\n").size() >= 2 else ""
 			t.check(not benefit.is_empty() and (benefit.contains(before_value) and benefit.contains(after_value) if not before_value.is_empty() else benefit.contains(Card.effect_text(delta).split("\n")[0])),"card keeps actual measured before/after benefit values in its short change row")
 			if delta.has("stat"):
 				t.check(benefit.begins_with(str(SHORT_STATS.get(str(delta.stat),str(delta.stat)))+" "),"short measured benefit names the actual authored stat rather than another effect")
@@ -60,7 +60,7 @@ func run(t) -> void:
 			t.check(detail_text.contains(Card.effect_text(option.effect_delta)),"detail preserves every measured effect")
 			if option.has("evolution_previews"):
 				for recipe in option.evolution_previews:
-					t.check(detail_text.contains(Card.evolution_previews_text([recipe],str(option.item_id) if option.kind == "equipment" else "")),"detail preserves this skill's own ultimate and actual requirement progress")
+					t.check(detail_text.contains(Card.evolution_previews_text([recipe],str(option.item_id) if option.kind in ["equipment","passive"] else "")),"detail preserves this skill's own ultimate and actual requirement progress")
 			else:
 				t.check(detail_text.contains(Card.requirements_text(option.requirements.filter(func(required): return required.item_id != option.item_id))),"evolution detail preserves named requirement progress and missing reasons")
 			ui.accept_released()

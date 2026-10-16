@@ -14,7 +14,7 @@ func run(t) -> void:
 	for option in view.active_offer.options:
 		var text: String = ui._growth_summary(option)
 		t.check(text.contains("/%d" % int(option.max_level)),"growth summary displays DTO maximum for newly owned and existing skills")
-		if int(option.level) == 0: t.check(text.contains("신규 습득"),"new skill acquisition is named explicitly")
+		if int(option.level) == 0: t.check(text.begins_with(str(option.name)+" 0/%d" % int(option.get("display_max_level",option.max_level))) and not text.contains("신규 습득"),"new skill shows current zero beside its name without acquisition prose")
 	var card := Card.new()
 	card.present({"kind":"equipment","name":"쌍검","level":4,"next_level":5,"max_level":5})
 	t.check(card.display_text().contains("MAX 5/5"),"maximum growth is identified before selection")

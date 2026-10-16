@@ -48,17 +48,17 @@ func run(t) -> void:
 			await _settle(t)
 			var card: Button = ui._buttons[0]
 			t.check(ui._scroll.get_global_rect().grow(1).encloses(card.get_global_rect()),"800x450 complete primary card fits for "+option.option_id)
-			t.check(card.text.split("\n")[0] == option.name,"every actual card keeps its complete authored identity on the first row")
+			t.check(card.face_text().split("\n")[0] == option.name+" %d/%d" % [int(option.get("display_level",option.level)),int(option.get("display_max_level",option.max_level))],"every actual card keeps its complete authored identity on the first row")
 			# An irreversible slot warning can legitimately say '이 선택으로'.
 			# Match the action prompt itself, never delete that meaningful warning.
-			t.check(not card.text.contains("터치/A") and not card.text.contains("A · 선택") and not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세"),"actual cards and subtitle omit persistent manipulation instructions")
+			t.check(not card.face_text().contains("터치/A") and not card.face_text().contains("A · 선택") and not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세"),"actual cards and subtitle omit persistent manipulation instructions")
 			if not option.slot_warning.is_empty():
-				t.check(card.text.contains(option.slot_warning),"irreversible last-slot warning remains visible before choosing")
+				t.check(card.face_text().contains(option.slot_warning),"irreversible last-slot warning remains visible before choosing")
 			if option.kind == "evolution":
 				evolution_checked = true
-				t.check(card.text.split("\n")[1] == "5/6 → 6/6" and card.display_text().contains("진화") and not card.text.contains("궁극"),"evolution face keeps the sixth-stage numbers on one compact row and details preserve the run evolution label")
+				t.check(card.face_text().split("\n")[0] == option.name+" 5/6" and card.display_text().contains("진화") and not card.face_text().contains("궁극"),"evolution face keeps the current sixth-stage progress beside the name and details preserve the run evolution label")
 				for requirement in option.requirements:
-					if requirement.kind == "seal" and int(requirement.required) > 0: t.check(card.text.contains("개조권 %d개 소비" % int(requirement.required)),"legacy recipe summary discloses an actual seal consumption")
+					if requirement.kind == "seal" and int(requirement.required) > 0: t.check(card.face_text().contains("개조권 %d개 소비" % int(requirement.required)),"legacy recipe summary discloses an actual seal consumption")
 				ui._buttons[1].grab_focus()
 				ui.navigate("accept")
 				await _settle(t)

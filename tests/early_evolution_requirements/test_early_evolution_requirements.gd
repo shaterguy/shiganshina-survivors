@@ -76,7 +76,7 @@ func _legacy_cost_labels(t) -> void:
 		t.check(option.requirements.any(func(required): return required.kind == "seal" and required.required == 1),"legacy fixture retains the unrelated target's real seal requirement")
 		var card := Card.new()
 		card.present(option)
-		t.check(not card.disabled and not card.text.contains("개조권"),"ordinary legacy growth never claims an evolution seal cost: "+choice[1])
+		t.check(not card.disabled and not card.face_text().contains("개조권"),"ordinary legacy growth never claims an evolution seal cost: "+choice[1])
 		if choice[0] == "passive": t.check(not card.display_text().contains("개조권"),"unrelated free passive has no invented seal prerequisite in its description")
 		t.check(state == before,"rendering a free legacy upgrade preserves game authority")
 		card.free()

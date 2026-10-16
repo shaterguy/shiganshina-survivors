@@ -69,7 +69,7 @@ func run(t) -> void:
 				var native_style: StyleBox = card.get_theme_stylebox("normal")
 				var body := Rect2(card.get_global_rect().position+Vector2(native_style.get_margin(SIDE_LEFT),native_style.get_margin(SIDE_TOP)),card.size-native_style.get_minimum_size())
 				t.check(not body.intersects(info.get_global_rect()),"native skill identity and benefit area cannot sit behind the internal information target: "+context)
-				var selected_attack := str(option.item_id) if option.kind in ["equipment","evolution"] else ""
+				var selected_attack := str(option.item_id) if option.kind in ["equipment","evolution","passive"] else ""
 				var final_requirements: Array = option.requirements.filter(func(required): return required.item_id != selected_attack)
 				var expected_rows: int = final_requirements.size() if option.kind == "evolution" else 0
 				for preview in option.get("evolution_previews",[]): expected_rows += 1+preview.requirements.filter(func(required): return required.item_id != selected_attack).size()
@@ -89,11 +89,11 @@ func run(t) -> void:
 				if expected_rows > 0:
 					t.check(not info.get_global_rect().intersects(rows.get_global_rect()) and not body.intersects(rows.get_global_rect()),"early and final recipe rows cannot obscure the information target or native skill text: "+context)
 				if option.kind == "evolution":
-					var level_row: String = card.text.split("\n")[1] if card.text.split("\n").size() >= 2 else ""
+					var level_row: String = card.get_node("CardTitle").text
 					var level_width: float = card.get_theme_font("font").get_string_size(level_row,HORIZONTAL_ALIGNMENT_LEFT,-1,card.get_theme_font_size("font_size")).x
 					var available_level_width: float = body.size.x-card.get_theme_constant("icon_max_width")-card.get_theme_constant("h_separation")
-					t.check(level_row == "5/6 → 6/6","final evolution level row omits redundant prefixes without losing either cap: "+context)
-					t.check(card.get_theme_font_size("font_size") >= 15 and level_width <= available_level_width,"final evolution levels stay on one measured readable row beside the 40px icon: "+context)
+					t.check(level_row == option.name+" 5/6","final evolution title shows current progress and actual maximum: "+context)
+					t.check(card.get_theme_font_size("font_size") >= 15 and card.get_node("CardTitle").size.x <= available_level_width+1 and card.get_node("CardTitle").get_line_count() >= 1,"final evolution title remains readable and wraps beside the 40px icon: "+context)
 					t.check(rows.is_visible_in_tree() and card.get_global_rect().encloses(rows.get_global_rect()),"all combination requirements stay inside the evolution border: "+context)
 					t.check(not info.get_global_rect().intersects(rows.get_global_rect()),"internal information never overlaps named combination requirements: "+context)
 					t.check(not body.intersects(rows.get_global_rect()),"native skill name and benefit area cannot be covered by internal requirements: "+context)

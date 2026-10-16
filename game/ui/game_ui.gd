@@ -68,6 +68,7 @@ var _touch_origin := Vector2.ZERO
 var _screen_size := Vector2i(800,450)
 var _safe_rect := Rect2i(0,0,800,450)
 var _panel: PanelContainer
+var _growth_layout_queued := false
 var _choices: GridContainer
 var _scroll: ScrollContainer
 var _title: Label
@@ -819,6 +820,8 @@ func _prepare_growth_controls() -> void:
 		_style_button(card)
 		group.add_child(card)
 		_growth_cards.append(card)
+		card.layout_metrics_changed.connect(_queue_growth_layout)
+		card.resized.connect(_queue_growth_layout)
 		_register_button(card)
 		card.button_down.connect(func(): card.set_meta("growth_press_generation",_growth_generation))
 		card.chosen.connect(func(_option_id):
@@ -911,6 +914,20 @@ func _render_growth_cards(offer: Dictionary) -> void:
 	# Information is available from each independent i target and the owned
 	# reader. Do not repeat another full-width reading action above the choices.
 	_target_button.hide()
+	_queue_growth_layout()
+func _queue_growth_layout() -> void:
+	if _growth_layout_queued or not is_inside_tree(): return
+	_growth_layout_queued = true
+	call_deferred("_sync_growth_layout")
+func _sync_growth_layout() -> void:
+	_growth_layout_queued = false
+	var metrics := Vector3.ZERO
+	for index in range(_growth_cards.size()):
+		if not _growth_groups[index].visible: continue
+		var own: Vector3 = _growth_cards[index].layout_metrics()
+		metrics = Vector3(maxf(metrics.x,own.x),maxf(metrics.y,own.y),maxf(metrics.z,own.z))
+	for index in range(_growth_cards.size()):
+		if _growth_groups[index].visible: _growth_cards[index].apply_shared_layout(metrics)
 func _growth_summary(option: Dictionary) -> String:
 	return Card.summary(option)
 func _open_growth_details(option_id: String) -> void:

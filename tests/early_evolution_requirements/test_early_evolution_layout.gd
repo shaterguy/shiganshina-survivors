@@ -37,7 +37,7 @@ func run(t) -> void:
 			var rows: VBoxContainer = card.get_node("Requirements")
 			var recipe: Dictionary = option.evolution_previews[0]
 			t.check(rows.visible and text_reader._labels(rows).contains(recipe.name),"early ultimate is visible directly on the selection card: "+str(screen)+" "+option.item_id)
-			var shown: Array = recipe.requirements.filter(func(required): return option.kind != "equipment" or required.item_id != option.item_id)
+			var shown: Array = recipe.requirements.filter(func(required): return required.item_id != option.item_id)
 			t.check(text_reader._labels(rows).contains("Lv %d/5" % int(recipe.requirements[0].current)) == (option.kind != "equipment"),"only a different attack's base requirement remains on a passive preview")
 			t.check(text_reader._icon_count(rows) == shown.size(),"every nonredundant prerequisite retains its icon")
 			for required in shown:

@@ -41,7 +41,7 @@ func run(t) -> void:
 	var rows := VBoxContainer.new()
 	Card.append_evolution_requirements(rows,passive)
 	for required in passive.evolution_previews[0].requirements:
-		t.check(_labels(rows).contains(Card.evolution_requirement_text(required)),"passive previews preserve every distinct recipe requirement")
+		t.check(_labels(rows).contains(Card.evolution_requirement_text(required)) == (required.item_id != passive.item_id),"passive preview omits itself and preserves every other recipe requirement")
 	rows.free()
 	state.equipment.spin_slash = 2
 	state.passives.movement = 1

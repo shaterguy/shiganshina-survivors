@@ -37,7 +37,7 @@ func run(t) -> void:
 	t.check(prepared.size() == 3,"startup attaches exactly three fixed growth cards before any offer")
 	var prepared_ids := _ids(prepared)
 	for card in prepared:
-		t.check(card.is_inside_tree() and not card.is_visible_in_tree() and card.text.is_empty(),"prepared cards are attached, hidden and contain no warmed offer text")
+		t.check(card.is_inside_tree() and not card.is_visible_in_tree() and card.face_text().is_empty(),"prepared cards are attached, hidden and contain no warmed offer text")
 	ui.present(sim.snapshot(state))
 	ui.present_progression(view)
 	ui.reflow(vp.size,Rect2i(Vector2i.ZERO,vp.size))
@@ -120,5 +120,5 @@ func run(t) -> void:
 	await _settle(t)
 	t.check(_ids(_cards(ui)) == prepared_ids,"authority reset retains only the UI-local fixed allocation")
 	for card in _cards(ui):
-		t.check(not card.is_visible_in_tree() and card.text.is_empty() and card._option.is_empty(),"reset clears hidden slot text, DTO and activity")
+		t.check(not card.is_visible_in_tree() and card.face_text().is_empty() and card._option.is_empty(),"reset clears hidden slot text, DTO and activity")
 	vp.free()

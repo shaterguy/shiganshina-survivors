@@ -20,7 +20,7 @@ func run(t) -> void:
 		for frame in range(6): await t.process_frame
 		var card: Button = ui._growth_cards[0]
 		t.check(card.icon != null,"GameUI summary override preserves actual skill icon at "+str(screen))
-		t.check(card.text.contains(str(option.name)) and not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세") and not card.text.contains("A · 선택"),"summary override keeps the real name without persistent manipulation instructions")
+		t.check(card.face_text().contains(str(option.name)) and not ui._subtitle.text.contains("터치/A") and not ui._subtitle.text.contains("i 상세") and not card.face_text().contains("A · 선택"),"summary override keeps the real name without persistent manipulation instructions")
 		var requirements := card.get_node_or_null("Requirements")
 		t.check(requirements != null,"growth card owns its small icon+named requirement rows")
 		if requirements != null and requirements.get_child_count() > 0:
