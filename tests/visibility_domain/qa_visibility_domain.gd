@@ -16,12 +16,13 @@ func run() -> void:
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--output="): output = argument.trim_prefix("--output=")
 		if argument.begins_with("--mode="): mode = argument.trim_prefix("--mode=")
-	if not output.begins_with("user://") or FileAccess.file_exists(output) or mode not in ["contracts","candidate","proof"]:
-		push_error("VISIBILITY_DOMAIN requires --mode=contracts|candidate|proof and fresh --output=user://...")
+	if not output.begins_with("user://") or FileAccess.file_exists(output) or mode not in ["contracts","candidate","proof","scope-baseline","scope-candidate"]:
+		push_error("VISIBILITY_DOMAIN requires --mode=contracts|candidate|proof|scope-baseline|scope-candidate and fresh --output=user://...")
 		quit(2)
 		return
 	var files: Array[String] = []
-	if mode == "proof": files.assign(["test_proof.gd"])
+	if mode in ["scope-baseline","scope-candidate"]: files.assign(["test_scope.gd"])
+	elif mode == "proof": files.assign(["test_proof.gd"])
 	else: files.assign(["test_geometry.gd","test_domains.gd","test_guards.gd","test_helper.gd"])
 	var bodies: Array = []
 	for filename in files:
@@ -38,13 +39,13 @@ func run() -> void:
 		entry.cases_after = cases.size()
 		entry.failures_after = failures.size()
 		bodies.append(entry)
-	var expected_cases: int = 18 if mode == "proof" else 1934
+	var expected_cases: int = 120 if mode == "scope-candidate" else (80 if mode == "scope-baseline" else (18 if mode == "proof" else 1934))
 	check(cases.size() == expected_cases,"VISIBILITY_DOMAIN complete expected comparison matrix")
 	check(completed == files,"VISIBILITY_DOMAIN all selected bodies return in exact order")
 	var returned := true
 	for body in bodies: returned = returned and body.body_returned
-	var result := {"harness":"native-visibility-domain-focused-v1","source_commit":"d9e6cbb749e85b4f5915dbab53411dad1cd64b9c","mode":mode,"ok":returned and failures.is_empty(),"checks":checks,"failures":failures,"files":bodies,"cases":cases,"completed":completed,"sources":{}}
-	for path in ["res://game/world/streamed_navigation_view.gd","res://game/world/streamed_world.gd","res://game/world/cached_streamed_world.gd","res://game/world/city_navigation.gd","res://game/world/precise_city_navigation.gd","res://game/core/streamed_run_world.gd","res://game/world/world_address.gd","res://tests/world/fixtures/city_fixture.gd","res://tests/visibility_domain/qa_visibility_domain.gd","res://tests/visibility_domain/support.gd","res://tests/visibility_domain/oracle_old_view.gd","res://tests/visibility_domain/fixture_generator.gd","res://tests/visibility_domain/custom_stream.gd","res://tests/visibility_domain/custom_cached.gd","res://tests/visibility_domain/custom_view.gd","res://tests/visibility_domain/full_navigation.gd","res://tests/visibility_domain/test_proof.gd"]:
+	var result := {"harness":"native-visibility-domain-focused-v1","source_commit":"ffd8bc90ced00e58d94547b55c52e4e18ded0eee","mode":mode,"ok":returned and failures.is_empty(),"checks":checks,"failures":failures,"files":bodies,"cases":cases,"completed":completed,"sources":{}}
+	for path in ["res://game/world/streamed_navigation_view.gd","res://game/world/streamed_world.gd","res://game/world/cached_streamed_world.gd","res://game/world/city_navigation.gd","res://game/world/precise_city_navigation.gd","res://game/core/streamed_run_world.gd","res://game/world/world_address.gd","res://tests/world/fixtures/city_fixture.gd","res://tests/visibility_domain/qa_visibility_domain.gd","res://tests/visibility_domain/support.gd","res://tests/visibility_domain/oracle_old_view.gd","res://tests/visibility_domain/fixture_generator.gd","res://tests/visibility_domain/custom_stream.gd","res://tests/visibility_domain/custom_cached.gd","res://tests/visibility_domain/custom_view.gd","res://tests/visibility_domain/full_navigation.gd","res://tests/visibility_domain/test_proof.gd","res://tests/visibility_domain/test_scope.gd","res://tests/visibility_domain/oracle_city_navigation.gd","res://tests/visibility_domain/oracle_precise_city_navigation.gd","res://tests/visibility_domain/scope_custom_navigation.gd","res://tests/visibility_domain/scope_custom_oracle_navigation.gd"]:
 		result.sources[path] = FileAccess.get_sha256(path)
 	var file := FileAccess.open(output,FileAccess.WRITE)
 	if file == null: push_error("VISIBILITY_DOMAIN could not write private result"); quit(2); return

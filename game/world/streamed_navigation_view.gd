@@ -163,3 +163,42 @@ func smoothing_queries_safe(start: Vector2, points: Array, first: int, radius: f
 		for x in range(low_x,high_x+1):
 			if not _by_origin.has(Vector2(x*768,y*768)): return false
 	return true
+
+func _smoothing_scope_ready(start: Vector2, points: Array, radius: float) -> bool:
+	# Scalar hull padding is proof slack only, never collision geometry.
+	# At |endpoint| <= 8192 each ray is valid; one pixel exceeds every
+	# native swept/reconstructed-endpoint roundoff bound in this domain.
+	if points.is_empty(): return false
+	if get_script() != StreamedNavigationView or (_world.get_script() != ExactSmoothingStream and _world.get_script() != CachedSmoothingStream): return false
+	if not _query_failure.is_empty() or not _world._last_error.is_empty(): return false
+	_refresh(_world.diagnostics())
+	if not is_finite(radius) or radius < 0 or radius > 32: return false
+	if not is_finite(start.x) or not is_finite(start.y) or absf(start.x) > 8192 or absf(start.y) > 8192: return false
+	var min_x: float = start.x
+	var max_x: float = start.x
+	var min_y: float = start.y
+	var max_y: float = start.y
+	for point in points:
+		if not point is Vector2: return false
+		if not is_finite(point.x) or not is_finite(point.y) or absf(point.x) > 8192 or absf(point.y) > 8192: return false
+		min_x = minf(min_x,point.x); max_x = maxf(max_x,point.x)
+		min_y = minf(min_y,point.y); max_y = maxf(max_y,point.y)
+	var pad: float = radius+1.0
+	var low_x := int(floor((min_x-pad)/768))
+	var high_x := int(floor((max_x+pad)/768))
+	var low_y := int(floor((min_y-pad)/768))
+	var high_y := int(floor((max_y+pad)/768))
+	if high_x-low_x > 8 or high_y-low_y > 8: return false
+	for y in range(low_y,high_y+1):
+		for x in range(low_x,high_x+1):
+			if not _by_origin.has(Vector2(x*768,y*768)): return false
+	return true
+func _visibility_prepared(position: Vector2, target: Vector2, radius: float) -> Dictionary:
+	# Called only inside the admitted synchronous smoothing scope. Keep the
+	# original scalar bounds, query/cache warming and collision order intact.
+	var delta := target-position
+	var bounds: Rect2 = ExactSmoothingStream._swept_rect(position,delta,radius)
+	for prop in _world._collision_query_props(bounds):
+		if (int(prop.collision_mask) & 3) != 0 and ExactSmoothingStream.slab_fraction(position,delta,prop.ground_footprint.grow(radius)) < 1.0:
+			return {"ok":true,"visible":false}
+	return {"ok":true,"visible":true}

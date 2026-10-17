@@ -219,6 +219,7 @@ func _distances(grid: Dictionary, target: int, goal: Vector2, radius: float, tic
 	grid.target = target
 	grid.tick = tick
 func _smooth(start: Vector2, points: Array, radius: float) -> Array:
+	var prepared: bool = not points.is_empty() and (get_script() == CityNavigation or get_script() == load("res://game/world/precise_city_navigation.gd")) and _smoothing_scope_ready(start,points,radius)
 	var result: Array = []
 	var current := start
 	var index := 0
@@ -226,9 +227,9 @@ func _smooth(start: Vector2, points: Array, radius: float) -> Array:
 		var best := index
 		# The exact stream can prove these queries cannot fail before reordering.
 		# Unknown worlds or unsafe query domains retain original error observation.
-		if _world.get_script() == SafeSmoothingView and _world.smoothing_queries_safe(current,points,index,radius):
+		if prepared or (_world.get_script() == SafeSmoothingView and _world.smoothing_queries_safe(current,points,index,radius)):
 			for next in range(points.size()-1,index-1,-1):
-				if _visible(current,points[next],radius):
+				if (_visible_prepared(current,points[next],radius) if prepared else _visible(current,points[next],radius)):
 					best = next
 					break
 		else:
@@ -238,6 +239,25 @@ func _smooth(start: Vector2, points: Array, radius: float) -> Array:
 		current = points[best]
 		index = best+1
 	return result
+func _smoothing_scope_ready(start: Vector2, points: Array, radius: float) -> bool:
+	# This proof lives only in one non-yielding exact-native _smooth invocation.
+	# Never create/retire a memo here: refusal must enter the original path.
+	if points.is_empty() or _direction_los.is_empty(): return false
+	if get_script() != CityNavigation and get_script() != load("res://game/world/precise_city_navigation.gd"): return false
+	if _world.get_script() != SafeSmoothingView: return false
+	var source = _direction_los.source
+	if source.get_script() != SafeSmoothingView.ExactSmoothingStream and source.get_script() != SafeSmoothingView.CachedSmoothingStream: return false
+	if _world != _direction_los.view or _world._world != source or source._coverage_revision != _direction_los.coverage or source._world_revision != _direction_los.revision or source._origin != _direction_los.origin or not _world._query_failure.is_empty() or not source._last_error.is_empty(): return false
+	return _world._smoothing_scope_ready(start,points,radius)
+func _visible_prepared(a: Vector2, b: Vector2, radius: float) -> bool:
+	# Admission proves the same live memo and successful scalar reader for
+	# every possible ray. Preserve exact aliases, keys, lookup and insertion.
+	var key: Array = [a,b,radius]
+	if _direction_los.queries.has(key): return _direction_los.queries[key]
+	var result: Dictionary = _world._visibility_prepared(a,b,radius)
+	var visible: bool = result.visible
+	if _direction_los.queries.size() < MAX_TICK_LOS: _direction_los.queries[key] = visible
+	return visible
 func _visible(a: Vector2, b: Vector2, radius: float) -> bool:
 	var key: Array = []
 	if not _direction_los.is_empty():
